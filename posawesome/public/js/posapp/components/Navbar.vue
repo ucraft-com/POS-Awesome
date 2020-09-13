@@ -22,15 +22,28 @@
                     Pages
                     </v-btn>
                 </template>
-                <v-list>
-                    <v-list-item
-                    v-for="(page, index) in items"
-                    :key="index"
-                    @click="[changePage(page.text), item = index]"
-                    >
-                    <v-list-item-title>{{ page.text }}</v-list-item-title>
-                    </v-list-item>
-                </v-list>
+                <v-card
+                    class="mx-auto"
+                    max-width="300"
+                    tile
+                >
+                    <v-list dense>
+                        <v-list-item-group v-model="item" color="primary">
+                            <v-list-item
+                                v-for="(item, index) in items"
+                                :key="item.text"
+                                @click="[changePage(item.text), item = index]"
+                            >
+                                <v-list-item-icon>
+                                    <v-icon v-text="item.icon"></v-icon>
+                                </v-list-item-icon>
+                                <v-list-item-content>
+                                    <v-list-item-title v-text="item.text"></v-list-item-title>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </v-list-item-group>
+                    </v-list>
+                 </v-card>
                 </v-menu>
             </div>
             <v-btn text color="grey" @click="go_to">
@@ -86,7 +99,7 @@ export default {
             mini: true,
             item: 0,
             items: [
-                { text: 'Home', icon: 'mdi-home' },
+                { text: 'POS', icon: 'mdi-point-of-sale' },
                 { text: 'Dashboard', icon: 'mdi-view-dashboard' },
                 { text: 'Projects', icon: 'mdi-folder-open' },
                 { text: 'Team', icon: 'mdi-account-box-multiple' },

@@ -2,11 +2,10 @@
 <v-app>
 <div class="container1">
 <v-main>
-        <!-- <navbar @changePage="setPage($event)" > </navbar>   -->
-        <Navbar> </Navbar>  
-        <keep-alive>
-        <!-- <component v-bind:is="page" class="mx-4 md-4"></component> -->
+        <Navbar @changePage="setPage($event)"> </Navbar>  
         <h1>Hello Pos Awseome</h1>
+        <keep-alive>
+                <component v-bind:is="page" class="mx-4 md-4"></component>
         </keep-alive>
 </v-main>
 </div>
@@ -15,16 +14,18 @@
 
 <script>
         import Navbar from './components/Navbar.vue'
+        import POS from './components/pos/Pos.vue'
 
         export default {
                 name: "TableRoot",
                 data: function () {
                         return {       
-                                page : "Home",
+                                page : "POS",
                         }
                 },
                 components: {
                        Navbar,
+                       POS
                 },
                methods:{
                         setPage (page) {
