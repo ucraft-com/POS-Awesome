@@ -1,8 +1,6 @@
-import TableRoot from './CustomerTable.vue';
+import Home from './Home.vue';
 
 frappe.provide('frappe.PosApp');
-
-
 
 
 frappe.PosApp.posapp = class {
@@ -19,7 +17,7 @@ frappe.PosApp.posapp = class {
                         el: this.$customer_table_container[0],
                         data: {
                         },
-                        render: h => h(TableRoot),
+                        render: h => h(Home),
                 });
                 
         }       
