@@ -1,9 +1,9 @@
 <template>
     <nav>
         <v-app-bar flat height="40">
-            <v-app-bar-nav-icon @click.stop="drawer = !drawer" class="grey--text"></v-app-bar-nav-icon>
-            <v-toolbar-title class="text-uppercase grey--text">
-                <span class="font-weight-light">POS</span>
+            <v-app-bar-nav-icon @click.stop="mini = !mini" class="grey--text"></v-app-bar-nav-icon>
+            <v-toolbar-title class="text-uppercase indigo--text">
+                <span class="font-weight-light">pos</span>
                 <span>awesome</span>
             </v-toolbar-title>
 
@@ -33,9 +33,6 @@
                 </v-list>
                 </v-menu>
             </div>
-            <!-- window.location.replace("http://www.w3schools.com") -->
-            <!-- frappe.get_route() -->
-            <!-- document.location.href -->
             <v-btn text color="grey" @click="go_to">
                 <v-icon>mdi-home</v-icon>
                 <span right>Home</span>
@@ -106,8 +103,9 @@ export default {
                 this.$emit('changePage', key);
             },
             go_to(){
-                 window.location = document.location.href.substring(0,document.location.href.length - 6);
-                 location.reload();
+                //  window.location = document.location.href.substring(0,document.location.href.length - 6);
+                frappe.set_route('workspace', 'home')
+                location.reload();
             },
         },
 }
