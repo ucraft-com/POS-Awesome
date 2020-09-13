@@ -1,6 +1,5 @@
 <template>
-<v-app>
-<div class="container1">
+<v-app class="container1">
 <v-main>
         <Navbar @changePage="setPage($event)"> </Navbar>  
         <h1>Hello Pos Awseome</h1>
@@ -8,7 +7,6 @@
                 <component v-bind:is="page" class="mx-4 md-4"></component>
         </keep-alive>
 </v-main>
-</div>
 </v-app>
 </template>
 
@@ -17,7 +15,6 @@
         import POS from './components/pos/Pos.vue'
 
         export default {
-                name: "TableRoot",
                 data: function () {
                         return {       
                                 page : "POS",
