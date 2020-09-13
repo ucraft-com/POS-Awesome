@@ -1,0 +1,5 @@
+{
+    "posawesome/js/toConsole.min.js": [
+        "public/js/toConsole.js"
+    ]
+}
