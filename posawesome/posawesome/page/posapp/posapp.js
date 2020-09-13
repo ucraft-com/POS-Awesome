@@ -6,9 +6,10 @@ frappe.pages['posapp'].on_page_load = function(wrapper) {
 	});
 
 	$('.page-head').remove();
+	$('.navbar.navbar-default.navbar-fixed-top').remove();
 	
 
-	this.page.$table_tool = new frappe.PosApp.posapp(this.page);
+	this.page.$PosApp = new frappe.PosApp.posapp(this.page);
 
 	$('div.navbar-fixed-top').find('.container').css('padding', '0');
 	
