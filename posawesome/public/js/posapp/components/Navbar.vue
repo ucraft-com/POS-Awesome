@@ -1,6 +1,6 @@
 <template>
     <nav>
-        <v-app-bar flat height="40">
+        <v-app-bar  height="40" class="elevation-2">
             <v-app-bar-nav-icon @click.stop="mini = !mini" class="grey--text"></v-app-bar-nav-icon>
             <v-toolbar-title class="text-uppercase indigo--text">
                 <span class="font-weight-light">pos</span>
@@ -55,7 +55,7 @@
                 <v-list dark>
                 <v-list-item class="px-2">
                     <v-list-item-avatar>
-                    <v-img src="https://randomuser.me/api/portraits/men/85.jpg"></v-img>
+                    <v-img src="/assets/erpnext/images/erp-icon.svg"></v-img>
                     </v-list-item-avatar>
 
                     <v-list-item-title>John Leider</v-list-item-title>
@@ -99,10 +99,10 @@ export default {
             mini: true,
             item: 0,
             items: [
-                { text: 'POS', icon: 'mdi-point-of-sale' },
                 { text: 'Dashboard', icon: 'mdi-view-dashboard' },
-                { text: 'Projects', icon: 'mdi-folder-open' },
-                { text: 'Team', icon: 'mdi-account-box-multiple' },
+                { text: 'POS', icon: 'mdi-point-of-sale' },
+                { text: 'Customer', icon: 'mdi-account-box-multiple' },
+                { text: 'Closing', icon: 'mdi-folder-open' },
             ],
             page: "",
             fav: true,

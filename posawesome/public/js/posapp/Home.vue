@@ -1,8 +1,7 @@
 <template>
 <v-app class="container1">
 <v-main>
-        <Navbar @changePage="setPage($event)"> </Navbar>  
-        <h1>Hello Pos Awseome</h1>
+        <Navbar @changePage="setPage($event)"> </Navbar> 
         <keep-alive>
                 <component v-bind:is="page" class="mx-4 md-4"></component>
         </keep-alive>
@@ -17,7 +16,7 @@
         export default {
                 data: function () {
                         return {       
-                                page : "POS",
+                                page : "Dashboard",
                         }
                 },
                 components: {

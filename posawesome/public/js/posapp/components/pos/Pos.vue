@@ -1,13 +1,13 @@
 <template>
-    <v-container fluid >
+        <div fluid >
             
-            <v-row class="mb-6">
-                <v-col cols="8" class="grey lighten-5">
+            <v-row>
+                <v-col cols="8" class="pos">
                     <ItemsSelector></ItemsSelector>
                 </v-col>
-                
+
             </v-row>
-        </v-container>
+        </div>
 </template>
 
 
