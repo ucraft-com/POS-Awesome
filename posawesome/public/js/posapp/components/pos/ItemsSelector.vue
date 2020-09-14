@@ -4,16 +4,17 @@
         <v-col cols="12"  class="pb-0 mb-0">
           <v-text-field dense clearable autofocus outlined color="indigo"
             label="Serch"
+            hint="Search by item code, serial number, batch no or barcode"
           ></v-text-field>
         </v-col>
     
         <v-col cols="12"  class="pt-0 mt-0">
               <div fluid  class="items">
-                <v-row dense class="overflow-y-auto" style="max-height: 80vh">
+                <v-row dense class="overflow-y-auto" style="max-height: 70vh">
                   <v-col
                     v-for="card in cards"
                     :key="card.title"
-                    :cols="card.flex"
+                    xl="1" lg="2" md="4" sm="6" cols="12"
                   >
                     <v-card>
                       <v-img

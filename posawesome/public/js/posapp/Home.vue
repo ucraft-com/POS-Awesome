@@ -16,7 +16,7 @@
         export default {
                 data: function () {
                         return {       
-                                page : "Dashboard",
+                                page : "POS",
                         }
                 },
                 components: {
