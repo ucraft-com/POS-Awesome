@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2020-09-13 03:17:43.703248",
+ "modified": "2020-09-14 16:19:58.152753",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "posapp",
@@ -25,5 +25,5 @@
  "standard": "Yes",
  "style": null,
  "system_page": 0,
- "title": "POS APP"
+ "title": "POS Awesome"
 }

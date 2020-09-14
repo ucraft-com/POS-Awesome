@@ -9,7 +9,7 @@
             v-for="project in projects"
             :key="project.name"
             >
-            <v-expansion-panel-header>{{ project.title }}</v-expansion-panel-header>
+            <v-expansion-panel-header class="pl-2">{{ project.title }}</v-expansion-panel-header>
             <v-expansion-panel-content class="px-1">
                 <v-row>
                     <v-col cols="4">
