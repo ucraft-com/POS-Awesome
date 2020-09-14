@@ -1,5 +1,5 @@
 <template>
-<v-card class="cards mx-auto grey lighten-5" style="max-height: 80vh; height: 80vh">
+<v-card class="cards mx-auto grey lighten-5" style="max-height: 90vh; height: 90vh">
      <Customer></Customer>
     <v-expansion-panels
             hover="hover"

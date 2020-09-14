@@ -1,5 +1,5 @@
 <template>
-      <v-card class="selection mx-auto grey lighten-5">
+      <v-card class="selection mx-auto grey lighten-5" style="max-height: 90vh; height: 90vh">
       <v-row class="items px-2 py-1">
         <v-col cols="12"  class="pb-0 mb-0">
           <v-text-field 
@@ -16,7 +16,7 @@
     
         <v-col cols="12"  class="pt-0 mt-0">
               <div fluid  class="items">
-                <v-row dense class="overflow-y-auto" style="max-height: 70vh">
+                <v-row dense class="overflow-y-auto" style="max-height: 79vh">
                   <v-col
                     v-for="(card, idx) in cards"
                     :key="idx"
@@ -29,10 +29,10 @@
                         gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
                         height="120px"
                       >
-                      <v-card-text v-text="card.title" class="text-subtitle-2"></v-card-text>
+                      <v-card-text v-text="card.title" class="text-subtitle-2 px-1 pb-2"></v-card-text>
                       </v-img>
                       <v-card-text class="text--primary pa-1">
-                        <div class="text-caption teal--text accent-3">$ 50.00</div>
+                        <div class="text-caption indigo--text accent-3">$ 50.00</div>
                       </v-card-text>
                     </v-card>
                   </v-col>
