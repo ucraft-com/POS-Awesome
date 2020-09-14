@@ -1,10 +1,16 @@
 <template>
       <v-card class="selection mx-auto grey lighten-5">
-      <v-row class="items px-5 py-1">
+      <v-row class="items px-2 py-1">
         <v-col cols="12"  class="pb-0 mb-0">
-          <v-text-field dense clearable autofocus outlined color="indigo"
-            label="Serch"
-            hint="Search by item code, serial number, batch no or barcode"
+          <v-text-field 
+          dense 
+          clearable 
+          autofocus 
+          outlined 
+          color="indigo"
+          label="Serch"
+          hint="Search by item code, serial number, batch no or barcode"
+          background-color="white"
           ></v-text-field>
         </v-col>
     
@@ -12,11 +18,11 @@
               <div fluid  class="items">
                 <v-row dense class="overflow-y-auto" style="max-height: 70vh">
                   <v-col
-                    v-for="card in cards"
-                    :key="card.title"
+                    v-for="(card, idx) in cards"
+                    :key="idx"
                     xl="1" lg="2" md="4" sm="6" cols="12"
                   >
-                    <v-card>
+                    <v-card hover="hover">
                       <v-img
                         :src="card.src"
                         class="white--text align-end"
@@ -50,9 +56,9 @@
         { title: 'Pre-fab homes', src: 'https://cdn.vuetifyjs.com/images/cards/house.jpg', flex: 2 },
         { title: 'COCA COLA Coca Cola Kutu 200 Ml', src: 'https://cdnd.bizimtoptan.com.tr/product/480x480/f73e3_COCA_COLA_KUTU_200_ML.jpg', flex: 2 },
         { title: 'Pre-fab homes', src: 'https://cdn.vuetifyjs.com/images/cards/house.jpg', flex: 2 },
-        { title: 'Favorite road trips', src: 'https://cdn.vuetifyjs.com/images/cards/road.jpg', flex: 2 },
+        { title: 'Favorite road trips', src: 'https://m.media-amazon.com/images/I/41GbUGRBhOL._AC_SS350_.jpg', flex: 2 },
         { title: 'Best airlines', src: 'https://cdn.vuetifyjs.com/images/cards/plane.jpg', flex: 2 },
-        { title: 'Pre-fab homes', src: 'https://cdn.vuetifyjs.com/images/cards/house.jpg', flex: 2 },
+        { title: 'Pre-fab homes', src: 'https://ayb.akinoncdn.com/products/2019/01/23/1998/18958675-db88-4a79-a108-f95b1a6522e9_size780x780_quality60_cropCenter.jpg', flex: 2 },
         { title: 'Favorite road trips', src: 'https://cdn.vuetifyjs.com/images/cards/road.jpg', flex: 2 },
         { title: 'Best airlines', src: 'https://cdn.vuetifyjs.com/images/cards/plane.jpg', flex: 2 },
         { title: 'Pre-fab homes', src: 'https://cdn.vuetifyjs.com/images/cards/house.jpg', flex: 2 },
