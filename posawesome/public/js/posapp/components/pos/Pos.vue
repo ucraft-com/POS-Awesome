@@ -4,7 +4,7 @@
                 <v-col cols="4" class="pos pr-0">
                     <ItemsSelector></ItemsSelector>
                 </v-col>
-                 <v-col cols="4" class="pos">
+                 <v-col cols="5" class="pos">
                     <ItemsCrads></ItemsCrads>
                 </v-col>
             </v-row>

@@ -1,70 +1,58 @@
 <template>
-<v-card style="max-height: 90vh; height: 90vh" class="cards my-0 py-0">
+<v-card style="max-height: 90vh; height: 90vh" class="cards my-0 py-0 grey lighten-5">
      <Customer></Customer>
-    <v-list class="my-0 py-0">
-      <v-list-item-group
-        v-model="selected"
+    <v-list dense class="my-0 py-0 overflow-y-auto" style="max-height: 79vh">
+      <v-list-group
+       v-for="(item, index) in items"
+       :key="index"
+        v-model="item.active"
+        :prepend-icon="item.action"
         color="primary"
-        class="my-0 py-0"
+        class="my-0 py-0 border_line_bottom"
       >
-        <template v-for="(item, index) in items">
-          <v-list-item :key="item.item_code" class="px-1">
-            <template v-slot:default="{ active, toggle }">
+        <template v-slot:activator class="pa-0">
+          <v-list-item :key="item.item_code" class="px-0">
+            <template>
                 <v-list-item-action class="pa-0 mr-2 my-0">
-                    <v-btn icon color="red" @click="out_console(item.item_code)">
+                    <v-btn icon color="red" @click.stop="out_console(item.item_code)">
                         <v-icon>mdi-delete</v-icon>
                     </v-btn>
                 </v-list-item-action>
-              <v-list-item-content class="py-0">
-                    <v-row align="center"  class="ma-0">
-                        <v-col cols="4" class="pa-1">
-                             <div v-text="item.item_code"></div>
-                        </v-col>
-                        <v-col cols="1" class="pa-1">
-                            <v-btn icon small color="green">
-                                <v-icon>mdi-minus-box-outline</v-icon>
-                            </v-btn>
-                        </v-col>
-                        <v-col cols="2" class="pa-1 text-overline">
-                            <div align="center"  v-text="item.qty"></div>
-                        </v-col>
-                        <v-col cols="1" class="pa-1">
-                            <v-btn icon small  color="green">
-                                <v-icon>mdi-plus-box-outline</v-icon>
-                            </v-btn>
-                        </v-col>
-                        <v-col cols="2" class="pa-1 text-overline">
-                            <div align="center" v-text="item.price"></div>
-                        </v-col>
-                        <v-col cols="2" class="pa-1 text-overline">
-                            <div align="center" v-text="item.total"></div>
-                        </v-col>
-                    </v-row>
-              </v-list-item-content>
-              <v-list-item-action class=" py-0 my-0">
-                <v-icon
-                  v-if="!active"
-                  color="grey lighten-1"
-                >
-                  mdi-star
-                </v-icon>
-
-                <v-icon
-                  v-else
-                  color="yellow"
-                >
-                  mdi-star
-                </v-icon>
-              </v-list-item-action>
+                <v-list-item-content class="py-0">
+                        <v-row align="center"  class="ma-0">
+                            <v-col cols="4" class="pa-1">
+                                <div v-text="item.item_code"></div>
+                            </v-col>
+                            <v-col cols="1" class="pa-1">
+                                <v-btn icon small color="green" @click.stop="">
+                                    <v-icon>mdi-minus-box-outline</v-icon>
+                                </v-btn>
+                            </v-col>
+                            <v-col cols="2" class="pa-1 text-overline">
+                                <div align="center"  v-text="item.qty"></div>
+                            </v-col>
+                            <v-col cols="1" class="pa-1">
+                                <v-btn icon small  color="green" @click.stop="">
+                                    <v-icon>mdi-plus-box-outline</v-icon>
+                                </v-btn>
+                            </v-col>
+                            <v-col cols="2" class="pa-1 text-overline">
+                                <div align="center" v-text="item.price"></div>
+                            </v-col>
+                            <v-col cols="2" class="pa-1 text-overline">
+                                <div align="center" v-text="item.total"></div>
+                            </v-col>
+                        </v-row>
+                </v-list-item-content>
+            
             </template>
           </v-list-item>
-
-          <v-divider class="my-0 py-0"
-            v-if="index + 1 < items.length"
-            :key="index"
-          ></v-divider>
         </template>
-      </v-list-item-group>
+            <v-card flat color="grey lighten-5">
+                <v-card-text>Some info</v-card-text>
+            </v-card>
+        
+      </v-list-group>
     </v-list>
 </v-card>
 </template>
@@ -111,6 +99,20 @@ export default {
                     price: '3',
                     total: '6',
                 },
+                {
+                    item_code: "Pepsi 200 ml",
+                    qty: '5',
+                    vat: '18',
+                    price: '3.6',
+                    total: '12,33',
+                },
+                {
+                    item_code: "Pepsi 330 ml Kutu Kola",
+                    qty: '2',
+                    vat: '18',
+                    price: '3',
+                    total: '6',
+                },
             ],
         }
     },
@@ -148,3 +150,13 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+    .border_line_bottom{
+        border-bottom: 1px solid lightgray;
+    }
+    .v-list-group__header{
+        margin: 0px;
+        padding: 0px;
+    }
+</style>
