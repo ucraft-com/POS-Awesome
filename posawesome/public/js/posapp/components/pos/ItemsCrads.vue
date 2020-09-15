@@ -1,7 +1,8 @@
 <template>
-<v-card style="max-height: 90vh; height: 90vh" class="cards my-0 py-0 grey lighten-5">
+<div>
+<v-card style="max-height: 70vh; height: 70vh" class="cards my-0 py-0 grey lighten-5">
      <Customer></Customer>
-    <v-list class="my-0 py-0 overflow-y-auto" style="max-height: 79vh">
+    <v-list class="my-0 py-0 overflow-y-auto" style="max-height: 57vh">
       <v-list-group
        v-for="(item, index) in items"
        :key="index"
@@ -23,7 +24,7 @@
                             <v-col la="4" md="4" sm="12" cols="12" class="pa-1">
                                 <div v-text="item.item_code"></div>
                             </v-col>
-                            <v-col cols="1" class="pa-1">
+                            <v-col align="center" cols="1" class="pa-1">
                                 <v-btn icon small color="green" @click.stop="">
                                     <v-icon>mdi-minus-box-outline</v-icon>
                                 </v-btn>
@@ -31,7 +32,7 @@
                             <v-col la="2" md="2" sm="3" cols="3" class="pa-1 text-overline">
                                 <div align="center"  v-text="item.qty"></div>
                             </v-col>
-                            <v-col cols="1" class="pa-1">
+                            <v-col align="center" cols="1" class="pa-1">
                                 <v-btn icon small  color="green" @click.stop="">
                                     <v-icon>mdi-plus-box-outline</v-icon>
                                 </v-btn>
@@ -55,6 +56,10 @@
       </v-list-group>
     </v-list>
 </v-card>
+<v-card style="max-height: 20vh; height: 20vh" class="cards mb-0 mt-3 py-0 grey lighten-5">
+        <div>some botns</div>
+</v-card>
+</div>
 </template>
 
 <script>
@@ -154,9 +159,5 @@ export default {
 <style scoped>
     .border_line_bottom{
         border-bottom: 1px solid lightgray;
-    }
-    .v-list-group__header{
-        margin: 0px;
-        padding: 0px;
     }
 </style>

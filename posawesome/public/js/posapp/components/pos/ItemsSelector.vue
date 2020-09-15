@@ -1,5 +1,6 @@
 <template>
-      <v-card class="selection mx-auto grey lighten-5" style="max-height: 90vh; height: 90vh">
+  <div>
+      <v-card class="selection mx-auto grey lighten-5" style="max-height: 80vh; height: 80vh">
       <v-row class="items px-2 py-1">
         <v-col cols="12"  class="pb-0 mb-0">
           <v-text-field 
@@ -16,7 +17,7 @@
     
         <v-col cols="12"  class="pt-0 mt-0">
               <div fluid  class="items">
-                <v-row dense class="overflow-y-auto" style="max-height: 79vh">
+                <v-row dense class="overflow-y-auto" style="max-height: 68vh">
                   <v-col
                     v-for="(card, idx) in cards"
                     :key="idx"
@@ -37,12 +38,14 @@
                     </v-card>
                   </v-col>
                 </v-row>
-              </div>
-            
+              </div>   
         </v-col>
       </v-row>
-
     </v-card>
+    <v-card style="max-height: 10vh; height: 10vh" class="cards mb-0 mt-3 py-0 grey lighten-5">
+          <div>some botns</div>
+    </v-card>
+  </div>
 </template>
 
 
