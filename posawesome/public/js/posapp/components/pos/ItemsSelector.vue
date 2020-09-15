@@ -20,7 +20,7 @@
                   <v-col
                     v-for="(card, idx) in cards"
                     :key="idx"
-                    xl="2" lg="3" md=4 sm="6" cols="12"
+                    xl="2" lg="3" md="6" sm="6" cols="6"
                   >
                     <v-card hover="hover">
                       <v-img

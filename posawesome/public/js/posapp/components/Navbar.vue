@@ -1,6 +1,6 @@
 <template>
     <nav>
-        <v-app-bar  height="40" class="elevation-2">
+        <v-app-bar app height="40" class="elevation-2">
             <v-app-bar-nav-icon @click.stop="mini = !mini" class="grey--text"></v-app-bar-nav-icon>
             <v-toolbar-title class="text-uppercase indigo--text">
                 <span class="font-weight-light">pos</span>

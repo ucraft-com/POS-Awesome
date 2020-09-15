@@ -1,7 +1,7 @@
 <template>
 <v-card style="max-height: 90vh; height: 90vh" class="cards my-0 py-0 grey lighten-5">
      <Customer></Customer>
-    <v-list dense class="my-0 py-0 overflow-y-auto" style="max-height: 79vh">
+    <v-list class="my-0 py-0 overflow-y-auto" style="max-height: 79vh">
       <v-list-group
        v-for="(item, index) in items"
        :key="index"
@@ -20,7 +20,7 @@
                 </v-list-item-action>
                 <v-list-item-content class="py-0">
                         <v-row align="center"  class="ma-0">
-                            <v-col cols="4" class="pa-1">
+                            <v-col la="4" md="4" sm="12" cols="12" class="pa-1">
                                 <div v-text="item.item_code"></div>
                             </v-col>
                             <v-col cols="1" class="pa-1">
@@ -28,7 +28,7 @@
                                     <v-icon>mdi-minus-box-outline</v-icon>
                                 </v-btn>
                             </v-col>
-                            <v-col cols="2" class="pa-1 text-overline">
+                            <v-col la="2" md="2" sm="3" cols="3" class="pa-1 text-overline">
                                 <div align="center"  v-text="item.qty"></div>
                             </v-col>
                             <v-col cols="1" class="pa-1">
@@ -36,10 +36,10 @@
                                     <v-icon>mdi-plus-box-outline</v-icon>
                                 </v-btn>
                             </v-col>
-                            <v-col cols="2" class="pa-1 text-overline">
+                            <v-col la="2" md="2" sm="3" cols="3" class="pa-1 text-overline">
                                 <div align="center" v-text="item.price"></div>
                             </v-col>
-                            <v-col cols="2" class="pa-1 text-overline">
+                            <v-col la="2" md="2" sm="4" cols="3" class="pa-1 text-overline">
                                 <div align="center" v-text="item.total"></div>
                             </v-col>
                         </v-row>
