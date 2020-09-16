@@ -12,6 +12,7 @@
           label="Serch"
           hint="Search by item code, serial number, batch no or barcode"
           background-color="white"
+          hide-details
           ></v-text-field>
         </v-col>
     

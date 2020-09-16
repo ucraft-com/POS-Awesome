@@ -59,22 +59,92 @@
 <v-row>
     <v-col class="pt-0 pr-0" cols="8">
         <v-card style="max-height: 20vh; height: 20vh" class="cards mb-0 mt-3 py-0 grey lighten-5">
-                    
+            <v-row no-gutters class="pa-1 pt-2" style="height: 100%">
+                <v-col cols="6" no-gutters>
+                    <v-row  no-gutters class="ma-1 pa-0" style="height: 100%">
+                        <v-col cols="12">
+                            <v-text-field
+                                v-model="total_qty"
+                                label="Total Qty"
+                                outlined
+                                dense
+                                readonly
+                                hide-details
+                            ></v-text-field>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-text-field
+                                v-model="subtotal"
+                                label="Subtotal"
+                                outlined
+                                dense
+                                readonly
+                                hide-details
+                            ></v-text-field>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-text-field
+                                v-model="items_discount"
+                                label="Items Discount"
+                                outlined
+                                dense
+                                readonly
+                                hide-details
+                            ></v-text-field>
+                        </v-col>
+                    </v-row>
+                </v-col>
+                <v-col no-gutters cols="6">
+                    <v-row no-gutters class="ma-1 pa-0" style="height: 100%">
+                        <v-col cols="12">
+                            <v-text-field
+                                v-model="additional_discount"
+                                label="ِAdditional Discount"
+                                outlined
+                                dense
+                                
+                                hide-details
+                            ></v-text-field>
+                        </v-col>
+                        <v-col cols="12">
+                            <v-text-field
+                                v-model="total_tax"
+                                label="TAX"
+                                outlined
+                                dense
+                                readonly
+                                hide-details
+                            ></v-text-field>
+                        </v-col>
+                        <v-col  cols="12">
+                            <v-text-field
+                                v-model="total"
+                                label="Total"
+                                outlined
+                                dense
+                                readonly
+                                hide-details
+                            ></v-text-field>
+                        </v-col>
+                    </v-row>
+                </v-col>
+            </v-row>
+                
         </v-card>
     </v-col>
     <v-col class="pt-0 pr-3" cols="4">
         <v-card flat style="max-height: 20vh; height: 20vh" class="cards mb-0 mt-3 py-0">
                 <v-row align="end" style="height: 53%">
                     <v-col cols="6">
-                        <v-btn block class="pa-0" large color="error" dark>Delet</v-btn>
+                        <v-btn block class="pa-0" x-large color="error" dark>Delet</v-btn>
                     </v-col >
                     <v-col cols="6">
-                        <v-btn block class="pa-0" large color="success" dark>New</v-btn>
+                        <v-btn block class="pa-0" x-large color="success" dark>New</v-btn>
                     </v-col>
                 </v-row>
                 <v-row align="end" style="height: 54%">
                     <v-col cols="12">
-                        <v-btn block class="pa-0" large color="primary" dark>PAY</v-btn>
+                        <v-btn block class="pa-0" x-large color="primary" dark>PAY</v-btn>
                     </v-col>
                 </v-row> 
         </v-card>
@@ -88,6 +158,12 @@ import Customer from './Customer.vue'
 export default {
     data() {
         return {
+            total_qty: 0,
+            subtotal: 0,
+            items_discount: 0,
+            additional_discount: 0,
+            total_tax: 0,
+            total: 0,
             items: [
                 {
                     item_code: "Pepsi 200 ml",
@@ -182,4 +258,5 @@ export default {
     .border_line_bottom{
         border-bottom: 1px solid lightgray;
     }
+
 </style>

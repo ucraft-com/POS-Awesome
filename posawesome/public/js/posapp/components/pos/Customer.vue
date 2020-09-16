@@ -14,6 +14,7 @@
             append-outer-icon="mdi-plus"
             background-color="white"
             no-data-text="Customer not found"
+            hide-details
             ></v-autocomplete>
         </v-col>
       </v-row>
