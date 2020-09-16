@@ -56,9 +56,30 @@
       </v-list-group>
     </v-list>
 </v-card>
-<v-card style="max-height: 20vh; height: 20vh" class="cards mb-0 mt-3 py-0 grey lighten-5">
-        <div>some botns</div>
-</v-card>
+<v-row>
+    <v-col class="pt-0 pr-0" cols="8">
+        <v-card style="max-height: 20vh; height: 20vh" class="cards mb-0 mt-3 py-0 grey lighten-5">
+                    
+        </v-card>
+    </v-col>
+    <v-col class="pt-0 pr-3" cols="4">
+        <v-card flat style="max-height: 20vh; height: 20vh" class="cards mb-0 mt-3 py-0">
+                <v-row align="end" style="height: 53%">
+                    <v-col cols="6">
+                        <v-btn block class="pa-0" large color="error" dark>Delet</v-btn>
+                    </v-col >
+                    <v-col cols="6">
+                        <v-btn block class="pa-0" large color="success" dark>New</v-btn>
+                    </v-col>
+                </v-row>
+                <v-row align="end" style="height: 54%">
+                    <v-col cols="12">
+                        <v-btn block class="pa-0" large color="primary" dark>PAY</v-btn>
+                    </v-col>
+                </v-row> 
+        </v-card>
+    </v-col>
+</v-row>
 </div>
 </template>
 
