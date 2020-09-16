@@ -25,16 +25,16 @@
                                 <div v-text="item.item_code"></div>
                             </v-col>
                             <v-col align="center" cols="1" class="pa-1">
-                                <v-btn icon small color="green" @click.stop="">
-                                    <v-icon>mdi-minus-box-outline</v-icon>
+                                <v-btn icon small color="indigo lighten-1" @click.stop="">
+                                    <v-icon>mdi-minus-circle-outline</v-icon>
                                 </v-btn>
                             </v-col>
                             <v-col la="2" md="2" sm="3" cols="3" class="pa-1 text-overline">
                                 <div align="center"  v-text="item.qty"></div>
                             </v-col>
                             <v-col align="center" cols="1" class="pa-1">
-                                <v-btn icon small  color="green" @click.stop="">
-                                    <v-icon>mdi-plus-box-outline</v-icon>
+                                <v-btn icon small  color="indigo lighten-1" @click.stop="">
+                                    <v-icon>mdi-plus-circle-outline</v-icon>
                                 </v-btn>
                             </v-col>
                             <v-col la="2" md="2" sm="3" cols="3" class="pa-1 text-overline">
@@ -49,7 +49,7 @@
             </template>
           </v-list-item>
         </template>
-            <v-card flat color="grey lighten-5">
+            <v-card flat color="blue lighten-5">
                 <v-card-text>Some info</v-card-text>
             </v-card>
         
@@ -67,7 +67,6 @@ import Customer from './Customer.vue'
 export default {
     data() {
         return {
-            selected: 0,
             items: [
                 {
                     item_code: "Pepsi 200 ml",
@@ -82,6 +81,7 @@ export default {
                     vat: '18',
                     price: '3',
                     total: '6',
+                    active: true,
                 },
                 {
                     item_code: "Favorite road trips",
@@ -110,6 +110,7 @@ export default {
                     vat: '18',
                     price: '3.6',
                     total: '12,33',
+                    active: true,
                 },
                 {
                     item_code: "Pepsi 330 ml Kutu Kola",

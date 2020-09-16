@@ -47,8 +47,7 @@
                 </v-menu>
             </div>
             <v-btn text color="grey" @click="go_to">
-                <v-icon>mdi-home</v-icon>
-                <span right>Home</span>
+                <span right>Erpnext</span>
             </v-btn>
         </v-app-bar>
         <v-navigation-drawer v-model="drawer" :mini-variant.sync="mini" app class="indigo margen-top">
