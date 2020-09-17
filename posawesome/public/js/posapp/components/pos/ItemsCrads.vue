@@ -136,7 +136,7 @@
         <v-card flat style="max-height: 20vh; height: 20vh" class="cards mb-0 mt-3 py-0">
                 <v-row align="end" style="height: 53%">
                     <v-col cols="6">
-                        <v-btn block class="pa-0" x-large color="error" dark>Delet</v-btn>
+                        <v-btn block class="pa-0" x-large color="error" dark>Cancel</v-btn>
                     </v-col >
                     <v-col cols="6">
                         <v-btn block class="pa-0" x-large color="success" dark>New</v-btn>

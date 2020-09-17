@@ -1,6 +1,6 @@
 <template>
       <v-row class="items px-2 py-1">
-        <v-col cols="12"  class="pb-0 mb-0">
+        <v-col cols="12"  class="pb-0 mb-2">
             <v-autocomplete 
             dense 
             clearable 

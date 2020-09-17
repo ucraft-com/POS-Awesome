@@ -1,5 +1,5 @@
 <template>
-        <div fluid >
+        <div fluid>
             <v-row>
                 <v-col xl="6" lg="5" md="5" sm="6" cols="12"  class="pos pr-0">
                     <ItemsSelector></ItemsSelector>

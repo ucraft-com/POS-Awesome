@@ -2,7 +2,7 @@
   <div>
       <v-card class="selection mx-auto grey lighten-5" style="max-height: 80vh; height: 80vh">
       <v-row class="items px-2 py-1">
-        <v-col cols="12"  class="pb-0 mb-0">
+        <v-col cols="12"  class="pb-0 mb-2">
           <v-text-field 
           dense 
           clearable 
@@ -15,7 +15,6 @@
           hide-details
           ></v-text-field>
         </v-col>
-    
         <v-col cols="12"  class="pt-0 mt-0">
               <div fluid  class="items">
                 <v-row dense class="overflow-y-auto" style="max-height: 68vh">
@@ -43,8 +42,48 @@
         </v-col>
       </v-row>
     </v-card>
-    <v-card style="max-height: 10vh; height: 10vh" class="cards mb-0 mt-3 py-0 grey lighten-5">
-          <div>some botns</div>
+    <v-card style="max-height: 10vh; height: 10vh" class="cards mb-0 mt-3 pa-2 grey lighten-5">
+      <v-row no-gutters>
+        <v-col cols="12">
+           <v-select
+            :items="items_group"
+            label="Items Group"
+            dense
+            outlined
+            hide-details
+            v-model="item_group"
+          ></v-select>
+          </v-col>
+          <v-col cols="8" class="mt-1">
+          <v-btn-toggle
+          v-model="items_view"
+          color="primary accent-3"
+          group
+          dense
+          rounded
+          >
+          <v-btn value="card">
+            Card View
+          </v-btn>
+          <v-btn value="list">
+            List View
+          </v-btn>
+        </v-btn-toggle>
+        </v-col>
+        <v-col cols="4" class="mt-1">
+        <v-btn-toggle
+          v-model="favourites_view"
+          color="success accent-3"
+          group
+          dense
+          rounded
+          >
+        <v-btn value="True">
+            Favourites
+          </v-btn>
+        </v-btn-toggle>
+        </v-col>
+      </v-row>
     </v-card>
   </div>
 </template>
@@ -53,6 +92,10 @@
 <script>
   export default {
     data: () => ({
+      items_view: 'card',
+      item_group: 'Fizz',
+      favourites_view: false,
+      items_group: ['Foo', 'Bar', 'Fizz', 'Buzz'],
       cards: [
         { title: 'Pepsi 330 ml Kutu Kola', src: 'https://cdn.cimri.io/image/1000x1000/pepsimlkutukola_150033727.jpg', flex: 2 },
         { title: 'Favorite road trips', src: 'https://cdn.vuetifyjs.com/images/cards/road.jpg', flex: 2 },
