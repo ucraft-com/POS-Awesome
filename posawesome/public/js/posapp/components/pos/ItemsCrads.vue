@@ -134,17 +134,20 @@
     </v-col>
     <v-col class="pt-0 pr-3" cols="4">
         <v-card flat style="max-height: 20vh; height: 20vh" class="cards mb-0 mt-3 py-0">
-                <v-row align="end" style="height: 53%">
-                    <v-col cols="6">
-                        <v-btn block class="pa-0" x-large color="error" dark>Cancel</v-btn>
+                <v-row align="start" style="height: 53%">
+                    <v-col cols="12">
+                        <v-btn block class="pa-0" large color="warning" dark>Get Hold Invoice</v-btn>
                     </v-col >
                     <v-col cols="6">
-                        <v-btn block class="pa-0" x-large color="success" dark>New</v-btn>
+                        <v-btn block class="pa-0" large color="error" dark>Cancel</v-btn>
+                    </v-col >
+                    <v-col cols="6">
+                        <v-btn block class="pa-0" large color="success" dark>New</v-btn>
                     </v-col>
                 </v-row>
                 <v-row align="end" style="height: 54%">
                     <v-col cols="12">
-                        <v-btn block class="pa-0" x-large color="primary" dark>PAY</v-btn>
+                        <v-btn block class="pa-0" large color="primary" dark>PAY</v-btn>
                     </v-col>
                 </v-row> 
         </v-card>
