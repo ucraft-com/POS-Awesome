@@ -22,21 +22,31 @@
                     v-for="(item, idx) in items"
                     :key="idx"
                     xl="2" lg="3" md="6" sm="6" cols="6"
+                    min-height="50"
                   >
-                    <v-card hover="hover" @click="add_item(item)">
-                      <v-img
-                        :src="item.image"
-                        class="white--text align-end"
-                        gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
-                        height="100px"
-                      >
-                      <v-card-text v-text="item.item_name" class="text-subtitle-2 px-1 pb-2"></v-card-text>
-                      <!-- <v-card-subtitle v-text="card.name" class="pb-0"></v-card-subtitle> -->
-                      </v-img>
-                      <v-card-text class="text--primary pa-1">
-                        <div class="text-caption indigo--text accent-3">$ 50.00</div>
-                      </v-card-text>
-                    </v-card>
+                  <v-sheet min-height="50" class="fill-height" color="transparent">
+                    <v-lazy
+                      v-model="item.isActive"
+                      :options="{
+                        threshold: .1
+                      }"
+                    >
+                      <v-card hover="hover" @click="add_item(item)">
+                        <v-img
+                          :src="item.image"
+                          class="white--text align-end"
+                          gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
+                          height="100px"
+                        >
+                        <v-card-text v-text="item.item_name" class="text-subtitle-2 px-1 pb-2"></v-card-text>
+                        <!-- <v-card-subtitle v-text="card.name" class="pb-0"></v-card-subtitle> -->
+                        </v-img>
+                        <v-card-text class="text--primary pa-1">
+                          <div class="text-caption indigo--text accent-3">$ 50.00</div>
+                        </v-card-text>
+                      </v-card>
+                    </v-lazy>
+                  </v-sheet>
                   </v-col>
                 </v-row>
               </div>   
@@ -99,6 +109,8 @@
       favourites_view: false,
       items_group: ['Foo', 'Bar', 'Fizz', 'Buzz'],
       items: [],
+      isActive: false,
+
     }),
 
     methods: {

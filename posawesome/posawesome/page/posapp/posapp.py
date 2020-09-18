@@ -16,7 +16,8 @@ def get_items():
 	return frappe.db.sql("""
         select *
         from `tabItem`
-        order by name"""
+        order by name
+        LIMIT 0, 1000 """
         , as_dict=1)
 
 
@@ -31,13 +32,13 @@ def add_project(pro):
         content = pro["content"],
         due = pro["due"],
 	)).insert()
-	roxtools.console("data in" , doc)
+	posawesome.console("data in" , doc)
 	return "Project Add"
 
 
 @frappe.whitelist()
 def get_all_projects():
-	roxtools.console("Trigger get_all_projects")
+	posawesome.console("Trigger get_all_projects")
 	return frappe.db.sql("""
         select *
         from `tabMyProjects`
