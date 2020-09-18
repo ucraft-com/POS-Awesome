@@ -15,14 +15,14 @@
           <v-list-item :key="item.item_code" class="px-0">
             <template>
                 <v-list-item-action class="pa-0 mr-2 my-0">
-                    <v-btn icon color="red" @click.stop="out_console(item.item_code)">
+                    <v-btn icon color="red" @click.stop="remove_item(item.item_code)">
                         <v-icon>mdi-delete</v-icon>
                     </v-btn>
                 </v-list-item-action>
                 <v-list-item-content class="py-0">
                         <v-row align="center"  class="ma-0">
                             <v-col la="4" md="4" sm="12" cols="12" class="pa-1">
-                                <div v-text="item.item_code"></div>
+                                <div v-text="item.item_name"></div>
                             </v-col>
                             <v-col align="center" cols="1" class="pa-1">
                                 <v-btn icon small color="indigo lighten-1" @click.stop="">
@@ -41,7 +41,7 @@
                                 <div align="center" v-text="item.price"></div>
                             </v-col>
                             <v-col la="2" md="2" sm="4" cols="3" class="pa-1 text-overline">
-                                <div align="center" v-text="item.total"></div>
+                                <div align="center" v-text="item.qty * item.price"></div>
                             </v-col>
                         </v-row>
                 </v-list-item-content>
@@ -159,6 +159,9 @@
 <script>
 import Customer from './Customer.vue'
 export default {
+    props: [
+            "items"
+    ],
     data() {
         return {
             total_qty: 0,
@@ -167,70 +170,22 @@ export default {
             additional_discount: 0,
             total_tax: 0,
             total: 0,
-            items: [
-                {
-                    item_code: "Pepsi 200 ml",
-                    qty: '5',
-                    vat: '18',
-                    price: '3.6',
-                    total: '12,33',
-                },
-                {
-                    item_code: "Pepsi 330 ml Kutu Kola",
-                    qty: '2',
-                    vat: '18',
-                    price: '3',
-                    total: '6',
-                    active: true,
-                },
-                {
-                    item_code: "Favorite road trips",
-                    qty: '2',
-                    vat: '18',
-                    price: '3',
-                    total: '6',
-                },
-                {
-                    item_code: "Coca Cola Gazlı İçecek Kola 1.25 L",
-                    qty: '100',
-                    vat: '18',
-                    price: '123.99',
-                    total: '1231.23',
-                },
-                {
-                    item_code: "COCA COLA Coca Cola Kutu 200 Ml",
-                    qty: '2',
-                    vat: '18',
-                    price: '3',
-                    total: '6',
-                },
-                {
-                    item_code: "Pepsi 200 ml",
-                    qty: '5',
-                    vat: '18',
-                    price: '3.6',
-                    total: '12,33',
-                    active: true,
-                },
-                {
-                    item_code: "Pepsi 330 ml Kutu Kola",
-                    qty: '2',
-                    vat: '18',
-                    price: '3',
-                    total: '6',
-                },
-            ],
         }
+        
     },
     components: {
         Customer,
+    },
+    computed: {
+       
     },
     methods: {
         sortBy(prop) {
             this.projects.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
         },
-        out_console(value) {
+        remove_item(value) {
             console.log(value)
+            // this.items = this.items.filter(function(el) { return el != value; }); 
         }
     },
     mounted: function () {
