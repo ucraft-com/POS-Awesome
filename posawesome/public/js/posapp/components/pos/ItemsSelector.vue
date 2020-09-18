@@ -13,24 +13,25 @@
           hint="Search by item code, serial number, batch no or barcode"
           background-color="white"
           hide-details
+          v-model="search"
           ></v-text-field>
         </v-col>
         <v-col cols="12"  class="pt-0 mt-0">
               <div fluid  class="items">
                 <v-row dense class="overflow-y-auto" style="max-height: 68vh">
                   <v-col
-                    v-for="(item, idx) in items"
+                    v-for="(item, idx) in filtred_items"
                     :key="idx"
                     xl="2" lg="3" md="6" sm="6" cols="6"
                     min-height="50"
                   >
-                  <v-sheet min-height="50" class="fill-height" color="transparent">
+                  <!-- <v-sheet min-height="50" class="fill-height" color="transparent">
                     <v-lazy
                       v-model="item.isActive"
                       :options="{
                         threshold: .1
                       }"
-                    >
+                    > -->
                       <v-card hover="hover" @click="add_item(item)">
                         <v-img
                           :src="item.image"
@@ -45,8 +46,8 @@
                           <div class="text-caption indigo--text accent-3">$ 50.00</div>
                         </v-card-text>
                       </v-card>
-                    </v-lazy>
-                  </v-sheet>
+                    <!-- </v-lazy>
+                  </v-sheet> -->
                   </v-col>
                 </v-row>
               </div>   
@@ -105,11 +106,13 @@
   export default {
     data: () => ({
       items_view: 'card',
-      item_group: 'Fizz',
+      item_group: 'ALL',
       favourites_view: false,
-      items_group: ['Foo', 'Bar', 'Fizz', 'Buzz'],
+      items_group: [
+        'ALL',
+      ],
       items: [],
-      isActive: false,
+      search: "",
 
     }),
 
@@ -132,6 +135,28 @@
         add_item(item){
           evntBus.$emit('add_item', item);
         }
+    },
+    computed: {
+      filtred_items() {
+        let filtred_list = []
+        let filtred_group_list = []
+        if (this.item_group != 'ALL') {
+          filtred_group_list = this.items.filter((item)=> item.item_group.toLowerCase().includes(this.item_group.toLowerCase()))
+        }
+        else {
+          filtred_group_list = this.items
+        }
+        if (!this.search || this.search.length < 3) {
+          return filtred_list = filtred_group_list.slice(0,500)
+        }
+        else if (this.search) {
+          filtred_list = filtred_group_list.filter((item)=> item.item_name.toLowerCase().includes(this.search.toLowerCase()))
+          if (filtred_list.length == 0){
+            filtred_list = filtred_group_list.filter((item)=> item.item_code.toLowerCase().includes(this.search.toLowerCase()))
+          }
+        }
+        return filtred_list.slice(0,500)
+      }
     },
 
     created: function () {

@@ -50,7 +50,10 @@
           </v-list-item>
         </template>
             <v-card flat color="blue lighten-5">
-                <v-card-text>Some info</v-card-text>
+                <v-card-text>{{ item.name }}</v-card-text>
+                <v-card-text>{{ item.item_code }}</v-card-text>
+                <v-card-text>{{ item.item_name }}</v-card-text>
+                <v-card-text></v-card-text>
             </v-card>
         
       </v-list-group>
