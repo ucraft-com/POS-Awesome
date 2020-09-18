@@ -1,70 +1,74 @@
 <template>
   <div>
-      <v-card class="selection mx-auto grey lighten-5" style="max-height: 80vh; height: 80vh">
+    <v-card class="selection mx-auto grey lighten-5" style="max-height: 80vh; height: 80vh">
       <v-row class="items px-2 py-1">
-        <v-col cols="12"  class="pb-0 mb-2">
-          <v-text-field 
-          dense 
-          clearable 
-          autofocus 
-          outlined 
-          color="indigo"
-          label="Serch Items"
-          hint="Search by item code, serial number, batch no or barcode"
-          background-color="white"
-          hide-details
-          v-model="search"
+        <v-col cols="12" class="pb-0 mb-2">
+          <v-text-field
+            dense
+            clearable
+            autofocus
+            outlined
+            color="indigo"
+            label="Serch Items"
+            hint="Search by item code, serial number, batch no or barcode"
+            background-color="white"
+            hide-details
+            v-model="search"
           ></v-text-field>
         </v-col>
-        <v-col cols="12"  class="pt-0 mt-0">
-              <div fluid  class="items">
-                <v-row dense class="overflow-y-auto" style="max-height: 68vh">
-                  <v-progress-linear
-                    :active="loading"
-                    :indeterminate="loading"
-                    absolute
-                    top
-                    color="deep-purple accent-4"
-                  ></v-progress-linear>
-                  <v-col
-                    v-for="(item, idx) in filtred_items"
-                    :key="idx"
-                    xl="2" lg="3" md="6" sm="6" cols="6"
-                    min-height="50"
-                  >
-                  <!-- <v-sheet min-height="50" class="fill-height" color="transparent">
+        <v-col cols="12" class="pt-0 mt-0">
+          <div fluid class="items">
+            <v-row dense class="overflow-y-auto" style="max-height: 68vh">
+              <v-progress-linear
+                :active="loading"
+                :indeterminate="loading"
+                absolute
+                top
+                color="deep-purple accent-4"
+              ></v-progress-linear>
+              <v-col
+                v-for="(item, idx) in filtred_items"
+                :key="idx"
+                xl="2"
+                lg="3"
+                md="6"
+                sm="6"
+                cols="6"
+                min-height="50"
+              >
+                <!-- <v-sheet min-height="50" class="fill-height" color="transparent">
                     <v-lazy
                       v-model="item.isActive"
                       :options="{
                         threshold: .1
                       }"
-                    > -->
-                      <v-card hover="hover" @click="add_item(item)">
-                        <v-img
-                          :src="item.image || 'https://lunawood.com/wp-content/uploads/2018/02/placeholder-image.png'"
-                          class="white--text align-end"
-                          gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
-                          height="100px"
-                        >
-                        <v-card-text v-text="item.item_name" class="text-subtitle-2 px-1 pb-2"></v-card-text>
-                        <!-- <v-card-subtitle v-text="card.name" class="pb-0"></v-card-subtitle> -->
-                        </v-img>
-                        <v-card-text class="text--primary pa-1">
-                          <div class="text-caption indigo--text accent-3">$ 50.00</div>
-                        </v-card-text>
-                      </v-card>
-                    <!-- </v-lazy>
-                  </v-sheet> -->
-                  </v-col>
-                </v-row>
-              </div>   
+                >-->
+                <v-card hover="hover" @click="add_item(item)">
+                  <v-img
+                    :src="item.image || 'https://lunawood.com/wp-content/uploads/2018/02/placeholder-image.png'"
+                    class="white--text align-end"
+                    gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
+                    height="100px"
+                  >
+                    <v-card-text v-text="item.item_name" class="text-subtitle-2 px-1 pb-2"></v-card-text>
+                    <!-- <v-card-subtitle v-text="card.name" class="pb-0"></v-card-subtitle> -->
+                  </v-img>
+                  <v-card-text class="text--primary pa-1">
+                    <div class="text-caption indigo--text accent-3">$ 50.00</div>
+                  </v-card-text>
+                </v-card>
+                <!-- </v-lazy>
+                </v-sheet>-->
+              </v-col>
+            </v-row>
+          </div>
         </v-col>
       </v-row>
     </v-card>
     <v-card style="max-height: 10vh; height: 10vh" class="cards mb-0 mt-3 pa-2 grey lighten-5">
       <v-row no-gutters>
         <v-col cols="12">
-           <v-select
+          <v-select
             :items="items_group"
             label="Items Group"
             dense
@@ -72,35 +76,17 @@
             hide-details
             v-model="item_group"
           ></v-select>
-          </v-col>
-          <v-col cols="8" class="mt-1">
-          <v-btn-toggle
-          v-model="items_view"
-          color="primary accent-3"
-          group
-          dense
-          rounded
-          >
-          <v-btn value="card">
-            Card View
-          </v-btn>
-          <v-btn value="list">
-            List View
-          </v-btn>
-        </v-btn-toggle>
+        </v-col>
+        <v-col cols="8" class="mt-1">
+          <v-btn-toggle v-model="items_view" color="primary accent-3" group dense rounded>
+            <v-btn value="card">Card View</v-btn>
+            <v-btn value="list">List View</v-btn>
+          </v-btn-toggle>
         </v-col>
         <v-col cols="4" class="mt-1">
-        <v-btn-toggle
-          v-model="favourites_view"
-          color="success accent-3"
-          group
-          dense
-          rounded
-          >
-        <v-btn value="True">
-            Favourites
-          </v-btn>
-        </v-btn-toggle>
+          <v-btn-toggle v-model="favourites_view" color="success accent-3" group dense rounded>
+            <v-btn value="True">Favourites</v-btn>
+          </v-btn-toggle>
         </v-col>
       </v-row>
     </v-card>
@@ -109,79 +95,73 @@
 
 
 <script>
-  import { evntBus } from "../../bus";
-  export default {
-    data: () => ({
-      items_view: 'card',
-      item_group: 'ALL',
-      favourites_view: false,
-      loading: false,
-      items_group: [
-        'ALL',
-      ],
-      items: [],
-      search: "",
+import { evntBus } from "../../bus";
+export default {
+  data: () => ({
+    items_view: "card",
+    item_group: "ALL",
+    favourites_view: false,
+    loading: false,
+    items_group: ["ALL"],
+    items: [],
+    search: "",
+  }),
 
-    }),
-
-    methods: {
-        get_items() {
-          const vm = this;
-          this.loading = true
-          frappe.call({
-              method: 'posawesome.posawesome.page.posapp.posapp.get_items',
-              args: {
-
-              },
-              callback: function(r) {
-                  if (r.message) {
-                      vm.items = r.message;
-                      vm.$nextTick(() => {
-                          vm.loading = false
-                      })
-                  }
-              }
-          });
-        },
-        add_item(item){
-          evntBus.$emit('add_item', item);
-        }
-    },
-    computed: {
-      filtred_items() {
-        let filtred_list = []
-        let filtred_group_list = []
-        if (this.item_group != 'ALL') {
-          filtred_group_list = this.items.filter((item)=> item.item_group.toLowerCase().includes(this.item_group.toLowerCase()))
-        }
-        else {
-          filtred_group_list = this.items
-        }
-        if (!this.search || this.search.length < 3) {
-          return filtred_list = filtred_group_list.slice(0,500)
-        }
-        else if (this.search) {
-          filtred_list = filtred_group_list.filter((item)=> item.item_name.toLowerCase().includes(this.search.toLowerCase()))
-          if (filtred_list.length == 0){
-            filtred_list = filtred_group_list.filter((item)=> item.item_code.toLowerCase().includes(this.search.toLowerCase()))
+  methods: {
+    get_items() {
+      const vm = this;
+      this.loading = true;
+      frappe.call({
+        method: "posawesome.posawesome.page.posapp.posapp.get_items",
+        args: {},
+        callback: function (r) {
+          if (r.message) {
+            vm.items = r.message;
+            vm.$nextTick(() => {
+              vm.loading = false;
+            });
           }
-        }
-        return filtred_list.slice(0,500)
-      }
+        },
+      });
     },
+    add_item(item) {
+      evntBus.$emit("add_item", item);
+    },
+  },
+  computed: {
+    filtred_items() {
+      let filtred_list = [];
+      let filtred_group_list = [];
+      if (this.item_group != "ALL") {
+        filtred_group_list = this.items.filter((item) =>
+          item.item_group.toLowerCase().includes(this.item_group.toLowerCase())
+        );
+      } else {
+        filtred_group_list = this.items;
+      }
+      if (!this.search || this.search.length < 3) {
+        return (filtred_list = filtred_group_list.slice(0, 500));
+      } else if (this.search) {
+        filtred_list = filtred_group_list.filter((item) =>
+          item.item_name.toLowerCase().includes(this.search.toLowerCase())
+        );
+        if (filtred_list.length == 0) {
+          filtred_list = filtred_group_list.filter((item) =>
+            item.item_code.toLowerCase().includes(this.search.toLowerCase())
+          );
+        }
+      }
+      return filtred_list.slice(0, 500);
+    },
+  },
 
-    created: function () {
-        this.$nextTick(function () {
-          this.get_items();
-        });
-        
-    }
-
-  }
-
-  
+  created: function () {
+    this.$nextTick(function () {
+      this.get_items();
+    });
+  },
+};
 </script>
 
 <style scoped>
-
 </style>
