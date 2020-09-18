@@ -25,7 +25,7 @@
                                 <div v-text="item.item_name"></div>
                             </v-col>
                             <v-col align="center" cols="1" class="pa-1">
-                                <v-btn icon small color="indigo lighten-1" @click.stop="">
+                                <v-btn icon small color="indigo lighten-1" @click.stop="subtract_one(item)">
                                     <v-icon>mdi-minus-circle-outline</v-icon>
                                 </v-btn>
                             </v-col>
@@ -33,7 +33,7 @@
                                 <div align="center"  v-text="item.qty"></div>
                             </v-col>
                             <v-col align="center" cols="1" class="pa-1">
-                                <v-btn icon small  color="indigo lighten-1" @click.stop="">
+                                <v-btn icon small  color="indigo lighten-1" @click.stop="add_one(item)">
                                     <v-icon>mdi-plus-circle-outline</v-icon>
                                 </v-btn>
                             </v-col>
@@ -102,7 +102,6 @@
                                 label="ِAdditional Discount"
                                 outlined
                                 dense
-                                
                                 hide-details
                             ></v-text-field>
                         </v-col>
@@ -165,8 +164,6 @@ export default {
     ],
     data() {
         return {
-            total_qty: 0,
-            subtotal: 0,
             items_discount: 0,
             additional_discount: 0,
             total_tax: 0,
@@ -179,24 +176,49 @@ export default {
         Customer,
     },
     computed: {
-       
+       total_qty() {
+           let qty = 0
+           this.items.forEach(item => {
+               qty += item.qty
+           });
+           return qty
+       }, 
+       subtotal() {
+           let sum = 0
+           this.items.forEach(item => {
+               sum += item.qty * item.price
+           });
+           return sum
+       }, 
     },
     methods: {
         sortBy(prop) {
             this.projects.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
         },
-        remove_item(value) {
-            const index = this.items.findIndex(item => item === value);
+        remove_item(item) {
+            const index = this.items.findIndex(el => el === item);
             this.items.splice(index, 1);
-        }
+        },
+        add_one(item) {
+            item.qty ++
+            // this.$forceUpdate();
+        },
+        subtract_one(item) {
+            item.qty --
+            if (item.qty <= 0) {
+                this.remove_item(item);
+            }
+            // this.$forceUpdate();
+        },
     },
     created() {
         evntBus.$on('add_item',(item) => {
-            item.qty = 1;
-            item.vat = 18;
-            item.price = 25;
-            item.active = false,
-            this.items.unshift(item);
+            const new_item = {...item}
+            new_item.qty = 1;
+            new_item.vat = 18;
+            new_item.price = 25;
+            new_item.active = false,
+            this.items.unshift(new_item);
         })
     },
     mounted: function () {
