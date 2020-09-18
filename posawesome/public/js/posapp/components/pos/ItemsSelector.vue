@@ -19,6 +19,13 @@
         <v-col cols="12"  class="pt-0 mt-0">
               <div fluid  class="items">
                 <v-row dense class="overflow-y-auto" style="max-height: 68vh">
+                  <v-progress-linear
+                    :active="loading"
+                    :indeterminate="loading"
+                    absolute
+                    top
+                    color="deep-purple accent-4"
+                  ></v-progress-linear>
                   <v-col
                     v-for="(item, idx) in filtred_items"
                     :key="idx"
@@ -34,7 +41,7 @@
                     > -->
                       <v-card hover="hover" @click="add_item(item)">
                         <v-img
-                          :src="item.image"
+                          :src="item.image || 'https://lunawood.com/wp-content/uploads/2018/02/placeholder-image.png'"
                           class="white--text align-end"
                           gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
                           height="100px"
@@ -108,6 +115,7 @@
       items_view: 'card',
       item_group: 'ALL',
       favourites_view: false,
+      loading: false,
       items_group: [
         'ALL',
       ],
@@ -119,6 +127,7 @@
     methods: {
         get_items() {
           const vm = this;
+          this.loading = true
           frappe.call({
               method: 'posawesome.posawesome.page.posapp.posapp.get_items',
               args: {
@@ -126,8 +135,10 @@
               },
               callback: function(r) {
                   if (r.message) {
-                      // console.log(r.message);
                       vm.items = r.message;
+                      vm.$nextTick(() => {
+                          vm.loading = false
+                      })
                   }
               }
           });
