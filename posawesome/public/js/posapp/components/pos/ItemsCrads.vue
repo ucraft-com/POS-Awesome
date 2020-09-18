@@ -15,7 +15,7 @@
           <v-list-item :key="item.item_code" class="px-0">
             <template>
                 <v-list-item-action class="pa-0 mr-2 my-0">
-                    <v-btn icon color="red" @click.stop="remove_item(item.item_code)">
+                    <v-btn icon color="red" @click.stop="remove_item(item)">
                         <v-icon>mdi-delete</v-icon>
                     </v-btn>
                 </v-list-item-action>
@@ -157,10 +157,11 @@
 </template>
 
 <script>
+import { evntBus } from "../../bus";
 import Customer from './Customer.vue'
 export default {
     props: [
-            "items"
+            // "items"
     ],
     data() {
         return {
@@ -170,6 +171,7 @@ export default {
             additional_discount: 0,
             total_tax: 0,
             total: 0,
+            items: [],
         }
         
     },
@@ -184,9 +186,18 @@ export default {
             this.projects.sort((a,b) => a[prop] < b[prop] ? -1 : 1)
         },
         remove_item(value) {
-            console.log(value)
-            // this.items = this.items.filter(function(el) { return el != value; }); 
+            const index = this.items.findIndex(item => item === value);
+            this.items.splice(index, 1);
         }
+    },
+    created() {
+        evntBus.$on('add_item',(item) => {
+            item.qty = 1;
+            item.vat = 18;
+            item.price = 25;
+            item.active = false,
+            this.items.unshift(item);
+        })
     },
     mounted: function () {
         // this.$nextTick(function () {

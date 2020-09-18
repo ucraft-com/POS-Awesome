@@ -91,6 +91,7 @@
 
 
 <script>
+  import { evntBus } from "../../bus";
   export default {
     data: () => ({
       items_view: 'card',
@@ -117,7 +118,7 @@
           });
         },
         add_item(item){
-          this.$emit('add_item', item);
+          evntBus.$emit('add_item', item);
         }
     },
 
