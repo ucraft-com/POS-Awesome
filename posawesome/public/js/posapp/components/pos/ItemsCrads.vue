@@ -184,9 +184,9 @@ export default {
     },
   },
   methods: {
-    sortBy(prop) {
-      this.projects.sort((a, b) => (a[prop] < b[prop] ? -1 : 1));
-    },
+    // sortBy(prop) {
+    //   this.projects.sort((a, b) => (a[prop] < b[prop] ? -1 : 1));
+    // },
     remove_item(item) {
       const index = this.items.findIndex((el) => el === item);
       this.items.splice(index, 1);
@@ -202,14 +202,22 @@ export default {
       }
       // this.$forceUpdate();
     },
+    add_item(item) {
+      const index = this.items.findIndex((el) => el.name === item.name);
+      if (index === -1) {
+        const new_item = { ...item };
+        new_item.qty = 1;
+        new_item.vat = 18;
+        new_item.price = 25;
+        (new_item.active = false), this.items.unshift(new_item);
+      } else {
+        this.items[index].qty++;
+      }
+    },
   },
   created() {
     evntBus.$on("add_item", (item) => {
-      const new_item = { ...item };
-      new_item.qty = 1;
-      new_item.vat = 18;
-      new_item.price = 25;
-      (new_item.active = false), this.items.unshift(new_item);
+      this.add_item(item);
     });
   },
   mounted: function () {
