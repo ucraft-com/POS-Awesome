@@ -21,6 +21,16 @@ def get_items():
         , as_dict=1)
 
 
+@frappe.whitelist()
+def get_items_groups():
+	return frappe.db.sql("""
+        select name 
+        from `tabItem Group`
+        where is_group = 0
+        order by name
+        LIMIT 0, 10000 """
+        , as_dict=1)
+
 
 
 @frappe.whitelist()

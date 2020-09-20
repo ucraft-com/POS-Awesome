@@ -120,16 +120,36 @@ export default {
         args: {},
         callback: function (r) {
           if (r.message) {
-            const loadItmes = !localStorage.items_storage || (JSON.parse(localStorage.getItem("items_storage")).length != r.message.length)
+            const loadItmes =
+              !localStorage.items_storage ||
+              JSON.parse(localStorage.getItem("items_storage")).length !=
+                r.message.length;
             localStorage.setItem("items_storage", "");
             localStorage.setItem("items_storage", JSON.stringify(r.message));
             if (loadItmes) {
               vm.$nextTick(() => {
-                console.log("loadItmes",loadItmes)
+                console.log("loadItmes", loadItmes);
                 vm.items = JSON.parse(localStorage.getItem("items_storage"));
                 vm.loading = false;
               });
             }
+          }
+        },
+      });
+    },
+    get_items_groups() {
+      const vm = this;
+      frappe.call({
+        method: "posawesome.posawesome.page.posapp.posapp.get_items_groups",
+        args: {},
+        callback: function (r) {
+          if (r.message) {
+            // console.log(r.message)
+            r.message.forEach(element => {
+              vm.items_group.push(element.name)
+            });
+            // vm.items_group = r.message;
+            
           }
         },
       });
@@ -168,6 +188,7 @@ export default {
   created: function () {
     this.$nextTick(function () {
       this.get_items();
+      this.get_items_groups();
     });
   },
   // mounted() {
