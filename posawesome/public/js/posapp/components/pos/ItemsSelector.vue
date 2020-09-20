@@ -111,15 +111,25 @@ export default {
     get_items() {
       const vm = this;
       this.loading = true;
+      if (localStorage.items_storage) {
+        vm.items = JSON.parse(localStorage.getItem("items_storage"));
+        vm.loading = false;
+      }
       frappe.call({
         method: "posawesome.posawesome.page.posapp.posapp.get_items",
         args: {},
         callback: function (r) {
           if (r.message) {
-            vm.items = r.message;
-            vm.$nextTick(() => {
-              vm.loading = false;
-            });
+            const loadItmes = !localStorage.items_storage || (JSON.parse(localStorage.getItem("items_storage")).length != r.message.length)
+            localStorage.setItem("items_storage", "");
+            localStorage.setItem("items_storage", JSON.stringify(r.message));
+            if (loadItmes) {
+              vm.$nextTick(() => {
+                console.log("loadItmes",loadItmes)
+                vm.items = JSON.parse(localStorage.getItem("items_storage"));
+                vm.loading = false;
+              });
+            }
           }
         },
       });
@@ -140,7 +150,7 @@ export default {
         filtred_group_list = this.items;
       }
       if (!this.search || this.search.length < 3) {
-        return (filtred_list = filtred_group_list.slice(0, 500));
+        return (filtred_list = filtred_group_list.slice(0, 100));
       } else if (this.search) {
         filtred_list = filtred_group_list.filter((item) =>
           item.item_name.toLowerCase().includes(this.search.toLowerCase())
@@ -151,7 +161,7 @@ export default {
           );
         }
       }
-      return filtred_list.slice(0, 500);
+      return filtred_list.slice(0, 100);
     },
   },
 
@@ -160,6 +170,16 @@ export default {
       this.get_items();
     });
   },
+  // mounted() {
+  //   if (localStorage.getItem('items_storage')) {
+  //     try {
+  //       this.items = JSON.parse(localStorage.getItem('items_storage'));
+  //     } catch(e) {
+  //       // localStorage.removeItem('cats');
+  //       console.log(e)
+  //     }
+  //   }
+  // },
 };
 </script>
 

@@ -14,10 +14,10 @@ from posawesome import console
 @frappe.whitelist()
 def get_items():
 	return frappe.db.sql("""
-        select *
+        select name ,item_code, item_name, image, item_group
         from `tabItem`
         order by name
-        LIMIT 0, 5000 """
+        LIMIT 0, 10000 """
         , as_dict=1)
 
 
