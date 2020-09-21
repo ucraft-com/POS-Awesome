@@ -7,7 +7,10 @@
           <v-data-table
             :headers="items_headers"
             :items="items"
+            :single-expand="singleExpand"
+            :expanded.sync="expanded"
             item-key="name"
+            show-expand
             class="elevation-1"
             :items-per-page="itemsPerPage"
             hide-default-footer
@@ -22,8 +25,9 @@
                 <v-icon>mdi-plus-circle-outline</v-icon>
               </v-btn>
             </template>
-            <template v-slot:item.total="{ item }">
-              {{ item.qty * item.price }}
+            <template v-slot:item.total="{ item }">{{ item.qty * item.price }}</template>
+            <template v-slot:expanded-item="{ headers, item }">
+              <td :colspan="headers.length">More info about {{ item.name }}</td>
             </template>
           </v-data-table>
         </template>
@@ -135,6 +139,8 @@ export default {
       total: 0,
       items: [],
       itemsPerPage: 1000,
+      expanded: [],
+      singleExpand: true,
       items_headers: [
         {
           text: "Name",
