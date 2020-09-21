@@ -14,6 +14,8 @@
             background-color="white"
             hide-details
             v-model="search"
+            @keydown.enter="enter_event"
+            @keydown.esc="esc_event"
           ></v-text-field>
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
@@ -144,18 +146,25 @@ export default {
         args: {},
         callback: function (r) {
           if (r.message) {
-            // console.log(r.message)
-            r.message.forEach(element => {
-              vm.items_group.push(element.name)
+            r.message.forEach((element) => {
+              vm.items_group.push(element.name);
             });
-            // vm.items_group = r.message;
-            
           }
         },
       });
     },
     add_item(item) {
       evntBus.$emit("add_item", item);
+    },
+    enter_event() {
+      if (!this.filtred_items.length || !this.search) {
+        return;
+      }
+      this.add_item(this.filtred_items[0]);
+      this.search = null;
+    },
+    esc_event() {
+      this.search = null;
     },
   },
   computed: {

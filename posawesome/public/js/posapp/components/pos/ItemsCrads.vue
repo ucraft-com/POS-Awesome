@@ -107,7 +107,7 @@
               <v-btn block class="pa-0" large color="warning" dark>Get Hold Invoice</v-btn>
             </v-col>
             <v-col cols="6">
-              <v-btn block class="pa-0" large color="error" dark>Cancel</v-btn>
+              <v-btn block class="pa-0" large color="error" dark @click="cancel_invoice">Cancel</v-btn>
             </v-col>
             <v-col cols="6">
               <v-btn block class="pa-0" large color="success" dark>New</v-btn>
@@ -206,6 +206,9 @@ export default {
       } else {
         this.items[index].qty++;
       }
+    },
+    cancel_invoice() {
+      this.items = []
     },
   },
   created() {
