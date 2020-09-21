@@ -128,13 +128,13 @@ export default {
         {
           text: "Name",
           align: "start",
-          sortable: false,
+          sortable: true,
           value: "item_name",
         },
-        { text: "Code", value: "name", align: "center" },
-        { text: "Group", value: "item_group", align: "center" },
-        { text: "Price", value: "price", align: "center" },
-        { text: "VAT", value: "vat", align: "center" },
+        { text: "Code", value: "name", align: "start" },
+        { text: "Group", value: "item_group", align: "start" },
+        { text: "Price", value: "price", align: "start" },
+        { text: "VAT", value: "vat", align: "start" },
       ],
   }),
 

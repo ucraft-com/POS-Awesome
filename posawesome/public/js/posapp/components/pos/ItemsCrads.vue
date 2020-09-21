@@ -15,19 +15,34 @@
             :items-per-page="itemsPerPage"
             hide-default-footer
           >
-            <template v-slot:item.subtract="{ item }">
-              <v-btn icon small color="indigo lighten-1" @click.stop="subtract_one(item)">
-                <v-icon>mdi-minus-circle-outline</v-icon>
-              </v-btn>
-            </template>
-            <template v-slot:item.add="{ item }">
-              <v-btn icon small color="indigo lighten-1" @click.stop="add_one(item)">
-                <v-icon>mdi-plus-circle-outline</v-icon>
-              </v-btn>
-            </template>
             <template v-slot:item.total="{ item }">{{ item.qty * item.price }}</template>
+
             <template v-slot:expanded-item="{ headers, item }">
-              <td :colspan="headers.length">More info about {{ item.name }} {{ expanded }}</td>
+              <td :colspan="headers.length">
+                <v-row>
+                  <v-col cols="1">
+                    <v-btn icon small color="red" @click.stop="remove_item(item)">
+                      <v-icon>mdi-delete</v-icon>
+                    </v-btn>
+                  </v-col>
+                   <v-spacer></v-spacer>
+                  <v-col cols="1">
+                    <v-btn icon small color="indigo lighten-1" @click.stop="subtract_one(item)">
+                      <v-icon>mdi-minus-circle-outline</v-icon>
+                    </v-btn>
+                  </v-col>
+                  <v-col cols="1">
+                    <v-btn icon small color="indigo lighten-1" @click.stop="add_one(item)">
+                      <v-icon>mdi-plus-circle-outline</v-icon>
+                    </v-btn>
+                  </v-col>
+                </v-row>
+                <v-row>
+                  <v-col cols="6">
+                    <p>More info about {{ item.name }} {{ expanded }}</p>
+                  </v-col>
+                </v-row>
+              </td>
             </template>
           </v-data-table>
         </template>
@@ -148,9 +163,7 @@ export default {
           sortable: false,
           value: "item_name",
         },
-        { text: "", value: "subtract", align: "center" },
         { text: "QTY", value: "qty", align: "center" },
-        { text: "", value: "add", align: "center" },
         { text: "Price", value: "price", align: "center" },
         { text: "VAT", value: "vat", align: "center" },
         { text: "Total", value: "total", align: "center" },
@@ -208,7 +221,7 @@ export default {
       }
     },
     cancel_invoice() {
-      this.items = []
+      this.items = [];
     },
   },
   created() {
