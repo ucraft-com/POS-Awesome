@@ -2,60 +2,32 @@
   <div>
     <v-card style="max-height: 70vh; height: 70vh" class="cards my-0 py-0 grey lighten-5">
       <Customer></Customer>
-      <v-list class="my-0 py-0 overflow-y-auto" style="max-height: 57vh">
-        <v-list-group
-          v-for="(item, index) in items"
-          :key="index"
-          v-model="item.active"
-          :prepend-icon="item.action"
-          color="primary"
-          class="my-0 py-0 border_line_bottom"
-        >
-          <template v-slot:activator class="pa-0">
-            <v-list-item :key="item.item_code" class="px-0">
-              <template>
-                <v-list-item-action class="pa-0 mr-2 my-0">
-                  <v-btn icon color="red" @click.stop="remove_item(item)">
-                    <v-icon>mdi-delete</v-icon>
-                  </v-btn>
-                </v-list-item-action>
-                <v-list-item-content class="py-0">
-                  <v-row align="center" class="ma-0">
-                    <v-col la="4" md="4" sm="12" cols="12" class="pa-1">
-                      <div v-text="item.item_name"></div>
-                    </v-col>
-                    <v-col align="center" cols="1" class="pa-1">
-                      <v-btn icon small color="indigo lighten-1" @click.stop="subtract_one(item)">
-                        <v-icon>mdi-minus-circle-outline</v-icon>
-                      </v-btn>
-                    </v-col>
-                    <v-col la="2" md="2" sm="3" cols="3" class="pa-1 text-overline">
-                      <div align="center" v-text="item.qty"></div>
-                    </v-col>
-                    <v-col align="center" cols="1" class="pa-1">
-                      <v-btn icon small color="indigo lighten-1" @click.stop="add_one(item)">
-                        <v-icon>mdi-plus-circle-outline</v-icon>
-                      </v-btn>
-                    </v-col>
-                    <v-col la="2" md="2" sm="3" cols="3" class="pa-1 text-overline">
-                      <div align="center" v-text="item.price"></div>
-                    </v-col>
-                    <v-col la="2" md="2" sm="4" cols="3" class="pa-1 text-overline">
-                      <div align="center" v-text="item.qty * item.price"></div>
-                    </v-col>
-                  </v-row>
-                </v-list-item-content>
-              </template>
-            </v-list-item>
-          </template>
-          <v-card flat color="blue lighten-5">
-            <v-card-text>{{ item.name }}</v-card-text>
-            <v-card-text>{{ item.item_code }}</v-card-text>
-            <v-card-text>{{ item.item_name }}</v-card-text>
-            <v-card-text></v-card-text>
-          </v-card>
-        </v-list-group>
-      </v-list>
+      <div class="my-0 py-0 overflow-y-auto" style="max-height: 59vh">
+        <template>
+          <v-data-table
+            :headers="items_headers"
+            :items="items"
+            item-key="name"
+            class="elevation-1"
+            :items-per-page="itemsPerPage"
+            hide-default-footer
+          >
+            <template v-slot:item.subtract="{ item }">
+              <v-btn icon small color="indigo lighten-1" @click.stop="subtract_one(item)">
+                <v-icon>mdi-minus-circle-outline</v-icon>
+              </v-btn>
+            </template>
+            <template v-slot:item.add="{ item }">
+              <v-btn icon small color="indigo lighten-1" @click.stop="add_one(item)">
+                <v-icon>mdi-plus-circle-outline</v-icon>
+              </v-btn>
+            </template>
+            <template v-slot:item.total="{ item }">
+              {{ item.qty * item.price }}
+            </template>
+          </v-data-table>
+        </template>
+      </div>
     </v-card>
     <v-row>
       <v-col class="pt-0 pr-0" cols="8">
@@ -162,6 +134,21 @@ export default {
       total_tax: 0,
       total: 0,
       items: [],
+      itemsPerPage: 1000,
+      items_headers: [
+        {
+          text: "Name",
+          align: "start",
+          sortable: false,
+          value: "item_name",
+        },
+        { text: "", value: "subtract", align: "center" },
+        { text: "QTY", value: "qty", align: "center" },
+        { text: "", value: "add", align: "center" },
+        { text: "Price", value: "price", align: "center" },
+        { text: "VAT", value: "vat", align: "center" },
+        { text: "Total", value: "total", align: "center" },
+      ],
     };
   },
   components: {

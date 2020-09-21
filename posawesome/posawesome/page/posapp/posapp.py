@@ -28,7 +28,7 @@ def get_items_groups():
         from `tabItem Group`
         where is_group = 0
         order by name
-        LIMIT 0, 10000 """
+        LIMIT 0, 200 """
         , as_dict=1)
 
 
