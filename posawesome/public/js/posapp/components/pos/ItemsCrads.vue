@@ -27,7 +27,7 @@
             </template>
             <template v-slot:item.total="{ item }">{{ item.qty * item.price }}</template>
             <template v-slot:expanded-item="{ headers, item }">
-              <td :colspan="headers.length">More info about {{ item.name }}</td>
+              <td :colspan="headers.length">More info about {{ item.name }} {{ expanded }}</td>
             </template>
           </v-data-table>
         </template>

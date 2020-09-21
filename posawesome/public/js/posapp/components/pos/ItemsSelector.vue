@@ -19,7 +19,7 @@
           ></v-text-field>
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
-          <div fluid class="items">
+          <div fluid class="items"  v-if="items_view=='card'">
             <v-row dense class="overflow-y-auto" style="max-height: 68vh">
               <v-progress-linear
                 :active="loading"
@@ -64,6 +64,22 @@
               </v-col>
             </v-row>
           </div>
+          <div fluid class="items"  v-if="items_view=='list'">
+           <div class="my-0 py-0 overflow-y-auto" style="max-height: 68vh">
+        <template>
+          <v-data-table
+            :headers="items_headers"
+            :items="filtred_items"
+            item-key="name"
+            class="elevation-1"
+            :items-per-page="itemsPerPage"
+            hide-default-footer
+            @click:row="add_item"
+          >
+          </v-data-table>
+        </template>
+      </div>
+          </div>
         </v-col>
       </v-row>
     </v-card>
@@ -100,13 +116,26 @@
 import { evntBus } from "../../bus";
 export default {
   data: () => ({
-    items_view: "card",
+    items_view: "list",
     item_group: "ALL",
     favourites_view: false,
     loading: false,
     items_group: ["ALL"],
     items: [],
     search: "",
+    itemsPerPage: 1000,
+      items_headers: [
+        {
+          text: "Name",
+          align: "start",
+          sortable: false,
+          value: "item_name",
+        },
+        { text: "Code", value: "name", align: "center" },
+        { text: "Group", value: "item_group", align: "center" },
+        { text: "Price", value: "price", align: "center" },
+        { text: "VAT", value: "vat", align: "center" },
+      ],
   }),
 
   methods: {
