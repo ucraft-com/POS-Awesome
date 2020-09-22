@@ -12,6 +12,40 @@ from posawesome import console
 
 
 @frappe.whitelist()
+def create_opening_voucher(pos_profile, company, balance_details):
+	import json
+	balance_details = json.loads(balance_details)
+
+	new_pos_opening = frappe.get_doc({
+		'doctype': 'POS Opening Shift',
+		"period_start_date": frappe.utils.get_datetime(),
+		"posting_date": frappe.utils.getdate(),
+		"user": frappe.session.user,
+		"pos_profile": pos_profile,
+		"company": company,
+	})
+	new_pos_opening.set("balance_details", balance_details)
+	new_pos_opening.submit()
+
+	return new_pos_opening.as_dict()
+
+
+@frappe.whitelist()
+def check_opening_shift(user):
+	open_vouchers = frappe.db.get_all("POS Opening Shift",
+		filters = {
+			"user": user,
+			"pos_closing_entry": ["in", ["", None]],
+			"docstatus": 1
+		},
+		fields = ["name", "company", "pos_profile", "period_start_date"],
+		order_by = "period_start_date desc"
+	)
+
+	return open_vouchers
+
+
+@frappe.whitelist()
 def get_items():
 	return frappe.db.sql("""
         select name ,item_code, item_name, image, item_group, stock_uom

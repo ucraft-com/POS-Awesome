@@ -18,13 +18,47 @@ import ItemsCrads from "./ItemsCrads.vue";
 
 export default {
   data: function () {
-    return {};
+    return {
+      shift_is_open: false,
+    };
   },
+
   components: {
     ItemsSelector,
     ItemsCrads,
   },
-  methods: {},
+
+  methods: {
+    check_opening_entry() {
+      return frappe
+        .call(
+          "posawesome.posawesome.api.posapp.check_opening_shift",
+          { user: frappe.session.user }
+        )
+        .then((r) => {
+          console.log(r.message)
+          if (r.message.length) {
+            // Note : assuming only one opening voucher is available for the current user
+            // TODO : should Rendering pos
+            // this.prepare_app_defaults(r.message[0]);
+            console.log(r.message)
+          } else {
+            // TODO : should Rendering opninig shift dialog
+            this.create_opening_voucher();
+          }
+        });
+    },
+    create_opening_voucher() {
+      console.log("create_opening_voucher")
+    },
+  },
+
+  created: function () {
+    this.$nextTick(function () {
+      this.check_opening_entry();
+    });
+  },
+
 };
 </script>
 

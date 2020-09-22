@@ -35,7 +35,7 @@ export default {
       }
       
       frappe.call({
-        method: "posawesome.posawesome.page.posapp.posapp.get_customer_names",
+        method: "posawesome.posawesome.api.posapp.get_customer_names",
         args: {},
         callback: function (r) {
           if (r.message) {

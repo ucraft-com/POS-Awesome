@@ -146,7 +146,7 @@ export default {
         vm.loading = false;
       }
       frappe.call({
-        method: "posawesome.posawesome.page.posapp.posapp.get_items",
+        method: "posawesome.posawesome.api.posapp.get_items",
         args: {},
         callback: function (r) {
           if (r.message) {
@@ -170,7 +170,7 @@ export default {
     get_items_groups() {
       const vm = this;
       frappe.call({
-        method: "posawesome.posawesome.page.posapp.posapp.get_items_groups",
+        method: "posawesome.posawesome.api.posapp.get_items_groups",
         args: {},
         callback: function (r) {
           if (r.message) {
