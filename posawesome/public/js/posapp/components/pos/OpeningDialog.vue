@@ -23,7 +23,6 @@
                 ></v-autocomplete>
               </v-col>
               <v-col cols="12">
-
                 <template>
                   <v-data-table
                     :headers="payments_methods_headers"
@@ -32,20 +31,44 @@
                     class="elevation-1"
                     :items-per-page="itemsPerPage"
                     hide-default-footer
-                    
-                  ></v-data-table>
+                  >
+                    <template v-slot:item.amount="props">
+                      <v-edit-dialog
+                        :return-value.sync="props.item.amount"
+                        @save="save"
+                        @cancel="cancel"
+                        @open="open"
+                        @close="close"
+                      >
+                        {{ props.item.amount }}
+                        <template v-slot:input>
+                          <v-text-field
+                            v-model="props.item.amount"
+                            :rules="[max25chars]"
+                            label="Edit"
+                            single-line
+                            counter
+                          ></v-text-field>
+                        </template>
+                      </v-edit-dialog>
+                    </template>
+                  </v-data-table>
                 </template>
-
               </v-col>
             </v-row>
           </v-container>
-          <small>* indicates required field</small>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue darken-1" text @click="close_opening_dialog">Close</v-btn>
-          <v-btn color="blue darken-1" text @click="dialog = false">Submit</v-btn>
+          <v-btn color="red" dark @click="close_opening_dialog">Close</v-btn>
+          <v-btn color="blue" dark @click="dialog = false">Submit</v-btn>
         </v-card-actions>
+        <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+          {{ snackText }}
+          <template v-slot:action="{ attrs }">
+            <v-btn v-bind="attrs" text @click="snack = false">Close</v-btn>
+          </template>
+        </v-snackbar>
       </v-card>
     </v-dialog>
   </v-row>
@@ -62,9 +85,9 @@ export default {
     pos_profiles_data: [],
     pos_profiles: [],
     pos_profile: "",
-    payments_method_data : [],
-    payments_methods : [],
-    payments_methods_headers : [
+    payments_method_data: [],
+    payments_methods: [],
+    payments_methods_headers: [
       {
         text: "Mode of Payment",
         align: "start",
@@ -75,10 +98,15 @@ export default {
         text: "Opening Amount",
         value: "amount",
         align: "center",
-        sortable: false
-        },
+        sortable: false,
+      },
     ],
-    itemsPerPage : 100,
+    itemsPerPage: 100,
+    max25chars: (v) => v.length <= 25 || "Input too long!",
+    pagination: {},
+    snack: false,
+    snackColor: "",
+    snackText: "",
   }),
   watch: {
     company(val) {
@@ -94,16 +122,14 @@ export default {
         }
       });
     },
-    pos_profile(val){
-        this.payments_methods = []
-        this.payments_method_data.forEach((element) => {
+    pos_profile(val) {
+      this.payments_methods = [];
+      this.payments_method_data.forEach((element) => {
         if (element.parent === val) {
-          this.payments_methods.push(
-              {
-                 mode_of_payment: element.mode_of_payment,
-                 amount : 0
-              }
-              );
+          this.payments_methods.push({
+            mode_of_payment: element.mode_of_payment,
+            amount: 0,
+          });
         }
       });
     },
@@ -128,10 +154,29 @@ export default {
             });
             vm.company = vm.companys[0];
             vm.pos_profiles_data = r.message.pos_profiles_data;
-            vm.payments_method_data = r.message.payments_method
+            vm.payments_method_data = r.message.payments_method;
           }
         },
       });
+    },
+    save() {
+      this.snack = true;
+      this.snackColor = "success";
+      this.snackText = "Data saved";
+      console.log(this.payments_methods)
+    },
+    cancel() {
+      this.snack = true;
+      this.snackColor = "error";
+      this.snackText = "Canceled";
+    },
+    open() {
+      this.snack = true;
+      this.snackColor = "info";
+      this.snackText = "Dialog opened";
+    },
+    close() {
+      console.log("Dialog closed");
     },
   },
   created: function () {
