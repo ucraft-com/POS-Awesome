@@ -48,6 +48,7 @@
                             label="Edit"
                             single-line
                             counter
+                            type="number"
                           ></v-text-field>
                         </template>
                       </v-edit-dialog>
@@ -64,6 +65,7 @@
           <v-btn color="blue" dark @click="dialog = false">Submit</v-btn>
         </v-card-actions>
         <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
+          // TODO : need to remove
           {{ snackText }}
           <template v-slot:action="{ attrs }">
             <v-btn v-bind="attrs" text @click="snack = false">Close</v-btn>
@@ -102,11 +104,11 @@ export default {
       },
     ],
     itemsPerPage: 100,
-    max25chars: (v) => v.length <= 25 || "Input too long!",
+    max25chars: (v) => v.length <= 25 || "Input too long!", // TODO : should validate as number
     pagination: {},
-    snack: false,
-    snackColor: "",
-    snackText: "",
+    snack: false, // TODO : need to remove
+    snackColor: "", // TODO : need to remove
+    snackText: "", // TODO : need to remove
   }),
   watch: {
     company(val) {
@@ -160,22 +162,26 @@ export default {
       });
     },
     save() {
+      // TODO : need to remove
       this.snack = true;
       this.snackColor = "success";
       this.snackText = "Data saved";
-      console.log(this.payments_methods)
+      console.log(this.payments_methods);
     },
     cancel() {
+      // TODO : need to remove
       this.snack = true;
       this.snackColor = "error";
       this.snackText = "Canceled";
     },
     open() {
+      // TODO : need to remove
       this.snack = true;
       this.snackColor = "info";
       this.snackText = "Dialog opened";
     },
     close() {
+      // TODO : need to remove
       console.log("Dialog closed");
     },
   },
