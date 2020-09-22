@@ -19,7 +19,7 @@
           ></v-text-field>
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
-          <div fluid class="items"  v-if="items_view=='card'">
+          <div fluid class="items" v-if="items_view=='card'">
             <v-row dense class="overflow-y-auto" style="max-height: 68vh">
               <v-progress-linear
                 :active="loading"
@@ -64,21 +64,20 @@
               </v-col>
             </v-row>
           </div>
-          <div fluid class="items"  v-if="items_view=='list'">
-           <div class="my-0 py-0 overflow-y-auto" style="max-height: 68vh">
-        <template>
-          <v-data-table
-            :headers="items_headers"
-            :items="filtred_items"
-            item-key="name"
-            class="elevation-1"
-            :items-per-page="itemsPerPage"
-            hide-default-footer
-            @click:row="add_item"
-          >
-          </v-data-table>
-        </template>
-      </div>
+          <div fluid class="items" v-if="items_view=='list'">
+            <div class="my-0 py-0 overflow-y-auto" style="max-height: 68vh">
+              <template>
+                <v-data-table
+                  :headers="items_headers"
+                  :items="filtred_items"
+                  item-key="name"
+                  class="elevation-1"
+                  :items-per-page="itemsPerPage"
+                  hide-default-footer
+                  @click:row="add_item"
+                ></v-data-table>
+              </template>
+            </div>
           </div>
         </v-col>
       </v-row>
@@ -124,18 +123,18 @@ export default {
     items: [],
     search: "",
     itemsPerPage: 1000,
-      items_headers: [
-        {
-          text: "Name",
-          align: "start",
-          sortable: true,
-          value: "item_name",
-        },
-        { text: "Code", value: "name", align: "start" },
-        { text: "Group", value: "item_group", align: "start" },
-        { text: "Price", value: "price", align: "start" },
-        { text: "VAT", value: "vat", align: "start" },
-      ],
+    items_headers: [
+      {
+        text: "Name",
+        align: "start",
+        sortable: true,
+        value: "item_name",
+      },
+      { text: "Code", value: "name", align: "start" },
+      { text: "Group", value: "item_group", align: "start" },
+      { text: "Price", value: "price", align: "start" },
+      { text: "VAT", value: "vat", align: "start" },
+    ],
   }),
 
   methods: {

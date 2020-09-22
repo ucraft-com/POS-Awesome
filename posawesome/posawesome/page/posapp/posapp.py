@@ -32,6 +32,19 @@ def get_items_groups():
         , as_dict=1)
 
 
+@frappe.whitelist()
+def get_customer_names():
+        customers = frappe.db.sql("""
+        select name 
+        from `tabCustomer`
+        order by name
+        LIMIT 0, 10000 """
+        , as_dict=1)
+        customers_list = []
+        for customer in customers:
+                customers_list.append(customer["name"])
+        return customers_list
+
 
 @frappe.whitelist()
 def add_project(pro):

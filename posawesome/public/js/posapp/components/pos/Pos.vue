@@ -1,10 +1,10 @@
 <template>
   <div fluid>
     <v-row>
-      <v-col xl="6" lg="5" md="5" sm="6" cols="12" class="pos pr-0">
+      <v-col xl="5" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
         <ItemsSelector></ItemsSelector>
       </v-col>
-      <v-col xl="6" lg="7" md="7" sm="6" cols="12" class="pos">
+      <v-col xl="7" lg="6" md="6" sm="6" cols="12" class="pos">
         <ItemsCrads></ItemsCrads>
       </v-col>
     </v-row>

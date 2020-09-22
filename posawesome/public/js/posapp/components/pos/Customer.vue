@@ -24,7 +24,46 @@
 export default {
   data: () => ({
     cutomers: ["Cash Customer", "foo", "bar", "fizz", "buzz"],
-    cutomer: "Cash Customer",
+    cutomer: "",
   }),
+
+  methods: {
+    get_customer_names() {
+      const vm = this;
+      if (localStorage.customer_storage) {
+        vm.cutomers = JSON.parse(localStorage.getItem("customer_storage"));
+      }
+      
+      frappe.call({
+        method: "posawesome.posawesome.page.posapp.posapp.get_customer_names",
+        args: {},
+        callback: function (r) {
+          if (r.message) {
+            const loadCustomers =
+              !localStorage.customer_storage ||
+              JSON.parse(localStorage.getItem("items_storage")).length !=
+                r.message.length;
+            localStorage.setItem("customer_storage", "");
+            localStorage.setItem("customer_storage", JSON.stringify(r.message));
+            if (loadCustomers) {
+              vm.$nextTick(() => {
+                console.log("loadCustomers", loadCustomers);
+                vm.cutomers = JSON.parse(
+                  localStorage.getItem("customer_storage")
+                );
+              });
+            }
+          }
+        },
+      });
+    },
+  },
+  computed: {},
+
+  created: function () {
+    this.$nextTick(function () {
+      this.get_customer_names();
+    });
+  },
 };
 </script>

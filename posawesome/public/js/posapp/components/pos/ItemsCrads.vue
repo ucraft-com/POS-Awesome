@@ -3,7 +3,7 @@
     <v-card style="max-height: 70vh; height: 70vh" class="cards my-0 py-0 grey lighten-5">
       <Customer></Customer>
       <div class="my-0 py-0 overflow-y-auto" style="max-height: 59vh">
-        <template>
+        <template  @mouseover="style='cursor: pointer'">
           <v-data-table
             :headers="items_headers"
             :items="items"
