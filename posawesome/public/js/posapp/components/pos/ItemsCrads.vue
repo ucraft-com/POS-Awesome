@@ -164,6 +164,7 @@ export default {
           value: "item_name",
         },
         { text: "QTY", value: "qty", align: "center" },
+        { text: "UOM", value: "stock_uom", align: "center" },
         { text: "Price", value: "price", align: "center" },
         { text: "VAT", value: "vat", align: "center" },
         { text: "Total", value: "total", align: "center" },

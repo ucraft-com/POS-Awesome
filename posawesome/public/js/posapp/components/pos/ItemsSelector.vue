@@ -130,10 +130,10 @@ export default {
         sortable: true,
         value: "item_name",
       },
-      { text: "Code", value: "name", align: "start" },
-      { text: "Group", value: "item_group", align: "start" },
-      { text: "Price", value: "price", align: "start" },
+      // { text: "Code", value: "name", align: "start" },
       { text: "VAT", value: "vat", align: "start" },
+      { text: "UOM", value: "stock_uom", align: "start" },
+      { text: "Price", value: "price", align: "start" },
     ],
   }),
 

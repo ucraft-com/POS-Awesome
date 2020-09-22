@@ -14,7 +14,7 @@ from posawesome import console
 @frappe.whitelist()
 def get_items():
 	return frappe.db.sql("""
-        select name ,item_code, item_name, image, item_group
+        select name ,item_code, item_name, image, item_group, stock_uom
         from `tabItem`
         order by name
         LIMIT 0, 10000 """
@@ -46,26 +46,26 @@ def get_customer_names():
         return customers_list
 
 
-@frappe.whitelist()
-def add_project(pro):
-	pro = json.loads(pro)
-	doc = frappe.get_doc(dict(
-		doctype = "MyProjects",
-        title = pro["title"],
-        content = pro["content"],
-        due = pro["due"],
-	)).insert()
-	console("data in" , doc)
-	return "Project Add"
+# @frappe.whitelist()
+# def add_project(pro):
+# 	pro = json.loads(pro)
+# 	doc = frappe.get_doc(dict(
+# 		doctype = "MyProjects",
+#         title = pro["title"],
+#         content = pro["content"],
+#         due = pro["due"],
+# 	)).insert()
+# 	console("data in" , doc)
+# 	return "Project Add"
 
 
-@frappe.whitelist()
-def get_all_projects():
-	console("Trigger get_all_projects")
-	return frappe.db.sql("""
-        select *
-        from `tabMyProjects`
-        order by name"""
-        , as_dict=1)
+# @frappe.whitelist()
+# def get_all_projects():
+# 	console("Trigger get_all_projects")
+# 	return frappe.db.sql("""
+#         select *
+#         from `tabMyProjects`
+#         order by name"""
+#         , as_dict=1)
 
 
