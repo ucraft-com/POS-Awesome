@@ -227,8 +227,8 @@ export default {
               found = true;
               break;
             }
-            console.log(element.barcode);
-          }
+          };
+          return found;
         });
         if (filtred_list.length == 0) {
           filtred_list = filtred_group_list.filter((item) =>
