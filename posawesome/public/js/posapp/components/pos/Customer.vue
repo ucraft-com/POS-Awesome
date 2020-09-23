@@ -21,9 +21,11 @@
 </template>
 
 <script>
+import { evntBus } from "../../bus";
 export default {
   data: () => ({
-    cutomers: ["Cash Customer", "foo", "bar", "fizz", "buzz"],
+    pos_profile: "",
+    cutomers: [],
     cutomer: "",
   }),
 
@@ -33,7 +35,7 @@ export default {
       if (localStorage.customer_storage) {
         vm.cutomers = JSON.parse(localStorage.getItem("customer_storage"));
       }
-      
+
       frappe.call({
         method: "posawesome.posawesome.api.posapp.get_customer_names",
         args: {},
@@ -62,7 +64,10 @@ export default {
 
   created: function () {
     this.$nextTick(function () {
-      this.get_customer_names();
+      evntBus.$on("register_pos_profile", (pos_profile) => {
+        this.pos_profile = pos_profile;
+        this.get_customer_names();
+      });
     });
   },
 };

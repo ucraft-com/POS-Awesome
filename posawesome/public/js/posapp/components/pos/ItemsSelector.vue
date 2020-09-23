@@ -38,13 +38,6 @@
                 cols="6"
                 min-height="50"
               >
-                <!-- <v-sheet min-height="50" class="fill-height" color="transparent">
-                    <v-lazy
-                      v-model="item.isActive"
-                      :options="{
-                        threshold: .1
-                      }"
-                >-->
                 <v-card hover="hover" @click="add_item(item)">
                   <v-img
                     :src="item.image || 'https://lunawood.com/wp-content/uploads/2018/02/placeholder-image.png'"
@@ -53,14 +46,11 @@
                     height="100px"
                   >
                     <v-card-text v-text="item.item_name" class="text-subtitle-2 px-1 pb-2"></v-card-text>
-                    <!-- <v-card-subtitle v-text="card.name" class="pb-0"></v-card-subtitle> -->
                   </v-img>
                   <v-card-text class="text--primary pa-1">
                     <div class="text-caption indigo--text accent-3">$ 50.00</div>
                   </v-card-text>
                 </v-card>
-                <!-- </v-lazy>
-                </v-sheet>-->
               </v-col>
             </v-row>
           </div>
@@ -114,7 +104,9 @@
 <script>
 import { evntBus } from "../../bus";
 export default {
+  // props: ["pos_profile"],
   data: () => ({
+    pos_profile: "",
     items_view: "list",
     item_group: "ALL",
     favourites_view: false,
@@ -124,21 +116,26 @@ export default {
     search: "",
     itemsPerPage: 1000,
     items_headers: [
-      {
-        text: "Name",
-        align: "start",
-        sortable: true,
-        value: "item_name",
-      },
-      // { text: "Code", value: "name", align: "start" },
-      { text: "VAT", value: "vat", align: "start" },
+      { text: "Name", align: "start", sortable: true, value: "item_name" },
       { text: "UOM", value: "stock_uom", align: "start" },
+      { text: "VAT", value: "vat", align: "start" },
       { text: "Price", value: "price", align: "start" },
     ],
   }),
+  // watch: {
+  //   pos_profile() {
+  //     console.log("POS Profile Updated")
+  //     this.get_items();
+  //     this.get_items_groups();
+  //   },
+  // },
 
   methods: {
     get_items() {
+      if (!this.pos_profile) {
+        console.log("No POS Profile");
+        return;
+      }
       const vm = this;
       this.loading = true;
       if (localStorage.items_storage) {
@@ -147,7 +144,7 @@ export default {
       }
       frappe.call({
         method: "posawesome.posawesome.api.posapp.get_items",
-        args: {},
+        args: { pos_profile: vm.pos_profile },
         callback: function (r) {
           if (r.message) {
             const loadItmes =
@@ -168,18 +165,30 @@ export default {
       });
     },
     get_items_groups() {
-      const vm = this;
-      frappe.call({
-        method: "posawesome.posawesome.api.posapp.get_items_groups",
-        args: {},
-        callback: function (r) {
-          if (r.message) {
-            r.message.forEach((element) => {
-              vm.items_group.push(element.name);
-            });
+      if (!this.pos_profile) {
+        console.log("No POS Profile");
+        return;
+      }
+      if (this.pos_profile.item_groups.length > 0) {
+        this.pos_profile.item_groups.forEach((element) => {
+          if (element.item_group !== "All Item Groups") {
+            this.items_group.push(element.item_group);
           }
-        },
-      });
+        });
+      } else {
+        const vm = this;
+        frappe.call({
+          method: "posawesome.posawesome.api.posapp.get_items_groups",
+          args: {},
+          callback: function (r) {
+            if (r.message) {
+              r.message.forEach((element) => {
+                vm.items_group.push(element.name);
+              });
+            }
+          },
+        });
+      }
     },
     add_item(item) {
       evntBus.$emit("add_item", item);
@@ -224,9 +233,13 @@ export default {
 
   created: function () {
     this.$nextTick(function () {
-      this.get_items();
-      this.get_items_groups();
+
     });
+    evntBus.$on("register_pos_profile", (pos_profile) => {
+        this.pos_profile = pos_profile;
+        this.get_items();
+        this.get_items_groups();
+      });
   },
   // mounted() {
   //   if (localStorage.getItem('items_storage')) {

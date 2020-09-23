@@ -80,13 +80,22 @@ def check_opening_shift(user):
 
 
 @frappe.whitelist()
-def get_items():
+def get_items(pos_profile):
     return frappe.db.sql("""
         select name ,item_code, item_name, image, item_group, stock_uom
         from `tabItem`
         order by name
         LIMIT 0, 10000 """, as_dict=1)
+    
 
+
+def get_root_of(doctype):
+	"""Get root element of a DocType with a tree structure"""
+	result = frappe.db.sql("""select t1.name from `tab{0}` t1 where
+		(select count(*) from `tab{1}` t2 where
+			t2.lft < t1.lft and t2.rgt > t1.rgt) = 0
+		and t1.rgt > t1.lft""".format(doctype, doctype))
+	return result[0][0] if result else None
 
 @frappe.whitelist()
 def get_items_groups():

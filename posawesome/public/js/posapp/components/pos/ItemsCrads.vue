@@ -3,7 +3,7 @@
     <v-card style="max-height: 70vh; height: 70vh" class="cards my-0 py-0 grey lighten-5">
       <Customer></Customer>
       <div class="my-0 py-0 overflow-y-auto" style="max-height: 59vh">
-        <template  @mouseover="style='cursor: pointer'">
+        <template @mouseover="style='cursor: pointer'">
           <v-data-table
             :headers="items_headers"
             :items="items"
@@ -25,7 +25,7 @@
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
                   </v-col>
-                   <v-spacer></v-spacer>
+                  <v-spacer></v-spacer>
                   <v-col cols="1">
                     <v-btn icon small color="indigo lighten-1" @click.stop="subtract_one(item)">
                       <v-icon>mdi-minus-circle-outline</v-icon>
@@ -143,11 +143,10 @@
 import { evntBus } from "../../bus";
 import Customer from "./Customer.vue";
 export default {
-  props: [
-    // "items"
-  ],
+  // props: ["pos_profile"],
   data() {
     return {
+      pos_profile : "",
       items_discount: 0,
       additional_discount: 0,
       total_tax: 0,
@@ -226,6 +225,9 @@ export default {
     },
   },
   created() {
+    evntBus.$on("register_pos_profile_invoice", (pos_profile) => {
+      this.pos_profile = pos_profile;
+    });
     evntBus.$on("add_item", (item) => {
       this.add_item(item);
     });
