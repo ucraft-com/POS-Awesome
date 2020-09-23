@@ -61,8 +61,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red" dark @click="close_opening_dialog">Close</v-btn>
-          <v-btn color="blue" dark @click="dialog = false">Submit</v-btn>
+          <!-- <v-btn color="red" dark @click="close_opening_dialog">Close</v-btn> -->
+          <v-btn color="blue" dark @click="submit_dialog">Submit</v-btn>
         </v-card-actions>
         <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
           // TODO : need to remove
@@ -104,7 +104,7 @@ export default {
       },
     ],
     itemsPerPage: 100,
-    max25chars: (v) => v.length <= 25 || "Input too long!", // TODO : should validate as number
+    max25chars: (v) => v.length <= 12 || "Input too long!", // TODO : should validate as number
     pagination: {},
     snack: false, // TODO : need to remove
     snackColor: "", // TODO : need to remove
@@ -147,10 +147,6 @@ export default {
         args: {},
         callback: function (r) {
           if (r.message) {
-            // r.message.forEach((element) => {
-            //   vm.items_group.push(element.name);
-            // });
-            console.log(r.message);
             r.message.companys.forEach((element) => {
               vm.companys.push(element.name);
             });
@@ -160,6 +156,24 @@ export default {
           }
         },
       });
+    },
+    submit_dialog() {
+      if (!this.payments_methods.length || !this.company || !this.pos_profile) {
+        return;
+      }
+      const vm = this;
+      return frappe
+        .call("posawesome.posawesome.api.posapp.create_opening_voucher", {
+          pos_profile: this.pos_profile,
+          company: this.company,
+          balance_details: this.payments_methods,
+        })
+        .then((r) => {
+          if (r.message) {
+            evntBus.$emit("register_pos_data", r.message);
+            vm.close_opening_dialog();
+          }
+        });
     },
     save() {
       // TODO : need to remove

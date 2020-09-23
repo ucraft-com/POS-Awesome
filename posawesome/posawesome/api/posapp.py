@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from frappe.utils import getdate, now_datetime, nowdate, flt, cint, get_datetime_str, add_days
 from frappe import _
 from erpnext.accounts.party import get_party_account
+import json
 from posawesome import console
 
 
@@ -49,8 +50,11 @@ def create_opening_voucher(pos_profile, company, balance_details):
     })
     new_pos_opening.set("balance_details", balance_details)
     new_pos_opening.submit()
-
-    return new_pos_opening.as_dict()
+    data = {}
+    data["pos_opening_shift"] = new_pos_opening.as_dict()
+    data["pos_profile"] = frappe.get_doc(
+        "POS Profile", new_pos_opening.pos_profile)
+    return data
 
 
 @frappe.whitelist()
@@ -61,12 +65,18 @@ def check_opening_shift(user):
                                           "pos_closing_entry": ["in", ["", None]],
                                           "docstatus": 1
                                       },
-                                      fields=["name", "company",
-                                              "pos_profile", "period_start_date"],
+                                      fields=["name",
+                                              "pos_profile"],
                                       order_by="period_start_date desc"
                                       )
-
-    return open_vouchers
+    data = ""
+    if len(open_vouchers) > 0:
+        data = {}
+        data["pos_opening_shift"] = frappe.get_doc(
+            "POS Opening Shift", open_vouchers[0]["name"])
+        data["pos_profile"] = frappe.get_doc(
+            "POS Profile", open_vouchers[0]["pos_profile"])
+    return data
 
 
 @frappe.whitelist()
