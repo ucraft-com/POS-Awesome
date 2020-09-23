@@ -165,7 +165,7 @@ export default {
         { text: "QTY", value: "qty", align: "center" },
         { text: "UOM", value: "stock_uom", align: "center" },
         { text: "Rate", value: "price_list_rate", align: "center" },
-        { text: "VAT", value: "vat", align: "center" },
+        // { text: "VAT", value: "vat", align: "center" },
         { text: "Total", value: "total", align: "center" },
       ],
     };
@@ -213,7 +213,7 @@ export default {
       if (index === -1) {
         const new_item = { ...item };
         new_item.qty = 1;
-        new_item.vat = 18;
+        // new_item.vat = 18;
         (new_item.active = false), this.items.unshift(new_item);
       } else {
         this.items[index].qty++;

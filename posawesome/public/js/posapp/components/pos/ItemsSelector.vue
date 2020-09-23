@@ -48,7 +48,9 @@
                     <v-card-text v-text="item.item_name" class="text-subtitle-2 px-1 pb-2"></v-card-text>
                   </v-img>
                   <v-card-text class="text--primary pa-1">
-                    <div class="text-caption indigo--text accent-3">{{ item.price_list_rate || 0}} {{ item.currency  || ''}}</div>
+                    <div
+                      class="text-caption indigo--text accent-3"
+                    >{{ item.price_list_rate || 0}} {{ item.currency || ''}}</div>
                   </v-card-text>
                 </v-card>
               </v-col>
@@ -118,7 +120,7 @@ export default {
     items_headers: [
       { text: "Name", align: "start", sortable: true, value: "item_name" },
       { text: "UOM", value: "stock_uom", align: "start" },
-      { text: "VAT", value: "vat", align: "start" },
+      { text: "Currency", value: "currency", align: "start" },
       { text: "Rate", value: "price_list_rate", align: "start" },
     ],
   }),
@@ -218,13 +220,25 @@ export default {
       if (!this.search || this.search.length < 3) {
         return (filtred_list = filtred_group_list.slice(0, 100));
       } else if (this.search) {
-        filtred_list = filtred_group_list.filter((item) =>
-          item.item_name.toLowerCase().includes(this.search.toLowerCase())
-        );
+        filtred_list = filtred_group_list.filter((item) => {
+          let found = false;
+          for (let element of item.item_barcode) {
+            if (element.barcode == this.search) {
+              found = true;
+              break;
+            }
+            console.log(element.barcode);
+          }
+        });
         if (filtred_list.length == 0) {
           filtred_list = filtred_group_list.filter((item) =>
-            item.item_code.toLowerCase().includes(this.search.toLowerCase())
+            item.item_name.toLowerCase().includes(this.search.toLowerCase())
           );
+          if (filtred_list.length == 0) {
+            filtred_list = filtred_group_list.filter((item) =>
+              item.item_code.toLowerCase().includes(this.search.toLowerCase())
+            );
+          }
         }
       }
       return filtred_list.slice(0, 100);
@@ -232,14 +246,12 @@ export default {
   },
 
   created: function () {
-    this.$nextTick(function () {
-
-    });
+    this.$nextTick(function () {});
     evntBus.$on("register_pos_profile", (pos_profile) => {
-        this.pos_profile = pos_profile;
-        this.get_items();
-        this.get_items_groups();
-      });
+      this.pos_profile = pos_profile;
+      this.get_items();
+      this.get_items_groups();
+    });
   },
   // mounted() {
   //   if (localStorage.getItem('items_storage')) {

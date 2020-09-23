@@ -145,6 +145,7 @@ def get_items(pos_profile):
             item_code = item.item_code
             item_price = item_prices.get(item_code) or {}
             item_stock_qty = get_stock_availability(item_code, warehouse)
+            item_barcode = frappe.get_all("Item Barcode",filters = {"parent": item_code} , fields = ["barcode"])
 
             # if not item_stock_qty:
             #     pass
@@ -155,6 +156,7 @@ def get_items(pos_profile):
                 'price_list_rate': item_price.get('price_list_rate') or 0,
                 'currency': item_price.get('currency') or pos_profile.get("currency"),
                 'actual_qty': item_stock_qty or 0,
+                'item_barcode': item_barcode or []
             })
             result.append(row)
 
