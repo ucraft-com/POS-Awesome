@@ -9,13 +9,13 @@
             :items="items"
             :single-expand="singleExpand"
             :expanded.sync="expanded"
-            item-key="name"
+            item-key="item_code"
             show-expand
             class="elevation-1"
             :items-per-page="itemsPerPage"
             hide-default-footer
           >
-            <template v-slot:item.total="{ item }">{{ item.qty * item.price }}</template>
+            <template v-slot:item.total="{ item }">{{ item.qty * item.price_list_rate }}</template>
 
             <template v-slot:expanded-item="{ headers, item }">
               <td :colspan="headers.length">
@@ -164,7 +164,7 @@ export default {
         },
         { text: "QTY", value: "qty", align: "center" },
         { text: "UOM", value: "stock_uom", align: "center" },
-        { text: "Price", value: "price", align: "center" },
+        { text: "Rate", value: "price_list_rate", align: "center" },
         { text: "VAT", value: "vat", align: "center" },
         { text: "Total", value: "total", align: "center" },
       ],
@@ -184,7 +184,7 @@ export default {
     subtotal() {
       let sum = 0;
       this.items.forEach((item) => {
-        sum += item.qty * item.price;
+        sum += item.qty * item.price_list_rate;
       });
       return sum;
     },
@@ -209,12 +209,11 @@ export default {
       // this.$forceUpdate();
     },
     add_item(item) {
-      const index = this.items.findIndex((el) => el.name === item.name);
+      const index = this.items.findIndex((el) => el.item_code === item.item_code);
       if (index === -1) {
         const new_item = { ...item };
         new_item.qty = 1;
         new_item.vat = 18;
-        new_item.price = 25;
         (new_item.active = false), this.items.unshift(new_item);
       } else {
         this.items[index].qty++;

@@ -48,7 +48,7 @@
                     <v-card-text v-text="item.item_name" class="text-subtitle-2 px-1 pb-2"></v-card-text>
                   </v-img>
                   <v-card-text class="text--primary pa-1">
-                    <div class="text-caption indigo--text accent-3">$ 50.00</div>
+                    <div class="text-caption indigo--text accent-3">{{ item.price_list_rate || 0}} {{ item.currency  || ''}}</div>
                   </v-card-text>
                 </v-card>
               </v-col>
@@ -60,7 +60,7 @@
                 <v-data-table
                   :headers="items_headers"
                   :items="filtred_items"
-                  item-key="name"
+                  item-key="item_code"
                   class="elevation-1"
                   :items-per-page="itemsPerPage"
                   hide-default-footer
@@ -119,7 +119,7 @@ export default {
       { text: "Name", align: "start", sortable: true, value: "item_name" },
       { text: "UOM", value: "stock_uom", align: "start" },
       { text: "VAT", value: "vat", align: "start" },
-      { text: "Price", value: "price", align: "start" },
+      { text: "Rate", value: "price_list_rate", align: "start" },
     ],
   }),
   // watch: {
