@@ -1,6 +1,13 @@
 <template>
   <div>
     <v-card class="selection mx-auto grey lighten-5" style="max-height: 80vh; height: 80vh">
+      <v-progress-linear
+                :active="loading"
+                :indeterminate="loading"
+                absolute
+                top
+                color="deep-purple accent-4"
+              ></v-progress-linear>
       <v-row class="items px-2 py-1">
         <v-col cols="12" class="pb-0 mb-2">
           <v-text-field
@@ -21,13 +28,6 @@
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view=='card'">
             <v-row dense class="overflow-y-auto" style="max-height: 68vh">
-              <v-progress-linear
-                :active="loading"
-                :indeterminate="loading"
-                absolute
-                top
-                color="deep-purple accent-4"
-              ></v-progress-linear>
               <v-col
                 v-for="(item, idx) in filtred_items"
                 :key="idx"
@@ -104,7 +104,9 @@
 
 
 <script>
+
 import { evntBus } from "../../bus";
+
 export default {
   // props: ["pos_profile"],
   data: () => ({
@@ -124,13 +126,10 @@ export default {
       { text: "Rate", value: "price_list_rate", align: "start" },
     ],
   }),
-  // watch: {
-  //   pos_profile() {
-  //     console.log("POS Profile Updated")
-  //     this.get_items();
-  //     this.get_items_groups();
-  //   },
-  // },
+
+  watch: {
+    
+  },
 
   methods: {
     get_items() {
@@ -149,19 +148,19 @@ export default {
         args: { pos_profile: vm.pos_profile },
         callback: function (r) {
           if (r.message) {
-            const loadItmes =
-              !localStorage.items_storage ||
-              JSON.parse(localStorage.getItem("items_storage")).length !=
-                r.message.length;
+            // const loadItmes =
+            //   !localStorage.items_storage ||
+            //   JSON.parse(localStorage.getItem("items_storage")).length !=
+            //     r.message.length;
             localStorage.setItem("items_storage", "");
             localStorage.setItem("items_storage", JSON.stringify(r.message));
-            if (loadItmes) {
+            // if (loadItmes) {
               vm.$nextTick(() => {
-                console.log("loadItmes", loadItmes);
+                console.log("loadItmes");
                 vm.items = JSON.parse(localStorage.getItem("items_storage"));
                 vm.loading = false;
               });
-            }
+            // }
           }
         },
       });
@@ -206,6 +205,7 @@ export default {
       this.search = null;
     },
   },
+
   computed: {
     filtred_items() {
       let filtred_list = [];
@@ -253,16 +253,10 @@ export default {
       this.get_items_groups();
     });
   },
-  // mounted() {
-  //   if (localStorage.getItem('items_storage')) {
-  //     try {
-  //       this.items = JSON.parse(localStorage.getItem('items_storage'));
-  //     } catch(e) {
-  //       // localStorage.removeItem('cats');
-  //       console.log(e)
-  //     }
-  //   }
-  // },
+
+  mounted() {
+    
+  },
 };
 </script>
 

@@ -41,20 +41,20 @@ export default {
         args: {},
         callback: function (r) {
           if (r.message) {
-            const loadCustomers =
-              !localStorage.customer_storage ||
-              JSON.parse(localStorage.getItem("items_storage")).length !=
-                r.message.length;
+            // const loadCustomers =
+            //   !localStorage.customer_storage ||
+            //   JSON.parse(localStorage.getItem("items_storage")).length !=
+            //     r.message.length;
             localStorage.setItem("customer_storage", "");
             localStorage.setItem("customer_storage", JSON.stringify(r.message));
-            if (loadCustomers) {
+            // if (loadCustomers) {
               vm.$nextTick(() => {
-                console.log("loadCustomers", loadCustomers);
+                console.log("loadCustomers");
                 vm.cutomers = JSON.parse(
                   localStorage.getItem("customer_storage")
                 );
               });
-            }
+            // }
           }
         },
       });

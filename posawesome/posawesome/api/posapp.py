@@ -116,6 +116,7 @@ def get_items(pos_profile):
             idx AS idx,
             is_stock_item,
             has_variants,
+            variant_of,
             item_group
         FROM
             `tabItem`
