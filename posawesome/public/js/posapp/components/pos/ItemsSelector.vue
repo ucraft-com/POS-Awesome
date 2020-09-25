@@ -123,7 +123,7 @@ export default {
       { text: "Name", align: "start", sortable: true, value: "item_name" },
       { text: "UOM", value: "stock_uom", align: "start" },
       { text: "Currency", value: "currency", align: "start" },
-      { text: "Rate", value: "price_list_rate", align: "start" },
+      { text: "Rate", value: "rate", align: "start" },
     ],
   }),
 
@@ -247,8 +247,8 @@ export default {
 
   created: function () {
     this.$nextTick(function () {});
-    evntBus.$on("register_pos_profile", (pos_profile) => {
-      this.pos_profile = pos_profile;
+    evntBus.$on("register_pos_profile", (data) => {
+      this.pos_profile = data.pos_profile;
       this.get_items();
       this.get_items_groups();
     });

@@ -15,7 +15,7 @@
             :items-per-page="itemsPerPage"
             hide-default-footer
           >
-            <template v-slot:item.total="{ item }">{{ item.qty * item.price_list_rate }}</template>
+            <template v-slot:item.total="{ item }">{{ item.qty * item.rate }}</template>
 
             <template v-slot:expanded-item="{ headers, item }">
               <td :colspan="headers.length">
@@ -147,6 +147,7 @@ export default {
   data() {
     return {
       pos_profile : "",
+      doc: "",
       items_discount: 0,
       additional_discount: 0,
       total_tax: 0,
@@ -164,7 +165,7 @@ export default {
         },
         { text: "QTY", value: "qty", align: "center" },
         { text: "UOM", value: "stock_uom", align: "center" },
-        { text: "Rate", value: "price_list_rate", align: "center" },
+        { text: "Rate", value: "rate", align: "center" },
         // { text: "VAT", value: "vat", align: "center" },
         { text: "Total", value: "total", align: "center" },
       ],
@@ -224,8 +225,10 @@ export default {
     },
   },
   created() {
-    evntBus.$on("register_pos_profile_invoice", (pos_profile) => {
-      this.pos_profile = pos_profile;
+    this.$nextTick(function () {});
+    evntBus.$on("register_pos_profile", (data) => {
+      this.pos_profile = data.pos_profile;
+      this.doc = data.doc;
     });
     evntBus.$on("add_item", (item) => {
       this.add_item(item);

@@ -44,7 +44,7 @@ export default {
           if (r.message) {
             this.pos_profile = r.message.pos_profile;
             this.pos_opening_shift = r.message.pos_opening_shift;
-            evntBus.$emit("register_pos_profile", r.message.pos_profile);
+            evntBus.$emit("register_pos_profile", r.message);
             console.log("LoadPosProfile")
           } else {
             this.create_opening_voucher();
@@ -82,7 +82,7 @@ export default {
       evntBus.$on("register_pos_data", (data) => {
         this.pos_profile = data.pos_profile;
         this.pos_opening_shift = data.pos_opening_shift;
-        evntBus.$emit("register_pos_profile", data.pos_profile);
+        evntBus.$emit("register_pos_profile", data);
         console.log("LoadPosProfile")
       });
     });

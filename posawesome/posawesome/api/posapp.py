@@ -55,6 +55,7 @@ def create_opening_voucher(pos_profile, company, balance_details):
     data["pos_opening_shift"] = new_pos_opening.as_dict()
     data["pos_profile"] = frappe.get_doc(
         "POS Profile", new_pos_opening.pos_profile)
+    data["doc"] = frappe.new_doc("Sales Invoice")
     return data
 
 
@@ -77,6 +78,7 @@ def check_opening_shift(user):
             "POS Opening Shift", open_vouchers[0]["name"])
         data["pos_profile"] = frappe.get_doc(
             "POS Profile", open_vouchers[0]["pos_profile"])
+        data["doc"] = frappe.new_doc("Sales Invoice")
     return data
 
 
@@ -117,7 +119,8 @@ def get_items(pos_profile):
             is_stock_item,
             has_variants,
             variant_of,
-            item_group
+            item_group,
+            idx as idx
         FROM
             `tabItem`
         WHERE
@@ -155,7 +158,7 @@ def get_items(pos_profile):
             row = {}
             row.update(item)
             row.update({
-                'price_list_rate': item_price.get('price_list_rate') or 0,
+                'rate': item_price.get('price_list_rate') or 0,
                 'currency': item_price.get('currency') or pos_profile.get("currency"),
                 'actual_qty': item_stock_qty or 0,
                 'item_barcode': item_barcode or [],
