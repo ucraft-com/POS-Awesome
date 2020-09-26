@@ -9,6 +9,7 @@ from frappe.utils import getdate, now_datetime, nowdate, flt, cint, get_datetime
 from frappe import _
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
+from erpnext.controllers.accounts_controller import get_taxes_and_charges
 import json
 from posawesome import console
 
@@ -38,7 +39,6 @@ def get_opening_dialog_data():
 
 @frappe.whitelist()
 def create_opening_voucher(pos_profile, company, balance_details):
-    import json
     balance_details = json.loads(balance_details)
 
     new_pos_opening = frappe.get_doc({
@@ -78,7 +78,6 @@ def check_opening_shift(user):
             "POS Opening Shift", open_vouchers[0]["name"])
         data["pos_profile"] = frappe.get_doc(
             "POS Profile", open_vouchers[0]["pos_profile"])
-        data["doc"] = frappe.new_doc("Sales Invoice")
     return data
 
 
@@ -162,7 +161,7 @@ def get_items(pos_profile):
                 'currency': item_price.get('currency') or pos_profile.get("currency"),
                 'actual_qty': item_stock_qty or 0,
                 'item_barcode': item_barcode or [],
-                'uoms': uoms or [],
+                'item_uoms': uoms or [],
             })
             result.append(row)
 
@@ -199,6 +198,22 @@ def get_customer_names():
     for customer in customers:
         customers_list.append(customer["name"])
     return customers_list
+
+
+
+@frappe.whitelist()
+def save_invoice(doc):
+    doc = json.loads(doc)
+    invoice_doc = frappe.get_doc(doc)
+    invoice_doc.flags.ignore_permissions = True
+    frappe.flags.ignore_account_permission = True
+    invoice_doc.set_missing_values()
+    for tax in invoice_doc.taxes:
+        tax.included_in_print_rate = 1
+    invoice_doc.save()
+    return invoice_doc
+
+
 
 
 # @frappe.whitelist()

@@ -1,9 +1,12 @@
 <template>
   <div>
-    <v-card style="max-height: 70vh; height: 70vh" class="cards my-0 py-0 grey lighten-5">
+    <v-card
+      style="max-height: 70vh; height: 70vh"
+      class="cards my-0 py-0 grey lighten-5"
+    >
       <Customer></Customer>
       <div class="my-0 py-0 overflow-y-auto" style="max-height: 59vh">
-        <template @mouseover="style='cursor: pointer'">
+        <template @mouseover="style = 'cursor: pointer'">
           <v-data-table
             :headers="items_headers"
             :items="items"
@@ -15,24 +18,41 @@
             :items-per-page="itemsPerPage"
             hide-default-footer
           >
-            <template v-slot:item.total="{ item }">{{ item.qty * item.rate }}</template>
+            <template v-slot:item.amount="{ item }">{{
+              item.qty * item.rate
+            }}</template>
 
             <template v-slot:expanded-item="{ headers, item }">
               <td :colspan="headers.length">
                 <v-row>
                   <v-col cols="1">
-                    <v-btn icon small color="red" @click.stop="remove_item(item)">
+                    <v-btn
+                      icon
+                      small
+                      color="red"
+                      @click.stop="remove_item(item)"
+                    >
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
                   </v-col>
                   <v-spacer></v-spacer>
                   <v-col cols="1">
-                    <v-btn icon small color="indigo lighten-1" @click.stop="subtract_one(item)">
+                    <v-btn
+                      icon
+                      small
+                      color="indigo lighten-1"
+                      @click.stop="subtract_one(item)"
+                    >
                       <v-icon>mdi-minus-circle-outline</v-icon>
                     </v-btn>
                   </v-col>
                   <v-col cols="1">
-                    <v-btn icon small color="indigo lighten-1" @click.stop="add_one(item)">
+                    <v-btn
+                      icon
+                      small
+                      color="indigo lighten-1"
+                      @click.stop="add_one(item)"
+                    >
                       <v-icon>mdi-plus-circle-outline</v-icon>
                     </v-btn>
                   </v-col>
@@ -50,7 +70,10 @@
     </v-card>
     <v-row>
       <v-col class="pt-0 pr-0" cols="8">
-        <v-card style="max-height: 20vh; height: 20vh" class="cards mb-0 mt-3 py-0 grey lighten-5">
+        <v-card
+          style="max-height: 20vh; height: 20vh"
+          class="cards mb-0 mt-3 py-0 grey lighten-5"
+        >
           <v-row no-gutters class="pa-1 pt-2" style="height: 100%">
             <v-col cols="6" no-gutters>
               <v-row no-gutters class="ma-1 pa-0" style="height: 100%">
@@ -108,7 +131,14 @@
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-text-field v-model="total" label="Total" outlined dense readonly hide-details></v-text-field>
+                  <v-text-field
+                    v-model="total"
+                    label="Total"
+                    outlined
+                    dense
+                    readonly
+                    hide-details
+                  ></v-text-field>
                 </v-col>
               </v-row>
             </v-col>
@@ -116,13 +146,27 @@
         </v-card>
       </v-col>
       <v-col class="pt-0 pr-3" cols="4">
-        <v-card flat style="max-height: 20vh; height: 20vh" class="cards mb-0 mt-3 py-0">
+        <v-card
+          flat
+          style="max-height: 20vh; height: 20vh"
+          class="cards mb-0 mt-3 py-0"
+        >
           <v-row align="start" style="height: 53%">
             <v-col cols="12">
-              <v-btn block class="pa-0" large color="warning" dark>Get Hold Invoice</v-btn>
+              <v-btn block class="pa-0" large color="warning" dark
+                >Get Hold Invoice</v-btn
+              >
             </v-col>
             <v-col cols="6">
-              <v-btn block class="pa-0" large color="error" dark @click="cancel_invoice">Cancel</v-btn>
+              <v-btn
+                block
+                class="pa-0"
+                large
+                color="error"
+                dark
+                @click="cancel_invoice"
+                >Cancel</v-btn
+              >
             </v-col>
             <v-col cols="6">
               <v-btn block class="pa-0" large color="success" dark>New</v-btn>
@@ -130,7 +174,15 @@
           </v-row>
           <v-row align="end" style="height: 54%">
             <v-col cols="12">
-              <v-btn block class="pa-0" large color="primary" dark>PAY</v-btn>
+              <v-btn
+                block
+                class="pa-0"
+                large
+                color="primary"
+                @click="submit_invoice"
+                dark
+                >PAY</v-btn
+              >
             </v-col>
           </v-row>
         </v-card>
@@ -146,8 +198,9 @@ export default {
   // props: ["pos_profile"],
   data() {
     return {
-      pos_profile : "",
+      pos_profile: "",
       doc: "",
+      customer: "",
       items_discount: 0,
       additional_discount: 0,
       total_tax: 0,
@@ -167,7 +220,7 @@ export default {
         { text: "UOM", value: "stock_uom", align: "center" },
         { text: "Rate", value: "rate", align: "center" },
         // { text: "VAT", value: "vat", align: "center" },
-        { text: "Total", value: "total", align: "center" },
+        { text: "Amount", value: "amount", align: "center" },
       ],
     };
   },
@@ -185,7 +238,7 @@ export default {
     subtotal() {
       let sum = 0;
       this.items.forEach((item) => {
-        sum += item.qty * item.price_list_rate;
+        sum += item.qty * item.rate;
       });
       return sum;
     },
@@ -210,7 +263,9 @@ export default {
       // this.$forceUpdate();
     },
     add_item(item) {
-      const index = this.items.findIndex((el) => el.item_code === item.item_code);
+      const index = this.items.findIndex(
+        (el) => el.item_code === item.item_code
+      );
       if (index === -1) {
         const new_item = { ...item };
         new_item.qty = 1;
@@ -222,38 +277,64 @@ export default {
     },
     cancel_invoice() {
       this.items = [];
+      this.customer = this.pos_profile.customer;
+    },
+    submit_invoice() {
+      const doc = this.get_invoice_doc();
+      frappe.call({
+        method: "posawesome.posawesome.api.posapp.save_invoice",
+        args: { doc: doc },
+        async: false,
+        callback: function (r) {
+          if (r.message) {
+            console.log(r.message);
+          }
+        },
+      });
+    },
+    get_invoice_doc() {
+      const doc = {};
+      doc.doctype = "Sales Invoice";
+      doc.is_pos = 1;
+      doc.company = this.pos_profile.company;
+      doc.pos_profile = this.pos_profile.name;
+      doc.currency = this.pos_profile.currency;
+      doc.naming_series = this.pos_profile.naming_series;
+      doc.customer = this.customer;
+      doc.items = this.get_invoice_items();
+      doc.total = this.subtotal;
+      return doc;
+    },
+    get_invoice_items() {
+      const items_list = [];
+      this.items.forEach((item) => {
+        items_list.push({
+          item_code: item.item_code,
+          qty: item.qty,
+          rate: item.rate,
+        });
+      });
+      return items_list;
     },
   },
   created() {
     this.$nextTick(function () {});
     evntBus.$on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
-      this.doc = data.doc;
+      this.customer = data.pos_profile.customer;
     });
     evntBus.$on("add_item", (item) => {
       this.add_item(item);
     });
+    evntBus.$on("update_customer", (customer) => {
+      this.customer = customer;
+    });
   },
-  mounted: function () {
-    // this.$nextTick(function () {
-    // const vm = this;
-    //     frappe.call({
-    //         method: 'roxtools.roxtools.doctype.myprojects.myprojects.get_all_projects',
-    //         async: false,
-    //         callback: function(r) {
-    //             if (r.message) {
-    //                 // console.log(r.message);
-    //                 vm.projects = r.message;
-    //             }
-    //         }
-    //     });
-    // })
-    // this.$nextTick(function () {
-    //     const vm = this;
-    //     frappe.realtime.on('rox_add_project', function(data) {
-    //         vm.projects.push(data);
-    //     });
-    // })
+  mounted: function () {},
+  watch: {
+    customer() {
+      evntBus.$emit("set_customer", this.customer);
+    },
   },
 };
 </script>

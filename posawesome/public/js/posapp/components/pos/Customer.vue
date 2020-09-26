@@ -9,8 +9,8 @@
         outlined
         color="indigo"
         label="Customer"
-        v-model="cutomer"
-        :items="cutomers"
+        v-model="customer"
+        :items="customers"
         append-outer-icon="mdi-plus"
         background-color="white"
         no-data-text="Customer not found"
@@ -25,15 +25,15 @@ import { evntBus } from "../../bus";
 export default {
   data: () => ({
     pos_profile: "",
-    cutomers: [],
-    cutomer: "",
+    customers: [],
+    customer: "",
   }),
 
   methods: {
     get_customer_names() {
       const vm = this;
       if (localStorage.customer_storage) {
-        vm.cutomers = JSON.parse(localStorage.getItem("customer_storage"));
+        vm.customers = JSON.parse(localStorage.getItem("customer_storage"));
       }
 
       frappe.call({
@@ -50,7 +50,7 @@ export default {
             // if (loadCustomers) {
               vm.$nextTick(() => {
                 console.log("loadCustomers");
-                vm.cutomers = JSON.parse(
+                vm.customers = JSON.parse(
                   localStorage.getItem("customer_storage")
                 );
               });
@@ -68,7 +68,17 @@ export default {
         this.pos_profile = pos_profile;
         this.get_customer_names();
       });
+      evntBus.$on("set_customer", (customer) => {
+        this.customer = customer;
+      });
     });
   },
+
+    watch: {
+      customer() {
+        evntBus.$emit("update_customer", this.customer);
+      }
+    },
+
 };
 </script>

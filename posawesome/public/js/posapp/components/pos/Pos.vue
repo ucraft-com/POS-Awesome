@@ -45,27 +45,11 @@ export default {
             this.pos_profile = r.message.pos_profile;
             this.pos_opening_shift = r.message.pos_opening_shift;
             evntBus.$emit("register_pos_profile", r.message);
-            console.log("LoadPosProfile")
+            console.log("LoadPosProfile");
           } else {
             this.create_opening_voucher();
           }
         });
-      // frappe.call({
-      //   method: "posawesome.posawesome.api.posapp.check_opening_shift",
-      //   args: { user: frappe.session.user },
-      //   async: false,
-      //   callback: function (r) {
-      //     if (r.message) {
-      //       if (r.message) {
-      //         this.pos_profile = r.message.pos_profile;
-      //         this.pos_opening_shift = r.message.pos_opening_shift;
-      //         evntBus.$emit("update_items", r.message.pos_profile);
-      //       } else {
-      //         this.create_opening_voucher();
-      //       }
-      //     }
-      //   },
-      // });
     },
     create_opening_voucher() {
       console.log("create_opening_voucher");
@@ -83,7 +67,8 @@ export default {
         this.pos_profile = data.pos_profile;
         this.pos_opening_shift = data.pos_opening_shift;
         evntBus.$emit("register_pos_profile", data);
-        console.log("LoadPosProfile")
+        console.log("LoadPosProfile");
+        console.log(data.item);
       });
     });
   },

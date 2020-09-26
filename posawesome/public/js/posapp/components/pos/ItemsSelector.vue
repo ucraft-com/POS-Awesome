@@ -1,13 +1,16 @@
 <template>
   <div>
-    <v-card class="selection mx-auto grey lighten-5" style="max-height: 80vh; height: 80vh">
+    <v-card
+      class="selection mx-auto grey lighten-5"
+      style="max-height: 80vh; height: 80vh"
+    >
       <v-progress-linear
-                :active="loading"
-                :indeterminate="loading"
-                absolute
-                top
-                color="deep-purple accent-4"
-              ></v-progress-linear>
+        :active="loading"
+        :indeterminate="loading"
+        absolute
+        top
+        color="deep-purple accent-4"
+      ></v-progress-linear>
       <v-row class="items px-2 py-1">
         <v-col cols="12" class="pb-0 mb-2">
           <v-text-field
@@ -26,7 +29,7 @@
           ></v-text-field>
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
-          <div fluid class="items" v-if="items_view=='card'">
+          <div fluid class="items" v-if="items_view == 'card'">
             <v-row dense class="overflow-y-auto" style="max-height: 68vh">
               <v-col
                 v-for="(item, idx) in filtred_items"
@@ -40,23 +43,29 @@
               >
                 <v-card hover="hover" @click="add_item(item)">
                   <v-img
-                    :src="item.image || 'https://lunawood.com/wp-content/uploads/2018/02/placeholder-image.png'"
+                    :src="
+                      item.image ||
+                      'https://lunawood.com/wp-content/uploads/2018/02/placeholder-image.png'
+                    "
                     class="white--text align-end"
                     gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
                     height="100px"
                   >
-                    <v-card-text v-text="item.item_name" class="text-subtitle-2 px-1 pb-2"></v-card-text>
+                    <v-card-text
+                      v-text="item.item_name"
+                      class="text-subtitle-2 px-1 pb-2"
+                    ></v-card-text>
                   </v-img>
                   <v-card-text class="text--primary pa-1">
-                    <div
-                      class="text-caption indigo--text accent-3"
-                    >{{ item.price_list_rate || 0}} {{ item.currency || ''}}</div>
+                    <div class="text-caption indigo--text accent-3">
+                      {{ item.price_list_rate || 0 }} {{ item.currency || "" }}
+                    </div>
                   </v-card-text>
                 </v-card>
               </v-col>
             </v-row>
           </div>
-          <div fluid class="items" v-if="items_view=='list'">
+          <div fluid class="items" v-if="items_view == 'list'">
             <div class="my-0 py-0 overflow-y-auto" style="max-height: 68vh">
               <template>
                 <v-data-table
@@ -74,7 +83,10 @@
         </v-col>
       </v-row>
     </v-card>
-    <v-card style="max-height: 10vh; height: 10vh" class="cards mb-0 mt-3 pa-2 grey lighten-5">
+    <v-card
+      style="max-height: 10vh; height: 10vh"
+      class="cards mb-0 mt-3 pa-2 grey lighten-5"
+    >
       <v-row no-gutters>
         <v-col cols="12">
           <v-select
@@ -87,13 +99,25 @@
           ></v-select>
         </v-col>
         <v-col cols="8" class="mt-1">
-          <v-btn-toggle v-model="items_view" color="primary accent-3" group dense rounded>
+          <v-btn-toggle
+            v-model="items_view"
+            color="primary accent-3"
+            group
+            dense
+            rounded
+          >
             <v-btn value="card">Card View</v-btn>
             <v-btn value="list">List View</v-btn>
           </v-btn-toggle>
         </v-col>
         <v-col cols="4" class="mt-1">
-          <v-btn-toggle v-model="favourites_view" color="success accent-3" group dense rounded>
+          <v-btn-toggle
+            v-model="favourites_view"
+            color="success accent-3"
+            group
+            dense
+            rounded
+          >
             <v-btn value="True">Favourites</v-btn>
           </v-btn-toggle>
         </v-col>
@@ -104,7 +128,6 @@
 
 
 <script>
-
 import { evntBus } from "../../bus";
 
 export default {
@@ -127,9 +150,7 @@ export default {
     ],
   }),
 
-  watch: {
-    
-  },
+  watch: {},
 
   methods: {
     get_items() {
@@ -155,11 +176,11 @@ export default {
             localStorage.setItem("items_storage", "");
             localStorage.setItem("items_storage", JSON.stringify(r.message));
             // if (loadItmes) {
-              vm.$nextTick(() => {
-                console.log("loadItmes");
-                vm.items = JSON.parse(localStorage.getItem("items_storage"));
-                vm.loading = false;
-              });
+            vm.$nextTick(() => {
+              console.log("loadItmes");
+              vm.items = JSON.parse(localStorage.getItem("items_storage"));
+              vm.loading = false;
+            });
             // }
           }
         },
@@ -227,7 +248,7 @@ export default {
               found = true;
               break;
             }
-          };
+          }
           return found;
         });
         if (filtred_list.length == 0) {
@@ -254,9 +275,7 @@ export default {
     });
   },
 
-  mounted() {
-    
-  },
+  mounted() {},
 };
 </script>
 
