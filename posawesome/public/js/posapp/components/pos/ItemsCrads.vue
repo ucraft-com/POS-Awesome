@@ -289,7 +289,7 @@ export default {
         callback: function (r) {
           if (r.message) {
             console.log(r.message);
-            vm.submit_invoice(r.message);
+            vm.update_invoice(r.message);
           }
         },
       });
@@ -324,7 +324,7 @@ export default {
       this.pos_profile.payments.forEach((payment) => {
         let amount = 0;
         if (payment.mode_of_payment === "Cash") {
-          amount = this.subtotal; // NOTE : this shoulde update from user
+          amount = this.subtotal; // NOTE : this shoulde updated from user
         }
         payments.push({
           amount: amount,
@@ -335,11 +335,14 @@ export default {
       });
       return payments;
     },
-    submit_invoice(doc) {
+    update_invoice(doc, to_submit=false) {
       doc.payments = this.get_payments();
       frappe.call({
-        method: "posawesome.posawesome.api.posapp.submit_invoice",
-        args: { data: doc },
+        method: "posawesome.posawesome.api.posapp.update_invoice",
+        args: {
+          data: doc,
+          to_submit: to_submit
+        },
         async: false,
         callback: function (r) {
           if (r.message) {
