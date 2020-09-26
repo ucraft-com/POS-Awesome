@@ -179,7 +179,7 @@
                 class="pa-0"
                 large
                 color="primary"
-                @click="submit_invoice"
+                @click="save_invoice"
                 dark
                 >PAY</v-btn
               >
@@ -279,15 +279,17 @@ export default {
       this.items = [];
       this.customer = this.pos_profile.customer;
     },
-    submit_invoice() {
+    save_invoice() {
+      const vm = this;
       const doc = this.get_invoice_doc();
       frappe.call({
         method: "posawesome.posawesome.api.posapp.save_invoice",
-        args: { doc: doc },
+        args: { data: doc },
         async: false,
         callback: function (r) {
           if (r.message) {
             console.log(r.message);
+            vm.submit_invoice(r.message)
           }
         },
       });
@@ -303,6 +305,8 @@ export default {
       doc.customer = this.customer;
       doc.items = this.get_invoice_items();
       doc.total = this.subtotal;
+      doc.payments = [],
+      doc.taxes = []
       return doc;
     },
     get_invoice_items() {
@@ -315,6 +319,35 @@ export default {
         });
       });
       return items_list;
+    },
+    get_payments() {
+      const payments = []
+      this.pos_profile.payments.forEach(payment => {
+        let amount = 0;
+        if (payment.mode_of_payment === "Cash") {
+          amount = this.subtotal // NOTE : this shoulde update from user
+        }
+        payments.push({
+          amount: amount,
+          mode_of_payment: payment.mode_of_payment,
+          default: payment.default,
+          account: ""
+        })
+      });
+      return payments
+    },
+    submit_invoice(doc) {
+      doc.payments = this.get_payments()
+      frappe.call({
+        method: "posawesome.posawesome.api.posapp.submit_invoice",
+        args: { data: doc },
+        async: false,
+        callback: function (r) {
+          if (r.message) {
+            console.log(r.message);
+          }
+        },
+      });
     },
   },
   created() {

@@ -202,17 +202,35 @@ def get_customer_names():
 
 
 @frappe.whitelist()
-def save_invoice(doc):
-    doc = json.loads(doc)
-    invoice_doc = frappe.get_doc(doc)
+def save_invoice(data):
+    data = json.loads(data)
+    invoice_doc = frappe.get_doc(data)
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.set_missing_values()
-    for tax in invoice_doc.taxes:
-        tax.included_in_print_rate = 1
+    if invoice_doc.get("taxes"):
+        for tax in invoice_doc.taxes:
+            tax.included_in_print_rate = 1
     invoice_doc.save()
     return invoice_doc
 
+
+@frappe.whitelist()
+def submit_invoice(data):
+    data = json.loads(data)
+    invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
+    for payment in data.get("payments"):
+        if payment.get("amount"):
+            for i in invoice_doc.payments:
+                if i.mode_of_payment == payment["mode_of_payment"]:
+                    i.amount = payment["amount"]
+                    break
+    invoice_doc.flags.ignore_permissions = True
+    frappe.flags.ignore_account_permission = True
+    # invoice_doc.set_missing_values()
+    invoice_doc.save()
+    invoice_doc.submit()
+    return invoice_doc.name
 
 
 
@@ -228,12 +246,3 @@ def save_invoice(doc):
 # 	console("data in" , doc)
 # 	return "Project Add"
 
-
-# @frappe.whitelist()
-# def get_all_projects():
-# 	console("Trigger get_all_projects")
-# 	return frappe.db.sql("""
-#         select *
-#         from `tabMyProjects`
-#         order by name"""
-#         , as_dict=1)
