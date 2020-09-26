@@ -48,12 +48,12 @@ export default {
             localStorage.setItem("customer_storage", "");
             localStorage.setItem("customer_storage", JSON.stringify(r.message));
             // if (loadCustomers) {
-              vm.$nextTick(() => {
-                console.log("loadCustomers");
-                vm.customers = JSON.parse(
-                  localStorage.getItem("customer_storage")
-                );
-              });
+            vm.$nextTick(() => {
+              console.log("loadCustomers");
+              vm.customers = JSON.parse(
+                localStorage.getItem("customer_storage")
+              );
+            });
             // }
           }
         },
@@ -74,11 +74,10 @@ export default {
     });
   },
 
-    watch: {
-      customer() {
-        evntBus.$emit("update_customer", this.customer);
-      }
+  watch: {
+    customer() {
+      evntBus.$emit("update_customer", this.customer);
     },
-
+  },
 };
 </script>

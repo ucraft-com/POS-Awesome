@@ -83,7 +83,6 @@ def check_opening_shift(user):
 
 @frappe.whitelist()
 def get_items(pos_profile):
-    
     pos_profile = json.loads(pos_profile)
     warehouse = pos_profile.get("warehouse")
     price_list = pos_profile.get("selling_price_list")
@@ -103,7 +102,6 @@ def get_items(pos_profile):
             conditon = "AND item_group = '{0}'".format(item_groups_list[0])
         else:
             conditon = "AND item_group in {0}".format(tuple(item_groups_list))
-
 
     result = []
 
@@ -130,15 +128,16 @@ def get_items(pos_profile):
         ORDER BY
             name asc
             """
-        .format(
-            conditon
-        ), as_dict=1)
+                               .format(
+                                   conditon
+                               ), as_dict=1)
 
     if items_data:
         items = [d.item_code for d in items_data]
         item_prices_data = frappe.get_all("Item Price",
-            fields = ["item_code", "price_list_rate", "currency"],
-            filters = {'price_list': price_list, 'item_code': ['in', items]})
+                                          fields=[
+                                              "item_code", "price_list_rate", "currency"],
+                                          filters={'price_list': price_list, 'item_code': ['in', items]})
 
         item_prices = {}
         for d in item_prices_data:
@@ -148,8 +147,10 @@ def get_items(pos_profile):
             item_code = item.item_code
             item_price = item_prices.get(item_code) or {}
             item_stock_qty = get_stock_availability(item_code, warehouse)
-            item_barcode = frappe.get_all("Item Barcode",filters = {"parent": item_code} , fields = ["barcode"])
-            uoms = frappe.get_all("UOM Conversion Detail",filters = {"parent": item_code} , fields = ["uom","conversion_factor"])
+            item_barcode = frappe.get_all("Item Barcode", filters={
+                                          "parent": item_code}, fields=["barcode"])
+            uoms = frappe.get_all("UOM Conversion Detail", filters={
+                                  "parent": item_code}, fields=["uom", "conversion_factor"])
 
             # if not item_stock_qty:
             #     pass
@@ -165,17 +166,17 @@ def get_items(pos_profile):
             })
             result.append(row)
 
-
     return result
 
 
 def get_root_of(doctype):
-	"""Get root element of a DocType with a tree structure"""
-	result = frappe.db.sql("""select t1.name from `tab{0}` t1 where
+    """Get root element of a DocType with a tree structure"""
+    result = frappe.db.sql("""select t1.name from `tab{0}` t1 where
 		(select count(*) from `tab{1}` t2 where
 			t2.lft < t1.lft and t2.rgt > t1.rgt) = 0
 		and t1.rgt > t1.lft""".format(doctype, doctype))
-	return result[0][0] if result else None
+    return result[0][0] if result else None
+
 
 @frappe.whitelist()
 def get_items_groups():
@@ -198,7 +199,6 @@ def get_customer_names():
     for customer in customers:
         customers_list.append(customer["name"])
     return customers_list
-
 
 
 @frappe.whitelist()
@@ -227,11 +227,10 @@ def submit_invoice(data):
                     break
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
-    # invoice_doc.set_missing_values()
+
     invoice_doc.save()
     invoice_doc.submit()
     return invoice_doc.name
-
 
 
 # @frappe.whitelist()
@@ -245,4 +244,3 @@ def submit_invoice(data):
 # 	)).insert()
 # 	console("data in" , doc)
 # 	return "Project Add"
-

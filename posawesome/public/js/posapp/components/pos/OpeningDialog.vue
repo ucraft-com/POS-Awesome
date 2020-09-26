@@ -12,7 +12,12 @@
           <v-container>
             <v-row>
               <v-col cols="12">
-                <v-autocomplete :items="companys" label="Company" v-model="company" required></v-autocomplete>
+                <v-autocomplete
+                  :items="companys"
+                  label="Company"
+                  v-model="company"
+                  required
+                ></v-autocomplete>
               </v-col>
               <v-col cols="12">
                 <v-autocomplete
