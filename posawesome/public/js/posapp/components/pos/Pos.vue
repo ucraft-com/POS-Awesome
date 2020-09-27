@@ -6,7 +6,7 @@
         <ItemsSelector></ItemsSelector>
       </v-col>
       <v-col xl="7" lg="6" md="6" sm="6" cols="12" class="pos">
-        <ItemsCrads></ItemsCrads>
+        <Invoice></Invoice>
       </v-col>
     </v-row>
   </div>
@@ -16,7 +16,7 @@
 <script>
 import { evntBus } from "../../bus";
 import ItemsSelector from "./ItemsSelector.vue";
-import ItemsCrads from "./ItemsCrads.vue";
+import Invoice from "./Invoice.vue";
 import OpeningDialog from "./OpeningDialog.vue";
 
 export default {
@@ -30,7 +30,7 @@ export default {
 
   components: {
     ItemsSelector,
-    ItemsCrads,
+    Invoice,
     OpeningDialog,
   },
 
