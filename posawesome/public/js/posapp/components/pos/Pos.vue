@@ -2,8 +2,11 @@
   <div fluid>
     <OpeningDialog v-if="dialog" :dialog="dialog"></OpeningDialog>
     <v-row v-show="!dialog">
-      <v-col xl="5" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
+      <v-col v-show="!payment" xl="5" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
         <ItemsSelector></ItemsSelector>
+      </v-col>
+      <v-col v-show="payment" xl="5" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
+        <Payments></Payments>
       </v-col>
       <v-col xl="7" lg="6" md="6" sm="6" cols="12" class="pos">
         <Invoice></Invoice>
@@ -18,6 +21,7 @@ import { evntBus } from "../../bus";
 import ItemsSelector from "./ItemsSelector.vue";
 import Invoice from "./Invoice.vue";
 import OpeningDialog from "./OpeningDialog.vue";
+import Payments from "./Payments.vue";
 
 export default {
   data: function () {
@@ -25,6 +29,7 @@ export default {
       dialog: false,
       pos_profile: "",
       pos_opening_shift: "",
+      payment: false,
     };
   },
 
@@ -32,6 +37,7 @@ export default {
     ItemsSelector,
     Invoice,
     OpeningDialog,
+    Payments,
   },
 
   methods: {
@@ -70,6 +76,11 @@ export default {
         console.log("LoadPosProfile");
         console.log(data.item);
       });
+      evntBus.$on("show_payment", (data) => {
+        
+        this.payment = true ? data ==="true": false
+        
+      })
     });
   },
 };

@@ -179,7 +179,7 @@
                 class="pa-0"
                 large
                 color="primary"
-                @click="save_invoice"
+                @click="show_payment"
                 dark
                 >PAY</v-btn
               >
@@ -200,7 +200,7 @@ export default {
     return {
       pos_profile: "",
       pos_opening_shift: "",
-      doc: "",
+      invoice_doc: "",
       customer: "",
       items_discount: 0,
       additional_discount: 0,
@@ -245,9 +245,6 @@ export default {
     },
   },
   methods: {
-    // sortBy(prop) {
-    //   this.projects.sort((a, b) => (a[prop] < b[prop] ? -1 : 1));
-    // },
     remove_item(item) {
       const index = this.items.findIndex((el) => el === item);
       this.items.splice(index, 1);
@@ -270,7 +267,6 @@ export default {
       if (index === -1) {
         const new_item = { ...item };
         new_item.qty = 1;
-        // new_item.vat = 18;
         (new_item.active = false), this.items.unshift(new_item);
       } else {
         this.items[index].qty++;
@@ -279,6 +275,7 @@ export default {
     cancel_invoice() {
       this.items = [];
       this.customer = this.pos_profile.customer;
+      this.invoice_doc = ""
     },
     save_invoice() {
       const vm = this;
@@ -289,11 +286,13 @@ export default {
         async: false,
         callback: function (r) {
           if (r.message) {
-            console.log(r.message);
-            vm.update_invoice(r.message);
+            vm.invoice_doc = r.message;
+            // console.log(r.message);
+            // vm.update_invoice(r.message);
           }
         },
       });
+      return this.invoice_doc
     },
     get_invoice_doc() {
       const doc = {};
@@ -353,6 +352,12 @@ export default {
         },
       });
     },
+    show_payment() {
+      evntBus.$emit("show_payment", "true");
+      const invoice_doc = this.save_invoice()
+      console.log(invoice_doc)
+      evntBus.$emit("send_invoice_doc_payment", invoice_doc);
+    },
   },
   created() {
     this.$nextTick(function () {});
@@ -366,6 +371,9 @@ export default {
     });
     evntBus.$on("update_customer", (customer) => {
       this.customer = customer;
+    });
+    evntBus.$on("new_invoice", (customer) => {
+      this.cancel_invoice()
     });
   },
   mounted: function () {},
