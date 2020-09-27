@@ -140,3 +140,9 @@ app_include_js = [
 #
 # auto_cancel_exempted_doctypes = ["Auto Repeat"]
 
+fixtures = [
+	{"doctype":"Custom Field", "filters": [["name", "in", (
+		"Sales Invoice-posa_pos_opening_shift",
+	
+	)]]},
+]

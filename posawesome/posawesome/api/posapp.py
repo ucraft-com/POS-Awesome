@@ -216,7 +216,7 @@ def save_invoice(data):
 
 
 @frappe.whitelist()
-def update_invoice(data, to_submit=False):
+def update_invoice(data, to_submit=None):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
     for payment in data.get("payments"):
@@ -229,7 +229,7 @@ def update_invoice(data, to_submit=False):
     frappe.flags.ignore_account_permission = True
 
     invoice_doc.save()
-    if to_submit:
+    if to_submit =="True":
         invoice_doc.submit()
     return {
         "name": invoice_doc.name,

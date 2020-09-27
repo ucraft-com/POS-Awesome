@@ -199,6 +199,7 @@ export default {
   data() {
     return {
       pos_profile: "",
+      pos_opening_shift: "",
       doc: "",
       customer: "",
       items_discount: 0,
@@ -305,6 +306,7 @@ export default {
       doc.customer = this.customer;
       doc.items = this.get_invoice_items();
       doc.total = this.subtotal;
+      doc.posa_pos_opening_shift = this.pos_opening_shift.name,
       (doc.payments = []), (doc.taxes = []);
       return doc;
     },
@@ -335,7 +337,7 @@ export default {
       });
       return payments;
     },
-    update_invoice(doc, to_submit=false) {
+    update_invoice(doc, to_submit="False") {
       doc.payments = this.get_payments();
       frappe.call({
         method: "posawesome.posawesome.api.posapp.update_invoice",
@@ -357,6 +359,7 @@ export default {
     evntBus.$on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
       this.customer = data.pos_profile.customer;
+      this.pos_opening_shift = data.pos_opening_shift;
     });
     evntBus.$on("add_item", (item) => {
       this.add_item(item);
