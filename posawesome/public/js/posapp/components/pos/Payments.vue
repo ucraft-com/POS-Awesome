@@ -90,7 +90,6 @@ export default {
         async: true,
         callback: function (r) {
           if (r.message) {
-            console.log(r.message);
             frappe.show_alert( // TODO : replace whith proper alert
               {
                 message: __(`Invoice ${r.message.name} Submited`),
@@ -111,7 +110,6 @@ export default {
       evntBus.$on("send_invoice_doc_payment", (invoice_doc) => {
         this.invoice_doc = invoice_doc;
         this.invoice_doc.payments[0].amount = invoice_doc.total;
-        console.log(invoice_doc.name);
       });
     });
   },

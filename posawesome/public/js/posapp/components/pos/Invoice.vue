@@ -175,7 +175,15 @@
               >
             </v-col>
             <v-col cols="6">
-              <v-btn block class="pa-0" large color="success" dark @click="new_invoice">New</v-btn>
+              <v-btn
+                block
+                class="pa-0"
+                large
+                color="success"
+                dark
+                @click="new_invoice"
+                >New</v-btn
+              >
             </v-col>
           </v-row>
           <v-row align="end" style="height: 54%">
@@ -286,38 +294,46 @@ export default {
       const doc = this.get_invoice_doc();
       if (doc.name) {
         frappe.call({
-        method: "posawesome.posawesome.api.posapp.delete_invoice",
-        args: { invoice: doc.name },
-        async: true,
-        callback: function (r) {
-          if (r.message) {
-            frappe.show_alert( // TODO : replace whith proper alert
-              {
-                message: __(`${r.message}`),
-                indicator: "green",
-              },
-              5
-            );
-          }
-        },
-      });
+          method: "posawesome.posawesome.api.posapp.delete_invoice",
+          args: { invoice: doc.name },
+          async: true,
+          callback: function (r) {
+            if (r.message) {
+              frappe.show_alert(
+                // TODO : replace whith proper alert
+                {
+                  message: __(`${r.message}`),
+                  indicator: "green",
+                },
+                5
+              );
+            }
+          },
+        });
       }
       this.items = [];
       this.customer = this.pos_profile.customer;
       this.invoice_doc = "";
     },
-    new_invoice() {
+    new_invoice(data={}) {
       const doc = this.get_invoice_doc();
       if (doc.name) {
         this.update_invoice(doc);
       } else {
         if (doc.items.length) {
-        this.save_draft_invoice(doc);
+          this.save_draft_invoice(doc);
         }
       }
-      this.items = [];
-      this.customer = this.pos_profile.customer;
-      this.invoice_doc = "";
+      if (!data.name) {
+        this.items = [];
+        this.customer = this.pos_profile.customer;
+        this.invoice_doc = "";
+        
+      } else {
+        this.invoice_doc = data;
+        this.items = data.items;
+        this.customer = data.customer;
+      }
     },
     save_draft_invoice() {
       const vm = this;
@@ -415,7 +431,6 @@ export default {
       }
       evntBus.$emit("show_payment", "true");
       const invoice_doc = this.proces_invoice();
-      console.log(invoice_doc);
       evntBus.$emit("send_invoice_doc_payment", invoice_doc);
     },
     get_draft_invoices() {
@@ -429,7 +444,6 @@ export default {
         callback: function (r) {
           if (r.message) {
             evntBus.$emit("open_drafts", r.message);
-            console.log(r.message);
           }
         },
       });
@@ -455,9 +469,7 @@ export default {
       this.cancel_invoice();
     });
     evntBus.$on("load_invoice", (data) => {
-      this.invoice_doc = data;
-      this.items = data.items;
-      this.customer = data.customer;
+      this.new_invoice(data);
     });
   },
   mounted: function () {},

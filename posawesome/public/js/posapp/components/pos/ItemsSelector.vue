@@ -58,7 +58,7 @@
                   </v-img>
                   <v-card-text class="text--primary pa-1">
                     <div class="text-caption indigo--text accent-3">
-                      {{ item.price_list_rate || 0 }} {{ item.currency || "" }}
+                      {{ item.rate || 0 }} {{ item.currency || "" }}
                     </div>
                   </v-card-text>
                 </v-card>
