@@ -68,6 +68,7 @@ import { evntBus } from "../../bus";
 export default {
   data: () => ({
     loading: false,
+    pos_profile: "",
     invoice_doc: "",
   }),
 
@@ -76,11 +77,12 @@ export default {
       evntBus.$emit("show_payment", "false");
     },
     submit() {
-      this.update_invoice();
+      this.submit_invoice();
       evntBus.$emit("new_invoice", "false");
+      this.load_print_page();
       this.back_to_invoice();
     },
-    update_invoice() {
+    submit_invoice() {
       frappe.call({
         method: "posawesome.posawesome.api.posapp.submit_invoice",
         args: {
@@ -90,7 +92,8 @@ export default {
         async: true,
         callback: function (r) {
           if (r.message) {
-            frappe.show_alert( // TODO : replace whith proper alert
+            frappe.show_alert(
+              // TODO : replace whith proper alert
               {
                 message: __(`Invoice ${r.message.name} Submited`),
                 indicator: "green",
@@ -101,6 +104,32 @@ export default {
         },
       });
     },
+    load_print_page() {
+      const letter_head = this.pos_profile.letter_head || 0;
+      const url =
+        frappe.urllib.get_base_url() +
+        "/printview?doctype=Sales%20Invoice&name=" +
+        this.invoice_doc.name +
+        "&format=" +
+        this.pos_profile.print_format +
+        "&no_letterhead=" +
+        letter_head;
+
+      // TODO : need better way for printing
+      const printWindow = window.open(
+        url,
+        "Print"
+      );
+      printWindow.addEventListener(
+        "load",
+        function () {
+          printWindow.print();
+          // printWindow.close(); 
+          // NOTE : uncomoent this to auto closing printing window
+        },
+        true
+      );
+    },
   },
 
   computed: {},
@@ -110,6 +139,9 @@ export default {
       evntBus.$on("send_invoice_doc_payment", (invoice_doc) => {
         this.invoice_doc = invoice_doc;
         this.invoice_doc.payments[0].amount = invoice_doc.total;
+      });
+      evntBus.$on("register_pos_profile", (data) => {
+        this.pos_profile = data.pos_profile;
       });
     });
   },

@@ -245,10 +245,10 @@ export default {
   },
   computed: {
     total_qty() {
-      this.items.forEach((item) => {
+      this.close_payments();
       let qty = 0;
+      this.items.forEach((item) => {
         qty += item.qty;
-        this.close_payments();
       });
       return qty;
     },
@@ -318,7 +318,7 @@ export default {
       this.customer = this.pos_profile.customer;
       this.invoice_doc = "";
     },
-    new_invoice(data={}) {
+    new_invoice(data = {}) {
       const doc = this.get_invoice_doc();
       if (doc.name) {
         this.update_invoice(doc);
@@ -331,7 +331,6 @@ export default {
         this.items = [];
         this.customer = this.pos_profile.customer;
         this.invoice_doc = "";
-        
       } else {
         this.invoice_doc = data;
         this.items = data.items;
@@ -453,7 +452,7 @@ export default {
     },
     close_payments() {
       evntBus.$emit("show_payment", "false");
-    }
+    },
   },
   created() {
     this.$nextTick(function () {});
