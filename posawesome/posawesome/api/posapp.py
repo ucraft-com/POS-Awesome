@@ -224,7 +224,7 @@ def update_invoice(data):
     invoice_doc.customer = data.get("customer")
     invoice_doc.items = []
     invoice_doc.update({
-        "items":data.get("items")
+        "items": data.get("items")
     })
     invoice_doc.set_missing_values()
     if invoice_doc.get("taxes"):
@@ -232,6 +232,7 @@ def update_invoice(data):
             tax.included_in_print_rate = 1
     invoice_doc.save()
     return invoice_doc
+
 
 @frappe.whitelist()
 def submit_invoice(data, to_submit=None):
@@ -247,7 +248,7 @@ def submit_invoice(data, to_submit=None):
     frappe.flags.ignore_account_permission = True
 
     invoice_doc.save()
-    if to_submit =="True":
+    if to_submit == "True":
         invoice_doc.submit()
     return {
         "name": invoice_doc.name,
@@ -255,14 +256,26 @@ def submit_invoice(data, to_submit=None):
     }
 
 
-# @frappe.whitelist()
-# def add_project(pro):
-# 	pro = json.loads(pro)
-# 	doc = frappe.get_doc(dict(
-# 		doctype = "MyProjects",
-#         title = pro["title"],
-#         content = pro["content"],
-#         due = pro["due"],
-# 	)).insert()
-# 	console("data in" , doc)
-# 	return "Project Add"
+@frappe.whitelist()
+def get_draft_invoices(pos_opening_shift):
+    invoices_list = frappe.get_list(
+        "Sales Invoice",
+        filters={
+            "posa_pos_opening_shift": pos_opening_shift,
+            "docstatus": 0
+        },
+        fields=["name"],
+        limit_page_length=0,
+        order_by='customer'
+    )
+    data = []
+    for invoice in invoices_list:
+        data.append(frappe.get_doc("Sales Invoice", invoice["name"]))
+    return data
+
+
+@frappe.whitelist()
+def delete_invoice(invoice):
+    doc = frappe.get_doc("Sales Invoice", invoice)
+    doc.delete()
+    return "Inovice {0} Deleted".format(invoice)

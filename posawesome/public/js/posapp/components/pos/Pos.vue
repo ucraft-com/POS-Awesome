@@ -1,5 +1,6 @@
 <template>
   <div fluid>
+    <Drafts></Drafts>
     <OpeningDialog v-if="dialog" :dialog="dialog"></OpeningDialog>
     <v-row v-show="!dialog">
       <v-col v-show="!payment" xl="5" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
@@ -22,6 +23,7 @@ import ItemsSelector from "./ItemsSelector.vue";
 import Invoice from "./Invoice.vue";
 import OpeningDialog from "./OpeningDialog.vue";
 import Payments from "./Payments.vue";
+import Drafts from "./Drafts.vue";
 
 export default {
   data: function () {
@@ -38,6 +40,7 @@ export default {
     Invoice,
     OpeningDialog,
     Payments,
+    Drafts,
   },
 
   methods: {
@@ -77,9 +80,7 @@ export default {
         console.log(data.item);
       });
       evntBus.$on("show_payment", (data) => {
-        
         this.payment = true ? data ==="true": false
-        
       })
     });
   },

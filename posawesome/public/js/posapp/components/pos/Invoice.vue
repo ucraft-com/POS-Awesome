@@ -153,7 +153,13 @@
         >
           <v-row align="start" style="height: 53%">
             <v-col cols="12">
-              <v-btn block class="pa-0" large color="warning" dark
+              <v-btn
+                block
+                class="pa-0"
+                large
+                color="warning"
+                dark
+                @click="get_draft_invoices"
                 >Get Hold Invoice</v-btn
               >
             </v-col>
@@ -169,7 +175,7 @@
               >
             </v-col>
             <v-col cols="6">
-              <v-btn block class="pa-0" large color="success" dark>New</v-btn>
+              <v-btn block class="pa-0" large color="success" dark @click="new_invoice">New</v-btn>
             </v-col>
           </v-row>
           <v-row align="end" style="height: 54%">
@@ -248,6 +254,10 @@ export default {
     remove_item(item) {
       const index = this.items.findIndex((el) => el === item);
       this.items.splice(index, 1);
+      const idx = this.expanded.findIndex((el) => el === item);
+      if (idx >= 0) {
+        this.expanded.splice(idx, 1);
+      }
     },
     add_one(item) {
       item.qty++;
@@ -273,9 +283,41 @@ export default {
       }
     },
     cancel_invoice() {
+      const doc = this.get_invoice_doc();
+      if (doc.name) {
+        frappe.call({
+        method: "posawesome.posawesome.api.posapp.delete_invoice",
+        args: { invoice: doc.name },
+        async: true,
+        callback: function (r) {
+          if (r.message) {
+            frappe.show_alert( // TODO : replace whith proper alert
+              {
+                message: __(`${r.message}`),
+                indicator: "green",
+              },
+              5
+            );
+          }
+        },
+      });
+      }
       this.items = [];
       this.customer = this.pos_profile.customer;
-      this.invoice_doc = ""
+      this.invoice_doc = "";
+    },
+    new_invoice() {
+      const doc = this.get_invoice_doc();
+      if (doc.name) {
+        this.update_invoice(doc);
+      } else {
+        if (doc.items.length) {
+        this.save_draft_invoice(doc);
+        }
+      }
+      this.items = [];
+      this.customer = this.pos_profile.customer;
+      this.invoice_doc = "";
     },
     save_draft_invoice() {
       const vm = this;
@@ -290,12 +332,12 @@ export default {
           }
         },
       });
-      return this.invoice_doc
+      return this.invoice_doc;
     },
     get_invoice_doc() {
       let doc = {};
       if (this.invoice_doc.name) {
-        doc = {...this.invoice_doc}
+        doc = { ...this.invoice_doc };
       }
       doc.doctype = "Sales Invoice";
       doc.is_pos = 1;
@@ -306,9 +348,9 @@ export default {
       doc.customer = this.customer;
       doc.items = this.get_invoice_items();
       doc.total = this.subtotal;
-      doc.posa_pos_opening_shift = this.pos_opening_shift.name,
-      doc.payments = doc.payments = this.get_payments(),
-      doc.taxes = [];
+      (doc.posa_pos_opening_shift = this.pos_opening_shift.name),
+        (doc.payments = doc.payments = this.get_payments()),
+        (doc.taxes = []);
       return doc;
     },
     get_invoice_items() {
@@ -352,31 +394,46 @@ export default {
           }
         },
       });
-      return this.invoice_doc
+      return this.invoice_doc;
     },
     proces_invoice() {
-      const doc = this.get_invoice_doc()
+      const doc = this.get_invoice_doc();
       if (doc.name) {
-         return this.update_invoice(doc)
+        return this.update_invoice(doc);
+      } else {
+        return this.save_draft_invoice(doc);
       }
-      else {
-        return this.save_draft_invoice(doc)
-      }
-
     },
     show_payment() {
       if (!this.customer) {
-        frappe.throw(__('There is no Customer!')) // TODO : replace whith proper alert
-        return
+        frappe.throw(__("There is no Customer!")); // TODO : replace whith proper alert
+        return;
       }
       if (!this.items.length) {
-        frappe.throw(__('There is no Items!')) // TODO : replace whith proper alert
-        return
+        frappe.throw(__("There is no Items!")); // TODO : replace whith proper alert
+        return;
       }
       evntBus.$emit("show_payment", "true");
-      const invoice_doc = this.proces_invoice()
-      console.log(invoice_doc)
+      const invoice_doc = this.proces_invoice();
+      console.log(invoice_doc);
       evntBus.$emit("send_invoice_doc_payment", invoice_doc);
+    },
+    get_draft_invoices() {
+      const vm = this;
+      frappe.call({
+        method: "posawesome.posawesome.api.posapp.get_draft_invoices",
+        args: {
+          pos_opening_shift: this.pos_opening_shift.name,
+        },
+        async: false,
+        callback: function (r) {
+          if (r.message) {
+            evntBus.$emit("open_drafts", r.message);
+            console.log(r.message);
+          }
+        },
+      });
+      // return this.invoice_doc;
     },
   },
   created() {
@@ -387,13 +444,20 @@ export default {
       this.pos_opening_shift = data.pos_opening_shift;
     });
     evntBus.$on("add_item", (item) => {
+      // this.expanded = []
       this.add_item(item);
     });
     evntBus.$on("update_customer", (customer) => {
       this.customer = customer;
     });
-    evntBus.$on("new_invoice", (customer) => {
-      this.cancel_invoice()
+    evntBus.$on("new_invoice", () => {
+      this.invoice_doc = "";
+      this.cancel_invoice();
+    });
+    evntBus.$on("load_invoice", (data) => {
+      this.invoice_doc = data;
+      this.items = data.items;
+      this.customer = data.customer;
     });
   },
   mounted: function () {},
