@@ -87,7 +87,7 @@
                     hide-details
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12">
+                <!-- <v-col cols="12">
                   <v-text-field
                     v-model="subtotal"
                     label="Subtotal"
@@ -96,11 +96,11 @@
                     readonly
                     hide-details
                   ></v-text-field>
-                </v-col>
+                </v-col> -->
                 <v-col cols="12">
                   <v-text-field
-                    v-model="items_discount"
-                    label="Items Discount"
+                    v-model="items_discounts"
+                    label="Items Discounts"
                     outlined
                     dense
                     readonly
@@ -120,7 +120,7 @@
                     hide-details
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12">
+                <!-- <v-col cols="12">
                   <v-text-field
                     v-model="total_tax"
                     label="TAX"
@@ -129,15 +129,16 @@
                     readonly
                     hide-details
                   ></v-text-field>
-                </v-col>
+                </v-col> -->
                 <v-col cols="12">
                   <v-text-field
-                    v-model="total"
+                    v-model="subtotal"
                     label="Total"
                     outlined
                     dense
                     readonly
                     hide-details
+                    class="text--red"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -216,7 +217,7 @@ export default {
       pos_opening_shift: "",
       invoice_doc: "",
       customer: "",
-      items_discount: 0,
+      items_discounts: 0,
       additional_discount: 0,
       total_tax: 0,
       total: 0,
@@ -244,13 +245,15 @@ export default {
   },
   computed: {
     total_qty() {
-      let qty = 0;
       this.items.forEach((item) => {
+      let qty = 0;
         qty += item.qty;
+        this.close_payments();
       });
       return qty;
     },
     subtotal() {
+      this.close_payments();
       let sum = 0;
       this.items.forEach((item) => {
         sum += item.qty * item.rate;
@@ -447,8 +450,10 @@ export default {
           }
         },
       });
-      // return this.invoice_doc;
     },
+    close_payments() {
+      evntBus.$emit("show_payment", "false");
+    }
   },
   created() {
     this.$nextTick(function () {});
@@ -475,6 +480,7 @@ export default {
   mounted: function () {},
   watch: {
     customer() {
+      this.close_payments();
       evntBus.$emit("set_customer", this.customer);
     },
   },
