@@ -202,7 +202,7 @@ def get_customer_names():
 
 
 @frappe.whitelist()
-def save_invoice(data):
+def save_draft_invoice(data):
     data = json.loads(data)
     invoice_doc = frappe.get_doc(data)
     invoice_doc.flags.ignore_permissions = True
@@ -216,7 +216,25 @@ def save_invoice(data):
 
 
 @frappe.whitelist()
-def update_invoice(data, to_submit=None):
+def update_invoice(data):
+    data = json.loads(data)
+    invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
+    invoice_doc.flags.ignore_permissions = True
+    frappe.flags.ignore_account_permission = True
+    invoice_doc.customer = data.get("customer")
+    invoice_doc.items = []
+    invoice_doc.update({
+        "items":data.get("items")
+    })
+    invoice_doc.set_missing_values()
+    if invoice_doc.get("taxes"):
+        for tax in invoice_doc.taxes:
+            tax.included_in_print_rate = 1
+    invoice_doc.save()
+    return invoice_doc
+
+@frappe.whitelist()
+def submit_invoice(data, to_submit=None):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
     for payment in data.get("payments"):

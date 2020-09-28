@@ -28,7 +28,7 @@
           ></v-text-field>
         </v-col>
         <v-col cols="5">
-          <v-btn block class="" color="success" dark
+          <v-btn block class="" color="primary" dark
             >Pay Full {{ payment.mode_of_payment }}</v-btn
           >
         </v-col>
@@ -54,7 +54,7 @@
       </v-row>
       <v-row align="end" style="height: 54%">
         <v-col cols="12">
-          <v-btn block class="pa-0" large color="success" dark @click="submit">Submit Payments</v-btn>
+          <v-btn block class="pa-0" large color="primary" dark @click="submit">Submit Payments</v-btn>
         </v-col>
       </v-row>
     </v-card>
@@ -80,7 +80,7 @@ export default {
     },
     update_invoice() {
       frappe.call({
-        method: "posawesome.posawesome.api.posapp.update_invoice",
+        method: "posawesome.posawesome.api.posapp.submit_invoice",
         args: {
           data: this.invoice_doc,
           to_submit: "True"

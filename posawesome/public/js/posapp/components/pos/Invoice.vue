@@ -277,36 +277,38 @@ export default {
       this.customer = this.pos_profile.customer;
       this.invoice_doc = ""
     },
-    save_invoice() {
+    save_draft_invoice() {
       const vm = this;
       const doc = this.get_invoice_doc();
       frappe.call({
-        method: "posawesome.posawesome.api.posapp.save_invoice",
+        method: "posawesome.posawesome.api.posapp.save_draft_invoice",
         args: { data: doc },
         async: false,
         callback: function (r) {
           if (r.message) {
             vm.invoice_doc = r.message;
-            // console.log(r.message);
-            // vm.update_invoice(r.message);
           }
         },
       });
       return this.invoice_doc
     },
     get_invoice_doc() {
-      const doc = {};
+      let doc = {};
+      if (this.invoice_doc.name) {
+        doc = {...this.invoice_doc}
+      }
       doc.doctype = "Sales Invoice";
       doc.is_pos = 1;
-      doc.company = this.pos_profile.company;
-      doc.pos_profile = this.pos_profile.name;
-      doc.currency = this.pos_profile.currency;
-      doc.naming_series = this.pos_profile.naming_series;
+      doc.company = doc.company || this.pos_profile.company;
+      doc.pos_profile = doc.pos_profile || this.pos_profile.name;
+      doc.currency = doc.currency || this.pos_profile.currency;
+      doc.naming_series = doc.naming_series || this.pos_profile.naming_series;
       doc.customer = this.customer;
       doc.items = this.get_invoice_items();
       doc.total = this.subtotal;
       doc.posa_pos_opening_shift = this.pos_opening_shift.name,
-      (doc.payments = []), (doc.taxes = []);
+      doc.payments = doc.payments = this.get_payments(),
+      doc.taxes = [];
       return doc;
     },
     get_invoice_items() {
@@ -336,25 +338,35 @@ export default {
       });
       return payments;
     },
-    update_invoice(doc, to_submit="False") {
-      doc.payments = this.get_payments();
+    update_invoice(doc) {
+      const vm = this;
       frappe.call({
         method: "posawesome.posawesome.api.posapp.update_invoice",
         args: {
           data: doc,
-          to_submit: to_submit
         },
         async: false,
         callback: function (r) {
           if (r.message) {
-            console.log(r.message);
+            vm.invoice_doc = r.message;
           }
         },
       });
+      return this.invoice_doc
+    },
+    proces_invoice() {
+      const doc = this.get_invoice_doc()
+      if (doc.name) {
+         return this.update_invoice(doc)
+      }
+      else {
+        return this.save_draft_invoice(doc)
+      }
+
     },
     show_payment() {
       evntBus.$emit("show_payment", "true");
-      const invoice_doc = this.save_invoice()
+      const invoice_doc = this.proces_invoice()
       console.log(invoice_doc)
       evntBus.$emit("send_invoice_doc_payment", invoice_doc);
     },
