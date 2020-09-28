@@ -365,6 +365,14 @@ export default {
 
     },
     show_payment() {
+      if (!this.customer) {
+        frappe.throw(__('There is no Customer!')) // TODO : replace whith proper alert
+        return
+      }
+      if (!this.items.length) {
+        frappe.throw(__('There is no Items!')) // TODO : replace whith proper alert
+        return
+      }
       evntBus.$emit("show_payment", "true");
       const invoice_doc = this.proces_invoice()
       console.log(invoice_doc)

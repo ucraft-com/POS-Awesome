@@ -54,7 +54,9 @@
       </v-row>
       <v-row align="end" style="height: 54%">
         <v-col cols="12">
-          <v-btn block class="pa-0" large color="primary" dark @click="submit">Submit Payments</v-btn>
+          <v-btn block class="pa-0" large color="primary" dark @click="submit"
+            >Submit Payments</v-btn
+          >
         </v-col>
       </v-row>
     </v-card>
@@ -74,21 +76,28 @@ export default {
       evntBus.$emit("show_payment", "false");
     },
     submit() {
-        this.update_invoice()
-        evntBus.$emit("new_invoice", "false");
-        this.back_to_invoice()
+      this.update_invoice();
+      evntBus.$emit("new_invoice", "false");
+      this.back_to_invoice();
     },
     update_invoice() {
       frappe.call({
         method: "posawesome.posawesome.api.posapp.submit_invoice",
         args: {
           data: this.invoice_doc,
-          to_submit: "True"
+          to_submit: "True",
         },
         async: true,
         callback: function (r) {
           if (r.message) {
             console.log(r.message);
+            frappe.show_alert( // TODO : replace whith proper alert
+              {
+                message: __(`Invoice ${r.message.name} Submited`),
+                indicator: "green",
+              },
+              5
+            );
           }
         },
       });
