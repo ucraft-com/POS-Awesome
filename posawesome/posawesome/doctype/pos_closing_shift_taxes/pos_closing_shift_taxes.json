@@ -1,0 +1,48 @@
+{
+ "actions": [],
+ "creation": "2020-09-29 03:00:46.321522",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "account_head",
+  "rate",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "account_head",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Account Head",
+   "options": "Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-09-29 03:00:46.321522",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "POS Closing Shift Taxes",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
