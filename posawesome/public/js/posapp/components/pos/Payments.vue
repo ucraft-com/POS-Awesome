@@ -79,10 +79,10 @@ export default {
     submit() {
       this.submit_invoice();
       evntBus.$emit("new_invoice", "false");
-      this.load_print_page();
       this.back_to_invoice();
     },
     submit_invoice() {
+      const vm = this;
       frappe.call({
         method: "posawesome.posawesome.api.posapp.submit_invoice",
         args: {
@@ -92,6 +92,7 @@ export default {
         async: true,
         callback: function (r) {
           if (r.message) {
+            vm.load_print_page();
             frappe.show_alert(
               // TODO : replace whith proper alert
               {
