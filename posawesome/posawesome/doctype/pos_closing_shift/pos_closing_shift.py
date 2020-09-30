@@ -32,7 +32,7 @@ class POSClosingShift(Document):
     def on_submit(self):
         opening_entry = frappe.get_doc(
             "POS Opening Shift", self.pos_opening_shift)
-        opening_entry.pos_closing_entry = self.name
+        opening_entry.pos_closing_shift = self.name
         opening_entry.set_status()
         opening_entry.save()
 
@@ -67,24 +67,25 @@ def get_pos_invoices(pos_opening_shift):
     return data
 
 
-def make_closing_entry_from_opening(opening_entry):
-    closing_entry = frappe.new_doc("POS Closing Shift")
-    closing_entry.pos_opening_shift = opening_entry.name
-    closing_entry.period_start_date = opening_entry.period_start_date
-    closing_entry.period_end_date = frappe.utils.get_datetime()
-    closing_entry.pos_profile = opening_entry.pos_profile
-    closing_entry.user = opening_entry.user
-    closing_entry.company = opening_entry.company
-    closing_entry.grand_total = 0
-    closing_entry.net_total = 0
-    closing_entry.total_quantity = 0
+@frappe.whitelist()
+def make_closing_shift_from_opening(opening_shift):
+    closing_shift = frappe.new_doc("POS Closing Shift")
+    closing_shift.pos_opening_shift = opening_shift.name
+    closing_shift.period_start_date = opening_shift.period_start_date
+    closing_shift.period_end_date = frappe.utils.get_datetime()
+    closing_shift.pos_profile = opening_shift.pos_profile
+    closing_shift.user = opening_shift.user
+    closing_shift.company = opening_shift.company
+    closing_shift.grand_total = 0
+    closing_shift.net_total = 0
+    closing_shift.total_quantity = 0
 
-    invoices = get_pos_invoices(opening_entry.name)
+    invoices = get_pos_invoices(opening_shift.name)
 
     pos_transactions = []
     taxes = []
     payments = []
-    for detail in opening_entry.balance_details:
+    for detail in opening_shift.balance_details:
         payments.append(frappe._dict({
             'mode_of_payment': detail.mode_of_payment,
             'opening_amount': detail.opening_amount,
@@ -98,9 +99,9 @@ def make_closing_entry_from_opening(opening_entry):
             'grand_total': d.grand_total,
             'customer': d.customer
         }))
-        closing_entry.grand_total += flt(d.grand_total)
-        closing_entry.net_total += flt(d.net_total)
-        closing_entry.total_quantity += flt(d.total_qty)
+        closing_shift.grand_total += flt(d.grand_total)
+        closing_shift.net_total += flt(d.net_total)
+        closing_shift.total_quantity += flt(d.total_qty)
 
         for t in d.taxes:
             existing_tax = [tx for tx in taxes if tx.account_head ==
@@ -126,8 +127,8 @@ def make_closing_entry_from_opening(opening_entry):
                     'expected_amount': p.amount
                 }))
 
-    closing_entry.set("pos_transactions", pos_transactions)
-    closing_entry.set("payment_reconciliation", payments)
-    closing_entry.set("taxes", taxes)
+    closing_shift.set("pos_transactions", pos_transactions)
+    closing_shift.set("payment_reconciliation", payments)
+    closing_shift.set("taxes", taxes)
 
-    return closing_entry
+    return closing_shift
