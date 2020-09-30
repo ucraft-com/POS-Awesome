@@ -8,12 +8,15 @@ frappe.ui.form.on('POS Opening Shift', {
 			frm.set_value('period_start_date', frappe.datetime.now_datetime());
 			frm.set_value('user', frappe.session.user);
 		}
-		
-		// FIXME : need redirect to new pos closing doctype
 		frm.set_query("user", function(doc) {
 			return {
-				query: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_cashiers",
+				query: "posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.get_cashiers",
 				filters: { 'parent': doc.pos_profile }
+			};
+		});
+		frm.set_query("pos_profile", function(doc) {
+			return {
+				filters: { 'company': doc.company}
 			};
 		});
 	},
