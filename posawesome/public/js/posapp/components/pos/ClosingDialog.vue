@@ -15,10 +15,30 @@
                     :items="dialog_data.payment_reconciliation"
                     item-key="mode_of_payment"
                     class="elevation-1"
-                    :single-select="singleSelect"
-                    show-select
-                    v-model="selected"
+                    :items-per-page="itemsPerPage"
+                    hide-default-footer
                   >
+                    <template v-slot:item.closing_amount="props">
+                      <v-edit-dialog
+                        :return-value.sync="props.item.closing_amount"
+                      >
+                        {{ props.item.closing_amount }}
+                        <template v-slot:input>
+                          <v-text-field
+                            v-model="props.item.closing_amount"
+                            :rules="[max25chars]"
+                            label="Edit"
+                            single-line
+                            counter
+                            type="number"
+                          ></v-text-field>
+                        </template>
+                      </v-edit-dialog>
+                    </template>
+                    <template v-slot:item.difference="{ item }">{{
+                      (item.difference =
+                        item.expected_amount - item.closing_amount)
+                    }}</template>
                   </v-data-table>
                 </template>
               </v-col>
@@ -40,8 +60,7 @@ import { evntBus } from "../../bus";
 export default {
   data: () => ({
     closingDialog: false,
-    singleSelect: true,
-    selected: [],
+    itemsPerPage: 20,
     dialog_data: {},
     headers: [
       {
@@ -75,6 +94,8 @@ export default {
         sortable: false,
       },
     ],
+    max25chars: (v) => v.length <= 20 || "Input too long!", // TODO : should validate as number
+    pagination: {},
   }),
   watch: {},
   methods: {

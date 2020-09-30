@@ -38,8 +38,8 @@ frappe.ui.form.on('POS Closing Shift', {
 				balance_details.forEach(detail => {
 					frm.add_child("payment_reconciliation", {
 						mode_of_payment: detail.mode_of_payment,
-						opening_amount: detail.opening_amount || 0,
-						expected_amount: detail.opening_amount || 0
+						opening_amount: detail.amount || 0,
+						expected_amount: detail.amount || 0
 					});
 				})
 			});

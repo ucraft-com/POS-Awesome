@@ -89,8 +89,8 @@ def make_closing_shift_from_opening(opening_shift):
     for detail in opening_shift.get("balance_details"):
         payments.append(frappe._dict({
             'mode_of_payment': detail.get("mode_of_payment"),
-            'opening_amount': detail.get("opening_amount") or 0,
-            'expected_amount': detail.get("opening_amount")or 0
+            'opening_amount': detail.get("amount") or 0,
+            'expected_amount': detail.get("amount")or 0
         }))
 
     for d in invoices:
