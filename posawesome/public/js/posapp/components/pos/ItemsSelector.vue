@@ -147,10 +147,15 @@ export default {
       { text: "UOM", value: "stock_uom", align: "start" },
       { text: "Currency", value: "currency", align: "start" },
       { text: "Rate", value: "rate", align: "start" },
+      { text: "Stock QTY", value: "actual_qty", align: "start" },
     ],
   }),
 
-  watch: {},
+  watch: {
+    filtred_items(data_value){
+      this.update_items_details(data_value)
+    }
+  },
 
   methods: {
     get_items() {
@@ -224,6 +229,31 @@ export default {
     },
     esc_event() {
       this.search = null;
+    },
+    update_items_details(items) {
+      const vm = this;
+      frappe.call({
+        method: "posawesome.posawesome.api.posapp.get_items_details",
+        args: {
+          pos_profile: vm.pos_profile,
+          items_data: items,
+        },
+        callback: function (r) {
+          if (r.message) {
+            items.forEach((item) => {
+              const updated_item = r.message.find(
+                (element) => element.item_code == item.item_code
+              );
+              item.actual_qty = updated_item.actual_qty;
+              item.serial_no_data = updated_item.serial_no_data;
+              item.batch_no_data = updated_item.batch_no_data;
+              item.uoms = updated_item.uoms;
+              item.rate = updated_item.rate;
+              item.currency = updated_item.currency;
+            });
+          }
+        },
+      });
     },
   },
 

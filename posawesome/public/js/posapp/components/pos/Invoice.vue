@@ -288,9 +288,10 @@ export default {
       if (index === -1) {
         const new_item = { ...item };
         new_item.qty = 1;
-        (new_item.active = false), this.items.unshift(new_item);
+        this.items.unshift(new_item);
       } else {
         this.items[index].qty++;
+        this.items[index].actual_qty = item.actual_qty;
       }
     },
     cancel_invoice() {

@@ -117,7 +117,9 @@ def get_items(pos_profile):
             has_variants,
             variant_of,
             item_group,
-            idx as idx
+            idx as idx,
+            has_batch_no,
+            has_serial_no
         FROM
             `tabItem`
         WHERE
@@ -128,9 +130,9 @@ def get_items(pos_profile):
         ORDER BY
             name asc
             """
-                               .format(
-                                   conditon
-                               ), as_dict=1)
+            .format(
+                conditon
+            ), as_dict=1)
 
     if items_data:
         items = [d.item_code for d in items_data]
@@ -146,23 +148,15 @@ def get_items(pos_profile):
         for item in items_data:
             item_code = item.item_code
             item_price = item_prices.get(item_code) or {}
-            item_stock_qty = get_stock_availability(item_code, warehouse)
             item_barcode = frappe.get_all("Item Barcode", filters={
                                           "parent": item_code}, fields=["barcode"])
-            uoms = frappe.get_all("UOM Conversion Detail", filters={
-                                  "parent": item_code}, fields=["uom", "conversion_factor"])
-
-            # if not item_stock_qty:
-            #     pass
-            # else:
             row = {}
             row.update(item)
             row.update({
                 'rate': item_price.get('price_list_rate') or 0,
                 'currency': item_price.get('currency') or pos_profile.get("currency"),
-                'actual_qty': item_stock_qty or 0,
                 'item_barcode': item_barcode or [],
-                'item_uoms': uoms or [],
+                'actual_qty': 0,
             })
             result.append(row)
 
@@ -279,3 +273,56 @@ def delete_invoice(invoice):
     doc = frappe.get_doc("Sales Invoice", invoice)
     doc.delete()
     return "Inovice {0} Deleted".format(invoice)
+
+
+@frappe.whitelist()
+def get_items_details(pos_profile , items_data):
+    pos_profile = json.loads(pos_profile)
+    items_data = json.loads(items_data)
+    warehouse = pos_profile.get("warehouse")
+    price_list = pos_profile.get("selling_price_list")
+    result = []
+
+    if len(items_data) > 0:
+        
+        items = [d.get("item_code") for d in items_data]
+        item_prices_data = frappe.get_all("Item Price",
+                                          fields=[
+                                              "item_code", "price_list_rate", "currency"],
+                                          filters={'price_list': price_list, 'item_code': ['in', items]})
+
+        item_prices = {}
+        for d in item_prices_data:
+            item_prices[d.item_code] = d
+
+        for item in items_data:
+            item_code = item.get("item_code")
+            item_price = item_prices.get(item_code) or {}
+            item_stock_qty = get_stock_availability(item_code, warehouse)
+            
+            uoms = frappe.get_all("UOM Conversion Detail", filters={
+                                    "parent": item_code}, fields=["uom", "conversion_factor"])
+            
+            serial_no_data = []
+            if item.get("has_serial_no"):
+                serial_no_data = frappe.get_all('Serial No', filters={
+                                    "item_code": item_code}, fields=["name as serial_no"])
+                
+            batch_no_data = []
+            if item.get("has_batch_no"):
+                batch_no_data = frappe.get_all('Batch', filters={
+                                    "item": item_code}, fields=["name as batch_no"])
+            row = {}
+            row.update(item)
+            row.update({
+                'rate': item_price.get('price_list_rate') or 0,
+                'currency': item_price.get('currency') or pos_profile.get("currency"),
+                'actual_qty': item_stock_qty or 0,
+                'item_uoms': uoms or [],
+                'serial_no_data': serial_no_data or [],
+                'batch_no_data': batch_no_data or [],
+
+            })
+            result.append(row)
+
+    return result
