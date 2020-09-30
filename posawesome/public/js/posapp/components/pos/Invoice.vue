@@ -59,7 +59,7 @@
                 </v-row>
                 <v-row>
                   <v-col cols="6">
-                    <p>More info about {{ item.name }} {{ expanded }}</p>
+                    <p>More info about {{ item.name }} {{ item }}</p>
                   </v-col>
                 </v-row>
               </td>
@@ -224,12 +224,12 @@ export default {
       items: [],
       itemsPerPage: 1000,
       expanded: [],
-      singleExpand: true,
+      singleExpand: false,
       items_headers: [
         {
           text: "Name",
           align: "start",
-          sortable: false,
+          sortable: true,
           value: "item_name",
         },
         { text: "QTY", value: "qty", align: "center" },
@@ -454,6 +454,31 @@ export default {
     close_payments() {
       evntBus.$emit("show_payment", "false");
     },
+    update_items_details(items) {
+      const vm = this;
+      frappe.call({
+        method: "posawesome.posawesome.api.posapp.get_items_details",
+        args: {
+          pos_profile: vm.pos_profile,
+          items_data: items,
+        },
+        callback: function (r) {
+          if (r.message) {
+            items.forEach((item) => {
+              const updated_item = r.message.find(
+                (element) => element.item_code == item.item_code
+              );
+              item.actual_qty = updated_item.actual_qty;
+              item.serial_no_data = updated_item.serial_no_data;
+              item.batch_no_data = updated_item.batch_no_data;
+              item.uoms = updated_item.uoms;
+              item.rate = updated_item.rate;
+              item.currency = updated_item.currency;
+            });
+          }
+        },
+      });
+    },
   },
   created() {
     this.$nextTick(function () {});
@@ -482,6 +507,9 @@ export default {
     customer() {
       this.close_payments();
       evntBus.$emit("set_customer", this.customer);
+    },
+    expanded(data_value) {
+      this.update_items_details(data_value);
     },
   },
 };
