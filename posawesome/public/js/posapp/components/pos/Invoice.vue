@@ -288,8 +288,10 @@ export default {
       if (index === -1) {
         const new_item = { ...item };
         new_item.qty = 1;
+        this.update_items_details([new_item])
         this.items.unshift(new_item);
       } else {
+        this.update_items_details([this.items[index]])
         this.items[index].qty++;
         this.items[index].actual_qty = item.actual_qty;
       }

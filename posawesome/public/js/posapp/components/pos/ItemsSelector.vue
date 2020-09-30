@@ -144,10 +144,10 @@ export default {
     itemsPerPage: 1000,
     items_headers: [
       { text: "Name", align: "start", sortable: true, value: "item_name" },
-      { text: "UOM", value: "stock_uom", align: "start" },
-      { text: "Currency", value: "currency", align: "start" },
       { text: "Rate", value: "rate", align: "start" },
-      { text: "Stock QTY", value: "actual_qty", align: "start" },
+      { text: "Currency", value: "currency", align: "start" },
+      { text: "Available QTY", value: "actual_qty", align: "start" },
+      { text: "UOM", value: "stock_uom", align: "start" },
     ],
   }),
 
@@ -255,6 +255,9 @@ export default {
         },
       });
     },
+    update_cur_items_details(){
+      this.update_items_details(this.filtred_items);
+    },
   },
 
   computed: {
@@ -302,6 +305,9 @@ export default {
       this.pos_profile = data.pos_profile;
       this.get_items();
       this.get_items_groups();
+    });
+    evntBus.$on("update_cur_items_details", () => {
+      this.update_cur_items_details();
     });
   },
 

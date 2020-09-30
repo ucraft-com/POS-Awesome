@@ -80,7 +80,8 @@ export default {
         console.log(data.item);
       });
       evntBus.$on("show_payment", (data) => {
-        this.payment = true ? data ==="true": false
+        this.payment = true ? data ==="true": false;
+        evntBus.$emit("update_cur_items_details");
       })
     });
   },
