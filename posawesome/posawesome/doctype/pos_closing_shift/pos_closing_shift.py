@@ -69,27 +69,28 @@ def get_pos_invoices(pos_opening_shift):
 
 @frappe.whitelist()
 def make_closing_shift_from_opening(opening_shift):
+    opening_shift = json.loads(opening_shift)
     closing_shift = frappe.new_doc("POS Closing Shift")
-    closing_shift.pos_opening_shift = opening_shift.name
-    closing_shift.period_start_date = opening_shift.period_start_date
+    closing_shift.pos_opening_shift = opening_shift.get("name")
+    closing_shift.period_start_date = opening_shift.get("period_start_date")
     closing_shift.period_end_date = frappe.utils.get_datetime()
-    closing_shift.pos_profile = opening_shift.pos_profile
-    closing_shift.user = opening_shift.user
-    closing_shift.company = opening_shift.company
+    closing_shift.pos_profile = opening_shift.get("pos_profile")
+    closing_shift.user = opening_shift.get("user")
+    closing_shift.company = opening_shift.get("company")
     closing_shift.grand_total = 0
     closing_shift.net_total = 0
     closing_shift.total_quantity = 0
 
-    invoices = get_pos_invoices(opening_shift.name)
+    invoices = get_pos_invoices(opening_shift.get("name"))
 
     pos_transactions = []
     taxes = []
     payments = []
-    for detail in opening_shift.balance_details:
+    for detail in opening_shift.get("balance_details"):
         payments.append(frappe._dict({
-            'mode_of_payment': detail.mode_of_payment,
-            'opening_amount': detail.opening_amount,
-            'expected_amount': detail.opening_amount
+            'mode_of_payment': detail.get("mode_of_payment"),
+            'opening_amount': detail.get("opening_amount") or 0,
+            'expected_amount': detail.get("opening_amount")or 0
         }))
 
     for d in invoices:
@@ -132,3 +133,14 @@ def make_closing_shift_from_opening(opening_shift):
     closing_shift.set("taxes", taxes)
 
     return closing_shift
+
+
+@frappe.whitelist()
+def submit_closing_shift(closing_shift):
+    closing_shift = json.loads(closing_shift)
+
+    closing_shift_doc = frappe.get_doc(closing_shift)
+    closing_shift_doc.flags.ignore_permissions = True
+    closing_shift_doc.save()
+    closing_shift_doc.submit()
+    return closing_shift_doc.name

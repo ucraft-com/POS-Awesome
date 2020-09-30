@@ -9,6 +9,30 @@
 
       <v-spacer></v-spacer>
 
+       <div class="text-center">
+        <v-menu offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn color="grey" dark text v-bind="attrs" v-on="on">Menu</v-btn>
+          </template>
+          <v-card class="mx-auto" max-width="300" tile>
+            <v-list dense>
+              <v-list-item-group v-model="menu_item" color="primary">
+                <v-list-item
+                  @click="close_shift_dialog"
+                >
+                  <v-list-item-icon>
+                    <v-icon>mdi-folder-open</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title>Close Shift</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-list-item-group>
+            </v-list>
+          </v-card>
+        </v-menu>
+       </div>
+
       <div class="text-center">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
@@ -68,7 +92,7 @@
 </template>
 
 <script>
-// import MyPopup from './MyPopup.vue';
+import { evntBus } from "../bus";
 
 export default {
   // components: {MyPopup},
@@ -88,6 +112,7 @@ export default {
       menu: false,
       message: false,
       hints: true,
+      menu_item: 0,
     };
   },
   methods: {
@@ -95,9 +120,11 @@ export default {
       this.$emit("changePage", key);
     },
     go_to() {
-      //  window.location = document.location.href.substring(0,document.location.href.length - 6);
       frappe.set_route("workspace", "home");
       location.reload();
+    },
+    close_shift_dialog(){
+      evntBus.$emit("open_closing_dialog");
     },
   },
 };

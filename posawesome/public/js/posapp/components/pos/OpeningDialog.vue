@@ -185,7 +185,6 @@ export default {
       this.snack = true;
       this.snackColor = "success";
       this.snackText = "Data saved";
-      console.log(this.payments_methods);
     },
     cancel() {
       // TODO : need to remove
@@ -201,7 +200,6 @@ export default {
     },
     close() {
       // TODO : need to remove
-      console.log("Dialog closed");
     },
   },
   created: function () {

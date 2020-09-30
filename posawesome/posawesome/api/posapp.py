@@ -65,7 +65,8 @@ def check_opening_shift(user):
                                       filters={
                                           "user": user,
                                           "pos_closing_entry": ["in", ["", None]],
-                                          "docstatus": 1
+                                          "docstatus": 1,
+                                          "status": "Open"
                                       },
                                       fields=["name",
                                               "pos_profile"],
