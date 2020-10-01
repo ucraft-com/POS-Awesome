@@ -85,7 +85,6 @@ def check_opening_shift(user):
 @frappe.whitelist()
 def get_items(pos_profile):
     pos_profile = json.loads(pos_profile)
-    warehouse = pos_profile.get("warehouse")
     price_list = pos_profile.get("selling_price_list")
 
     item_groups_list = []
@@ -233,6 +232,9 @@ def update_invoice(data):
 def submit_invoice(data, to_submit=None):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
+    invoice_doc.loyalty_amount = data.get("loyalty_amount");
+    invoice_doc.redeem_loyalty_points = data.get("redeem_loyalty_points");
+    invoice_doc.loyalty_points = data.get("loyalty_points");
     for payment in data.get("payments"):
         if payment.get("amount"):
             for i in invoice_doc.payments:

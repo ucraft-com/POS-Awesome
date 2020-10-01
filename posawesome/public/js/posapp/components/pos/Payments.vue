@@ -35,11 +35,8 @@
           >
         </v-col>
       </v-row>
-      <v-row
-        class="pyments px-1 py-0"
-        v-if="invoice_doc"
-      >
-         <v-col cols="7">
+      <v-row class="pyments px-1 py-0" v-if="invoice_doc">
+        <v-col cols="7">
           <v-text-field
             dense
             outlined
@@ -47,13 +44,13 @@
             label="Redeem Loyalty Points"
             background-color="white"
             hide-details
-            v-model="invoice_doc.loyalty_amount"
+            v-model="loyalty_amount"
             type="number"
             :prefix="invoice_doc.currency"
           ></v-text-field>
         </v-col>
         <v-col cols="5">
-            <v-text-field
+          <v-text-field
             dense
             outlined
             color="indigo"
@@ -206,6 +203,7 @@ export default {
     loading: false,
     pos_profile: "",
     invoice_doc: "",
+    loyalty_amount: 0,
   }),
 
   methods: {
@@ -268,7 +266,7 @@ export default {
 
   computed: {
     total_payments() {
-      let total = 0;
+      let total = flt(this.invoice_doc.loyalty_amount);
       this.invoice_doc.payments.forEach((payment) => {
         total += flt(payment.amount);
       });
@@ -279,22 +277,28 @@ export default {
     },
     diff_lable() {
       let lable = this.diff_payment < 0 ? "Change" : "To Be Paid";
-      return lable
+      return lable;
     },
     available_pioints_amount() {
-      let amount = 0
+      let amount = 0;
       if (this.invoice_doc.customer_info.loyalty_points) {
-       amount = this.invoice_doc.customer_info.loyalty_points / this.invoice_doc.customer_info.conversion_factor
+        amount =
+          this.invoice_doc.customer_info.loyalty_points /
+          this.invoice_doc.customer_info.conversion_factor;
       }
-      return amount
-    }
+      return amount;
+    },
   },
 
   created: function () {
     this.$nextTick(function () {
       evntBus.$on("send_invoice_doc_payment", (invoice_doc) => {
         this.invoice_doc = invoice_doc;
-        this.invoice_doc.payments[0].amount = invoice_doc.grand_total;
+        const default_payment = this.invoice_doc.payments.find(
+          (payment) => payment.default == 1
+        );
+        default_payment.amount = invoice_doc.grand_total;
+        this.loyalty_amount = 0;
       });
       evntBus.$on("register_pos_profile", (data) => {
         this.pos_profile = data.pos_profile;
@@ -302,7 +306,21 @@ export default {
     });
   },
 
-  watch: {},
+  watch: {
+    loyalty_amount(value) {
+      if (value > this.available_pioints_amount) {
+        this.invoice_doc.loyalty_amount = 0;
+        this.invoice_doc.redeem_loyalty_points = 0;
+        this.invoice_doc.loyalty_points = 0;
+      } else {
+        this.invoice_doc.loyalty_amount = flt(this.loyalty_amount);
+        this.invoice_doc.redeem_loyalty_points = 1;
+        this.invoice_doc.loyalty_points =
+          flt(this.loyalty_amount) *
+          this.invoice_doc.customer_info.conversion_factor;
+      }
+    },
+  },
 };
 </script>
 

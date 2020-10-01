@@ -417,12 +417,8 @@ export default {
     get_payments() {
       const payments = [];
       this.pos_profile.payments.forEach((payment) => {
-        let amount = 0;
-        if (payment.default == 1) {
-          amount = this.subtotal;
-        }
         payments.push({
-          amount: amount,
+          amount: 0,
           mode_of_payment: payment.mode_of_payment,
           default: payment.default,
           account: "",
