@@ -88,16 +88,6 @@
                     type="number"
                   ></v-text-field>
                 </v-col>
-                <!-- <v-col cols="12">
-                  <v-text-field
-                    v-model="subtotal"
-                    label="Subtotal"
-                    outlined
-                    dense
-                    readonly
-                    hide-details
-                  ></v-text-field>
-                </v-col> -->
                 <v-col cols="12">
                   <v-text-field
                     v-model="items_discounts"
@@ -110,10 +100,6 @@
                     :prefix="pos_profile.currency"
                   ></v-text-field>
                 </v-col>
-              </v-row>
-            </v-col>
-            <v-col no-gutters cols="6">
-              <v-row no-gutters class="ma-1 pa-0" style="height: 100%">
                 <v-col cols="12">
                   <v-text-field
                     v-model="additional_discount"
@@ -125,16 +111,6 @@
                     :prefix="pos_profile.currency"
                   ></v-text-field>
                 </v-col>
-                <!-- <v-col cols="12">
-                  <v-text-field
-                    v-model="total_tax"
-                    label="TAX"
-                    outlined
-                    dense
-                    readonly
-                    hide-details
-                  ></v-text-field>
-                </v-col> -->
                 <v-col cols="12">
                   <v-text-field
                     v-model="subtotal"
@@ -146,6 +122,52 @@
                     class="text--red"
                     type="number"
                     :prefix="pos_profile.currency"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-col>
+            <v-col no-gutters cols="6">
+              <v-row no-gutters class="ma-1 pa-0" style="height: 100%">
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="customer_info.email_id"
+                    label="Email"
+                    outlined
+                    dense
+                    disabled
+                    hide-details
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="customer_info.mobile_no"
+                    label="ِPhone Number"
+                    outlined
+                    dense
+                    hide-details
+                    disabled
+                    type="number"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="customer_info.loyalty_program"
+                    label="Loyalty Program"
+                    outlined
+                    dense
+                    disabled
+                    hide-details
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field
+                    v-model="customer_info.loyalty_points"
+                    label="Loyalty Points"
+                    outlined
+                    dense
+                    disabled
+                    hide-details
+                    type="number"
                   ></v-text-field>
                 </v-col>
               </v-row>
