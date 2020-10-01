@@ -227,14 +227,10 @@ export default {
         callback: function (r) {
           if (r.message) {
             vm.load_print_page();
-            frappe.show_alert(
-              // TODO : replace whith proper alert
-              {
-                message: __(`Invoice ${r.message.name} Submited`),
-                indicator: "green",
-              },
-              5
-            );
+            evntBus.$emit("show_mesage", {
+              text: `Invoice ${r.message.name} Submited`,
+              color: "success",
+            });
           }
         },
       });
@@ -312,6 +308,10 @@ export default {
         this.invoice_doc.loyalty_amount = 0;
         this.invoice_doc.redeem_loyalty_points = 0;
         this.invoice_doc.loyalty_points = 0;
+        evntBus.$emit("show_mesage", {
+          text: `Loyalty Amount can not be more then ${this.available_pioints_amount}`,
+          color: "error",
+        });
       } else {
         this.invoice_doc.loyalty_amount = flt(this.loyalty_amount);
         this.invoice_doc.redeem_loyalty_points = 1;

@@ -232,9 +232,10 @@ def update_invoice(data):
 def submit_invoice(data, to_submit=None):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
-    invoice_doc.loyalty_amount = data.get("loyalty_amount");
-    invoice_doc.redeem_loyalty_points = data.get("redeem_loyalty_points");
-    invoice_doc.loyalty_points = data.get("loyalty_points");
+    if data.get("loyalty_amount") > 0:
+        invoice_doc.loyalty_amount = data.get("loyalty_amount")
+        invoice_doc.redeem_loyalty_points = data.get("redeem_loyalty_points")
+        invoice_doc.loyalty_points = data.get("loyalty_points")
     for payment in data.get("payments"):
         if payment.get("amount"):
             for i in invoice_doc.payments:

@@ -452,11 +452,17 @@ export default {
     },
     show_payment() {
       if (!this.customer) {
-        frappe.throw(__("There is no Customer!")); // TODO : replace whith proper alert
+        evntBus.$emit("show_mesage", {
+          text: `There is no Customer !`,
+          color: "error"
+        })
         return;
       }
       if (!this.items.length) {
-        frappe.throw(__("There is no Items!")); // TODO : replace whith proper alert
+         evntBus.$emit("show_mesage", {
+          text: `There is no Items !`,
+          color: "error"
+        })
         return;
       }
       evntBus.$emit("show_payment", "true");

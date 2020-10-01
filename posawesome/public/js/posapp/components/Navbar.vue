@@ -1,7 +1,10 @@
 <template>
   <nav>
     <v-app-bar app height="40" class="elevation-2">
-      <v-app-bar-nav-icon @click.stop="mini = !mini" class="grey--text"></v-app-bar-nav-icon>
+      <v-app-bar-nav-icon
+        @click.stop="mini = !mini"
+        class="grey--text"
+      ></v-app-bar-nav-icon>
       <v-toolbar-title class="text-uppercase indigo--text">
         <span class="font-weight-light">pos</span>
         <span>awesome</span>
@@ -9,7 +12,7 @@
 
       <v-spacer></v-spacer>
 
-       <div class="text-center">
+      <div class="text-center">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
             <v-btn color="grey" dark text v-bind="attrs" v-on="on">Menu</v-btn>
@@ -17,9 +20,7 @@
           <v-card class="mx-auto" max-width="300" tile>
             <v-list dense>
               <v-list-item-group v-model="menu_item" color="primary">
-                <v-list-item
-                  @click="close_shift_dialog"
-                >
+                <v-list-item @click="close_shift_dialog">
                   <v-list-item-icon>
                     <v-icon>mdi-folder-open</v-icon>
                   </v-list-item-icon>
@@ -31,7 +32,7 @@
             </v-list>
           </v-card>
         </v-menu>
-       </div>
+      </div>
 
       <div class="text-center">
         <v-menu offset-y>
@@ -44,7 +45,7 @@
                 <v-list-item
                   v-for="(item, index) in items"
                   :key="item.text"
-                  @click="[changePage(item.text), item = index]"
+                  @click="[changePage(item.text), (item = index)]"
                 >
                   <v-list-item-icon>
                     <v-icon v-text="item.icon"></v-icon>
@@ -62,7 +63,12 @@
         <span right>Erpnext</span>
       </v-btn>
     </v-app-bar>
-    <v-navigation-drawer v-model="drawer" :mini-variant.sync="mini" app class="indigo margen-top">
+    <v-navigation-drawer
+      v-model="drawer"
+      :mini-variant.sync="mini"
+      app
+      class="indigo margen-top"
+    >
       <v-list dark>
         <v-list-item class="px-2">
           <v-list-item-avatar>
@@ -77,7 +83,11 @@
         </v-list-item>
         <!-- <MyPopup/> -->
         <v-list-item-group v-model="item" color="white">
-          <v-list-item v-for="item in items" :key="item.text" @click="changePage(item.text)">
+          <v-list-item
+            v-for="item in items"
+            :key="item.text"
+            @click="changePage(item.text)"
+          >
             <v-list-item-icon>
               <v-icon v-text="item.icon"></v-icon>
             </v-list-item-icon>
@@ -88,6 +98,12 @@
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
+    <v-snackbar v-model="snack" :timeout="5000" :color="snackColor" top right>
+      {{ snackText }}
+      <template v-slot:action="{ attrs }">
+        <v-btn v-bind="attrs" text @click="snack = false">Close</v-btn>
+      </template>
+    </v-snackbar>
   </nav>
 </template>
 
@@ -113,6 +129,9 @@ export default {
       message: false,
       hints: true,
       menu_item: 0,
+      snack: false,
+      snackColor: "",
+      snackText: "",
     };
   },
   methods: {
@@ -123,9 +142,21 @@ export default {
       frappe.set_route("workspace", "home");
       location.reload();
     },
-    close_shift_dialog(){
+    close_shift_dialog() {
       evntBus.$emit("open_closing_dialog");
     },
+    show_mesage(data) {
+      this.snack = true;
+      this.snackColor = data.color;
+      this.snackText = data.text;
+    },
+  },
+  created: function () {
+    this.$nextTick(function () {
+      evntBus.$on("show_mesage", (data) => {
+        this.show_mesage(data);
+      });
+    });
   },
 };
 </script>
