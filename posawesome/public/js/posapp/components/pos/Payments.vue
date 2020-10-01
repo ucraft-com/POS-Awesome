@@ -42,6 +42,20 @@
             dense
             outlined
             color="indigo"
+            label="Net Total"
+            background-color="white"
+            hide-details
+            v-model="invoice_doc.net_total"
+            type="number"
+            disabled
+            :prefix="invoice_doc.currency"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="6">
+          <v-text-field
+            dense
+            outlined
+            color="indigo"
             label="Tax and Charges"
             background-color="white"
             hide-details
