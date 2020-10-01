@@ -418,8 +418,8 @@ export default {
       const payments = [];
       this.pos_profile.payments.forEach((payment) => {
         let amount = 0;
-        if (payment.mode_of_payment === "Cash") {
-          amount = this.subtotal; // NOTE : this shoulde updated from user
+        if (payment.default == 1) {
+          amount = this.subtotal;
         }
         payments.push({
           amount: amount,
@@ -465,6 +465,7 @@ export default {
       }
       evntBus.$emit("show_payment", "true");
       const invoice_doc = this.proces_invoice();
+      invoice_doc.customer_info = this.customer_info;
       evntBus.$emit("send_invoice_doc_payment", invoice_doc);
     },
     get_draft_invoices() {

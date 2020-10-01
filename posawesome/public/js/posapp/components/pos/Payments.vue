@@ -31,8 +31,40 @@
         </v-col>
         <v-col cols="5">
           <v-btn block class="" color="primary" dark
-            >Pay Full {{ payment.mode_of_payment }}</v-btn
+            >Submit {{ payment.mode_of_payment }}</v-btn
           >
+        </v-col>
+      </v-row>
+      <v-row
+        class="pyments px-1 py-0"
+        v-if="invoice_doc"
+      >
+         <v-col cols="7">
+          <v-text-field
+            dense
+            outlined
+            color="indigo"
+            label="Redeem Loyalty Points"
+            background-color="white"
+            hide-details
+            v-model="invoice_doc.loyalty_amount"
+            type="number"
+            :prefix="invoice_doc.currency"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="5">
+            <v-text-field
+            dense
+            outlined
+            color="indigo"
+            label="You can redeem upto"
+            background-color="white"
+            hide-details
+            v-model="available_pioints_amount"
+            type="number"
+            :prefix="invoice_doc.currency"
+            disabled
+          ></v-text-field>
         </v-col>
       </v-row>
       <v-divider></v-divider>
@@ -249,6 +281,13 @@ export default {
       let lable = this.diff_payment < 0 ? "Change" : "To Be Paid";
       return lable
     },
+    available_pioints_amount() {
+      let amount = 0
+      if (this.invoice_doc.customer_info.loyalty_points) {
+       amount = this.invoice_doc.customer_info.loyalty_points / this.invoice_doc.customer_info.conversion_factor
+      }
+      return amount
+    }
   },
 
   created: function () {
