@@ -107,7 +107,7 @@
                     readonly
                     hide-details
                     type="number"
-                    :prefix=pos_profile.currency
+                    :prefix="pos_profile.currency"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -122,7 +122,7 @@
                     dense
                     hide-details
                     type="number"
-                    :prefix=pos_profile.currency
+                    :prefix="pos_profile.currency"
                   ></v-text-field>
                 </v-col>
                 <!-- <v-col cols="12">
@@ -145,7 +145,7 @@
                     hide-details
                     class="text--red"
                     type="number"
-                    :prefix=pos_profile.currency
+                    :prefix="pos_profile.currency"
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -224,6 +224,7 @@ export default {
       pos_opening_shift: "",
       invoice_doc: "",
       customer: "",
+      customer_info: "",
       items_discounts: 0,
       additional_discount: 0,
       total_tax: 0,
@@ -294,10 +295,10 @@ export default {
       if (index === -1) {
         const new_item = { ...item };
         new_item.qty = 1;
-        this.update_items_details([new_item])
+        this.update_items_details([new_item]);
         this.items.unshift(new_item);
       } else {
-        this.update_items_details([this.items[index]])
+        this.update_items_details([this.items[index]]);
         this.items[index].qty++;
         this.items[index].actual_qty = item.actual_qty;
       }
@@ -487,6 +488,54 @@ export default {
         },
       });
     },
+    fetch_customer_details() {
+      const vm = this;
+      if (this.customer) {
+        return new Promise((resolve) => {
+          frappe.db
+            .get_value("Customer", vm.customer, [
+              "email_id",
+              "mobile_no",
+              "image",
+              "loyalty_program",
+            ])
+            .then(({ message }) => {
+              const { loyalty_program } = message;
+              if (loyalty_program) {
+                frappe.call({
+                  method:
+                    "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
+                  args: {
+                    customer: vm.customer,
+                    loyalty_program,
+                    silent: true,
+                  },
+                  callback: (r) => {
+                    const { loyalty_points, conversion_factor } = r.message;
+                    if (!r.exc) {
+                      vm.customer_info = {
+                        ...message,
+                        customer: vm.customer,
+                        loyalty_points,
+                        conversion_factor,
+                      };
+                      resolve();
+                    }
+                  },
+                });
+              } else {
+                vm.customer_info = { ...message, customer: vm.customer };
+                resolve();
+              }
+            });
+        });
+      } else {
+        return new Promise((resolve) => {
+          vm.customer_info = {};
+          resolve();
+        });
+      }
+    },
   },
   created() {
     this.$nextTick(function () {});
@@ -515,6 +564,8 @@ export default {
     customer() {
       this.close_payments();
       evntBus.$emit("set_customer", this.customer);
+      this.fetch_customer_details();
+      // this.get_loyalty();
     },
     expanded(data_value) {
       this.update_items_details(data_value);
