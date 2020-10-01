@@ -69,13 +69,6 @@
           <!-- <v-btn color="red" dark @click="close_opening_dialog">Close</v-btn> -->
           <v-btn color="blue" dark @click="submit_dialog">Submit</v-btn>
         </v-card-actions>
-        <v-snackbar v-model="snack" :timeout="3000" :color="snackColor">
-          // TODO : need to remove
-          {{ snackText }}
-          <template v-slot:action="{ attrs }">
-            <v-btn v-bind="attrs" text @click="snack = false">Close</v-btn>
-          </template>
-        </v-snackbar>
       </v-card>
     </v-dialog>
   </v-row>
@@ -182,21 +175,12 @@ export default {
     },
     save() {
       // TODO : need to remove
-      this.snack = true;
-      this.snackColor = "success";
-      this.snackText = "Data saved";
     },
     cancel() {
       // TODO : need to remove
-      this.snack = true;
-      this.snackColor = "error";
-      this.snackText = "Canceled";
     },
     open() {
       // TODO : need to remove
-      this.snack = true;
-      this.snackColor = "info";
-      this.snackText = "Dialog opened";
     },
     close() {
       // TODO : need to remove

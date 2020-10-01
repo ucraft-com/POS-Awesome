@@ -138,7 +138,6 @@ def make_closing_shift_from_opening(opening_shift):
 @frappe.whitelist()
 def submit_closing_shift(closing_shift):
     closing_shift = json.loads(closing_shift)
-
     closing_shift_doc = frappe.get_doc(closing_shift)
     closing_shift_doc.flags.ignore_permissions = True
     closing_shift_doc.save()
