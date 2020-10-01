@@ -85,6 +85,7 @@
                     dense
                     readonly
                     hide-details
+                    type="number"
                   ></v-text-field>
                 </v-col>
                 <!-- <v-col cols="12">
@@ -105,6 +106,8 @@
                     dense
                     readonly
                     hide-details
+                    type="number"
+                    :prefix=pos_profile.currency
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -118,6 +121,8 @@
                     outlined
                     dense
                     hide-details
+                    type="number"
+                    :prefix=pos_profile.currency
                   ></v-text-field>
                 </v-col>
                 <!-- <v-col cols="12">
@@ -139,6 +144,8 @@
                     readonly
                     hide-details
                     class="text--red"
+                    type="number"
+                    :prefix=pos_profile.currency
                   ></v-text-field>
                 </v-col>
               </v-row>
@@ -235,7 +242,6 @@ export default {
         { text: "QTY", value: "qty", align: "center" },
         { text: "UOM", value: "stock_uom", align: "center" },
         { text: "Rate", value: "rate", align: "center" },
-        // { text: "VAT", value: "vat", align: "center" },
         { text: "Amount", value: "amount", align: "center" },
       ],
     };
@@ -250,7 +256,7 @@ export default {
       this.items.forEach((item) => {
         qty += item.qty;
       });
-      return qty;
+      return flt(qty);
     },
     subtotal() {
       this.close_payments();
@@ -258,7 +264,7 @@ export default {
       this.items.forEach((item) => {
         sum += item.qty * item.rate;
       });
-      return sum;
+      return flt(sum);
     },
   },
   methods: {

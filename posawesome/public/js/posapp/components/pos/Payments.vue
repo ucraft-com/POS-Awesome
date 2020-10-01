@@ -25,12 +25,102 @@
             background-color="white"
             hide-details
             v-model="payment.amount"
+            type="number"
+            :prefix="invoice_doc.currency"
           ></v-text-field>
         </v-col>
         <v-col cols="5">
           <v-btn block class="" color="primary" dark
             >Pay Full {{ payment.mode_of_payment }}</v-btn
           >
+        </v-col>
+      </v-row>
+      <v-divider></v-divider>
+      <v-row class="px-1 py-0">
+        <v-col cols="6">
+          <v-text-field
+            dense
+            outlined
+            color="indigo"
+            label="Tax and Charges"
+            background-color="white"
+            hide-details
+            v-model="invoice_doc.total_taxes_and_charges"
+            type="number"
+            disabled
+            :prefix="invoice_doc.currency"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="6">
+          <v-text-field
+            dense
+            outlined
+            color="indigo"
+            label="Totoal Amount"
+            background-color="white"
+            hide-details
+            v-model="invoice_doc.total"
+            type="number"
+            disabled
+            :prefix="invoice_doc.currency"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="6">
+          <v-text-field
+            dense
+            outlined
+            color="indigo"
+            label="Discount Amount"
+            background-color="white"
+            hide-details
+            v-model="invoice_doc.discount_amount"
+            type="number"
+            disabled
+            :prefix="invoice_doc.currency"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="6">
+          <v-text-field
+            dense
+            outlined
+            color="indigo"
+            label="Grand Amount"
+            background-color="white"
+            hide-details
+            v-model="invoice_doc.grand_total"
+            type="number"
+            disabled
+            :prefix="invoice_doc.currency"
+          ></v-text-field>
+        </v-col>
+      </v-row>
+      <v-divider></v-divider>
+      <v-row v-if="invoice_doc" class="px-1 py-0">
+        <v-col cols="6">
+          <v-text-field
+            outlined
+            color="indigo"
+            label="Paid Amount"
+            background-color="white"
+            hide-details
+            v-model="total_payments"
+            type="number"
+            readonly
+            :prefix="invoice_doc.currency"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="6">
+          <v-text-field
+            outlined
+            color="indigo"
+            :label="diff_lable"
+            background-color="white"
+            hide-details
+            v-model="diff_payment"
+            type="number"
+            disabled
+            :prefix="invoice_doc.currency"
+          ></v-text-field>
         </v-col>
       </v-row>
     </v-card>
@@ -117,15 +207,12 @@ export default {
         letter_head;
 
       // TODO : need better way for printing
-      const printWindow = window.open(
-        url,
-        "Print"
-      );
+      const printWindow = window.open(url, "Print");
       printWindow.addEventListener(
         "load",
         function () {
           printWindow.print();
-          // printWindow.close(); 
+          // printWindow.close();
           // NOTE : uncomoent this to auto closing printing window
         },
         true
@@ -133,13 +220,28 @@ export default {
     },
   },
 
-  computed: {},
+  computed: {
+    total_payments() {
+      let total = 0;
+      this.invoice_doc.payments.forEach((payment) => {
+        total += flt(payment.amount);
+      });
+      return total;
+    },
+    diff_payment() {
+      return this.invoice_doc.grand_total - this.total_payments;
+    },
+    diff_lable() {
+      let lable = this.diff_payment < 0 ? "Change" : "To Be Paid";
+      return lable
+    },
+  },
 
   created: function () {
     this.$nextTick(function () {
       evntBus.$on("send_invoice_doc_payment", (invoice_doc) => {
         this.invoice_doc = invoice_doc;
-        this.invoice_doc.payments[0].amount = invoice_doc.total;
+        this.invoice_doc.payments[0].amount = invoice_doc.grand_total;
       });
       evntBus.$on("register_pos_profile", (data) => {
         this.pos_profile = data.pos_profile;
@@ -150,3 +252,4 @@ export default {
   watch: {},
 };
 </script>
+
