@@ -9,7 +9,10 @@ from frappe.utils import getdate, now_datetime, nowdate, flt, cint, get_datetime
 from frappe import _
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
-from erpnext.controllers.accounts_controller import get_taxes_and_charges
+# from erpnext.controllers.accounts_controller import get_taxes_and_charges
+# from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
+# from erpnext.utilities.product import get_price
+from erpnext.stock.get_item_details import get_item_details
 import json
 from posawesome import console
 
@@ -284,24 +287,24 @@ def get_items_details(pos_profile , items_data):
     pos_profile = json.loads(pos_profile)
     items_data = json.loads(items_data)
     warehouse = pos_profile.get("warehouse")
-    price_list = pos_profile.get("selling_price_list")
+    # price_list = pos_profile.get("selling_price_list")
     result = []
 
     if len(items_data) > 0:
         
         items = [d.get("item_code") for d in items_data]
-        item_prices_data = frappe.get_all("Item Price",
-                                          fields=[
-                                              "item_code", "price_list_rate", "currency"],
-                                          filters={'price_list': price_list, 'item_code': ['in', items]})
+        # item_prices_data = frappe.get_all("Item Price",
+        #                                   fields=[
+        #                                       "item_code", "price_list_rate", "currency"],
+        #                                   filters={'price_list': price_list, 'item_code': ['in', items]})
 
-        item_prices = {}
-        for d in item_prices_data:
-            item_prices[d.item_code] = d
+        # item_prices = {}
+        # for d in item_prices_data:
+        #     item_prices[d.item_code] = d
 
         for item in items_data:
             item_code = item.get("item_code")
-            item_price = item_prices.get(item_code) or {}
+            # item_price = item_prices.get(item_code) or {}
             item_stock_qty = get_stock_availability(item_code, warehouse)
             
             uoms = frappe.get_all("UOM Conversion Detail", filters={
@@ -319,8 +322,8 @@ def get_items_details(pos_profile , items_data):
             row = {}
             row.update(item)
             row.update({
-                'rate': item_price.get('price_list_rate') or 0,
-                'currency': item_price.get('currency') or pos_profile.get("currency"),
+                # 'rate': item_price.get('price_list_rate') or 0,
+                # 'currency': item_price.get('currency') or pos_profile.get("currency"),
                 'actual_qty': item_stock_qty or 0,
                 'item_uoms': uoms or [],
                 'serial_no_data': serial_no_data or [],
@@ -330,3 +333,9 @@ def get_items_details(pos_profile , items_data):
             result.append(row)
 
     return result
+
+
+@frappe.whitelist()
+def get_item_detail(data, doc=None):
+    data = json.loads(data)
+    return get_item_details(data, doc)

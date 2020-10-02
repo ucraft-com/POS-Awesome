@@ -34,7 +34,6 @@
   {
    "fieldname": "period_end_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Period End Date",
    "read_only": 1
   },
@@ -140,7 +139,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-30 22:08:57.386081",
+ "modified": "2020-10-01 23:07:04.737704",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Opening Shift",

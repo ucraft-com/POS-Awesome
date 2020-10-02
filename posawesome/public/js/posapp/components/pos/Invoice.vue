@@ -23,15 +23,10 @@
             }}</template>
 
             <template v-slot:expanded-item="{ headers, item }">
-              <td :colspan="headers.length">
-                <v-row>
+              <td :colspan="headers.length" class="ma-0 pa-0">
+                <v-row class="ma-0 pa-0">
                   <v-col cols="1">
-                    <v-btn
-                      icon
-                      small
-                      color="red"
-                      @click.stop="remove_item(item)"
-                    >
+                    <v-btn icon color="red" @click.stop="remove_item(item)">
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
                   </v-col>
@@ -39,7 +34,6 @@
                   <v-col cols="1">
                     <v-btn
                       icon
-                      small
                       color="indigo lighten-1"
                       @click.stop="subtract_one(item)"
                     >
@@ -49,7 +43,6 @@
                   <v-col cols="1">
                     <v-btn
                       icon
-                      small
                       color="indigo lighten-1"
                       @click.stop="add_one(item)"
                     >
@@ -57,10 +50,129 @@
                     </v-btn>
                   </v-col>
                 </v-row>
-                <v-row>
-                  <v-col cols="6">
-                    <p>More info about {{ item.name }} {{ item }}</p>
+                <v-row class="ma-0 pa-0">
+                  <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="Item Code"
+                      background-color="white"
+                      hide-details
+                      v-model="item.item_code"
+                      readonly
+                    ></v-text-field>
                   </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="QTY"
+                      background-color="white"
+                      hide-details
+                      v-model.number="item.qty"
+                      type="number"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="UOM"
+                      background-color="white"
+                      hide-details
+                      v-model="item.stock_uom"
+                      readonly
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="Rate"
+                      background-color="white"
+                      hide-details
+                      v-model.number="item.rate"
+                      type="number"
+                      :prefix="invoice_doc.currency"
+                      @change="calc_prices(item, $event)"
+                      id="rate"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="Price list Rate"
+                      background-color="white"
+                      hide-details
+                      v-model="item.price_list_rate"
+                      type="number"
+                      readonly
+                      :prefix="invoice_doc.currency"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="Discount Percentage"
+                      background-color="white"
+                      hide-details
+                      v-model.number="item.discount_percentage"
+                      type="number"
+                      @change="calc_prices(item, $event)"
+                      id="discount_percentage"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="Discount Amount"
+                      background-color="white"
+                      hide-details
+                      v-model.number="item.discount_amount"
+                      type="number"
+                      :prefix="invoice_doc.currency"
+                      @change="calc_prices(item, $event)"
+                      id="discount_amount"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="Available QTY"
+                      background-color="white"
+                      hide-details
+                      v-model="item.actual_qty"
+                      type="number"
+                      readonly
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="Group"
+                      background-color="white"
+                      hide-details
+                      v-model="item.item_group"
+                      readonly
+                    ></v-text-field>
+                  </v-col>
+                  <!-- <v-col cols="12">
+                    <p>More info about {{ item.name }} {{ item }}</p>
+                  </v-col> -->
                 </v-row>
               </td>
             </template>
@@ -317,10 +429,15 @@ export default {
       if (index === -1) {
         const new_item = { ...item };
         new_item.qty = 1;
+        new_item.discount_amount = 0;
+        new_item.discount_percentage = 0;
+
+        new_item.price_list_rate = item.rate;
         this.update_items_details([new_item]);
+        this.update_item_detail(new_item);
         this.items.unshift(new_item);
       } else {
-        this.update_items_details([this.items[index]]);
+        // this.update_items_details([this.items[index]]);
         this.items[index].qty++;
         this.items[index].actual_qty = item.actual_qty;
       }
@@ -454,15 +571,15 @@ export default {
       if (!this.customer) {
         evntBus.$emit("show_mesage", {
           text: `There is no Customer !`,
-          color: "error"
-        })
+          color: "error",
+        });
         return;
       }
       if (!this.items.length) {
-         evntBus.$emit("show_mesage", {
+        evntBus.$emit("show_mesage", {
           text: `There is no Items !`,
-          color: "error"
-        })
+          color: "error",
+        });
         return;
       }
       evntBus.$emit("show_payment", "true");
@@ -513,6 +630,42 @@ export default {
         },
       });
     },
+    update_item_detail(item) {
+      const vm = this;
+      frappe.call({
+        method: "posawesome.posawesome.api.posapp.get_item_detail",
+        args: {
+          data: {
+            item_code: item.item_code,
+            warehouse: this.pos_profile.warehouse,
+            customer: this.customer,
+            selling_price_list: this.pos_profile.selling_price_list,
+            price_list_currency: this.pos_profile.currency,
+            doctype: "Sales Invoice",
+            name: "New Sales Invoice 1",
+            company: this.pos_profile.company,
+            conversion_rate: 1,
+            rate: item.rate,
+          },
+        },
+        callback: function (r) {
+          if (r.message) {
+            // items.forEach((item) => {
+            //   const updated_item = r.message.find(
+            //     (element) => element.item_code == item.item_code
+            //   );
+            //   item.actual_qty = updated_item.actual_qty;
+            //   item.serial_no_data = updated_item.serial_no_data;
+            //   item.batch_no_data = updated_item.batch_no_data;
+            //   item.uoms = updated_item.uoms;
+            //   item.rate = updated_item.rate;
+            //   item.currency = updated_item.currency;
+            // });
+            console.log(r.message);
+          }
+        },
+      });
+    },
     fetch_customer_details() {
       const vm = this;
       if (this.customer) {
@@ -559,6 +712,38 @@ export default {
           vm.customer_info = {};
           resolve();
         });
+      }
+    },
+    calc_prices(item, value, $event) {
+      if (event.target.id === "rate") {
+        item.discount_percentage = 0;
+        if (value < item.price_list_rate) {
+          item.discount_amount = flt(item.price_list_rate) - flt(value);
+        } else if (value < 0) {
+          item.rate = item.price_list_rate;
+          item.discount_amount = 0;
+        }
+        else if (value > item.price_list_rate) {
+          item.discount_amount = 0;
+        }
+      } else if (event.target.id === "discount_amount") {
+        if (value < 0) {
+          item.discount_amount = 0;
+          item.discount_percentage = 0;
+        } else {
+          item.rate = flt(item.price_list_rate) - flt(value);
+          item.discount_percentage = 0;
+        }
+      } else if (event.target.id === "discount_percentage") {
+        if (value < 0) {
+          item.discount_amount = 0;
+          item.discount_percentage = 0;
+        } else {
+          item.rate =
+            flt(item.price_list_rate) -
+            (flt(item.price_list_rate) * flt(value)) / 100;
+          item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
+        }
       }
     },
   },
