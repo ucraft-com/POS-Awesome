@@ -100,6 +100,7 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="rate"
+                      :disabled = "item.has_pricing_rule == 1 ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -128,6 +129,7 @@
                       type="number"
                       @change="calc_prices(item, $event)"
                       id="discount_percentage"
+                      :disabled = "item.has_pricing_rule == 1 ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -143,6 +145,7 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="discount_amount"
+                      :disabled = "item.has_pricing_rule == 1 ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -202,7 +205,7 @@
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
-                    v-model="items_discounts"
+                    v-model="total_items_discount_amount"
                     label="Items Discounts"
                     outlined
                     dense
@@ -359,14 +362,13 @@ export default {
       invoice_doc: "",
       customer: "",
       customer_info: "",
-      items_discounts: 0,
       additional_discount: 0,
       total_tax: 0,
       total: 0,
       items: [],
       itemsPerPage: 1000,
       expanded: [],
-      singleExpand: false,
+      singleExpand: true,
       items_headers: [
         {
           text: "Name",
@@ -401,6 +403,13 @@ export default {
       });
       return flt(sum);
     },
+    total_items_discount_amount() {
+      let sum = 0;
+      this.items.forEach((item) => {
+        sum += item.qty * item.discount_amount;
+      });
+      return flt(sum);
+    },
   },
   methods: {
     remove_item(item) {
@@ -431,13 +440,12 @@ export default {
         new_item.qty = 1;
         new_item.discount_amount = 0;
         new_item.discount_percentage = 0;
-
+        item.discount_amount_per_item = 0;
         new_item.price_list_rate = item.rate;
-        this.update_items_details([new_item]);
         this.update_item_detail(new_item);
         this.items.unshift(new_item);
       } else {
-        // this.update_items_details([this.items[index]]);
+        this.update_items_details([this.items[index]]);
         this.items[index].qty++;
         this.items[index].actual_qty = item.actual_qty;
       }
@@ -646,22 +654,28 @@ export default {
             company: this.pos_profile.company,
             conversion_rate: 1,
             rate: item.rate,
+            price_list_rate: item.price_list_rate
           },
         },
         callback: function (r) {
           if (r.message) {
-            // items.forEach((item) => {
-            //   const updated_item = r.message.find(
-            //     (element) => element.item_code == item.item_code
-            //   );
-            //   item.actual_qty = updated_item.actual_qty;
-            //   item.serial_no_data = updated_item.serial_no_data;
-            //   item.batch_no_data = updated_item.batch_no_data;
-            //   item.uoms = updated_item.uoms;
-            //   item.rate = updated_item.rate;
-            //   item.currency = updated_item.currency;
-            // });
-            console.log(r.message);
+            const data = r.message;
+              item.discount_amount_on_rate = data.discount_amount_on_rate;
+              item.discount_amount_on_rate = data.discount_amount_on_rate;
+              item.discount_percentage = data.discount_percentage;
+              item.discount_percentage_on_rate = data.discount_percentage_on_rate;
+              item.discount_amount = data.discount_amount;
+              item.has_pricing_rule = data.has_pricing_rule;
+              item.last_purchase_rate = data.last_purchase_rate;
+              item.price_list_rate = data.price_list_rate;
+              item.price_or_product_discount = data.price_or_product_discount;
+              item.pricing_rule_for = data.pricing_rule_for;
+              item.pricing_rules = data.pricing_rules;
+              item.projected_qty = data.projected_qty;
+              item.reserved_qty = data.reserved_qty;
+              item.batch_no = data.batch_no;
+              item.actual_qty = data.actual_qty;
+              vm.calc_item_price(item);
           }
         },
       });
@@ -744,6 +758,17 @@ export default {
             (flt(item.price_list_rate) * flt(value)) / 100;
           item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
         }
+      }
+    },
+    calc_item_price(item){
+      if (item.discount_percentage) {
+        item.rate =
+            flt(item.price_list_rate) -
+            (flt(item.price_list_rate) * flt(item.discount_percentage)) / 100;
+          item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
+          item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
+      } else if (item.discount_amount) {
+        item.rate = flt(item.price_list_rate) - flt(item.discount_amount);
       }
     },
   },

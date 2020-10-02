@@ -291,16 +291,6 @@ def get_items_details(pos_profile , items_data):
     result = []
 
     if len(items_data) > 0:
-        
-        items = [d.get("item_code") for d in items_data]
-        # item_prices_data = frappe.get_all("Item Price",
-        #                                   fields=[
-        #                                       "item_code", "price_list_rate", "currency"],
-        #                                   filters={'price_list': price_list, 'item_code': ['in', items]})
-
-        # item_prices = {}
-        # for d in item_prices_data:
-        #     item_prices[d.item_code] = d
 
         for item in items_data:
             item_code = item.get("item_code")
@@ -322,8 +312,6 @@ def get_items_details(pos_profile , items_data):
             row = {}
             row.update(item)
             row.update({
-                # 'rate': item_price.get('price_list_rate') or 0,
-                # 'currency': item_price.get('currency') or pos_profile.get("currency"),
                 'actual_qty': item_stock_qty or 0,
                 'item_uoms': uoms or [],
                 'serial_no_data': serial_no_data or [],
