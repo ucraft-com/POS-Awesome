@@ -35,7 +35,7 @@
           >
         </v-col>
       </v-row>
-      <v-row class="pyments px-1 py-0" v-if="invoice_doc">
+      <v-row class="pyments px-1 py-0" v-if="invoice_doc && available_pioints_amount > 0">
         <v-col cols="7">
           <v-text-field
             dense

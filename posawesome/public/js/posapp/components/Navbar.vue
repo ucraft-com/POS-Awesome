@@ -100,9 +100,9 @@
     </v-navigation-drawer>
     <v-snackbar v-model="snack" :timeout="5000" :color="snackColor" top right >
       {{ snackText }}
-      <template v-slot:action="{ attrs }">
+      <!-- <template v-slot:action="{ attrs }"> -->
         <!-- <v-btn v-bind="attrs" text @click="snack = false">Close</v-btn> -->
-      </template>
+      <!-- </template> -->
     </v-snackbar>
   </nav>
 </template>
