@@ -100,7 +100,7 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="rate"
-                      :disabled = "item.has_pricing_rule == 1 ? true : false"
+                      :disabled="item.has_pricing_rule == 1 ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -129,7 +129,7 @@
                       type="number"
                       @change="calc_prices(item, $event)"
                       id="discount_percentage"
-                      :disabled = "item.has_pricing_rule == 1 ? true : false"
+                      :disabled="item.has_pricing_rule == 1 ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -145,7 +145,7 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="discount_amount"
-                      :disabled = "item.has_pricing_rule == 1 ? true : false"
+                      :disabled="item.has_pricing_rule == 1 ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -459,14 +459,10 @@ export default {
           async: true,
           callback: function (r) {
             if (r.message) {
-              frappe.show_alert(
-                // TODO : replace whith proper alert
-                {
-                  message: __(`${r.message}`),
-                  indicator: "green",
-                },
-                5
-              );
+              evntBus.$emit("show_mesage", {
+                text: r.message,
+                color: "warning",
+              });
             }
           },
         });
@@ -653,10 +649,10 @@ export default {
             conversion_rate: 1,
             qty: item.qty,
             price_list_rate: item.price_list_rate,
-            child_docname:"New Sales Invoice Item 1",
+            child_docname: "New Sales Invoice Item 1",
             cost_center: this.pos_profile.cost_center,
             currency: this.pos_profile.currency,
-            plc_conversion_rate:1,
+            plc_conversion_rate: 1,
             pos_profile: this.pos_profile.name,
             price_list: this.pos_profile.selling_price_list,
             stock_uom: item.uom,
@@ -668,22 +664,22 @@ export default {
         callback: function (r) {
           if (r.message) {
             const data = r.message;
-              item.discount_amount_on_rate = data.discount_amount_on_rate;
-              item.discount_amount_on_rate = data.discount_amount_on_rate;
-              item.discount_percentage = data.discount_percentage;
-              item.discount_percentage_on_rate = data.discount_percentage_on_rate;
-              item.discount_amount = data.discount_amount;
-              item.has_pricing_rule = data.has_pricing_rule;
-              item.last_purchase_rate = data.last_purchase_rate;
-              item.price_list_rate = data.price_list_rate;
-              item.price_or_product_discount = data.price_or_product_discount;
-              item.pricing_rule_for = data.pricing_rule_for;
-              item.pricing_rules = data.pricing_rules;
-              item.projected_qty = data.projected_qty;
-              item.reserved_qty = data.reserved_qty;
-              item.batch_no = data.batch_no;
-              item.actual_qty = data.actual_qty;
-              vm.calc_item_price(item);
+            item.discount_amount_on_rate = data.discount_amount_on_rate;
+            item.discount_amount_on_rate = data.discount_amount_on_rate;
+            item.discount_percentage = data.discount_percentage;
+            item.discount_percentage_on_rate = data.discount_percentage_on_rate;
+            item.discount_amount = data.discount_amount;
+            item.has_pricing_rule = data.has_pricing_rule;
+            item.last_purchase_rate = data.last_purchase_rate;
+            item.price_list_rate = data.price_list_rate;
+            item.price_or_product_discount = data.price_or_product_discount;
+            item.pricing_rule_for = data.pricing_rule_for;
+            item.pricing_rules = data.pricing_rules;
+            item.projected_qty = data.projected_qty;
+            item.reserved_qty = data.reserved_qty;
+            item.batch_no = data.batch_no;
+            item.actual_qty = data.actual_qty;
+            vm.calc_item_price(item);
           }
         },
       });
@@ -744,8 +740,7 @@ export default {
         } else if (value < 0) {
           item.rate = item.price_list_rate;
           item.discount_amount = 0;
-        }
-        else if (value > item.price_list_rate) {
+        } else if (value > item.price_list_rate) {
           item.discount_amount = 0;
         }
       } else if (event.target.id === "discount_amount") {
@@ -768,16 +763,16 @@ export default {
         }
       }
     },
-    calc_item_price(item){
+    calc_item_price(item) {
       if (!item.has_pricing_rule) {
-        return
+        return;
       }
       if (item.discount_percentage) {
         item.rate =
-            flt(item.price_list_rate) -
-            (flt(item.price_list_rate) * flt(item.discount_percentage)) / 100;
-          item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
-          item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
+          flt(item.price_list_rate) -
+          (flt(item.price_list_rate) * flt(item.discount_percentage)) / 100;
+        item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
+        item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
       } else if (item.discount_amount) {
         item.rate = flt(item.price_list_rate) - flt(item.discount_amount);
       } else if (item.pricing_rule_for === "Rate") {
