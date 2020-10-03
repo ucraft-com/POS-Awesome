@@ -668,7 +668,7 @@ export default {
             item.discount_amount_on_rate = data.discount_amount_on_rate;
             item.discount_percentage = data.discount_percentage;
             item.discount_percentage_on_rate = data.discount_percentage_on_rate;
-            item.discount_amount = data.discount_amount;
+            item.discount_amount = data.discount_amount || 0;
             item.has_pricing_rule = data.has_pricing_rule;
             item.last_purchase_rate = data.last_purchase_rate;
             item.price_list_rate = data.price_list_rate;
