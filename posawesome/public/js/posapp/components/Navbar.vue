@@ -72,10 +72,10 @@
       <v-list dark>
         <v-list-item class="px-2">
           <v-list-item-avatar>
-            <v-img src="/assets/erpnext/images/erp-icon.svg"></v-img>
+            <v-img :src="company_img"></v-img>
           </v-list-item-avatar>
 
-          <v-list-item-title>John Leider</v-list-item-title>
+          <v-list-item-title>{{ company }}</v-list-item-title>
 
           <v-btn icon @click.stop="mini = !mini">
             <v-icon>mdi-chevron-left</v-icon>
@@ -132,6 +132,8 @@ export default {
       snack: false,
       snackColor: "",
       snackText: "",
+      company: "POS Awesome",
+      company_img: "/assets/erpnext/images/erp-icon.svg",
     };
   },
   methods: {
@@ -156,7 +158,12 @@ export default {
       evntBus.$on("show_mesage", (data) => {
         this.show_mesage(data);
       });
+      evntBus.$on("set_company", (data) => {
+        this.company = data.name;
+        this.company_img = data.company_logo ? data.company_logo :this.company_img ;
+      });
     });
+    
   },
 };
 </script>
