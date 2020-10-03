@@ -442,8 +442,8 @@ export default {
         new_item.discount_percentage = 0;
         item.discount_amount_per_item = 0;
         new_item.price_list_rate = item.rate;
-        this.update_item_detail(new_item);
         this.items.unshift(new_item);
+        this.update_item_detail(new_item);
       } else {
         this.update_items_details([this.items[index]]);
         this.items[index].qty++;
@@ -643,18 +643,26 @@ export default {
       frappe.call({
         method: "posawesome.posawesome.api.posapp.get_item_detail",
         args: {
+          doc: this.get_invoice_doc(),
           data: {
             item_code: item.item_code,
-            warehouse: this.pos_profile.warehouse,
             customer: this.customer,
-            selling_price_list: this.pos_profile.selling_price_list,
-            price_list_currency: this.pos_profile.currency,
             doctype: "Sales Invoice",
             name: "New Sales Invoice 1",
             company: this.pos_profile.company,
             conversion_rate: 1,
-            rate: item.rate,
-            price_list_rate: item.price_list_rate
+            qty: item.qty,
+            price_list_rate: item.price_list_rate,
+            child_docname:"New Sales Invoice Item 1",
+            cost_center: this.pos_profile.cost_center,
+            currency: this.pos_profile.currency,
+            plc_conversion_rate:1,
+            pos_profile: this.pos_profile.name,
+            price_list: this.pos_profile.selling_price_list,
+            stock_uom: item.uom,
+            tax_category: "",
+            transaction_type: "selling",
+            update_stock: 1,
           },
         },
         callback: function (r) {
@@ -761,6 +769,9 @@ export default {
       }
     },
     calc_item_price(item){
+      if (!item.has_pricing_rule) {
+        return
+      }
       if (item.discount_percentage) {
         item.rate =
             flt(item.price_list_rate) -
@@ -769,6 +780,8 @@ export default {
           item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
       } else if (item.discount_amount) {
         item.rate = flt(item.price_list_rate) - flt(item.discount_amount);
+      } else if (item.pricing_rule_for === "Rate") {
+        item.rate = item.price_list_rate;
       }
     },
   },

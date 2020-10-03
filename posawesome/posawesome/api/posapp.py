@@ -9,9 +9,6 @@ from frappe.utils import getdate, now_datetime, nowdate, flt, cint, get_datetime
 from frappe import _
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
-# from erpnext.controllers.accounts_controller import get_taxes_and_charges
-# from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
-# from erpnext.utilities.product import get_price
 from erpnext.stock.get_item_details import get_item_details
 import json
 from posawesome import console
@@ -287,14 +284,12 @@ def get_items_details(pos_profile , items_data):
     pos_profile = json.loads(pos_profile)
     items_data = json.loads(items_data)
     warehouse = pos_profile.get("warehouse")
-    # price_list = pos_profile.get("selling_price_list")
     result = []
 
     if len(items_data) > 0:
 
         for item in items_data:
             item_code = item.get("item_code")
-            # item_price = item_prices.get(item_code) or {}
             item_stock_qty = get_stock_availability(item_code, warehouse)
             
             uoms = frappe.get_all("UOM Conversion Detail", filters={
@@ -325,5 +320,4 @@ def get_items_details(pos_profile , items_data):
 
 @frappe.whitelist()
 def get_item_detail(data, doc=None):
-    data = json.loads(data)
     return get_item_details(data, doc)
