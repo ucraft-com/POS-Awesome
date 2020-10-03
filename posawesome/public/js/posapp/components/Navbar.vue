@@ -98,10 +98,10 @@
         </v-list-item-group>
       </v-list>
     </v-navigation-drawer>
-    <v-snackbar v-model="snack" :timeout="5000" :color="snackColor" top right>
+    <v-snackbar v-model="snack" :timeout="5000" :color="snackColor" top right >
       {{ snackText }}
       <template v-slot:action="{ attrs }">
-        <v-btn v-bind="attrs" text @click="snack = false">Close</v-btn>
+        <!-- <v-btn v-bind="attrs" text @click="snack = false">Close</v-btn> -->
       </template>
     </v-snackbar>
   </nav>

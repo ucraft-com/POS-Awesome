@@ -55,7 +55,7 @@ def create_opening_voucher(pos_profile, company, balance_details):
     data["pos_opening_shift"] = new_pos_opening.as_dict()
     data["pos_profile"] = frappe.get_doc(
         "POS Profile", new_pos_opening.pos_profile)
-    data["company"] = frappe.get_doc("Company", data["pos_profile"]["company"])
+    data["company"] = frappe.get_doc("Company", data["pos_profile"].company)
     return data
 
 

@@ -169,6 +169,7 @@ export default {
         .then((r) => {
           if (r.message) {
             evntBus.$emit("register_pos_data", r.message);
+            evntBus.$emit("set_company", r.message.company);
             vm.close_opening_dialog();
           }
         });
