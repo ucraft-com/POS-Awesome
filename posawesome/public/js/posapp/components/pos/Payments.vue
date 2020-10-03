@@ -172,11 +172,11 @@
       style="max-height: 10vh; height: 10vh"
       class="cards mb-0 mt-3 py-0"
     >
-      <v-row align="start" style="height: 53%">
+      <v-row align="start" style="height: 53%" no-gutters>
         <v-col cols="12">
           <v-btn
             block
-            class="pa-0"
+            class="pa-1"
             large
             color="warning"
             dark
@@ -184,10 +184,8 @@
             >Back</v-btn
           >
         </v-col>
-      </v-row>
-      <v-row align="end" style="height: 54%">
         <v-col cols="12">
-          <v-btn block class="pa-0" large color="primary" dark @click="submit"
+          <v-btn block class="mt-2" large color="primary" dark @click="submit"
             >Submit Payments</v-btn
           >
         </v-col>
