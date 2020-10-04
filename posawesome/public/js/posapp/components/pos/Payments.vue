@@ -36,7 +36,7 @@
             color="primary"
             dark
             @click="submit_full_payment(payment.idx)"
-            >Submit {{ payment.mode_of_payment }}</v-btn
+            >{{ payment.mode_of_payment }}</v-btn
           >
         </v-col>
       </v-row>
@@ -245,7 +245,7 @@ export default {
       this.invoice_doc.payments.forEach((payment) => {
         payment.amount = payment.idx == idx ? this.invoice_doc.grand_total : 0;
       });
-      this.submit();
+      // this.submit();
     },
     load_print_page() {
       const letter_head = this.pos_profile.letter_head || 0;

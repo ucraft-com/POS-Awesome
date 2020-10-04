@@ -450,6 +450,7 @@ export default {
     },
     add_one(item) {
       item.qty++;
+      this.calc_sotck_gty(item, item.qty) 
       // this.$forceUpdate();
     },
     subtract_one(item) {
@@ -457,6 +458,7 @@ export default {
       if (item.qty <= 0) {
         this.remove_item(item);
       }
+      this.calc_sotck_gty(item, item.qty) 
       // this.$forceUpdate();
     },
     add_item(item) {
@@ -476,8 +478,10 @@ export default {
         this.items.unshift(new_item);
         this.update_item_detail(new_item);
       } else {
-        this.update_items_details([this.items[index]]);
-        this.items[index].qty++; // TODO: need to use stock_qty and then update qty
+        const cur_item = this.items[index];
+        this.update_items_details([cur_item]);
+        cur_item.qty++; // TODO: need to use stock_qty and then update qty
+        this.calc_sotck_gty(cur_item, cur_item.qty)
       }
     },
     cancel_invoice() {
