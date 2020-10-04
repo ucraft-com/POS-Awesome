@@ -114,7 +114,7 @@ export default {
       });
       evntBus.$on("show_payment", (data) => {
         this.payment = true ? data ==="true": false;
-        evntBus.$emit("update_cur_items_details");
+        // evntBus.$emit("update_cur_items_details");
       })
       evntBus.$on("open_closing_dialog", () => {
         this.get_closing_data()

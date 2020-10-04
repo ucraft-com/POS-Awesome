@@ -79,7 +79,8 @@ def check_opening_shift(user):
             "POS Opening Shift", open_vouchers[0]["name"])
         data["pos_profile"] = frappe.get_doc(
             "POS Profile", open_vouchers[0]["pos_profile"])
-        data["company"] = frappe.get_doc("Company", data["pos_profile"].company)
+        data["company"] = frappe.get_doc(
+            "Company", data["pos_profile"].company)
     return data
 
 
@@ -131,9 +132,9 @@ def get_items(pos_profile):
         ORDER BY
             name asc
             """
-            .format(
-                conditon
-            ), as_dict=1)
+                               .format(
+                                   conditon
+                               ), as_dict=1)
 
     if items_data:
         items = [d.item_code for d in items_data]
@@ -281,30 +282,27 @@ def delete_invoice(invoice):
 
 
 @frappe.whitelist()
-def get_items_details(pos_profile , items_data):
+def get_items_details(pos_profile, items_data):
     pos_profile = json.loads(pos_profile)
     items_data = json.loads(items_data)
     warehouse = pos_profile.get("warehouse")
     result = []
 
     if len(items_data) > 0:
-
         for item in items_data:
             item_code = item.get("item_code")
             item_stock_qty = get_stock_availability(item_code, warehouse)
-            
+
             uoms = frappe.get_all("UOM Conversion Detail", filters={
-                                    "parent": item_code}, fields=["uom", "conversion_factor"])
-            
-            serial_no_data = []
-            if item.get("has_serial_no"):
-                serial_no_data = frappe.get_all('Serial No', filters={
-                                    "item_code": item_code}, fields=["name as serial_no"])
-                
-            batch_no_data = []
-            if item.get("has_batch_no"):
-                batch_no_data = frappe.get_all('Batch', filters={
-                                    "item": item_code}, fields=["name as batch_no"])
+                "parent": item_code}, fields=["uom", "conversion_factor"])
+
+            serial_no_data = frappe.get_all('Serial No', filters={
+                "item_code": item_code,
+                "status": "Active"
+            }, fields=["name as serial_no"])
+
+            batch_no_data = frappe.get_all('Batch', filters={
+                "item": item_code}, fields=["name as batch_no"])
             row = {}
             row.update(item)
             row.update({

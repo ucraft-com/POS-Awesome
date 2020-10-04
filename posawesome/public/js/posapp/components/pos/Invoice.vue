@@ -60,7 +60,7 @@
                       background-color="white"
                       hide-details
                       v-model="item.item_code"
-                      readonly
+                      disabled
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -73,20 +73,21 @@
                       hide-details
                       v-model.number="item.qty"
                       type="number"
+                      @change="calc_sotck_gty(item, $event)"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
-                    <v-select 
-                    dense
-                    background-color="white"
-                    label="UOM" 
-                    v-model="item.uom"
-                    :items="item.item_uoms" 
-                    outlined
-                    item-text="uom"
-                    item-value="uom"
-                    hide-details
-                    @change="calc_uom(item, $event)"
+                    <v-select
+                      dense
+                      background-color="white"
+                      label="UOM"
+                      v-model="item.uom"
+                      :items="item.item_uoms"
+                      outlined
+                      item-text="uom"
+                      item-value="uom"
+                      hide-details
+                      @change="calc_uom(item, $event)"
                     >
                     </v-select>
                   </v-col>
@@ -104,20 +105,6 @@
                       @change="calc_prices(item, $event)"
                       id="rate"
                       :disabled="item.pricing_rules ? true : false"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-text-field
-                      dense
-                      outlined
-                      color="indigo"
-                      label="Price list Rate"
-                      background-color="white"
-                      hide-details
-                      v-model="item.price_list_rate"
-                      type="number"
-                      readonly
-                      :prefix="invoice_doc.currency"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -156,12 +143,26 @@
                       dense
                       outlined
                       color="indigo"
+                      label="Price list Rate"
+                      background-color="white"
+                      hide-details
+                      v-model="item.price_list_rate"
+                      type="number"
+                      disabled
+                      :prefix="invoice_doc.currency"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
                       label="Available QTY"
                       background-color="white"
                       hide-details
                       v-model="item.actual_qty"
                       type="number"
-                      readonly
+                      disabled
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -173,7 +174,31 @@
                       background-color="white"
                       hide-details
                       v-model="item.item_group"
-                      readonly
+                      disabled
+                    ></v-text-field>
+                  </v-col>
+                   <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="Stock QTY"
+                      background-color="white"
+                      hide-details
+                      v-model="item.stock_qty"
+                      disabled
+                    ></v-text-field>
+                  </v-col>
+                   <v-col cols="4">
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="Stock UOM"
+                      background-color="white"
+                      hide-details
+                      v-model="item.stock_uom"
+                      disabled
                     ></v-text-field>
                   </v-col>
                   <!-- <v-col cols="12">
@@ -618,6 +643,9 @@ export default {
       evntBus.$emit("show_payment", "false");
     },
     update_items_details(items) {
+      if (!items.length > 0) {
+        return;
+      }
       const vm = this;
       frappe.call({
         method: "posawesome.posawesome.api.posapp.get_items_details",
@@ -686,7 +714,9 @@ export default {
             item.reserved_qty = data.reserved_qty;
             item.batch_no = data.batch_no;
             item.actual_qty = data.actual_qty;
-            item.conversion_factor = data.conversion_factor
+            item.conversion_factor = data.conversion_factor;
+            item.stock_qty = data.stock_qty;
+            item.stock_uom = data.stock_uom;
             vm.calc_item_price(item);
           }
         },
@@ -788,10 +818,13 @@ export default {
         item.rate = item.price_list_rate;
       }
     },
-    calc_uom(item, event) {
-      const new_uom =  item.item_uoms.find(element => element.uom == event);
-      item.conversion_factor = new_uom.conversion_factor
+    calc_uom(item, value) {
+      const new_uom = item.item_uoms.find((element) => element.uom == value);
+      item.conversion_factor = new_uom.conversion_factor;
       this.update_item_detail(item);
+    },
+    calc_sotck_gty(item, value) {
+      item.stock_qty = item.conversion_factor * value;
     },
   },
   created() {
