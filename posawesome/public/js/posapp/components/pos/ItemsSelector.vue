@@ -174,19 +174,13 @@ export default {
         args: { pos_profile: vm.pos_profile },
         callback: function (r) {
           if (r.message) {
-            // const loadItmes =
-            //   !localStorage.items_storage ||
-            //   JSON.parse(localStorage.getItem("items_storage")).length !=
-            //     r.message.length;
             localStorage.setItem("items_storage", "");
             localStorage.setItem("items_storage", JSON.stringify(r.message));
-            // if (loadItmes) {
             vm.$nextTick(() => {
               console.log("loadItmes");
               vm.items = JSON.parse(localStorage.getItem("items_storage"));
               vm.loading = false;
             });
-            // }
           }
         },
       });

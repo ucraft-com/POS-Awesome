@@ -76,16 +76,19 @@
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
-                    <v-text-field
-                      dense
-                      outlined
-                      color="indigo"
-                      label="UOM"
-                      background-color="white"
-                      hide-details
-                      v-model="item.stock_uom"
-                      readonly
-                    ></v-text-field>
+                    <v-select 
+                    dense
+                    background-color="white"
+                    label="UOM" 
+                    v-model="item.uom"
+                    :items="item.item_uoms" 
+                    outlined
+                    item-text="uom"
+                    item-value="uom"
+                    hide-details
+                    @change="calc_uom(item, $event)"
+                    >
+                    </v-select>
                   </v-col>
                   <v-col cols="4">
                     <v-text-field
@@ -534,6 +537,8 @@ export default {
           item_code: item.item_code,
           qty: item.qty,
           rate: item.rate,
+          uom: item.uom,
+          conversion_factor: item.conversion_factor,
         });
       });
       return items_list;
@@ -629,9 +634,7 @@ export default {
               item.actual_qty = updated_item.actual_qty;
               item.serial_no_data = updated_item.serial_no_data;
               item.batch_no_data = updated_item.batch_no_data;
-              item.uoms = updated_item.uoms;
-              item.rate = updated_item.rate;
-              item.currency = updated_item.currency;
+              item.item_uoms = updated_item.item_uoms;
             });
           }
         },
@@ -655,10 +658,10 @@ export default {
             child_docname: "New Sales Invoice Item 1",
             cost_center: this.pos_profile.cost_center,
             currency: this.pos_profile.currency,
-            plc_conversion_rate: item.conversion_factor,
+            // plc_conversion_rate: 1,
             pos_profile: this.pos_profile.name,
             price_list: this.pos_profile.selling_price_list,
-            stock_uom: item.stock_uom,
+            // stock_uom: item.stock_uom,
             uom: item.uom,
             tax_category: "",
             transaction_type: "selling",
@@ -683,6 +686,7 @@ export default {
             item.reserved_qty = data.reserved_qty;
             item.batch_no = data.batch_no;
             item.actual_qty = data.actual_qty;
+            item.conversion_factor = data.conversion_factor
             vm.calc_item_price(item);
           }
         },
@@ -769,6 +773,7 @@ export default {
     },
     calc_item_price(item) {
       if (!item.has_pricing_rule) {
+        item.rate = item.price_list_rate;
         return;
       }
       if (item.discount_percentage) {
@@ -782,6 +787,11 @@ export default {
       } else if (item.pricing_rule_for === "Rate") {
         item.rate = item.price_list_rate;
       }
+    },
+    calc_uom(item, event) {
+      const new_uom =  item.item_uoms.find(element => element.uom == event);
+      item.conversion_factor = new_uom.conversion_factor
+      this.update_item_detail(item);
     },
   },
   created() {
@@ -812,7 +822,6 @@ export default {
       this.close_payments();
       evntBus.$emit("set_customer", this.customer);
       this.fetch_customer_details();
-      // this.get_loyalty();
     },
     expanded(data_value) {
       this.update_items_details(data_value);
