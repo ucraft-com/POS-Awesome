@@ -30,12 +30,20 @@
           ></v-text-field>
         </v-col>
         <v-col cols="5">
-          <v-btn block class="" color="primary" dark @click="submit_full_payment(payment.idx)"
+          <v-btn
+            block
+            class=""
+            color="primary"
+            dark
+            @click="submit_full_payment(payment.idx)"
             >Submit {{ payment.mode_of_payment }}</v-btn
           >
         </v-col>
       </v-row>
-      <v-row class="pyments px-1 py-0" v-if="invoice_doc && available_pioints_amount > 0">
+      <v-row
+        class="pyments px-1 py-0"
+        v-if="invoice_doc && available_pioints_amount > 0"
+      >
         <v-col cols="7">
           <v-text-field
             dense
@@ -236,7 +244,7 @@ export default {
     submit_full_payment(idx) {
       this.invoice_doc.payments.forEach((payment) => {
         payment.amount = payment.idx == idx ? this.invoice_doc.grand_total : 0;
-      })
+      });
       this.submit();
     },
     load_print_page() {

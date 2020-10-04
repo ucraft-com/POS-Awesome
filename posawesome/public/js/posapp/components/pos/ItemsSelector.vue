@@ -134,7 +134,7 @@ export default {
   // props: ["pos_profile"],
   data: () => ({
     pos_profile: "",
-    items_view: "list",
+    items_view: "card",
     item_group: "ALL",
     favourites_view: false,
     loading: false,
@@ -152,9 +152,9 @@ export default {
   }),
 
   watch: {
-    filtred_items(data_value){
-      this.update_items_details(data_value)
-    }
+    filtred_items(data_value) {
+      this.update_items_details(data_value);
+    },
   },
 
   methods: {
@@ -255,7 +255,7 @@ export default {
         },
       });
     },
-    update_cur_items_details(){
+    update_cur_items_details() {
       this.update_items_details(this.filtred_items);
     },
   },

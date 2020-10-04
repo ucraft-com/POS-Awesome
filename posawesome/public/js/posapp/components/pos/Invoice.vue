@@ -100,7 +100,7 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="rate"
-                      :disabled="item.has_pricing_rule == 1 ? true : false"
+                      :disabled="item.pricing_rules ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -129,7 +129,7 @@
                       type="number"
                       @change="calc_prices(item, $event)"
                       id="discount_percentage"
-                      :disabled="item.has_pricing_rule == 1 ? true : false"
+                      :disabled="item.pricing_rules ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -145,7 +145,7 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="discount_amount"
-                      :disabled="item.has_pricing_rule == 1 ? true : false"
+                      :disabled="item.pricing_rules ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
