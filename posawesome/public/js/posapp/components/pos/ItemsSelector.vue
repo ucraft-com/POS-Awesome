@@ -247,9 +247,7 @@ export default {
               item.actual_qty = updated_item.actual_qty;
               item.serial_no_data = updated_item.serial_no_data;
               item.batch_no_data = updated_item.batch_no_data;
-              item.uoms = updated_item.uoms;
-              item.rate = updated_item.rate;
-              item.currency = updated_item.currency;
+              item.item_uoms = updated_item.item_uoms;
             });
           }
         },

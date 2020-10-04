@@ -377,7 +377,7 @@ export default {
           value: "item_name",
         },
         { text: "QTY", value: "qty", align: "center" },
-        { text: "UOM", value: "stock_uom", align: "center" },
+        { text: "UOM", value: "uom", align: "center" },
         { text: "Rate", value: "rate", align: "center" },
         { text: "Amount", value: "amount", align: "center" },
       ],
@@ -437,17 +437,19 @@ export default {
       );
       if (index === -1) {
         const new_item = { ...item };
-        new_item.qty = 1;
+        new_item.stock_qty = 1;
         new_item.discount_amount = 0;
         new_item.discount_percentage = 0;
-        item.discount_amount_per_item = 0;
+        new_item.discount_amount_per_item = 0;
         new_item.price_list_rate = item.rate;
+        new_item.qty = new_item.stock_qty;
+        new_item.uom = item.stock_uom;
+        new_item.conversion_factor = 1;
         this.items.unshift(new_item);
         this.update_item_detail(new_item);
       } else {
         this.update_items_details([this.items[index]]);
-        this.items[index].qty++;
-        this.items[index].actual_qty = item.actual_qty;
+        this.items[index].qty++; // TODO: need to use stock_qty and then update qty
       }
     },
     cancel_invoice() {
@@ -487,6 +489,7 @@ export default {
       } else {
         this.invoice_doc = data;
         this.items = data.items;
+        this.update_items_details(this.items);
         this.customer = data.customer;
       }
     },
@@ -652,10 +655,11 @@ export default {
             child_docname: "New Sales Invoice Item 1",
             cost_center: this.pos_profile.cost_center,
             currency: this.pos_profile.currency,
-            plc_conversion_rate: 1,
+            plc_conversion_rate: item.conversion_factor,
             pos_profile: this.pos_profile.name,
             price_list: this.pos_profile.selling_price_list,
-            stock_uom: item.uom,
+            stock_uom: item.stock_uom,
+            uom: item.uom,
             tax_category: "",
             transaction_type: "selling",
             update_stock: 1,
