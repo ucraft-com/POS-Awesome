@@ -30,7 +30,7 @@
           ></v-text-field>
         </v-col>
         <v-col cols="5">
-          <v-btn block class="" color="primary" dark
+          <v-btn block class="" color="primary" dark @click="submit_full_payment(payment.idx)"
             >Submit {{ payment.mode_of_payment }}</v-btn
           >
         </v-col>
@@ -232,6 +232,12 @@ export default {
           }
         },
       });
+    },
+    submit_full_payment(idx) {
+      this.invoice_doc.payments.forEach((payment) => {
+        payment.amount = payment.idx == idx ? this.invoice_doc.grand_total : 0;
+      })
+      this.submit();
     },
     load_print_page() {
       const letter_head = this.pos_profile.letter_head || 0;
