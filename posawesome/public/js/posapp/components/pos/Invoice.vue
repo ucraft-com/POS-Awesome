@@ -506,6 +506,7 @@ export default {
       this.invoice_doc = "";
     },
     new_invoice(data = {}) {
+      this.expanded = [];
       const doc = this.get_invoice_doc();
       if (doc.name) {
         this.update_invoice(doc);
