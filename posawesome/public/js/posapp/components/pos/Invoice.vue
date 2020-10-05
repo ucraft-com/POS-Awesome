@@ -177,7 +177,7 @@
                       disabled
                     ></v-text-field>
                   </v-col>
-                   <v-col cols="4">
+                  <v-col cols="4">
                     <v-text-field
                       dense
                       outlined
@@ -189,7 +189,7 @@
                       disabled
                     ></v-text-field>
                   </v-col>
-                   <v-col cols="4">
+                  <v-col cols="4">
                     <v-text-field
                       dense
                       outlined
@@ -201,9 +201,39 @@
                       disabled
                     ></v-text-field>
                   </v-col>
-                  <!-- <v-col cols="12">
-                    <p>More info about {{ item.name }} {{ item }}</p>
-                  </v-col> -->
+                  <v-col
+                    cols="4"
+                    v-if="item.has_serial_no == 1 || item.serial_no"
+                  >
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="Serial No QTY"
+                      background-color="white"
+                      hide-details
+                      v-model="item.serial_no_selected_count"
+                      disabled
+                    ></v-text-field>
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    v-if="item.has_serial_no == 1 || item.serial_no"
+                  >
+                    <v-autocomplete
+                      v-model="item.serial_no_selected"
+                      :items="item.serial_no_data"
+                      item-text="serial_no"
+                      outlined
+                      dense
+                      chips
+                      color="indigo"
+                      small-chips
+                      label="Serial No"
+                      multiple
+                      @change="set_serial_no(item)"
+                    ></v-autocomplete>
+                  </v-col>
                 </v-row>
               </td>
             </template>
@@ -450,7 +480,7 @@ export default {
     },
     add_one(item) {
       item.qty++;
-      this.calc_sotck_gty(item, item.qty) 
+      this.calc_sotck_gty(item, item.qty);
       // this.$forceUpdate();
     },
     subtract_one(item) {
@@ -458,7 +488,7 @@ export default {
       if (item.qty <= 0) {
         this.remove_item(item);
       }
-      this.calc_sotck_gty(item, item.qty) 
+      this.calc_sotck_gty(item, item.qty);
       // this.$forceUpdate();
     },
     add_item(item) {
@@ -481,7 +511,7 @@ export default {
         const cur_item = this.items[index];
         this.update_items_details([cur_item]);
         cur_item.qty++; // TODO: need to use stock_qty and then update qty
-        this.calc_sotck_gty(cur_item, cur_item.qty)
+        this.calc_sotck_gty(cur_item, cur_item.qty);
       }
     },
     cancel_invoice() {
@@ -524,6 +554,19 @@ export default {
         this.items = data.items;
         this.update_items_details(this.items);
         this.customer = data.customer;
+        this.items.forEach((item) => {
+          if (item.serial_no) {
+            item.serial_no_selected = [];
+            const serial_list = item.serial_no.split("\n");
+            serial_list.forEach((element) => {
+              if (element.length) {
+                item.serial_no_selected.push(element);
+              }
+            });
+            // item.serial_no_selected = item.serial_no.split("\n");
+            item.serial_no_selected_count = item.serial_no_selected.length;
+          }
+        });
       }
     },
     save_draft_invoice() {
@@ -569,6 +612,9 @@ export default {
           rate: item.rate,
           uom: item.uom,
           conversion_factor: item.conversion_factor,
+          serial_no: item.serial_no,
+          discount_percentage: item.discount_percentage,
+          discount_amount: item.discount_amount,
         });
       });
       return items_list;
@@ -698,7 +744,7 @@ export default {
             uom: item.uom,
             tax_category: "",
             transaction_type: "selling",
-            update_stock: 1,
+            update_stock: this.pos_profile.update_stock,
           },
         },
         callback: function (r) {
@@ -779,7 +825,9 @@ export default {
       if (event.target.id === "rate") {
         item.discount_percentage = 0;
         if (value < item.price_list_rate) {
-          item.discount_amount = (flt(item.price_list_rate) - flt(value)).toFixed(2);
+          item.discount_amount = (
+            flt(item.price_list_rate) - flt(value)
+          ).toFixed(2);
         } else if (value < 0) {
           item.rate = item.price_list_rate;
           item.discount_amount = 0;
@@ -799,10 +847,13 @@ export default {
           item.discount_amount = 0;
           item.discount_percentage = 0;
         } else {
-          item.rate =
-            (flt(item.price_list_rate) -
-            (flt(item.price_list_rate) * flt(value)) / 100).toFixed(2);
-          item.discount_amount = (flt(item.price_list_rate) - flt(item.rate)).toFixed(2);
+          item.rate = (
+            flt(item.price_list_rate) -
+            (flt(item.price_list_rate) * flt(value)) / 100
+          ).toFixed(2);
+          item.discount_amount = (
+            flt(item.price_list_rate) - flt(item.rate)
+          ).toFixed(2);
         }
       }
     },
@@ -815,9 +866,13 @@ export default {
         item.rate =
           flt(item.price_list_rate) -
           (flt(item.price_list_rate) * flt(item.discount_percentage)) / 100;
-        item.discount_amount = (flt(item.price_list_rate) - flt(item.rate)).toFixed(2);
+        item.discount_amount = (
+          flt(item.price_list_rate) - flt(item.rate)
+        ).toFixed(2);
       } else if (item.discount_amount) {
-        item.rate = (flt(item.price_list_rate) - flt(item.discount_amount)).toFixed(2);
+        item.rate = (
+          flt(item.price_list_rate) - flt(item.discount_amount)
+        ).toFixed(2);
       } else if (item.pricing_rule_for === "Rate") {
         item.rate = item.price_list_rate;
       }
@@ -829,6 +884,19 @@ export default {
     },
     calc_sotck_gty(item, value) {
       item.stock_qty = item.conversion_factor * value;
+    },
+    set_serial_no(item) {
+      item.serial_no = "";
+      item.serial_no_selected.forEach((element) => {
+        item.serial_no += element + "\n";
+      });
+      item.serial_no_selected_count = item.serial_no_selected.length;
+      if (item.serial_no_selected_count != item.stock_qty) {
+        evntBus.$emit("show_mesage", {
+          text: `Selected Serial No QTY is ${item.serial_no_selected_count} it should be ${item.stock_qty}`,
+          color: "warning",
+        });
+      }
     },
   },
   created() {
