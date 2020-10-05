@@ -8,7 +8,6 @@ from frappe.model.document import Document
 from frappe.utils import getdate, now_datetime, nowdate, flt, cint, get_datetime_str, add_days
 from frappe import _
 from erpnext.accounts.party import get_party_account
-from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 from erpnext.stock.get_item_details import get_item_details
 import json
 from posawesome import console
@@ -282,7 +281,7 @@ def delete_invoice(invoice):
 
 
 @frappe.whitelist()
-def get_items_details(pos_profile, items_data, get_availability=None):
+def get_items_details(pos_profile, items_data):
     pos_profile = json.loads(pos_profile)
     items_data = json.loads(items_data)
     warehouse = pos_profile.get("warehouse")
@@ -291,8 +290,7 @@ def get_items_details(pos_profile, items_data, get_availability=None):
     if len(items_data) > 0:
         for item in items_data:
             item_code = item.get("item_code")
-            if get_availability:
-                item_stock_qty = get_stock_availability(item_code, warehouse)
+            item_stock_qty = get_stock_availability(item_code, warehouse)
 
             uoms = frappe.get_all("UOM Conversion Detail", filters={
                 "parent": item_code}, fields=["uom", "conversion_factor"])
@@ -302,19 +300,21 @@ def get_items_details(pos_profile, items_data, get_availability=None):
                 "status": "Active"
             }, fields=["name as serial_no"])
 
-            batch_no_data = frappe.get_all('Batch', filters={
-                "item": item_code}, fields=["name as batch_no"])
+            batch_no_data = frappe.get_all('Batch', 
+                filters={
+                    "item": item_code,
+                    "batch_qty": [">", 0]
+                }, 
+                fields=["name as batch_no, batch_qty", "expiry_date"])
             row = {}
             row.update(item)
             row.update({
                 'item_uoms': uoms or [],
                 'serial_no_data': serial_no_data or [],
                 'batch_no_data': batch_no_data or [],
+                'actual_qty': item_stock_qty or 0,
             })
-            if get_availability:
-                row.update({
-                    'actual_qty': item_stock_qty or 0,
-                })
+
             result.append(row)
 
     return result
@@ -323,3 +323,19 @@ def get_items_details(pos_profile, items_data, get_availability=None):
 @frappe.whitelist()
 def get_item_detail(data, doc=None):
     return get_item_details(data, doc)
+
+
+# def get_bin_details(item_code, warehouse):
+# 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
+# 		["projected_qty", "actual_qty", "reserved_qty"], as_dict=True, cache=True) \
+# 			or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
+
+
+def get_stock_availability(item_code, warehouse):
+	latest_sle = frappe.db.sql("""select sum(actual_qty) as  actual_qty
+		from `tabStock Ledger Entry` 
+		where item_code = %s and warehouse = %s
+		limit 1""", (item_code, warehouse), as_dict=1)
+	
+	sle_qty = latest_sle[0].actual_qty or 0 if latest_sle else 0
+	return sle_qty

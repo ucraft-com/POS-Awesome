@@ -12,7 +12,6 @@
             :items="items"
             :single-expand="singleExpand"
             :expanded.sync="expanded"
-            item-key="item_code"
             show-expand
             class="elevation-1"
             :items-per-page="itemsPerPage"
@@ -186,6 +185,7 @@
                       background-color="white"
                       hide-details
                       v-model="item.stock_qty"
+                      type="number"
                       disabled
                     ></v-text-field>
                   </v-col>
@@ -213,6 +213,7 @@
                       background-color="white"
                       hide-details
                       v-model="item.serial_no_selected_count"
+                      type="number"
                       disabled
                     ></v-text-field>
                   </v-col>
@@ -232,6 +233,52 @@
                       label="Serial No"
                       multiple
                       @change="set_serial_no(item)"
+                    ></v-autocomplete>
+                  </v-col>
+                  <v-col
+                    cols="4"
+                    v-if="item.has_batch_no == 1 || item.batch_no"
+                  >
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="Batch No Available QTY"
+                      background-color="white"
+                      hide-details
+                      v-model="item.actual_batch_qty"
+                      type="number"
+                      disabled
+                    ></v-text-field>
+                  </v-col>
+                  <v-col
+                    cols="4"
+                    v-if="item.has_batch_no == 1 || item.batch_no"
+                  >
+                    <v-text-field
+                      dense
+                      outlined
+                      color="indigo"
+                      label="Batch No Expiry Date"
+                      background-color="white"
+                      hide-details
+                      v-model="item.batch_no_expiry_date"
+                      disabled
+                    ></v-text-field>
+                  </v-col>
+                  <v-col
+                    cols="8"
+                    v-if="item.has_batch_no == 1 || item.batch_no"
+                  >
+                    <v-autocomplete
+                      v-model="item.batch_no"
+                      :items="item.batch_no_data"
+                      item-text="batch_no"
+                      outlined
+                      dense
+                      color="indigo"
+                      label="Bacth No"
+                      @change="set_batch_qty(item, $event)"
                     ></v-autocomplete>
                   </v-col>
                 </v-row>
@@ -504,6 +551,7 @@ export default {
         new_item.price_list_rate = item.rate;
         new_item.qty = new_item.stock_qty;
         new_item.uom = item.stock_uom;
+        new_item.actual_batch_qty = "";
         new_item.conversion_factor = 1;
         this.items.unshift(new_item);
         this.update_item_detail(new_item);
@@ -615,6 +663,7 @@ export default {
           serial_no: item.serial_no,
           discount_percentage: item.discount_percentage,
           discount_amount: item.discount_amount,
+          batch_no: item.batch_no,
         });
       });
       return items_list;
@@ -740,7 +789,7 @@ export default {
             // plc_conversion_rate: 1,
             pos_profile: this.pos_profile.name,
             price_list: this.pos_profile.selling_price_list,
-            // stock_uom: item.stock_uom,
+            // batch_no: item.batch_no,
             uom: item.uom,
             tax_category: "",
             transaction_type: "selling",
@@ -764,13 +813,14 @@ export default {
             item.projected_qty = data.projected_qty;
             item.reserved_qty = data.reserved_qty;
             item.batch_no = data.batch_no;
-            item.actual_qty = data.actual_qty;
+            // item.actual_qty = data.actual_qty;
             item.conversion_factor = data.conversion_factor;
             item.stock_qty = data.stock_qty;
             item.stock_uom = data.stock_uom;
-            item.has_serial_no = data.has_serial_no,
-            item.has_batch_no = data.has_batch_no,
-            vm.calc_item_price(item);
+            (item.has_serial_no = data.has_serial_no),
+              (item.has_batch_no = data.has_batch_no),
+              (item.actual_batch_qty = data.actual_batch_qty),
+              vm.calc_item_price(item);
           }
         },
       });
@@ -899,6 +949,13 @@ export default {
           color: "warning",
         });
       }
+    },
+    set_batch_qty(item, value) {
+      const batch_no = item.batch_no_data.find(
+        (element) => element.batch_no == value
+      );
+      item.actual_batch_qty = batch_no.batch_qty;
+      item.batch_no_expiry_date = batch_no.expiry_date;
     },
   },
   created() {

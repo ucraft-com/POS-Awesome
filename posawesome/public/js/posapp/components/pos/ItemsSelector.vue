@@ -231,10 +231,10 @@ export default {
         args: {
           pos_profile: vm.pos_profile,
           items_data: items,
-          get_availability: true,
         },
         callback: function (r) {
           if (r.message) {
+            // console.log(r.message);
             items.forEach((item) => {
               const updated_item = r.message.find(
                 (element) => element.item_code == item.item_code
