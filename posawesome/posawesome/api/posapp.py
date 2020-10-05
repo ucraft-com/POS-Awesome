@@ -282,7 +282,7 @@ def delete_invoice(invoice):
 
 
 @frappe.whitelist()
-def get_items_details(pos_profile, items_data):
+def get_items_details(pos_profile, items_data, get_availability=None):
     pos_profile = json.loads(pos_profile)
     items_data = json.loads(items_data)
     warehouse = pos_profile.get("warehouse")
@@ -291,7 +291,8 @@ def get_items_details(pos_profile, items_data):
     if len(items_data) > 0:
         for item in items_data:
             item_code = item.get("item_code")
-            item_stock_qty = get_stock_availability(item_code, warehouse)
+            if get_availability:
+                item_stock_qty = get_stock_availability(item_code, warehouse)
 
             uoms = frappe.get_all("UOM Conversion Detail", filters={
                 "parent": item_code}, fields=["uom", "conversion_factor"])
@@ -306,12 +307,14 @@ def get_items_details(pos_profile, items_data):
             row = {}
             row.update(item)
             row.update({
-                'actual_qty': item_stock_qty or 0,
                 'item_uoms': uoms or [],
                 'serial_no_data': serial_no_data or [],
                 'batch_no_data': batch_no_data or [],
-
             })
+            if get_availability:
+                row.update({
+                    'actual_qty': item_stock_qty or 0,
+                })
             result.append(row)
 
     return result

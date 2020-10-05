@@ -768,6 +768,8 @@ export default {
             item.conversion_factor = data.conversion_factor;
             item.stock_qty = data.stock_qty;
             item.stock_uom = data.stock_uom;
+            item.has_serial_no = data.has_serial_no,
+            item.has_batch_no = data.has_batch_no,
             vm.calc_item_price(item);
           }
         },
@@ -930,6 +932,9 @@ export default {
     },
     expanded(data_value) {
       this.update_items_details(data_value);
+      if (data_value.length > 0) {
+        this.update_item_detail(data_value[0]);
+      }
     },
   },
 };

@@ -231,6 +231,7 @@ export default {
         args: {
           pos_profile: vm.pos_profile,
           items_data: items,
+          get_availability: true,
         },
         callback: function (r) {
           if (r.message) {
