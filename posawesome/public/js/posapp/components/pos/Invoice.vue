@@ -19,7 +19,7 @@
             hide-default-footer
           >
             <template v-slot:item.amount="{ item }">{{
-              item.qty * item.rate
+              (item.qty * item.rate).toFixed(2)
             }}</template>
 
             <template v-slot:expanded-item="{ headers, item }">
@@ -421,7 +421,7 @@ export default {
       this.items.forEach((item) => {
         qty += item.qty;
       });
-      return flt(qty);
+      return flt(qty).toFixed(2);
     },
     subtotal() {
       this.close_payments();
@@ -429,14 +429,14 @@ export default {
       this.items.forEach((item) => {
         sum += item.qty * item.rate;
       });
-      return flt(sum);
+      return flt(sum).toFixed(2);
     },
     total_items_discount_amount() {
       let sum = 0;
       this.items.forEach((item) => {
         sum += item.qty * item.discount_amount;
       });
-      return flt(sum);
+      return flt(sum).toFixed(2);
     },
   },
   methods: {
@@ -779,7 +779,7 @@ export default {
       if (event.target.id === "rate") {
         item.discount_percentage = 0;
         if (value < item.price_list_rate) {
-          item.discount_amount = flt(item.price_list_rate) - flt(value);
+          item.discount_amount = (flt(item.price_list_rate) - flt(value)).toFixed(2);
         } else if (value < 0) {
           item.rate = item.price_list_rate;
           item.discount_amount = 0;
@@ -800,9 +800,9 @@ export default {
           item.discount_percentage = 0;
         } else {
           item.rate =
-            flt(item.price_list_rate) -
-            (flt(item.price_list_rate) * flt(value)) / 100;
-          item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
+            (flt(item.price_list_rate) -
+            (flt(item.price_list_rate) * flt(value)) / 100).toFixed(2);
+          item.discount_amount = (flt(item.price_list_rate) - flt(item.rate)).toFixed(2);
         }
       }
     },
@@ -815,10 +815,9 @@ export default {
         item.rate =
           flt(item.price_list_rate) -
           (flt(item.price_list_rate) * flt(item.discount_percentage)) / 100;
-        item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
-        item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
+        item.discount_amount = (flt(item.price_list_rate) - flt(item.rate)).toFixed(2);
       } else if (item.discount_amount) {
-        item.rate = flt(item.price_list_rate) - flt(item.discount_amount);
+        item.rate = (flt(item.price_list_rate) - flt(item.discount_amount)).toFixed(2);
       } else if (item.pricing_rule_for === "Rate") {
         item.rate = item.price_list_rate;
       }

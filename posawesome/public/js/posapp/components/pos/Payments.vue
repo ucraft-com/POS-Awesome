@@ -27,6 +27,7 @@
             v-model="payment.amount"
             type="number"
             :prefix="invoice_doc.currency"
+            @focus="set_rest_amount(payment.idx)"
           ></v-text-field>
         </v-col>
         <v-col cols="5">
@@ -35,7 +36,7 @@
             class=""
             color="primary"
             dark
-            @click="submit_full_payment(payment.idx)"
+            @click="set_full_amount(payment.idx)"
             >{{ payment.mode_of_payment }}</v-btn
           >
         </v-col>
@@ -241,11 +242,18 @@ export default {
         },
       });
     },
-    submit_full_payment(idx) {
+    set_full_amount(idx) {
       this.invoice_doc.payments.forEach((payment) => {
         payment.amount = payment.idx == idx ? this.invoice_doc.grand_total : 0;
       });
       // this.submit();
+    },
+    set_rest_amount(idx) {
+      this.invoice_doc.payments.forEach((payment) => {
+        if (payment.idx == idx && payment.amount == 0 && this.diff_payment > 0) {
+          payment.amount  = this.diff_payment;
+        }
+      });
     },
     load_print_page() {
       const letter_head = this.pos_profile.letter_head || 0;
@@ -278,10 +286,10 @@ export default {
       this.invoice_doc.payments.forEach((payment) => {
         total += flt(payment.amount);
       });
-      return total;
+      return total.toFixed(2);
     },
     diff_payment() {
-      return this.invoice_doc.grand_total - this.total_payments;
+      return (this.invoice_doc.grand_total - this.total_payments).toFixed(2);
     },
     diff_lable() {
       let lable = this.diff_payment < 0 ? "Change" : "To Be Paid";
@@ -305,7 +313,7 @@ export default {
         const default_payment = this.invoice_doc.payments.find(
           (payment) => payment.default == 1
         );
-        default_payment.amount = invoice_doc.grand_total;
+        default_payment.amount = invoice_doc.grand_total.toFixed(2);
         this.loyalty_amount = 0;
       });
       evntBus.$on("register_pos_profile", (data) => {
