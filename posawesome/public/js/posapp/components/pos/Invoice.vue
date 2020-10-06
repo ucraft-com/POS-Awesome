@@ -637,6 +637,11 @@ export default {
       } else {
         this.invoice_doc = data;
         this.items = data.items;
+        let cont = 0
+        this.items.forEach((item) => {
+          cont++
+          item.item_id = Date.now() + cont;
+        });
         this.update_items_details(this.items);
         this.customer = data.customer;
         this.items.forEach((item) => {

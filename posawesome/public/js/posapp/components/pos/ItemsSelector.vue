@@ -291,7 +291,6 @@ export default {
     scan_barcoud() {
       const vm = this;
       onScan.attachTo(document, {
-        reactToPaste: true, // Compatibility to built-in scanners in paste-mode (as opposed to keyboard-mode)
         onScan: function (sCode) {
           vm.first_search = sCode;
           vm.enter_event();
