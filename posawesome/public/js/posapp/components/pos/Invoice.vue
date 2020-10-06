@@ -626,6 +626,7 @@ export default {
       this.items = [];
       this.customer = this.pos_profile.customer;
       this.invoice_doc = "";
+      this.discount_amount = 0;
     },
     new_invoice(data = {}) {
       this.expanded = [];
