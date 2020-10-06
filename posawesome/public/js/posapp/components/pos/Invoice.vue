@@ -13,7 +13,7 @@
             :single-expand="singleExpand"
             :expanded.sync="expanded"
             show-expand
-            item-key="item_code"
+            item-key="item_id"
             class="elevation-1"
             :items-per-page="itemsPerPage"
             hide-default-footer
@@ -288,7 +288,9 @@
                               v-html="data.item.batch_no"
                             ></v-list-item-title>
                             <v-list-item-subtitle
-                              v-html="`Available QTY  '${data.item.batch_qty}' - Expiry Date ${data.item.expiry_date}`"
+                              v-html="
+                                `Available QTY  '${data.item.batch_qty}' - Expiry Date ${data.item.expiry_date}`
+                              "
                             ></v-list-item-subtitle>
                           </v-list-item-content>
                         </template>
@@ -554,27 +556,48 @@ export default {
     },
     add_item(item) {
       const index = this.items.findIndex(
-        (el) => el.item_code === item.item_code
+        (el) => el.item_code === item.item_code && el.uom === item.stock_uom
       );
       if (index === -1) {
-        const new_item = { ...item };
-        new_item.stock_qty = 1;
-        new_item.discount_amount = 0;
-        new_item.discount_percentage = 0;
-        new_item.discount_amount_per_item = 0;
-        new_item.price_list_rate = item.rate;
-        new_item.qty = new_item.stock_qty;
-        new_item.uom = item.stock_uom;
-        new_item.actual_batch_qty = "";
-        new_item.conversion_factor = 1;
+        const new_item = this.get_new_item(item);
         this.items.unshift(new_item);
         this.update_item_detail(new_item);
       } else {
         const cur_item = this.items[index];
         this.update_items_details([cur_item]);
-        cur_item.qty++; // TODO: need to use stock_qty and then update qty
-        this.calc_sotck_gty(cur_item, cur_item.qty);
+        if (!cur_item.has_batch_no) {
+          cur_item.qty++; // TODO: need to use stock_qty and then update qty
+          this.calc_sotck_gty(cur_item, cur_item.qty);
+        } else {
+          if (cur_item.stock_qty < cur_item.actual_batch_qty || !cur_item.batch_no) {
+            cur_item.qty++; // TODO: need to use stock_qty and then update qty
+            this.calc_sotck_gty(cur_item, cur_item.qty);
+          } else {
+            const new_item = this.get_new_item(cur_item);
+            new_item.batch_no = "";
+            new_item.batch_no_expiry_date = "";
+            new_item.actual_batch_qty = "";
+            this.items.unshift(new_item);
+          }
+        }
       }
+    },
+    get_new_item(item) {
+      const new_item = { ...item };
+      new_item.stock_qty = 1;
+      new_item.discount_amount = 0;
+      new_item.discount_percentage = 0;
+      new_item.discount_amount_per_item = 0;
+      new_item.price_list_rate = item.rate;
+      new_item.qty = new_item.stock_qty;
+      new_item.uom = item.stock_uom;
+      new_item.actual_batch_qty = "";
+      new_item.conversion_factor = 1;
+      new_item.item_id = Date.now();
+      if (new_item.has_batch_no) {
+        this.expanded.push(new_item);
+      }
+      return new_item;
     },
     cancel_invoice() {
       const doc = this.get_invoice_doc();
@@ -771,7 +794,7 @@ export default {
           if (r.message) {
             items.forEach((item) => {
               const updated_item = r.message.find(
-                (element) => element.item_code == item.item_code
+                (element) => element.item_id == item.item_id
               );
               item.actual_qty = updated_item.actual_qty;
               item.serial_no_data = updated_item.serial_no_data;
@@ -803,7 +826,6 @@ export default {
             // plc_conversion_rate: 1,
             pos_profile: this.pos_profile.name,
             price_list: this.pos_profile.selling_price_list,
-            // batch_no: item.batch_no,
             uom: item.uom,
             tax_category: "",
             transaction_type: "selling",
@@ -826,14 +848,14 @@ export default {
             item.pricing_rules = data.pricing_rules;
             item.projected_qty = data.projected_qty;
             item.reserved_qty = data.reserved_qty;
-            item.batch_no = data.batch_no;
+            // item.batch_no = data.batch_no;
             // item.actual_qty = data.actual_qty;
             item.conversion_factor = data.conversion_factor;
             item.stock_qty = data.stock_qty;
             item.stock_uom = data.stock_uom;
             (item.has_serial_no = data.has_serial_no),
               (item.has_batch_no = data.has_batch_no),
-              (item.actual_batch_qty = data.actual_batch_qty),
+              // (item.actual_batch_qty = data.actual_batch_qty),
               vm.calc_item_price(item);
           }
         },
