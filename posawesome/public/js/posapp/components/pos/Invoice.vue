@@ -338,7 +338,7 @@
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
-                    v-model="additional_discount"
+                    v-model="discount_amount"
                     label="ِAdditional Discount"
                     outlined
                     dense
@@ -483,7 +483,7 @@ export default {
       invoice_doc: "",
       customer: "",
       customer_info: "",
-      additional_discount: 0,
+      discount_amount: 0,
       total_tax: 0,
       total: 0,
       items: [],
@@ -522,6 +522,7 @@ export default {
       this.items.forEach((item) => {
         sum += item.qty * item.rate;
       });
+      sum -= flt(this.discount_amount);
       return flt(sum).toFixed(2);
     },
     total_items_discount_amount() {
@@ -569,7 +570,10 @@ export default {
           cur_item.qty += item.qty;
           this.calc_sotck_gty(cur_item, cur_item.qty);
         } else {
-          if (cur_item.stock_qty < cur_item.actual_batch_qty || !cur_item.batch_no) {
+          if (
+            cur_item.stock_qty < cur_item.actual_batch_qty ||
+            !cur_item.batch_no
+          ) {
             cur_item.qty += item.qty;
             this.calc_sotck_gty(cur_item, cur_item.qty);
           } else {
@@ -584,6 +588,9 @@ export default {
     },
     get_new_item(item) {
       const new_item = { ...item };
+      if (!item.qty) {
+        item.qty = 1;
+      }
       new_item.stock_qty = item.qty;
       new_item.discount_amount = 0;
       new_item.discount_percentage = 0;
@@ -634,16 +641,18 @@ export default {
         this.items = [];
         this.customer = this.pos_profile.customer;
         this.invoice_doc = "";
+        this.discount_amount = 0;
       } else {
         this.invoice_doc = data;
         this.items = data.items;
-        let cont = 0
+        let cont = 0;
         this.items.forEach((item) => {
-          cont++
+          cont++;
           item.item_id = Date.now() + cont;
         });
         this.update_items_details(this.items);
         this.customer = data.customer;
+        this.discount_amount = data.discount_amount;
         this.items.forEach((item) => {
           if (item.serial_no) {
             item.serial_no_selected = [];
@@ -688,9 +697,10 @@ export default {
       doc.customer = this.customer;
       doc.items = this.get_invoice_items();
       doc.total = this.subtotal;
-      (doc.posa_pos_opening_shift = this.pos_opening_shift.name),
-        (doc.payments = doc.payments = this.get_payments()),
-        (doc.taxes = []);
+      doc.discount_amount = flt(this.discount_amount);
+      doc.posa_pos_opening_shift = this.pos_opening_shift.name;
+      doc.payments = this.get_payments();
+      doc.taxes = [];
       return doc;
     },
     get_invoice_items() {

@@ -68,7 +68,7 @@ export default {
       },
       {
         text: "Amount",
-        value: "total",
+        value: "grand_total",
         align: "start",
         sortable: false,
       },

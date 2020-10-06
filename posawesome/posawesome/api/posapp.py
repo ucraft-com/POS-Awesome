@@ -218,6 +218,7 @@ def update_invoice(data):
     frappe.flags.ignore_account_permission = True
     invoice_doc.customer = data.get("customer")
     invoice_doc.items = []
+    invoice_doc.discount_amount = data.get("discount_amount")
     invoice_doc.update({
         "items": data.get("items")
     })
