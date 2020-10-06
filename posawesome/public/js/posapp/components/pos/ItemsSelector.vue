@@ -251,6 +251,16 @@ export default {
     update_cur_items_details() {
       this.update_items_details(this.filtred_items);
     },
+    scan_barcoud() {
+      const vm = this;
+      onScan.attachTo(document, {
+        reactToPaste: true, // Compatibility to built-in scanners in paste-mode (as opposed to keyboard-mode)
+        onScan: function (sCode) {
+          vm.search = sCode;
+          vm.enter_event();
+        },
+      });
+    },
   },
 
   computed: {
@@ -304,7 +314,9 @@ export default {
     });
   },
 
-  mounted() {},
+  mounted() {
+    this.scan_barcoud();
+  },
 };
 </script>
 

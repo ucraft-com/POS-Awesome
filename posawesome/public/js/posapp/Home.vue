@@ -28,6 +28,10 @@ export default {
       this.page = page;
     },
   },
+  mounted() {
+    $(".page-head").remove();
+    $(".navbar.navbar-default.navbar-fixed-top").remove();
+  },
 };
 </script>
 

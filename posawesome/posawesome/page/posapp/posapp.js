@@ -1,13 +1,10 @@
+{% include "erpnext/selling/page/point_of_sale/onscan.js" %}
 frappe.pages['posapp'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
 		title: 'POS Awesome',
 		single_column: true
 	});
-
-	$('.page-head').remove();
-	$('.navbar.navbar-default.navbar-fixed-top').remove();
-	
 
 	this.page.$PosApp = new frappe.PosApp.posapp(this.page);
 
