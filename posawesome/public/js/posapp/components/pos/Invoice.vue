@@ -584,6 +584,7 @@ export default {
             new_item.batch_no = "";
             new_item.batch_no_expiry_date = "";
             new_item.actual_batch_qty = "";
+            new_item.qty = item.qty || 1;
             this.items.unshift(new_item);
           }
         }
