@@ -13,6 +13,7 @@
             :single-expand="singleExpand"
             :expanded.sync="expanded"
             show-expand
+            item-key="item_code"
             class="elevation-1"
             :items-per-page="itemsPerPage"
             hide-default-footer
@@ -279,7 +280,20 @@
                       color="indigo"
                       label="Bacth No"
                       @change="set_batch_qty(item, $event)"
-                    ></v-autocomplete>
+                    >
+                      <template v-slot:item="data">
+                        <template>
+                          <v-list-item-content>
+                            <v-list-item-title
+                              v-html="data.item.batch_no"
+                            ></v-list-item-title>
+                            <v-list-item-subtitle
+                              v-html="`Available QTY  '${data.item.batch_qty}' - Expiry Date ${data.item.expiry_date}`"
+                            ></v-list-item-subtitle>
+                          </v-list-item-content>
+                        </template>
+                      </template>
+                    </v-autocomplete>
                   </v-col>
                 </v-row>
               </td>
