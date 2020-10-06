@@ -23,7 +23,7 @@
             hint="Search by item code, serial number, batch no or barcode"
             background-color="white"
             hide-details
-            v-model="search"
+            v-model="first_search"
             @keydown.enter="enter_event"
             @keydown.esc="esc_event"
           ></v-text-field>
@@ -141,6 +141,7 @@ export default {
     items_group: ["ALL"],
     items: [],
     search: "",
+    first_search: "",
     itemsPerPage: 1000,
     items_headers: [
       { text: "Name", align: "start", sortable: true, value: "item_name" },
@@ -215,14 +216,50 @@ export default {
       evntBus.$emit("add_item", item);
     },
     enter_event() {
-      if (!this.filtred_items.length || !this.search) {
+      if (!this.filtred_items.length || !this.first_search) {
         return;
       }
-      this.add_item(this.filtred_items[0]);
+      const qty = this.get_item_qty(this.first_search);
+      const new_item = {...this.filtred_items[0]}
+      new_item.qty = flt(qty)
+      this.add_item(new_item);
       this.search = null;
+      this.first_search = null;
+    },
+    get_item_qty(first_search) {
+      let scal_qty = 1;
+      if (first_search.startsWith("221")) {
+        let pesokg1 = first_search.substr(7, 5);
+        let pesokg;
+        if (pesokg1.startsWith("0000")) {
+          pesokg = "0.00" + pesokg1.substr(4);
+        } else if (pesokg1.startsWith("000")) {
+          pesokg = "0.0" + pesokg1.substr(3);
+        } else if (pesokg1.startsWith("00")) {
+          pesokg = "0." + pesokg1.substr(2);
+        } else if (pesokg1.startsWith("0")) {
+          pesokg =
+            pesokg1.substr(1, 1) + "." + pesokg1.substr(2, pesokg1.length);
+        } else if (!pesokg1.startsWith("0")) {
+          pesokg =
+            pesokg1.substr(0, 2) + "." + pesokg1.substr(2, pesokg1.length);
+        }
+        scal_qty = pesokg;
+      }
+      return scal_qty;
+    },
+    get_search(first_search) {
+      let search_term = "";
+      if (first_search && first_search.startsWith("221")) {
+        search_term = first_search.substr(0, 7);
+      } else {
+        search_term = first_search;
+      }
+      return search_term;
     },
     esc_event() {
       this.search = null;
+      this.first_search = null;
     },
     update_items_details(items) {
       const vm = this;
@@ -256,7 +293,7 @@ export default {
       onScan.attachTo(document, {
         reactToPaste: true, // Compatibility to built-in scanners in paste-mode (as opposed to keyboard-mode)
         onScan: function (sCode) {
-          vm.search = sCode;
+          vm.first_search = sCode;
           vm.enter_event();
         },
       });
@@ -265,6 +302,7 @@ export default {
 
   computed: {
     filtred_items() {
+      this.search = this.get_search(this.first_search);
       let filtred_list = [];
       let filtred_group_list = [];
       if (this.item_group != "ALL") {

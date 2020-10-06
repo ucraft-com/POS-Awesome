@@ -566,11 +566,11 @@ export default {
         const cur_item = this.items[index];
         this.update_items_details([cur_item]);
         if (!cur_item.has_batch_no) {
-          cur_item.qty++; // TODO: need to use stock_qty and then update qty
+          cur_item.qty += item.qty;
           this.calc_sotck_gty(cur_item, cur_item.qty);
         } else {
           if (cur_item.stock_qty < cur_item.actual_batch_qty || !cur_item.batch_no) {
-            cur_item.qty++; // TODO: need to use stock_qty and then update qty
+            cur_item.qty += item.qty;
             this.calc_sotck_gty(cur_item, cur_item.qty);
           } else {
             const new_item = this.get_new_item(cur_item);
@@ -584,12 +584,12 @@ export default {
     },
     get_new_item(item) {
       const new_item = { ...item };
-      new_item.stock_qty = 1;
+      new_item.stock_qty = item.qty;
       new_item.discount_amount = 0;
       new_item.discount_percentage = 0;
       new_item.discount_amount_per_item = 0;
       new_item.price_list_rate = item.rate;
-      new_item.qty = new_item.stock_qty;
+      new_item.qty = item.qty;
       new_item.uom = item.stock_uom;
       new_item.actual_batch_qty = "";
       new_item.conversion_factor = 1;
