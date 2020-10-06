@@ -143,6 +143,7 @@ app_include_js = [
 fixtures = [
 	{"doctype":"Custom Field", "filters": [["name", "in", (
 		"Sales Invoice-posa_pos_opening_shift",
+		"Item Barcode-posa_uom",
 	
 	)]]},
 ]

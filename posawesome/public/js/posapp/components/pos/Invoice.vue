@@ -556,8 +556,11 @@ export default {
       // this.$forceUpdate();
     },
     add_item(item) {
+      if (!item.uom) {
+        item.uom = item.stock_uom;
+      }
       const index = this.items.findIndex(
-        (el) => el.item_code === item.item_code && el.uom === item.stock_uom
+        (el) => el.item_code === item.item_code && el.uom === item.uom
       );
       if (index === -1) {
         const new_item = this.get_new_item(item);
@@ -597,7 +600,7 @@ export default {
       new_item.discount_amount_per_item = 0;
       new_item.price_list_rate = item.rate;
       new_item.qty = item.qty;
-      new_item.uom = item.stock_uom;
+      new_item.uom = item.uom ? item.uom :item.stock_uom;
       new_item.actual_batch_qty = "";
       new_item.conversion_factor = 1;
       new_item.item_id = Date.now();

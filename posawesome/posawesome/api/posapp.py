@@ -150,7 +150,7 @@ def get_items(pos_profile):
             item_code = item.item_code
             item_price = item_prices.get(item_code) or {}
             item_barcode = frappe.get_all("Item Barcode", filters={
-                                          "parent": item_code}, fields=["barcode"])
+                                          "parent": item_code}, fields=["barcode","posa_uom"])
             row = {}
             row.update(item)
             row.update({
