@@ -370,7 +370,7 @@
                     label="Email"
                     outlined
                     dense
-                    @change="set_customer_info('email_id',$event)"
+                    @change="set_customer_info('email_id', $event)"
                     hide-details
                   ></v-text-field>
                 </v-col>
@@ -381,7 +381,7 @@
                     outlined
                     dense
                     hide-details
-                    @change="set_customer_info('mobile_no',$event)"
+                    @change="set_customer_info('mobile_no', $event)"
                     type="number"
                   ></v-text-field>
                 </v-col>
@@ -601,7 +601,7 @@ export default {
       new_item.discount_amount_per_item = 0;
       new_item.price_list_rate = item.rate;
       new_item.qty = item.qty;
-      new_item.uom = item.uom ? item.uom :item.stock_uom;
+      new_item.uom = item.uom ? item.uom : item.stock_uom;
       new_item.actual_batch_qty = "";
       new_item.conversion_factor = 1;
       new_item.item_id = Date.now();
@@ -1014,27 +1014,27 @@ export default {
       item.batch_no_expiry_date = batch_no.expiry_date;
     },
     set_customer_info(field, value) {
-        const vm = this;
-				frappe.call({
-					method: 'erpnext.selling.page.point_of_sale.point_of_sale.set_customer_info',
-					args: {
-						fieldname: field,
-						customer: this.customer_info.customer,
-						value: value,
-					},
-					callback: (r) => {
-						if(!r.exc) {
-							vm.customer_info[field] = value;
-              evntBus.$emit("show_mesage", {
-                text: "Customer contact updated successfully.",
-                color: "success",
-              });
-							frappe.utils.play_sound("submit");
-						}
-					}
-				});
-      
-    }
+      const vm = this;
+      frappe.call({
+        method:
+          "erpnext.selling.page.point_of_sale.point_of_sale.set_customer_info",
+        args: {
+          fieldname: field,
+          customer: this.customer_info.customer,
+          value: value,
+        },
+        callback: (r) => {
+          if (!r.exc) {
+            vm.customer_info[field] = value;
+            evntBus.$emit("show_mesage", {
+              text: "Customer contact updated successfully.",
+              color: "success",
+            });
+            frappe.utils.play_sound("submit");
+          }
+        },
+      });
+    },
   },
   created() {
     this.$nextTick(function () {});

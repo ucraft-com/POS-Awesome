@@ -11,11 +11,16 @@
         label="Customer"
         v-model="customer"
         :items="customers"
-        append-outer-icon="mdi-plus"
         background-color="white"
         no-data-text="Customer not found"
         hide-details
-      ></v-autocomplete>
+      >
+        <template v-slot:append-outer>
+          <v-slide-x-reverse-transition mode="out-in">
+            <v-icon @click="new_customer">mdi-plus</v-icon>
+          </v-slide-x-reverse-transition>
+        </template>
+      </v-autocomplete>
     </v-col>
   </v-row>
 </template>
@@ -41,23 +46,20 @@ export default {
         args: {},
         callback: function (r) {
           if (r.message) {
-            // const loadCustomers =
-            //   !localStorage.customer_storage ||
-            //   JSON.parse(localStorage.getItem("items_storage")).length !=
-            //     r.message.length;
             localStorage.setItem("customer_storage", "");
             localStorage.setItem("customer_storage", JSON.stringify(r.message));
-            // if (loadCustomers) {
             vm.$nextTick(() => {
               console.log("loadCustomers");
               vm.customers = JSON.parse(
                 localStorage.getItem("customer_storage")
               );
             });
-            // }
           }
         },
       });
+    },
+    new_customer() {
+      evntBus.$emit("open_new_customer");
     },
   },
   computed: {},
@@ -70,6 +72,9 @@ export default {
       });
       evntBus.$on("set_customer", (customer) => {
         this.customer = customer;
+      });
+      evntBus.$on("add_customer_to_list", (customer) => {
+        this.customers.push(customer);
       });
     });
   },

@@ -2,6 +2,7 @@
   <div fluid>
     <ClosingDialog></ClosingDialog>
     <Drafts></Drafts>
+    <NewCustomer></NewCustomer>
     <OpeningDialog v-if="dialog" :dialog="dialog"></OpeningDialog>
     <v-row v-show="!dialog">
       <v-col v-show="!payment" xl="5" lg="6" md="6" sm="6" cols="12" class="pos pr-0">
@@ -26,6 +27,7 @@ import OpeningDialog from "./OpeningDialog.vue";
 import Payments from "./Payments.vue";
 import Drafts from "./Drafts.vue";
 import ClosingDialog from "./ClosingDialog.vue";
+import NewCustomer from "./NewCustomer.vue";
 
 export default {
   data: function () {
@@ -44,6 +46,7 @@ export default {
     Payments,
     Drafts,
     ClosingDialog,
+    NewCustomer,
   },
 
   methods: {

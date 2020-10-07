@@ -326,12 +326,6 @@ def get_item_detail(data, doc=None):
     return get_item_details(data, doc)
 
 
-# def get_bin_details(item_code, warehouse):
-# 	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
-# 		["projected_qty", "actual_qty", "reserved_qty"], as_dict=True, cache=True) \
-# 			or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
-
-
 def get_stock_availability(item_code, warehouse):
 	latest_sle = frappe.db.sql("""select sum(actual_qty) as  actual_qty
 		from `tabStock Ledger Entry` 
@@ -340,3 +334,16 @@ def get_stock_availability(item_code, warehouse):
 	
 	sle_qty = latest_sle[0].actual_qty or 0 if latest_sle else 0
 	return sle_qty
+
+
+@frappe.whitelist()
+def create_customer(customer_name, tax_id, mobile_no,email_id):
+    if not frappe.db.exists("Customer", {"customer_name": customer_name}):
+        customer = frappe.get_doc({
+            "doctype": "Customer",
+            "customer_name": customer_name,
+            "tax_id": tax_id,
+            "mobile_no": mobile_no,
+            "email_id": email_id,
+        }).insert(ignore_permissions=True)
+        return customer
