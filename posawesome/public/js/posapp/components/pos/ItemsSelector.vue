@@ -299,6 +299,12 @@ export default {
         onScan: function (sCode) {
           vm.first_search = sCode;
           // vm.enter_event();
+          this.$nextTick(function () {
+            vm.first_search = null;
+            vm.search = null;
+          });
+          
+          
         },
       });
     },
