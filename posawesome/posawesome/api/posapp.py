@@ -63,7 +63,7 @@ def check_opening_shift(user):
     open_vouchers = frappe.db.get_all("POS Opening Shift",
                                       filters={
                                           "user": user,
-                                          "pos_closing_entry": ["in", ["", None]],
+                                          "pos_closing_shift": ["in", ["", None]],
                                           "docstatus": 1,
                                           "status": "Open"
                                       },
