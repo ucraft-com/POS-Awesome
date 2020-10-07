@@ -303,8 +303,6 @@ export default {
             vm.first_search = null;
             vm.search = null;
           });
-          
-          
         },
       });
     },

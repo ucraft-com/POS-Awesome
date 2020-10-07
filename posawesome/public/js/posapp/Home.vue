@@ -27,10 +27,21 @@ export default {
     setPage(page) {
       this.page = page;
     },
+    remove_frappe_nave() {
+      this.$nextTick(function () {
+        $(".page-head").remove();
+        $(".navbar.navbar-default.navbar-fixed-top").remove();
+      });
+    },
   },
   mounted() {
-    $(".page-head").remove();
-    $(".navbar.navbar-default.navbar-fixed-top").remove();
+    this.remove_frappe_nave();
+  },
+  updated() {},
+  created: function () {
+    setTimeout(() => {
+      this.remove_frappe_nave();
+    }, 500);
   },
 };
 </script>
