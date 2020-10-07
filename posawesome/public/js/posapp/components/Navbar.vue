@@ -118,10 +118,8 @@ export default {
       mini: true,
       item: 0,
       items: [
-        { text: "Dashboard", icon: "mdi-view-dashboard" },
         { text: "POS", icon: "mdi-point-of-sale" },
-        { text: "Customer", icon: "mdi-account-box-multiple" },
-        { text: "Closing", icon: "mdi-folder-open" },
+        { text: "Dashboard", icon: "mdi-view-dashboard" },
       ],
       page: "",
       fav: true,
