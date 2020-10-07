@@ -605,7 +605,7 @@ export default {
       new_item.actual_batch_qty = "";
       new_item.conversion_factor = 1;
       new_item.item_id = Date.now();
-      if (new_item.has_batch_no) {
+      if (new_item.has_batch_no || new_item.has_serial_no) {
         this.expanded.push(new_item);
       }
       return new_item;
