@@ -298,7 +298,7 @@ export default {
       onScan.attachTo(document, {
         onScan: function (sCode) {
           vm.first_search = sCode;
-          vm.enter_event();
+          // vm.enter_event();
         },
       });
     },
