@@ -27,7 +27,7 @@ export default {
     setPage(page) {
       this.page = page;
     },
-    remove_frappe_nave() {
+    remove_frappe_nav() {
       this.$nextTick(function () {
         $(".page-head").remove();
         $(".navbar.navbar-default.navbar-fixed-top").remove();
@@ -35,12 +35,12 @@ export default {
     },
   },
   mounted() {
-    this.remove_frappe_nave();
+    this.remove_frappe_nav();
   },
   updated() {},
   created: function () {
     setTimeout(() => {
-      this.remove_frappe_nave();
+      this.remove_frappe_nav();
     }, 500);
   },
 };
