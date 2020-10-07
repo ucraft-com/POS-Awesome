@@ -370,7 +370,7 @@
                     label="Email"
                     outlined
                     dense
-                    disabled
+                    @change="set_customer_info('email_id',$event)"
                     hide-details
                   ></v-text-field>
                 </v-col>
@@ -381,7 +381,7 @@
                     outlined
                     dense
                     hide-details
-                    disabled
+                    @change="set_customer_info('mobile_no',$event)"
                     type="number"
                   ></v-text-field>
                 </v-col>
@@ -1013,6 +1013,28 @@ export default {
       item.actual_batch_qty = batch_no.batch_qty;
       item.batch_no_expiry_date = batch_no.expiry_date;
     },
+    set_customer_info(field, value) {
+        const vm = this;
+				frappe.call({
+					method: 'erpnext.selling.page.point_of_sale.point_of_sale.set_customer_info',
+					args: {
+						fieldname: field,
+						customer: this.customer_info.customer,
+						value: value,
+					},
+					callback: (r) => {
+						if(!r.exc) {
+							vm.customer_info[field] = value;
+              evntBus.$emit("show_mesage", {
+                text: "Customer contact updated successfully.",
+                color: "success",
+              });
+							frappe.utils.play_sound("submit");
+						}
+					}
+				});
+      
+    }
   },
   created() {
     this.$nextTick(function () {});
