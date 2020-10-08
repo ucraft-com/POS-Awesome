@@ -855,7 +855,7 @@ export default {
         callback: function (r) {
           if (r.message) {
             const data = r.message;
-            if (item.has_pricing_rule) {
+            if (data.has_pricing_rule) {
               item.discount_amount_on_rate = data.discount_amount_on_rate;
               item.discount_percentage = data.discount_percentage;
               item.discount_percentage_on_rate =
