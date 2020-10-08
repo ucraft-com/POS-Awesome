@@ -6,7 +6,7 @@
       </template>-->
       <v-card>
         <v-card-title>
-          <span class="headline">Select Hold invoice</span>
+          <span class="headline indigo--text">Select Hold invoice</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -30,8 +30,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red" dark @click="close_dialog">Close</v-btn>
-          <v-btn color="blue" dark @click="submit_dialog">Select</v-btn>
+          <v-btn color="error" dark @click="close_dialog">Close</v-btn>
+          <v-btn color="primary" dark @click="submit_dialog">Select</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

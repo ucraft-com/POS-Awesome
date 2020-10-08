@@ -6,7 +6,7 @@
       </template>-->
       <v-card>
         <v-card-title>
-          <span class="headline">Create POS Opening Shift</span>
+          <span class="headline indigo--text">Create POS Opening Shift</span>
         </v-card-title>
         <v-card-text>
           <v-container>
@@ -66,8 +66,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <!-- <v-btn color="red" dark @click="close_opening_dialog">Close</v-btn> -->
-          <v-btn color="blue" dark @click="submit_dialog">Submit</v-btn>
+          <v-btn color="primary" dark @click="submit_dialog">Submit</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

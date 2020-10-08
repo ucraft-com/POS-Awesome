@@ -3,7 +3,7 @@
     <v-dialog v-model="closingDialog" max-width="900px">
       <v-card>
         <v-card-title>
-          <span class="headline">Closing POS Shift</span>
+          <span class="headline indigo--text">Closing POS Shift</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -47,8 +47,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red" dark @click="close_dialog">Close</v-btn>
-          <v-btn color="blue" dark @click="submit_dialog">Submit</v-btn>
+          <v-btn color="error" dark @click="close_dialog">Close</v-btn>
+          <v-btn color="success" dark @click="submit_dialog">Submit</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

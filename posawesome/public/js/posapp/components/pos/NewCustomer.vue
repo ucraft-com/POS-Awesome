@@ -6,7 +6,7 @@
       </template>-->
       <v-card>
         <v-card-title>
-          <span class="headline">New Customer</span>
+          <span class="headline indigo--text">New Customer</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -14,7 +14,6 @@
               <v-col cols="12">
                 <v-text-field
                   dense
-                  outlined
                   color="indigo"
                   label="Customer Name"
                   background-color="white"
@@ -25,7 +24,6 @@
               <v-col cols="6">
                 <v-text-field
                   dense
-                  outlined
                   color="indigo"
                   label="Tax ID"
                   background-color="white"
@@ -36,7 +34,6 @@
               <v-col cols="6">
                 <v-text-field
                   dense
-                  outlined
                   color="indigo"
                   label="Mobile No"
                   background-color="white"
@@ -47,7 +44,6 @@
               <v-col cols="6">
                 <v-text-field
                   dense
-                  outlined
                   color="indigo"
                   label="Email Id"
                   background-color="white"
@@ -60,8 +56,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red" dark @click="close_dialog">Close</v-btn>
-          <v-btn color="blue" dark @click="submit_dialog">Submit</v-btn>
+          <v-btn color="error" dark @click="close_dialog">Close</v-btn>
+          <v-btn color="primary" dark @click="submit_dialog">Submit</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
