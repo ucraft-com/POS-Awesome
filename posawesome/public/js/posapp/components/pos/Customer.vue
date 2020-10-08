@@ -11,10 +11,36 @@
         label="Customer"
         v-model="customer"
         :items="customers"
+        item-text="name"
         background-color="white"
         no-data-text="Customer not found"
         hide-details
+        :filter="customFilter"
       >
+        <template v-slot:item="data">
+          <template>
+            <v-list-item-content>
+              <v-list-item-title class="indigo--text subtitle-1"
+                v-html="data.item.name"
+              ></v-list-item-title>
+              <v-list-item-subtitle v-if="data.item.tax_id"
+                v-html="
+                  `TAX ID: ${data.item.tax_id}`
+                "
+              ></v-list-item-subtitle>
+              <v-list-item-subtitle v-if="data.item.email_id"
+                v-html="
+                  `Email: ${data.item.email_id}`
+                "
+              ></v-list-item-subtitle>
+              <v-list-item-subtitle v-if="data.item.mobile_no"
+                v-html="
+                  `Mobile No: ${data.item.mobile_no}`
+                "
+              ></v-list-item-subtitle>
+            </v-list-item-content>
+          </template>
+        </template>
         <template v-slot:append-outer>
           <v-slide-x-reverse-transition mode="out-in">
             <v-icon @click="new_customer">mdi-plus</v-icon>
@@ -61,6 +87,19 @@ export default {
     new_customer() {
       evntBus.$emit("open_new_customer");
     },
+    customFilter (item, queryText, itemText) {
+        const textOne = item.name.toLowerCase()
+        const textTwo = item.tax_id ? item.tax_id.toLowerCase() : ""
+        const textThree = item.email_id ? item.email_id.toLowerCase() : ""
+        const textFour = item.mobile_no ? item.mobile_no.toLowerCase() : ""
+        const searchText = queryText.toLowerCase()
+
+        return textOne.indexOf(searchText) > -1 ||
+          textTwo.indexOf(searchText) > -1 || 
+          textThree.indexOf(searchText) > -1 || 
+          textFour.indexOf(searchText) > -1
+
+      },
   },
   computed: {},
 

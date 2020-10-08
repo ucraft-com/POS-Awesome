@@ -186,14 +186,14 @@ def get_items_groups():
 @frappe.whitelist()
 def get_customer_names():
     customers = frappe.db.sql("""
-        select name 
+        select name, mobile_no, email_id, tax_id
         from `tabCustomer`
         order by name
         LIMIT 0, 10000 """, as_dict=1)
-    customers_list = []
-    for customer in customers:
-        customers_list.append(customer["name"])
-    return customers_list
+    # customers_list = []
+    # for customer in customers:
+    #     customers_list.append(customer["name"])
+    return customers
 
 
 @frappe.whitelist()
