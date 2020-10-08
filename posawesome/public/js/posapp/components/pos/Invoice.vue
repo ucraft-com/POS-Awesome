@@ -855,27 +855,26 @@ export default {
         callback: function (r) {
           if (r.message) {
             const data = r.message;
-            item.discount_amount_on_rate = data.discount_amount_on_rate;
-            item.discount_amount_on_rate = data.discount_amount_on_rate;
-            item.discount_percentage = data.discount_percentage;
-            item.discount_percentage_on_rate = data.discount_percentage_on_rate;
-            item.discount_amount = data.discount_amount || 0;
+            if (item.has_pricing_rule) {
+              item.discount_amount_on_rate = data.discount_amount_on_rate;
+              item.discount_percentage = data.discount_percentage;
+              item.discount_percentage_on_rate =
+                data.discount_percentage_on_rate;
+              item.discount_amount = data.discount_amount || 0;
+            }
+            item.price_list_rate = data.price_list_rate;
             item.has_pricing_rule = data.has_pricing_rule;
             item.last_purchase_rate = data.last_purchase_rate;
-            item.price_list_rate = data.price_list_rate;
             item.price_or_product_discount = data.price_or_product_discount;
             item.pricing_rule_for = data.pricing_rule_for;
             item.pricing_rules = data.pricing_rules;
             item.projected_qty = data.projected_qty;
             item.reserved_qty = data.reserved_qty;
-            // item.batch_no = data.batch_no;
-            // item.actual_qty = data.actual_qty;
             item.conversion_factor = data.conversion_factor;
             item.stock_qty = data.stock_qty;
             item.stock_uom = data.stock_uom;
             (item.has_serial_no = data.has_serial_no),
               (item.has_batch_no = data.has_batch_no),
-              // (item.actual_batch_qty = data.actual_batch_qty),
               vm.calc_item_price(item);
           }
         },
@@ -967,8 +966,9 @@ export default {
     },
     calc_item_price(item) {
       if (!item.has_pricing_rule) {
-        item.rate = item.price_list_rate;
-        return;
+        if (item.price_list_rate) {
+          item.rate = item.price_list_rate;
+        }
       }
       if (item.discount_percentage) {
         item.rate =
@@ -988,6 +988,10 @@ export default {
     calc_uom(item, value) {
       const new_uom = item.item_uoms.find((element) => element.uom == value);
       item.conversion_factor = new_uom.conversion_factor;
+      if (!item.has_pricing_rule) {
+        item.discount_amount = 0;
+        item.discount_percentage = 0;
+      }
       this.update_item_detail(item);
     },
     calc_sotck_gty(item, value) {
