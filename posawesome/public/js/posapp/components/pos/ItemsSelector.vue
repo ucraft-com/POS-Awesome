@@ -220,13 +220,13 @@ export default {
         return;
       }
       const qty = this.get_item_qty(this.first_search);
-      const new_item = {...this.filtred_items[0]}
-      new_item.qty = flt(qty)
-      new_item.item_barcode.forEach(element => {
+      const new_item = { ...this.filtred_items[0] };
+      new_item.qty = flt(qty);
+      new_item.item_barcode.forEach((element) => {
         if (this.search == element.barcode) {
           new_item.uom = element.posa_uom;
         }
-      })
+      });
       this.add_item(new_item);
       this.search = null;
       this.first_search = null;
@@ -300,8 +300,16 @@ export default {
           vm.first_search = sCode;
           // vm.enter_event();
           vm.$nextTick(function () {
-            vm.first_search = null;
-            vm.search = null;
+            if (vm.filtred_items.length == 0) {
+              evntBus.$emit("show_mesage", {
+                text: `No Item has this barcode ${sCode}`,
+                color: "error",
+              });
+              frappe.utils.play_sound("error");
+            } else {
+              vm.first_search = null;
+              vm.search = null;
+            }
           });
         },
       });

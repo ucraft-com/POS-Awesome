@@ -238,6 +238,7 @@ export default {
               text: `Invoice ${r.message.name} Submited`,
               color: "success",
             });
+            frappe.utils.play_sound("submit");
           }
         },
       });
