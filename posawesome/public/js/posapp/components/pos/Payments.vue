@@ -218,6 +218,30 @@ export default {
       evntBus.$emit("show_payment", "false");
     },
     submit() {
+      if (this.total_payments < 0) {
+        evntBus.$emit("show_mesage", {
+          text: `Payments not correct`,
+          color: "error",
+        });
+        frappe.utils.play_sound("error");
+        return;
+      }
+      if (!this.pos_profile.posa_allow_partial_payment  && this.diff_payment != 0) {
+        evntBus.$emit("show_mesage", {
+          text: `The amount paid is not complete`,
+          color: "error",
+        });
+        frappe.utils.play_sound("error");
+        return;
+      }
+      if (this.pos_profile.posa_allow_partial_payment && !this.pos_profile.posa_allow_credit_sale  && this.total_payments == 0) {
+        evntBus.$emit("show_mesage", {
+          text: `Please enter the amount paid`,
+          color: "error",
+        });
+        frappe.utils.play_sound("error");
+        return;
+      }
       this.submit_invoice();
       evntBus.$emit("new_invoice", "false");
       this.back_to_invoice();

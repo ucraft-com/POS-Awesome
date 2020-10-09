@@ -151,6 +151,8 @@ fixtures = [
 		"POS Profile-posa_allow_user_to_edit_item_discount",
 		"POS Profile-posa_display_items_in_stock",
 		"POS Profile-posa_allow_submissions_in_background_job",
+		"POS Profile-posa_allow_partial_payment",
+		"POS Profile-posa_allow_credit_sale",
 	
 	)]]},
 ]
