@@ -612,7 +612,7 @@ export default {
     },
     cancel_invoice() {
       const doc = this.get_invoice_doc();
-      if (doc.name) {
+      if (doc.name && this.pos_profile.posa_allow_delete) {
         frappe.call({
           method: "posawesome.posawesome.api.posapp.delete_invoice",
           args: { invoice: doc.name },

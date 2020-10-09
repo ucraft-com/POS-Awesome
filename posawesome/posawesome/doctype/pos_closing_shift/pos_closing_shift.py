@@ -34,7 +34,23 @@ class POSClosingShift(Document):
             "POS Opening Shift", self.pos_opening_shift)
         opening_entry.pos_closing_shift = self.name
         opening_entry.set_status()
+        self.delete_draft_invoices()
         opening_entry.save()
+
+    def delete_draft_invoices(self):
+        if frappe.get_value("POS Profile", self.pos_profile, "posa_allow_delete"):
+            data = frappe.db.sql("""
+                select
+                    name
+                from
+                    `tabSales Invoice`
+                where
+                    docstatus = 0 and posa_pos_opening_shift = %s
+                """, (self.pos_opening_shift), as_dict=1)
+
+            for invoice in data:
+                frappe.delete_doc("Sales Invoice", invoice.name, force=1)
+
 
     def get_payment_reconciliation_details(self):
         currency = frappe.get_cached_value(
