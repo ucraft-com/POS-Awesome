@@ -345,6 +345,7 @@
                     hide-details
                     type="number"
                     :prefix="pos_profile.currency"
+                    :disabled="!pos_profile.posa_allow_user_to_edit_additional_discount ? true : false"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
