@@ -151,15 +151,21 @@ def get_items(pos_profile):
             item_price = item_prices.get(item_code) or {}
             item_barcode = frappe.get_all("Item Barcode", filters={
                                           "parent": item_code}, fields=["barcode","posa_uom"])
-            row = {}
-            row.update(item)
-            row.update({
-                'rate': item_price.get('price_list_rate') or 0,
-                'currency': item_price.get('currency') or pos_profile.get("currency"),
-                'item_barcode': item_barcode or [],
-                'actual_qty': 0,
-            })
-            result.append(row)
+
+            if pos_profile.get("posa_display_items_in_stock"):
+                item_stock_qty = get_stock_availability(item_code, pos_profile.get("warehouse"))
+            if  pos_profile.get("posa_display_items_in_stock") and (not item_stock_qty or item_stock_qty < 0):
+                pass
+            else:                                          
+                row = {}
+                row.update(item)
+                row.update({
+                    'rate': item_price.get('price_list_rate') or 0,
+                    'currency': item_price.get('currency') or pos_profile.get("currency"),
+                    'item_barcode': item_barcode or [],
+                    'actual_qty': 0,
+                })
+                result.append(row)
 
     return result
 
