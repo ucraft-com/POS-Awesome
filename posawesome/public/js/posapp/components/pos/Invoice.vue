@@ -104,7 +104,7 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="rate"
-                      :disabled="item.pricing_rules ? true : false"
+                      :disabled="item.pricing_rules || !pos_profile.posa_allow_user_to_edit_rate ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
