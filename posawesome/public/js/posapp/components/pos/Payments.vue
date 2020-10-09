@@ -228,7 +228,6 @@ export default {
         method: "posawesome.posawesome.api.posapp.submit_invoice",
         args: {
           data: this.invoice_doc,
-          to_submit: "True",
         },
         async: true,
         callback: function (r) {
