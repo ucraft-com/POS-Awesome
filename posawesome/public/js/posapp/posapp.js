@@ -11,10 +11,10 @@ frappe.PosApp.posapp = class {
                 
         }
         make_body() {
-                this.$customer_table_container = this.$parent.find('#body_div');
+                this.$el = this.$parent.find('#body_div');
                 this.vue = new Vue({
                         vuetify: new Vuetify(),
-                        el: this.$customer_table_container[0],
+                        el: this.$el[0],
                         data: {
                         },
                         render: h => h(Home),

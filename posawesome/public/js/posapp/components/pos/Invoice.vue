@@ -104,7 +104,7 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="rate"
-                      :disabled="item.pricing_rules ? true : false"
+                      :disabled="item.pricing_rules || !pos_profile.posa_allow_user_to_edit_rate ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -119,7 +119,7 @@
                       type="number"
                       @change="calc_prices(item, $event)"
                       id="discount_percentage"
-                      :disabled="item.pricing_rules ? true : false"
+                      :disabled="item.pricing_rules || !pos_profile.posa_allow_user_to_edit_item_discount ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -135,7 +135,7 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="discount_amount"
-                      :disabled="item.pricing_rules ? true : false"
+                      :disabled="item.pricing_rules || !pos_profile.posa_allow_user_to_edit_item_discount ? true : false"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -345,6 +345,7 @@
                     hide-details
                     type="number"
                     :prefix="pos_profile.currency"
+                    :disabled="!pos_profile.posa_allow_user_to_edit_additional_discount ? true : false"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
@@ -612,7 +613,7 @@ export default {
     },
     cancel_invoice() {
       const doc = this.get_invoice_doc();
-      if (doc.name) {
+      if (doc.name && this.pos_profile.posa_allow_delete) {
         frappe.call({
           method: "posawesome.posawesome.api.posapp.delete_invoice",
           args: { invoice: doc.name },

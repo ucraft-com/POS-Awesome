@@ -10,6 +10,7 @@ from frappe import _
 from erpnext.accounts.party import get_party_account
 from erpnext.stock.get_item_details import get_item_details
 import json
+from frappe.utils.background_jobs import enqueue
 from posawesome import console
 
 
@@ -151,15 +152,21 @@ def get_items(pos_profile):
             item_price = item_prices.get(item_code) or {}
             item_barcode = frappe.get_all("Item Barcode", filters={
                                           "parent": item_code}, fields=["barcode","posa_uom"])
-            row = {}
-            row.update(item)
-            row.update({
-                'rate': item_price.get('price_list_rate') or 0,
-                'currency': item_price.get('currency') or pos_profile.get("currency"),
-                'item_barcode': item_barcode or [],
-                'actual_qty': 0,
-            })
-            result.append(row)
+
+            if pos_profile.get("posa_display_items_in_stock"):
+                item_stock_qty = get_stock_availability(item_code, pos_profile.get("warehouse"))
+            if  pos_profile.get("posa_display_items_in_stock") and (not item_stock_qty or item_stock_qty < 0):
+                pass
+            else:                                          
+                row = {}
+                row.update(item)
+                row.update({
+                    'rate': item_price.get('price_list_rate') or 0,
+                    'currency': item_price.get('currency') or pos_profile.get("currency"),
+                    'item_barcode': item_barcode or [],
+                    'actual_qty': 0,
+                })
+                result.append(row)
 
     return result
 
@@ -190,9 +197,7 @@ def get_customer_names():
         from `tabCustomer`
         order by name
         LIMIT 0, 10000 """, as_dict=1)
-    # customers_list = []
-    # for customer in customers:
-    #     customers_list.append(customer["name"])
+
     return customers
 
 
@@ -231,7 +236,7 @@ def update_invoice(data):
 
 
 @frappe.whitelist()
-def submit_invoice(data, to_submit=None):
+def submit_invoice(data):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
     if data.get("loyalty_amount") > 0:
@@ -248,12 +253,19 @@ def submit_invoice(data, to_submit=None):
     frappe.flags.ignore_account_permission = True
 
     invoice_doc.save()
-    if to_submit == "True":
+    if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_allow_submissions_in_background_job"):
+        enqueue(method=submit_in_background_job, queue='short', timeout=1000, is_async=True , kwargs=invoice_doc.name )
+    else:
         invoice_doc.submit()
     return {
         "name": invoice_doc.name,
         "status": invoice_doc.docstatus
     }
+
+
+def submit_in_background_job(kwargs):
+    invoice_doc = frappe.get_doc("Sales Invoice", kwargs)
+    invoice_doc.submit()
 
 
 @frappe.whitelist()
@@ -276,8 +288,7 @@ def get_draft_invoices(pos_opening_shift):
 
 @frappe.whitelist()
 def delete_invoice(invoice):
-    doc = frappe.get_doc("Sales Invoice", invoice)
-    doc.delete()
+    frappe.delete_doc("Sales Invoice", invoice, force=1)
     return "Inovice {0} Deleted".format(invoice)
 
 
