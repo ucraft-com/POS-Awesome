@@ -5,7 +5,7 @@
 
 1. `bench get-app  git@github.com:yrestom/POS-Awesome.git`
 
-2. `bench bench setup requirements`
+2. `bench setup requirements`
 
 3. `bench build --app posawesome`
 
