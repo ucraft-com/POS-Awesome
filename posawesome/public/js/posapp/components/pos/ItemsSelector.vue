@@ -140,6 +140,7 @@ export default {
     loading: false,
     items_group: ["ALL"],
     items: [],
+    item_search_brcode: "",
     search: "",
     first_search: "",
     itemsPerPage: 1000,
@@ -297,20 +298,53 @@ export default {
       const vm = this;
       onScan.attachTo(document, {
         onScan: function (sCode) {
-          vm.first_search = sCode;
-          // vm.enter_event();
-          vm.$nextTick(function () {
-            if (vm.filtred_items.length == 0) {
+          if (!vm.pos_profile.posa_use_server_for_searching) {
+            vm.first_search = sCode;
+            vm.$nextTick(function () {
+              if (vm.filtred_items.length == 0) {
+                evntBus.$emit("show_mesage", {
+                  text: `No Item has this barcode ${sCode}`,
+                  color: "error",
+                });
+                frappe.utils.play_sound("error");
+              } else {
+                vm.first_search = null;
+                vm.search = null;
+              }
+            });
+          } else {
+            let search_item = "";
+            frappe.call({
+              method: "posawesome.posawesome.api.posapp.get_items_from_barcode",
+              args: {
+                selling_price_list: vm.pos_profile.selling_price_list,
+                currency: vm.pos_profile.currency,
+                barcode: vm.get_search(sCode),
+              },
+              async: false,
+              callback: function (r) {
+                if (r.message) {
+                  search_item = r.message;
+                }
+              },
+            });
+            if (!search_item) {
               evntBus.$emit("show_mesage", {
                 text: `No Item has this barcode ${sCode}`,
                 color: "error",
               });
               frappe.utils.play_sound("error");
             } else {
-              vm.first_search = null;
-              vm.search = null;
+              vm.first_search = sCode;
+              vm.item_search_brcode = search_item;
+              // vm.enter_event();
+              vm.$nextTick(function () {
+                vm.first_search = null;
+                vm.search = null;
+                vm.item_search_brcode = null;
+              });
             }
-          });
+          }
         },
       });
     },
@@ -318,6 +352,9 @@ export default {
 
   computed: {
     filtred_items() {
+      if (this.item_search_brcode) {
+        return [this.item_search_brcode];
+      }
       this.search = this.get_search(this.first_search);
       let filtred_list = [];
       let filtred_group_list = [];

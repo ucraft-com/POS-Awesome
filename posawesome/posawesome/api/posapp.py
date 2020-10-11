@@ -114,7 +114,6 @@ def get_items(pos_profile):
             description,
             stock_uom,
             image,
-            idx AS idx,
             is_stock_item,
             has_variants,
             variant_of,
@@ -151,13 +150,14 @@ def get_items(pos_profile):
             item_code = item.item_code
             item_price = item_prices.get(item_code) or {}
             item_barcode = frappe.get_all("Item Barcode", filters={
-                                          "parent": item_code}, fields=["barcode","posa_uom"])
+                                          "parent": item_code}, fields=["barcode", "posa_uom"])
 
             if pos_profile.get("posa_display_items_in_stock"):
-                item_stock_qty = get_stock_availability(item_code, pos_profile.get("warehouse"))
-            if  pos_profile.get("posa_display_items_in_stock") and (not item_stock_qty or item_stock_qty < 0):
+                item_stock_qty = get_stock_availability(
+                    item_code, pos_profile.get("warehouse"))
+            if pos_profile.get("posa_display_items_in_stock") and (not item_stock_qty or item_stock_qty < 0):
                 pass
-            else:                                          
+            else:
                 row = {}
                 row.update(item)
                 row.update({
@@ -254,7 +254,8 @@ def submit_invoice(data):
 
     invoice_doc.save()
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_allow_submissions_in_background_job"):
-        enqueue(method=submit_in_background_job, queue='short', timeout=1000, is_async=True , kwargs=invoice_doc.name )
+        enqueue(method=submit_in_background_job, queue='short',
+                timeout=1000, is_async=True, kwargs=invoice_doc.name)
     else:
         invoice_doc.submit()
     return {
@@ -312,12 +313,12 @@ def get_items_details(pos_profile, items_data):
                 "status": "Active"
             }, fields=["name as serial_no"])
 
-            batch_no_data = frappe.get_all('Batch', 
-                filters={
-                    "item": item_code,
-                    "batch_qty": [">", 0]
-                }, 
-                fields=["name as batch_no, batch_qty", "expiry_date"])
+            batch_no_data = frappe.get_all('Batch',
+                                           filters={
+                                               "item": item_code,
+                                               "batch_qty": [">", 0]
+                                           },
+                                           fields=["name as batch_no, batch_qty", "expiry_date"])
             row = {}
             row.update(item)
             row.update({
@@ -338,17 +339,17 @@ def get_item_detail(data, doc=None):
 
 
 def get_stock_availability(item_code, warehouse):
-	latest_sle = frappe.db.sql("""select sum(actual_qty) as  actual_qty
+    latest_sle = frappe.db.sql("""select sum(actual_qty) as  actual_qty
 		from `tabStock Ledger Entry` 
 		where item_code = %s and warehouse = %s
 		limit 1""", (item_code, warehouse), as_dict=1)
-	
-	sle_qty = latest_sle[0].actual_qty or 0 if latest_sle else 0
-	return sle_qty
+
+    sle_qty = latest_sle[0].actual_qty or 0 if latest_sle else 0
+    return sle_qty
 
 
 @frappe.whitelist()
-def create_customer(customer_name, tax_id, mobile_no,email_id):
+def create_customer(customer_name, tax_id, mobile_no, email_id):
     if not frappe.db.exists("Customer", {"customer_name": customer_name}):
         customer = frappe.get_doc({
             "doctype": "Customer",
@@ -358,3 +359,46 @@ def create_customer(customer_name, tax_id, mobile_no,email_id):
             "email_id": email_id,
         }).insert(ignore_permissions=True)
         return customer
+
+
+@frappe.whitelist()
+def get_items_from_barcode(selling_price_list, currency, barcode):
+    search_item = frappe.get_all("Item Barcode", filters={
+        "barcode": barcode}, fields=["parent", "barcode", "posa_uom"])
+    if len(search_item) == 0:
+        return ""
+    item_code = search_item[0].parent
+    item_list = frappe.get_all("Item", filters={"name": item_code}, fields=[
+        "name",
+        "item_name",
+        "description",
+        "stock_uom",
+        "image",
+        "is_stock_item",
+        "has_variants",
+        "variant_of",
+        "item_group",
+        "has_batch_no",
+        "has_serial_no"])
+
+    if item_list[0]:
+        item = item_list[0]
+        item_prices_data = frappe.get_all("Item Price",
+                                          fields=[
+                                              "item_code", "price_list_rate", "currency"],
+                                          filters={'price_list': selling_price_list, 'item_code': item_code})
+        
+        item_price = 0
+        if len(item_prices_data):
+            item_price = item_prices_data[0].get("price_list_rate")
+            currency = item_prices_data[0].get("currency")
+        
+        item.update({
+            'rate': item_price,
+            'currency': currency,
+            'item_code': item_code,
+            'barcode' : barcode,
+            'actual_qty': 0,
+            'item_barcode': search_item,
+        })
+        return item
