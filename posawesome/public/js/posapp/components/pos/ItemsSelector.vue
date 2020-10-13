@@ -297,21 +297,22 @@ export default {
     scan_barcoud() {
       const vm = this;
       onScan.attachTo(document, {
+        keyCodeMapper: function (oEvent) {
+          oEvent.preventDefault();
+          return onScan.decodeKeyEvent(oEvent);
+        },
         onScan: function (sCode) {
           if (!vm.pos_profile.posa_use_server_for_searching) {
             vm.first_search = sCode;
-            setTimeout(() => {
-              if (vm.filtred_items.length == 0) {
-                evntBus.$emit("show_mesage", {
-                  text: `No Item has this barcode ${sCode}`,
-                  color: "error",
-                });
-                frappe.utils.play_sound("error");
-              } else {
-                vm.first_search = null;
-                vm.search = null;
-              }
-            }, 0);
+            if (vm.filtred_items.length == 0) {
+              evntBus.$emit("show_mesage", {
+                text: `No Item has this barcode ${sCode}`,
+                color: "error",
+              });
+              frappe.utils.play_sound("error");
+            } else {
+              vm.enter_event();
+            }
           } else {
             let search_item = "";
             frappe.call({
@@ -337,11 +338,8 @@ export default {
             } else {
               vm.first_search = sCode;
               vm.item_search_brcode = search_item;
-              setTimeout(() => {
-                vm.first_search = null;
-                vm.search = null;
-                vm.item_search_brcode = null;
-              }, 0);
+              vm.enter_event();
+              vm.item_search_brcode = null;
             }
           }
         },

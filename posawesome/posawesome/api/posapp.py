@@ -20,7 +20,7 @@ def get_opening_dialog_data():
     data["companys"] = frappe.get_list(
         "Company", limit_page_length=0, order_by='name')
     data["pos_profiles_data"] = frappe.get_list(
-        "POS Profile", fields=["name", "company"], limit_page_length=0, order_by='name')
+        "POS Profile", filters = {"disabled" : 0}, fields=["name", "company"], limit_page_length=0, order_by='name')
 
     pos_profiles_list = []
     for i in data["pos_profiles_data"]:
