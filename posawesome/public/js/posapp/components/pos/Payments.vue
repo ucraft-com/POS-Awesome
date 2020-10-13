@@ -2,7 +2,7 @@
   <div>
     <v-card
       class="selection mx-auto grey lighten-5"
-      style="max-height: 80vh; height: 80vh"
+      style="max-height: 78vh; height: 78vh"
     >
       <v-progress-linear
         :active="loading"
@@ -11,6 +11,38 @@
         top
         color="deep-purple accent-4"
       ></v-progress-linear>
+      <div class=" overflow-y-auto" style="max-height: 78vh">
+      <v-row v-if="invoice_doc" class="px-1 py-0">
+        <v-col cols="7">
+          <v-text-field
+            outlined
+            color="indigo"
+            label="Paid Amount"
+            background-color="white"
+            hide-details
+            v-model="total_payments"
+            type="number"
+            readonly
+            :prefix="invoice_doc.currency"
+            dense
+          ></v-text-field>
+        </v-col>
+        <v-col cols="5">
+          <v-text-field
+            outlined
+            color="indigo"
+            :label="diff_lable"
+            background-color="white"
+            hide-details
+            v-model="diff_payment"
+            type="number"
+            disabled
+            :prefix="invoice_doc.currency"
+            dense
+          ></v-text-field>
+        </v-col>
+      </v-row>
+      <v-divider></v-divider>
       <v-row
         class="pyments px-1 py-0"
         v-for="payment in invoice_doc.payments"
@@ -146,42 +178,14 @@
           ></v-text-field>
         </v-col>
       </v-row>
-      <v-divider></v-divider>
-      <v-row v-if="invoice_doc" class="px-1 py-0">
-        <v-col cols="6">
-          <v-text-field
-            outlined
-            color="indigo"
-            label="Paid Amount"
-            background-color="white"
-            hide-details
-            v-model="total_payments"
-            type="number"
-            readonly
-            :prefix="invoice_doc.currency"
-          ></v-text-field>
-        </v-col>
-        <v-col cols="6">
-          <v-text-field
-            outlined
-            color="indigo"
-            :label="diff_lable"
-            background-color="white"
-            hide-details
-            v-model="diff_payment"
-            type="number"
-            disabled
-            :prefix="invoice_doc.currency"
-          ></v-text-field>
-        </v-col>
-      </v-row>
+      </div>
     </v-card>
     <v-card
       flat
-      style="max-height: 10vh; height: 10vh"
+      style="max-height: 11vh; height: 11vh"
       class="cards mb-0 mt-3 py-0"
     >
-      <v-row align="start" style="height: 53%" no-gutters>
+      <v-row align="start"  no-gutters>
         <v-col cols="12">
           <v-btn
             block

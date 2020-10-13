@@ -1,11 +1,11 @@
 <template>
   <div>
     <v-card
-      style="max-height: 70vh; height: 70vh"
+      style="max-height: 65vh; height: 65vh"
       class="cards my-0 py-0 grey lighten-5"
     >
       <Customer></Customer>
-      <div class="my-0 py-0 overflow-y-auto" style="max-height: 59vh">
+      <div class="my-0 py-0 overflow-y-auto" style="max-height: 55vh">
         <template @mouseover="style = 'cursor: pointer'">
           <v-data-table
             :headers="items_headers"
@@ -307,7 +307,7 @@
     <v-row>
       <v-col class="pt-0 pr-0" cols="8">
         <v-card
-          style="max-height: 20vh; height: 20vh"
+          style="max-height: 25vh; height: 25vh"
           class="cards mb-0 mt-3 py-0 grey lighten-5"
         >
           <v-row no-gutters class="pa-1 pt-2" style="height: 100%">
@@ -415,10 +415,10 @@
       <v-col class="pt-0 pr-3" cols="4">
         <v-card
           flat
-          style="max-height: 20vh; height: 20vh"
+          style="max-height: 25vh; height: 25vh"
           class="cards mb-0 mt-3 py-0"
         >
-          <v-row align="start" style="height: 53%">
+          <v-row align="start" style="height: 52%">
             <v-col cols="12">
               <v-btn
                 block

@@ -2,7 +2,7 @@
   <div>
     <v-card
       class="selection mx-auto grey lighten-5"
-      style="max-height: 80vh; height: 80vh"
+      style="max-height: 77vh; height: 77vh"
     >
       <v-progress-linear
         :active="loading"
@@ -30,7 +30,7 @@
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">
-            <v-row dense class="overflow-y-auto" style="max-height: 68vh">
+            <v-row dense class="overflow-y-auto" style="max-height: 67vh">
               <v-col
                 v-for="(item, idx) in filtred_items"
                 :key="idx"
@@ -66,7 +66,7 @@
             </v-row>
           </div>
           <div fluid class="items" v-if="items_view == 'list'">
-            <div class="my-0 py-0 overflow-y-auto" style="max-height: 68vh">
+            <div class="my-0 py-0 overflow-y-auto" style="max-height: 67vh">
               <template>
                 <v-data-table
                   :headers="items_headers"
@@ -84,7 +84,7 @@
       </v-row>
     </v-card>
     <v-card
-      style="max-height: 10vh; height: 10vh"
+      style="max-height: 13vh; height: 13vh"
       class="cards mb-0 mt-3 pa-2 grey lighten-5"
     >
       <v-row no-gutters>
