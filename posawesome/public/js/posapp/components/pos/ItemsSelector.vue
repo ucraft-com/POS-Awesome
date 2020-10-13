@@ -298,7 +298,7 @@ export default {
       const vm = this;
       onScan.attachTo(document, {
         keyCodeMapper: function (oEvent) {
-          oEvent.preventDefault();
+          event.stopImmediatePropagation()
           return onScan.decodeKeyEvent(oEvent);
         },
         onScan: function (sCode) {

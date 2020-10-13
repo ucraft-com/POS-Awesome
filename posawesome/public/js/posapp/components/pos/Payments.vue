@@ -226,7 +226,7 @@ export default {
         frappe.utils.play_sound("error");
         return;
       }
-      if (!this.pos_profile.posa_allow_partial_payment  && this.diff_payment != 0) {
+      if (!this.pos_profile.posa_allow_partial_payment  && this.total_payments < this.invoice_doc.grand_total) {
         evntBus.$emit("show_mesage", {
           text: `The amount paid is not complete`,
           color: "error",
