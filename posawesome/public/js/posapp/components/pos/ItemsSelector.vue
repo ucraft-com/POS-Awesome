@@ -19,7 +19,7 @@
             autofocus
             outlined
             color="indigo"
-            label="Serch Items"
+            label="Search Items"
             hint="Search by item code, serial number, batch no or barcode"
             background-color="white"
             hide-details
