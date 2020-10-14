@@ -793,7 +793,7 @@ export default {
               text: `The existing quantity of item ${item.item_name} is not enough`,
               color: "error",
             });
-            vlaue = false
+            value = false
           }
         }
         if (item.has_serial_no) {
@@ -802,7 +802,7 @@ export default {
               text: `Selcted serial numbers of item ${item.item_name} is incorrect`,
               color: "error",
             });
-            vlaue = false
+            value = false
           }
         }
         if (item.has_batch_no) {
