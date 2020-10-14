@@ -815,7 +815,7 @@ export default {
           }
         }
       })
-      return vlaue
+      return value
     },
     get_draft_invoices() {
       const vm = this;
