@@ -668,7 +668,6 @@ export default {
                 item.serial_no_selected.push(element);
               }
             });
-            // item.serial_no_selected = item.serial_no.split("\n");
             item.serial_no_selected_count = item.serial_no_selected.length;
           }
         });
@@ -777,10 +776,46 @@ export default {
         });
         return;
       }
+      if (!this.validate_items()) {
+        return
+      }
       evntBus.$emit("show_payment", "true");
       const invoice_doc = this.proces_invoice();
       invoice_doc.customer_info = this.customer_info;
       evntBus.$emit("send_invoice_doc_payment", invoice_doc);
+    },
+    validate_items() {
+      let vlaue = true
+      this.items.forEach(item => {
+        if (this.pos_profile.update_stock) {
+          if (item.stock_qty > item.actual_qty) {
+            evntBus.$emit("show_mesage", {
+              text: `The existing quantity of item ${item.item_name} is not enough`,
+              color: "error",
+            });
+            vlaue = false
+          }
+        }
+        if (item.has_serial_no) {
+          if (!item.serial_no_selected || item.stock_qty != item.serial_no_selected.length) {
+            evntBus.$emit("show_mesage", {
+              text: `Selcted serial numbers of item ${item.item_name} is incorrect`,
+              color: "error",
+            });
+            vlaue = false
+          }
+        }
+        if (item.has_batch_no) {
+          if (item.stock_qty > item.actual_batch_qty) {
+            evntBus.$emit("show_mesage", {
+              text: `The existing batch quantity of item ${item.item_name} is not enough`,
+              color: "error",
+            });
+            vlaue = false
+          }
+        }
+      })
+      return vlaue
     },
     get_draft_invoices() {
       const vm = this;
@@ -821,6 +856,8 @@ export default {
               item.serial_no_data = updated_item.serial_no_data;
               item.batch_no_data = updated_item.batch_no_data;
               item.item_uoms = updated_item.item_uoms;
+              item.has_batch_no = updated_item.has_batch_no;
+              item.has_serial_no = updated_item.has_serial_no;
             });
           }
         },
