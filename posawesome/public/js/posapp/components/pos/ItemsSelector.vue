@@ -293,58 +293,6 @@ export default {
     update_cur_items_details() {
       this.update_items_details(this.filtred_items);
     },
-    scan_barcoud() {
-      const vm = this;
-      onScan.attachTo(document, {
-        suffixKeyCodes: [],
-         keyCodeMapper: function (oEvent) {
-          oEvent.stopImmediatePropagation()
-          return onScan.decodeKeyEvent(oEvent);
-        },
-        onScan: function (sCode) {
-          if (!vm.pos_profile.posa_use_server_for_searching) {
-            vm.first_search = sCode;
-            if (vm.filtred_items.length == 0) {
-              evntBus.$emit("show_mesage", {
-                text: `No Item has this barcode ${sCode}`,
-                color: "error",
-              });
-              frappe.utils.play_sound("error");
-            } else {
-              vm.enter_event();
-            }
-          } else {
-            let search_item = "";
-            frappe.call({
-              method: "posawesome.posawesome.api.posapp.get_items_from_barcode",
-              args: {
-                selling_price_list: vm.pos_profile.selling_price_list,
-                currency: vm.pos_profile.currency,
-                barcode: vm.get_search(sCode),
-              },
-              async: false,
-              callback: function (r) {
-                if (r.message) {
-                  search_item = r.message;
-                }
-              },
-            });
-            if (!search_item) {
-              evntBus.$emit("show_mesage", {
-                text: `No Item has this barcode ${sCode}`,
-                color: "error",
-              });
-              frappe.utils.play_sound("error");
-            } else {
-              vm.first_search = sCode;
-              vm.item_search_brcode = search_item;
-              vm.enter_event();
-              vm.item_search_brcode = null;
-            }
-          }
-        },
-      });
-    },
   },
 
   computed: {
@@ -403,7 +351,6 @@ export default {
   },
 
   mounted() {
-    this.scan_barcoud();
   },
 };
 </script>
