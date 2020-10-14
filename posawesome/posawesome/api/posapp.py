@@ -26,8 +26,9 @@ def get_opening_dialog_data():
     for i in data["pos_profiles_data"]:
         pos_profiles_list.append(i.name)
 
+    payment_method_table = "POS Payment Method" if get_version() == 13 else "Sales Invoice Payment"
     data["payments_method"] = frappe.get_list(
-        "POS Payment Method",
+        payment_method_table,
         filters={"parent": ["in", pos_profiles_list]},
         fields=["*"],
         limit_page_length=0,
@@ -314,12 +315,28 @@ def get_items_details(pos_profile, items_data):
                 "status": "Active"
             }, fields=["name as serial_no"])
 
-            batch_no_data = frappe.get_all('Batch',
-                                           filters={
-                                               "item": item_code,
-                                               "batch_qty": [">", 0]
-                                           },
-                                           fields=["name as batch_no, batch_qty", "expiry_date"])
+            if get_version() == 13: 
+                batch_no_data = frappe.get_all('Batch',
+                                            filters={
+                                                "item": item_code,
+                                                "batch_qty": [">", 0]
+                                            },
+                                            fields=["name as batch_no, batch_qty", "expiry_date"])
+            elif get_version() == 12:
+                batch_no_data = []
+                from erpnext.stock.doctype.batch.batch import get_batch_qty
+                batch_list = get_batch_qty(warehouse = warehouse, item_code = item_code)
+                for batch in batch_list:
+                    if batch.qty > 0 :
+                        expiry_date = frappe.get_value("Batch",batch.batch_no, "expiry_date")
+                        batch_no_data.append({
+                            "batch_no": batch.batch_no,
+                            "batch_qty": batch.qty,
+                            "expiry_date": expiry_date
+                        })
+                    
+
+
             row = {}
             row.update(item)
             row.update({
@@ -405,3 +422,14 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
             'item_barcode': search_item,
         })
         return item
+
+
+def get_version():
+    from frappe.utils.gitutils import get_app_branch
+    branch_name = get_app_branch("erpnext")
+    if "12" in branch_name:
+        return 12
+    elif "13" in branch_name:
+        return 13
+    else:
+        return 13
