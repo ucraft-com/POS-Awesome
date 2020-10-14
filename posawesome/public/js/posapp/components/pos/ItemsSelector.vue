@@ -25,6 +25,7 @@
             hide-details
             v-model="first_search"
             @keydown.esc="esc_event"
+            @keydown.enter="enter_event"
           ></v-text-field>
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
@@ -276,7 +277,6 @@ export default {
         },
         callback: function (r) {
           if (r.message) {
-            // console.log(r.message);
             items.forEach((item) => {
               const updated_item = r.message.find(
                 (element) => element.item_code == item.item_code
@@ -297,6 +297,10 @@ export default {
       const vm = this;
       onScan.attachTo(document, {
         suffixKeyCodes: [],
+         keyCodeMapper: function (oEvent) {
+          oEvent.stopImmediatePropagation()
+          return onScan.decodeKeyEvent(oEvent);
+        },
         onScan: function (sCode) {
           if (!vm.pos_profile.posa_use_server_for_searching) {
             vm.first_search = sCode;

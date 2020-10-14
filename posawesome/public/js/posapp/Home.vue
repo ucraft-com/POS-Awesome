@@ -41,7 +41,7 @@ export default {
   created: function () {
     setTimeout(() => {
       this.remove_frappe_nav();
-    }, 700);
+    }, 1000);
   },
 };
 </script>
