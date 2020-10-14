@@ -24,7 +24,6 @@
             background-color="white"
             hide-details
             v-model="first_search"
-            @keydown.enter="enter_event"
             @keydown.esc="esc_event"
           ></v-text-field>
         </v-col>
@@ -297,10 +296,7 @@ export default {
     scan_barcoud() {
       const vm = this;
       onScan.attachTo(document, {
-        keyCodeMapper: function (oEvent) {
-          event.stopImmediatePropagation()
-          return onScan.decodeKeyEvent(oEvent);
-        },
+        suffixKeyCodes: [],
         onScan: function (sCode) {
           if (!vm.pos_profile.posa_use_server_for_searching) {
             vm.first_search = sCode;
