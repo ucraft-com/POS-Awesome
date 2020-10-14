@@ -785,7 +785,7 @@ export default {
       evntBus.$emit("send_invoice_doc_payment", invoice_doc);
     },
     validate_items() {
-      let vlaue = true
+      let value = true
       this.items.forEach(item => {
         if (this.pos_profile.update_stock) {
           if (item.stock_qty > item.actual_qty) {
@@ -811,7 +811,7 @@ export default {
               text: `The existing batch quantity of item ${item.item_name} is not enough`,
               color: "error",
             });
-            vlaue = false
+            value = false
           }
         }
       })
