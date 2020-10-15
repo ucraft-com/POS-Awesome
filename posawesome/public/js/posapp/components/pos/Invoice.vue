@@ -1,11 +1,11 @@
 <template>
   <div>
     <v-card
-      style="max-height: 70vh; height: 70vh"
+      style="max-height: 65vh; height: 65vh"
       class="cards my-0 py-0 grey lighten-5"
     >
       <Customer></Customer>
-      <div class="my-0 py-0 overflow-y-auto" style="max-height: 59vh">
+      <div class="my-0 py-0 overflow-y-auto" style="max-height: 55vh">
         <template @mouseover="style = 'cursor: pointer'">
           <v-data-table
             :headers="items_headers"
@@ -307,7 +307,7 @@
     <v-row>
       <v-col class="pt-0 pr-0" cols="8">
         <v-card
-          style="max-height: 20vh; height: 20vh"
+          style="max-height: 25vh; height: 25vh"
           class="cards mb-0 mt-3 py-0 grey lighten-5"
         >
           <v-row no-gutters class="pa-1 pt-2" style="height: 100%">
@@ -415,10 +415,10 @@
       <v-col class="pt-0 pr-3" cols="4">
         <v-card
           flat
-          style="max-height: 20vh; height: 20vh"
+          style="max-height: 25vh; height: 25vh"
           class="cards mb-0 mt-3 py-0"
         >
-          <v-row align="start" style="height: 53%">
+          <v-row align="start" style="height: 52%">
             <v-col cols="12">
               <v-btn
                 block
@@ -481,6 +481,7 @@ export default {
     return {
       pos_profile: "",
       pos_opening_shift: "",
+      stock_settings: "",
       invoice_doc: "",
       customer: "",
       customer_info: "",
@@ -668,7 +669,6 @@ export default {
                 item.serial_no_selected.push(element);
               }
             });
-            // item.serial_no_selected = item.serial_no.split("\n");
             item.serial_no_selected_count = item.serial_no_selected.length;
           }
         });
@@ -777,10 +777,46 @@ export default {
         });
         return;
       }
+      if (!this.validate_items()) {
+        return
+      }
       evntBus.$emit("show_payment", "true");
       const invoice_doc = this.proces_invoice();
       invoice_doc.customer_info = this.customer_info;
       evntBus.$emit("send_invoice_doc_payment", invoice_doc);
+    },
+    validate_items() {
+      let value = true
+      this.items.forEach(item => {
+        if (this.pos_profile.update_stock && this.stock_settings.allow_negative_stock != 1) {
+          if (item.stock_qty > item.actual_qty) {
+            evntBus.$emit("show_mesage", {
+              text: `The existing quantity of item ${item.item_name} is not enough`,
+              color: "error",
+            });
+            value = false
+          }
+        }
+        if (item.has_serial_no) {
+          if (!item.serial_no_selected || item.stock_qty != item.serial_no_selected.length) {
+            evntBus.$emit("show_mesage", {
+              text: `Selcted serial numbers of item ${item.item_name} is incorrect`,
+              color: "error",
+            });
+            value = false
+          }
+        }
+        if (item.has_batch_no) {
+          if (item.stock_qty > item.actual_batch_qty) {
+            evntBus.$emit("show_mesage", {
+              text: `The existing batch quantity of item ${item.item_name} is not enough`,
+              color: "error",
+            });
+            value = false
+          }
+        }
+      })
+      return value
     },
     get_draft_invoices() {
       const vm = this;
@@ -821,6 +857,8 @@ export default {
               item.serial_no_data = updated_item.serial_no_data;
               item.batch_no_data = updated_item.batch_no_data;
               item.item_uoms = updated_item.item_uoms;
+              item.has_batch_no = updated_item.has_batch_no;
+              item.has_serial_no = updated_item.has_serial_no;
             });
           }
         },
@@ -1047,6 +1085,7 @@ export default {
       this.pos_profile = data.pos_profile;
       this.customer = data.pos_profile.customer;
       this.pos_opening_shift = data.pos_opening_shift;
+      this.stock_settings = data.stock_settings;
     });
     evntBus.$on("add_item", (item) => {
       // this.expanded = []

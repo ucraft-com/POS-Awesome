@@ -60,7 +60,6 @@ class POSClosingShift(Document):
 
 
 @frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
 def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
     cashiers_list = frappe.get_all(
         "POS Profile User", filters=filters, fields=['user'])

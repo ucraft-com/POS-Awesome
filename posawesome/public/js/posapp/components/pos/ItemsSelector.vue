@@ -2,7 +2,7 @@
   <div>
     <v-card
       class="selection mx-auto grey lighten-5"
-      style="max-height: 80vh; height: 80vh"
+      style="max-height: 77vh; height: 77vh"
     >
       <v-progress-linear
         :active="loading"
@@ -19,18 +19,18 @@
             autofocus
             outlined
             color="indigo"
-            label="Serch Items"
+            label="Search Items"
             hint="Search by item code, serial number, batch no or barcode"
             background-color="white"
             hide-details
-            v-model="first_search"
-            @keydown.enter="enter_event"
+            v-model="debounce_search"
             @keydown.esc="esc_event"
+            @keydown.enter="enter_event"
           ></v-text-field>
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">
-            <v-row dense class="overflow-y-auto" style="max-height: 68vh">
+            <v-row dense class="overflow-y-auto" style="max-height: 67vh">
               <v-col
                 v-for="(item, idx) in filtred_items"
                 :key="idx"
@@ -66,7 +66,7 @@
             </v-row>
           </div>
           <div fluid class="items" v-if="items_view == 'list'">
-            <div class="my-0 py-0 overflow-y-auto" style="max-height: 68vh">
+            <div class="my-0 py-0 overflow-y-auto" style="max-height: 67vh">
               <template>
                 <v-data-table
                   :headers="items_headers"
@@ -84,7 +84,7 @@
       </v-row>
     </v-card>
     <v-card
-      style="max-height: 10vh; height: 10vh"
+      style="max-height: 13vh; height: 13vh"
       class="cards mb-0 mt-3 pa-2 grey lighten-5"
     >
       <v-row no-gutters>
@@ -129,12 +129,12 @@
 
 <script>
 import { evntBus } from "../../bus";
-
+// import debounce from 'lodash.debounce'
+import _ from 'lodash';
 export default {
-  // props: ["pos_profile"],
   data: () => ({
     pos_profile: "",
-    items_view: "card",
+    items_view: "list",
     item_group: "ALL",
     favourites_view: false,
     loading: false,
@@ -230,6 +230,7 @@ export default {
       this.add_item(new_item);
       this.search = null;
       this.first_search = null;
+      this.debounce_search = null;
     },
     get_item_qty(first_search) {
       let scal_qty = 1;
@@ -276,7 +277,6 @@ export default {
         },
         callback: function (r) {
           if (r.message) {
-            // console.log(r.message);
             items.forEach((item) => {
               const updated_item = r.message.find(
                 (element) => element.item_code == item.item_code
@@ -296,23 +296,30 @@ export default {
     scan_barcoud() {
       const vm = this;
       onScan.attachTo(document, {
+        suffixKeyCodes: [],
+         keyCodeMapper: function (oEvent) {
+          oEvent.stopImmediatePropagation()
+          return onScan.decodeKeyEvent(oEvent);
+        },
         onScan: function (sCode) {
-          vm.first_search = sCode;
-          // vm.enter_event();
-          vm.$nextTick(function () {
-            if (vm.filtred_items.length == 0) {
-              evntBus.$emit("show_mesage", {
-                text: `No Item has this barcode ${sCode}`,
-                color: "error",
-              });
-              frappe.utils.play_sound("error");
-            } else {
-              vm.first_search = null;
-              vm.search = null;
-            }
-          });
+           setTimeout(() => {
+          vm.trigger_onscan(sCode)
+          }, 300)
         },
       });
+    },
+    trigger_onscan(sCode){
+      if (this.filtred_items.length == 0) {
+        evntBus.$emit("show_mesage", {
+          text: `No Item has this barcode "${sCode}"`,
+          color: "error",
+        });
+        frappe.utils.play_sound("error");
+      } else {
+      this.enter_event();
+      this.debounce_search = null;
+      this.search = null;
+      }
     },
   },
 
@@ -329,7 +336,7 @@ export default {
         filtred_group_list = this.items;
       }
       if (!this.search || this.search.length < 3) {
-        return (filtred_list = filtred_group_list.slice(0, 100));
+        return (filtred_list = filtred_group_list.slice(0, 50));
       } else if (this.search) {
         filtred_list = filtred_group_list.filter((item) => {
           let found = false;
@@ -352,8 +359,16 @@ export default {
           }
         }
       }
-      return filtred_list.slice(0, 100);
+      return filtred_list.slice(0, 50);
     },
+    debounce_search:{
+      get() {
+        return this.first_search;
+      },
+      set: _.debounce(function(newValue) {
+        this.first_search = newValue;
+      }, 200)
+    }
   },
 
   created: function () {

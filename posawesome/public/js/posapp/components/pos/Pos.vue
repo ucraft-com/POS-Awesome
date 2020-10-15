@@ -68,7 +68,6 @@ export default {
         });
     },
     create_opening_voucher() {
-      console.log("Opening Shift");
       this.dialog = true;
     },
      get_closing_data() {
