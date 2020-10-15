@@ -23,7 +23,7 @@
             hint="Search by item code, serial number, batch no or barcode"
             background-color="white"
             hide-details
-            v-model="first_search"
+            v-model="debounce_search"
             @keydown.esc="esc_event"
             @keydown.enter="enter_event"
           ></v-text-field>
@@ -129,9 +129,9 @@
 
 <script>
 import { evntBus } from "../../bus";
-
+// import debounce from 'lodash.debounce'
+import _ from 'lodash';
 export default {
-  // props: ["pos_profile"],
   data: () => ({
     pos_profile: "",
     items_view: "list",
@@ -230,6 +230,7 @@ export default {
       this.add_item(new_item);
       this.search = null;
       this.first_search = null;
+      this.debounce_search = null;
     },
     get_item_qty(first_search) {
       let scal_qty = 1;
@@ -292,6 +293,34 @@ export default {
     update_cur_items_details() {
       this.update_items_details(this.filtred_items);
     },
+    scan_barcoud() {
+      const vm = this;
+      onScan.attachTo(document, {
+        suffixKeyCodes: [],
+         keyCodeMapper: function (oEvent) {
+          oEvent.stopImmediatePropagation()
+          return onScan.decodeKeyEvent(oEvent);
+        },
+        onScan: function (sCode) {
+           setTimeout(() => {
+          vm.trigger_onscan(sCode)
+          }, 300)
+        },
+      });
+    },
+    trigger_onscan(sCode){
+      if (this.filtred_items.length == 0) {
+        evntBus.$emit("show_mesage", {
+          text: `No Item has this barcode "${sCode}"`,
+          color: "error",
+        });
+        frappe.utils.play_sound("error");
+      } else {
+      this.enter_event();
+      this.debounce_search = null;
+      this.search = null;
+      }
+    },
   },
 
   computed: {
@@ -332,6 +361,14 @@ export default {
       }
       return filtred_list.slice(0, 50);
     },
+    debounce_search:{
+      get() {
+        return this.first_search;
+      },
+      set: _.debounce(function(newValue) {
+        this.first_search = newValue;
+      }, 200)
+    }
   },
 
   created: function () {
@@ -347,6 +384,7 @@ export default {
   },
 
   mounted() {
+    this.scan_barcoud();
   },
 };
 </script>
