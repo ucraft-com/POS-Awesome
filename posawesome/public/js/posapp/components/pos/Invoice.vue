@@ -481,6 +481,7 @@ export default {
     return {
       pos_profile: "",
       pos_opening_shift: "",
+      stock_settings: "",
       invoice_doc: "",
       customer: "",
       customer_info: "",
@@ -787,7 +788,7 @@ export default {
     validate_items() {
       let value = true
       this.items.forEach(item => {
-        if (this.pos_profile.update_stock) {
+        if (this.pos_profile.update_stock && this.stock_settings.allow_negative_stock != 1) {
           if (item.stock_qty > item.actual_qty) {
             evntBus.$emit("show_mesage", {
               text: `The existing quantity of item ${item.item_name} is not enough`,
@@ -1084,6 +1085,7 @@ export default {
       this.pos_profile = data.pos_profile;
       this.customer = data.pos_profile.customer;
       this.pos_opening_shift = data.pos_opening_shift;
+      this.stock_settings = data.stock_settings;
     });
     evntBus.$on("add_item", (item) => {
       // this.expanded = []

@@ -52,10 +52,17 @@ def create_opening_voucher(pos_profile, company, balance_details):
     })
     new_pos_opening.set("balance_details", balance_details)
     new_pos_opening.submit()
+    
     data = {}
     data["pos_opening_shift"] = new_pos_opening.as_dict()
     data["pos_profile"] = frappe.get_doc(
         "POS Profile", new_pos_opening.pos_profile)
+    allow_negative_stock = frappe.get_value(
+    "Stock Settings", None, "allow_negative_stock")
+    data["stock_settings"] = {}
+    data["stock_settings"].update({
+        "allow_negative_stock": allow_negative_stock
+    })
     data["company"] = frappe.get_doc("Company", data["pos_profile"].company)
     return data
 
@@ -82,6 +89,12 @@ def check_opening_shift(user):
             "POS Profile", open_vouchers[0]["pos_profile"])
         data["company"] = frappe.get_doc(
             "Company", data["pos_profile"].company)
+        allow_negative_stock = frappe.get_value(
+            "Stock Settings", None, "allow_negative_stock")
+        data["stock_settings"] = {}
+        data["stock_settings"].update({
+            "allow_negative_stock": allow_negative_stock
+        })
     return data
 
 

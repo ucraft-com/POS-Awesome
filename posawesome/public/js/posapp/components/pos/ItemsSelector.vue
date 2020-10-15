@@ -134,13 +134,12 @@ export default {
   // props: ["pos_profile"],
   data: () => ({
     pos_profile: "",
-    items_view: "card",
+    items_view: "list",
     item_group: "ALL",
     favourites_view: false,
     loading: false,
     items_group: ["ALL"],
     items: [],
-    item_search_brcode: "",
     search: "",
     first_search: "",
     itemsPerPage: 1000,
@@ -297,9 +296,6 @@ export default {
 
   computed: {
     filtred_items() {
-      if (this.item_search_brcode) {
-        return [this.item_search_brcode];
-      }
       this.search = this.get_search(this.first_search);
       let filtred_list = [];
       let filtred_group_list = [];
@@ -311,7 +307,7 @@ export default {
         filtred_group_list = this.items;
       }
       if (!this.search || this.search.length < 3) {
-        return (filtred_list = filtred_group_list.slice(0, 100));
+        return (filtred_list = filtred_group_list.slice(0, 50));
       } else if (this.search) {
         filtred_list = filtred_group_list.filter((item) => {
           let found = false;
@@ -334,7 +330,7 @@ export default {
           }
         }
       }
-      return filtred_list.slice(0, 100);
+      return filtred_list.slice(0, 50);
     },
   },
 
