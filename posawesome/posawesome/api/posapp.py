@@ -55,15 +55,7 @@ def create_opening_voucher(pos_profile, company, balance_details):
     
     data = {}
     data["pos_opening_shift"] = new_pos_opening.as_dict()
-    data["pos_profile"] = frappe.get_doc(
-        "POS Profile", new_pos_opening.pos_profile)
-    allow_negative_stock = frappe.get_value(
-    "Stock Settings", None, "allow_negative_stock")
-    data["stock_settings"] = {}
-    data["stock_settings"].update({
-        "allow_negative_stock": allow_negative_stock
-    })
-    data["company"] = frappe.get_doc("Company", data["pos_profile"].company)
+    update_opening_shift_data(data, new_pos_opening.pos_profile)
     return data
 
 
@@ -85,18 +77,20 @@ def check_opening_shift(user):
         data = {}
         data["pos_opening_shift"] = frappe.get_doc(
             "POS Opening Shift", open_vouchers[0]["name"])
-        data["pos_profile"] = frappe.get_doc(
-            "POS Profile", open_vouchers[0]["pos_profile"])
-        data["company"] = frappe.get_doc(
-            "Company", data["pos_profile"].company)
-        allow_negative_stock = frappe.get_value(
-            "Stock Settings", None, "allow_negative_stock")
-        data["stock_settings"] = {}
-        data["stock_settings"].update({
-            "allow_negative_stock": allow_negative_stock
-        })
+        update_opening_shift_data(data, open_vouchers[0]["pos_profile"])
     return data
 
+def update_opening_shift_data(data,pos_profile):
+    data["pos_profile"] = frappe.get_doc(
+        "POS Profile", pos_profile)
+    data["company"] = frappe.get_doc(
+        "Company", data["pos_profile"].company)
+    allow_negative_stock = frappe.get_value(
+        "Stock Settings", None, "allow_negative_stock")
+    data["stock_settings"] = {}
+    data["stock_settings"].update({
+        "allow_negative_stock": allow_negative_stock
+    })
 
 @frappe.whitelist()
 def get_items(pos_profile):
