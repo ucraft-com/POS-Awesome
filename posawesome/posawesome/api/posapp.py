@@ -440,3 +440,41 @@ def get_version():
         return 13
     else:
         return 13
+    
+@frappe.whitelist()
+def set_customer_info(fieldname, customer, value=""):
+    if fieldname == 'loyalty_program':
+        frappe.db.set_value('Customer', customer, 'loyalty_program', value)
+
+    contact = frappe.get_cached_value('Customer', customer, 'customer_primary_contact') or ""
+
+    if contact:
+        contact_doc = frappe.get_doc('Contact', contact)
+        if fieldname == 'email_id':
+            contact_doc.set('email_ids', [{ 'email_id': value, 'is_primary': 1}])
+            frappe.db.set_value('Customer', customer, 'email_id', value)
+        elif fieldname == 'mobile_no':
+            contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
+            frappe.db.set_value('Customer', customer, 'mobile_no', value)
+        contact_doc.save()
+
+    else:
+        contact_doc = frappe.new_doc('Contact')
+        contact_doc.first_name = customer
+        contact_doc.is_primary_contact = 1
+        contact_doc.is_billing_contact = 1
+        if fieldname == "mobile_no":
+            contact_doc.add_phone(value, is_primary_mobile_no=1, is_primary_phone=1)
+
+        if fieldname == 'email_id':
+            contact_doc.add_email(value, is_primary=1)
+
+        contact_doc.append("links", {
+            "link_doctype": "Customer",
+            "link_name": customer
+        })
+
+        contact_doc.flags.ignore_mandatory = True
+        contact_doc.save()
+        frappe.set_value("Customer", customer, "customer_primary_contact", contact_doc.name )
+        

@@ -1060,7 +1060,7 @@ export default {
       const vm = this;
       frappe.call({
         method:
-          "erpnext.selling.page.point_of_sale.point_of_sale.set_customer_info",
+          "posawesome.posawesome.api.posapp.set_customer_info",
         args: {
           fieldname: field,
           customer: this.customer_info.customer,
