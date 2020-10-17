@@ -139,7 +139,7 @@ export default {
       this.$emit("changePage", key);
     },
     go_to() {
-      frappe.set_route("workspace", "home");
+      frappe.set_route("");
       location.reload();
     },
     close_shift_dialog() {
