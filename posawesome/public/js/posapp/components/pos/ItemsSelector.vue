@@ -45,7 +45,7 @@
                   <v-img
                     :src="
                       item.image ||
-                      'https://lunawood.com/wp-content/uploads/2018/02/placeholder-image.png'
+                      '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'
                     "
                     class="white--text align-end"
                     gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
