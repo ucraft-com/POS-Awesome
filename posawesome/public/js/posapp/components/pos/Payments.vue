@@ -341,13 +341,15 @@ export default {
       });
     },
     load_print_page() {
+      const print_format = this.pos_profile.print_format_for_online || this.pos_profile.print_format
       const letter_head = this.pos_profile.letter_head || 0;
       const url =
         frappe.urllib.get_base_url() +
         "/printview?doctype=Sales%20Invoice&name=" +
         this.invoice_doc.name +
+        "&trigger_print=1" +
         "&format=" +
-        this.pos_profile.print_format +
+        print_format +
         "&no_letterhead=" +
         letter_head;
 
