@@ -178,6 +178,62 @@
           ></v-text-field>
         </v-col>
       </v-row>
+        <v-divider></v-divider>
+        <v-row class="px-1 py-0">
+         <v-col cols="6">
+            <v-switch
+              v-if="pos_profile.posa_allow_credit_sale"
+              v-model="is_credit_sale"
+              flat
+              label="Is Credit Sale"
+            ></v-switch>
+          </v-col>
+          <v-col cols="6">
+            <v-menu
+              v-if="is_credit_sale"
+              ref="date_menu"
+              v-model="date_menu"
+              :close-on-content-click="false"
+              :return-value.sync="invoice_doc.due_date"
+              transition="scale-transition"
+              offset-y
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="invoice_doc.due_date"
+                  label="Due Date"
+                  prepend-icon="mdi-calendar"
+                  readonly
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="invoice_doc.due_date"
+                no-title
+                scrollable
+              >
+                <v-spacer></v-spacer>
+                <v-btn
+                  text
+                  color="primary"
+                  @click="date_menu = false"
+                >
+                  Cancel
+                </v-btn>
+                <v-btn
+                  text
+                  color="primary"
+                  @click="[$refs.date_menu.save(invoice_doc.due_date), validate_due_date()]"
+                >
+                  OK
+                </v-btn>
+              </v-date-picker>
+            </v-menu>
+          </v-col>
+      </v-row>
       </div>
     </v-card>
     <v-card
@@ -215,6 +271,8 @@ export default {
     pos_profile: "",
     invoice_doc: "",
     loyalty_amount: 0,
+    is_credit_sale: 0,
+    date_menu: false,
   }),
 
   methods: {
@@ -262,7 +320,7 @@ export default {
           if (r.message) {
             vm.load_print_page();
             evntBus.$emit("show_mesage", {
-              text: `Invoice ${r.message.name} Submited`,
+              text: `Invoice ${r.message.name} is Submited`,
               color: "success",
             });
             frappe.utils.play_sound("submit");
@@ -274,7 +332,6 @@ export default {
       this.invoice_doc.payments.forEach((payment) => {
         payment.amount = payment.idx == idx ? this.invoice_doc.grand_total : 0;
       });
-      // this.submit();
     },
     set_rest_amount(idx) {
       this.invoice_doc.payments.forEach((payment) => {
@@ -305,6 +362,16 @@ export default {
         },
         true
       );
+    },
+    validate_due_date() {
+      const today = frappe.datetime.now_date();
+      const parse_today = Date.parse(today)
+      const new_date = Date.parse(this.invoice_doc.due_date);
+      if (new_date < parse_today) {
+        setTimeout(() => {
+          this.invoice_doc.due_date = today;
+        },0)
+      }
     },
   },
 
@@ -341,6 +408,7 @@ export default {
         const default_payment = this.invoice_doc.payments.find(
           (payment) => payment.default == 1
         );
+        this.is_credit_sale = 0;
         default_payment.amount = invoice_doc.grand_total.toFixed(2);
         this.loyalty_amount = 0;
       });
@@ -366,6 +434,13 @@ export default {
         this.invoice_doc.loyalty_points =
           flt(this.loyalty_amount) *
           this.invoice_doc.customer_info.conversion_factor;
+      }
+    },
+    is_credit_sale(value) {
+      if (value == 1) {
+        this.invoice_doc.payments.forEach(payment => {
+          payment.amount = 0;
+        })
       }
     },
   },

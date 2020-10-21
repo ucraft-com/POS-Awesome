@@ -257,6 +257,7 @@ def submit_invoice(data):
                 if i.mode_of_payment == payment["mode_of_payment"]:
                     i.amount = payment["amount"]
                     break
+    invoice_doc.due_date = data.get("due_date")
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
 
