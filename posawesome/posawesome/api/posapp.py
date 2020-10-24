@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import getdate, now_datetime, nowdate, flt, cint, get_datetime_str, add_days
+from frappe.utils import getdate, now_datetime, nowdate, flt, cint, get_datetime_str, nowdate
 from frappe import _
 from erpnext.accounts.party import get_party_account
 from erpnext.stock.get_item_details import get_item_details
@@ -324,12 +324,16 @@ def get_items_details(pos_profile, items_data):
             }, fields=["name as serial_no"])
 
             if get_version() == 13: 
-                batch_no_data = frappe.get_all('Batch',
+                batch_no_data = []
+                batchs = frappe.get_all('Batch',
                                             filters={
                                                 "item": item_code,
                                                 "batch_qty": [">", 0]
                                             },
                                             fields=["name as batch_no, batch_qty", "expiry_date"])
+                for batch in batchs:
+                    if str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]:
+                        batch_no_data.append(batch)
             elif get_version() == 12:
                 batch_no_data = []
                 from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -337,13 +341,12 @@ def get_items_details(pos_profile, items_data):
                 for batch in batch_list:
                     if batch.qty > 0 :
                         expiry_date = frappe.get_value("Batch",batch.batch_no, "expiry_date")
-                        batch_no_data.append({
-                            "batch_no": batch.batch_no,
-                            "batch_qty": batch.qty,
-                            "expiry_date": expiry_date
-                        })
-                    
-
+                        if str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]:
+                            batch_no_data.append({
+                                "batch_no": batch.batch_no,
+                                "batch_qty": batch.qty,
+                                "expiry_date": expiry_date
+                            })
 
             row = {}
             row.update(item)
