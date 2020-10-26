@@ -486,7 +486,7 @@ def set_customer_info(fieldname, customer, value=""):
         
 
 @frappe.whitelist()
-def search_invoices(invoice_name, company):
+def search_invoices_for_return(invoice_name, company):
     invoices_list = frappe.get_list(
         "Sales Invoice",
         filters={
@@ -499,6 +499,17 @@ def search_invoices(invoice_name, company):
         order_by='customer'
     )
     data = []
+    is_returned = frappe.get_all(
+        "Sales Invoice",
+        filters={
+            "return_against": invoice_name,
+            "docstatus": 1
+        },
+        fields=["name"],
+        order_by='customer'
+    )
+    if len(is_returned):
+        return data
     for invoice in invoices_list:
         data.append(frappe.get_doc("Sales Invoice", invoice["name"]))
     return data

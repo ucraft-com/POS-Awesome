@@ -724,6 +724,7 @@ export default {
       doc.payments = this.get_payments();
       doc.taxes = [];
       doc.is_return = this.invoice_doc.is_return
+      doc.return_against = this.invoice_doc.return_against
       return doc;
     },
     get_invoice_items() {
