@@ -644,8 +644,10 @@ export default {
       this.customer = this.pos_profile.customer;
       this.invoice_doc = "";
       this.discount_amount = 0;
+      evntBus.$emit("set_customer_readonly", false);
     },
     new_invoice(data = {}) {
+      evntBus.$emit("set_customer_readonly", false);
       this.expanded = [];
       const doc = this.get_invoice_doc();
       if (doc.name) {
@@ -661,6 +663,9 @@ export default {
         this.invoice_doc = "";
         this.discount_amount = 0;
       } else {
+        if (data.is_return) {
+          evntBus.$emit("set_customer_readonly", true);
+        }
         this.invoice_doc = data;
         this.items = data.items;
         let cont = 0;

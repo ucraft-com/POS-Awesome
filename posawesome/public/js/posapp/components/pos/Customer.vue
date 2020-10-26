@@ -16,6 +16,7 @@
         no-data-text="Customer not found"
         hide-details
         :filter="customFilter"
+        :disabled = "readonly"
       >
         <template v-slot:item="data">
           <template>
@@ -58,6 +59,7 @@ export default {
     pos_profile: "",
     customers: [],
     customer: "",
+    readonly: false,
   }),
 
   methods: {
@@ -114,6 +116,9 @@ export default {
       });
       evntBus.$on("add_customer_to_list", (customer) => {
         this.customers.push(customer);
+      });
+      evntBus.$on("set_customer_readonly", (value) => {
+        this.readonly = value;
       });
     });
   },

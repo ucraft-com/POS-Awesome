@@ -279,6 +279,7 @@ export default {
   methods: {
     back_to_invoice() {
       evntBus.$emit("show_payment", "false");
+      evntBus.$emit("set_customer_readonly", false);
     },
     submit() {
       if (!this.invoice_doc.is_return && this.total_payments < 0) {
