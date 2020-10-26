@@ -901,7 +901,9 @@ export default {
                 data.discount_percentage_on_rate;
               item.discount_amount = data.discount_amount || 0;
             }
-            item.price_list_rate = data.price_list_rate;
+            if (!item.btach_price) {
+              item.price_list_rate = data.price_list_rate;
+            }
             item.has_pricing_rule = data.has_pricing_rule;
             item.last_purchase_rate = data.last_purchase_rate;
             item.price_or_product_discount = data.price_or_product_discount;
@@ -1030,6 +1032,9 @@ export default {
       if (!item.has_pricing_rule) {
         item.discount_amount = 0;
         item.discount_percentage = 0;
+      } 
+      if(item.btach_price) {
+        item.price_list_rate = item.btach_price * new_uom.conversion_factor;
       }
       this.update_item_detail(item);
     },
@@ -1055,6 +1060,12 @@ export default {
       );
       item.actual_batch_qty = batch_no.batch_qty;
       item.batch_no_expiry_date = batch_no.expiry_date;
+      if (batch_no.btach_price) {
+        item.btach_price = batch_no.btach_price;
+        item.price_list_rate = batch_no.btach_price;
+      }
+      
+      
     },
     set_customer_info(field, value) {
       const vm = this;

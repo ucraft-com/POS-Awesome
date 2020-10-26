@@ -328,9 +328,10 @@ def get_items_details(pos_profile, items_data):
                 batchs = frappe.get_all('Batch',
                                             filters={
                                                 "item": item_code,
-                                                "batch_qty": [">", 0]
+                                                "batch_qty": [">", 0],
+                                                "disabled": 0,
                                             },
-                                            fields=["name as batch_no, batch_qty", "expiry_date"])
+                                            fields=["name as batch_no, batch_qty", "expiry_date", "posa_btach_price as btach_price"])
                 for batch in batchs:
                     if str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]:
                         batch_no_data.append(batch)
@@ -341,11 +342,12 @@ def get_items_details(pos_profile, items_data):
                 for batch in batch_list:
                     if batch.qty > 0 :
                         expiry_date = frappe.get_value("Batch",batch.batch_no, "expiry_date")
-                        if str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]:
+                        if (str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]) and batch.disabled==0:
                             batch_no_data.append({
                                 "batch_no": batch.batch_no,
                                 "batch_qty": batch.qty,
-                                "expiry_date": expiry_date
+                                "expiry_date": batch.expiry_date,
+                                "btach_price": batch.posa_btach_price,
                             })
 
             row = {}
