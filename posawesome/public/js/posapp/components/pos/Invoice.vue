@@ -419,7 +419,7 @@
           class="cards mb-0 mt-3 py-0"
         >
           <v-row align="start" style="height: 52%">
-            <v-col cols="12">
+            <v-col cols="6">
               <v-btn
                 block
                 class="pa-0"
@@ -427,7 +427,18 @@
                 color="warning"
                 dark
                 @click="get_draft_invoices"
-                >Get Hold Invoice</v-btn
+                >Get Hold</v-btn
+              >
+            </v-col>
+            <v-col cols="6">
+              <v-btn
+                block
+                class="pa-0"
+                large
+                color="info"
+                dark
+                @click="open_returns"
+                >Return</v-btn
               >
             </v-col>
             <v-col cols="6">
@@ -842,6 +853,9 @@ export default {
           }
         },
       });
+    },
+    open_returns() {
+      evntBus.$emit("open_returns", this.pos_profile.company);
     },
     close_payments() {
       evntBus.$emit("show_payment", "false");

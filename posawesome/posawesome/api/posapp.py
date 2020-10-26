@@ -484,3 +484,21 @@ def set_customer_info(fieldname, customer, value=""):
         contact_doc.save()
         frappe.set_value("Customer", customer, "customer_primary_contact", contact_doc.name )
         
+
+@frappe.whitelist()
+def search_invoices(invoice_name, company):
+    invoices_list = frappe.get_list(
+        "Sales Invoice",
+        filters={
+            "name": invoice_name,
+            "company": company,
+            "docstatus": 1
+        },
+        fields=["name"],
+        limit_page_length=0,
+        order_by='customer'
+    )
+    data = []
+    for invoice in invoices_list:
+        data.append(frappe.get_doc("Sales Invoice", invoice["name"]))
+    return data
