@@ -777,7 +777,7 @@ export default {
         });
         return;
       }
-      if (!this.validate_items()) {
+      if (!this.validate()) {
         return
       }
       evntBus.$emit("show_payment", "true");
@@ -785,7 +785,7 @@ export default {
       invoice_doc.customer_info = this.customer_info;
       evntBus.$emit("send_invoice_doc_payment", invoice_doc);
     },
-    validate_items() {
+    validate() {
       let value = true
       this.items.forEach(item => {
         if (this.pos_profile.update_stock && this.stock_settings.allow_negative_stock != 1) {
@@ -810,6 +810,16 @@ export default {
           if (item.stock_qty > item.actual_batch_qty) {
             evntBus.$emit("show_mesage", {
               text: `The existing batch quantity of item ${item.item_name} is not enough`,
+              color: "error",
+            });
+            value = false
+          }
+        }
+        if (this.pos_profile.posa_allow_user_to_edit_additional_discount) {
+          const clac_percentage = this.discount_amount / this.subtotal * 100
+          if (clac_percentage > this.pos_profile.posa_max_discount_allowed) {
+            evntBus.$emit("show_mesage", {
+              text: `The discount should not be higher than ${this.pos_profile.posa_max_discount_allowed}%`,
               color: "error",
             });
             value = false
