@@ -1,25 +1,36 @@
 <template>
   <v-row justify="center">
-    <v-dialog v-model="invoicesDialog" max-width="800px" min-width="800px" style="min-height: 500px">
+    <v-dialog
+      v-model="invoicesDialog"
+      max-width="800px"
+      min-width="800px"
+    >
       <v-card>
         <v-card-title>
           <span class="headline indigo--text">Select Return Invoice</span>
         </v-card-title>
-        <v-card-text class="pa-0">
           <v-container>
             <v-row class="mb-4">
               <v-text-field
-            color="indigo"
-            label="Invoice ID"
-            background-color="white"
-            hide-details
-            v-model="invoice_name"
-            dense
-          ></v-text-field>
-          <v-btn class="ml-4" color="primary" dark @click="search_invoices">Search</v-btn>
+                color="indigo"
+                label="Invoice ID"
+                background-color="white"
+                hide-details
+                v-model="invoice_name"
+                dense
+                clearable
+              ></v-text-field>
+              <v-btn
+                text
+                class="ml-2"
+                color="primary"
+                dark
+                @click="search_invoices"
+                >Search</v-btn
+              >
             </v-row>
             <v-row>
-              <v-col cols="12" class="pa-1"  v-if="dialog_data">
+              <v-col cols="12" class="pa-1" v-if="dialog_data">
                 <template>
                   <v-data-table
                     :headers="headers"
@@ -35,11 +46,16 @@
               </v-col>
             </v-row>
           </v-container>
-        </v-card-text>
         <v-card-actions class="mt-4">
           <v-spacer></v-spacer>
           <v-btn color="error" dark @click="close_dialog">Close</v-btn>
-          <v-btn v-if="selected.length" color="primary" dark @click="submit_dialog">Select</v-btn>
+          <v-btn
+            v-if="selected.length"
+            color="primary"
+            dark
+            @click="submit_dialog"
+            >Select</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -55,7 +71,7 @@ export default {
     selected: [],
     dialog_data: "",
     company: "",
-    invoice_name:"",
+    invoice_name: "",
     headers: [
       {
         text: "Customer",
@@ -99,7 +115,6 @@ export default {
         async: false,
         callback: function (r) {
           if (r.message) {
-            // evntBus.$emit("open_drafts", r.message);
             vm.dialog_data = r.message;
           }
         },
@@ -107,8 +122,34 @@ export default {
     },
     submit_dialog() {
       if (this.selected.length > 0) {
-        this.selected[0].is_returnm = 1;
-        evntBus.$emit("load_invoice", this.selected[0]);
+        const return_doc = this.selected[0];
+        const invoice_doc = {}
+        const items = []
+        return_doc.items.forEach(item => {
+          item.qty = item.qty * (-1)
+          item.stock_qty = item.stock_qty * (-1)
+          item.amount = item.amount * (-1)
+          items.push(item)
+        });
+        invoice_doc.items = items;
+        invoice_doc.is_return = 1;
+        invoice_doc.return_against = return_doc.name;
+        invoice_doc.customer = return_doc.customer;
+      // const vm = this;
+      // frappe.call({
+      //   method: "posawesome.posawesome.api.posapp.make_sales_return",
+      //   args: {
+      //     invoice_name: return_doc.name,
+      //   },
+      //   async: false,
+      //   callback: function (r) {
+      //     if (r.message) {
+      //       evntBus.$emit("load_return_invoice", r.message);
+      //       vm.invoicesDialog = false;
+      //     }
+      //   },
+      // });
+        evntBus.$emit("load_return_invoice", invoice_doc);
         this.invoicesDialog = false;
       }
     },
@@ -119,6 +160,7 @@ export default {
       this.company = data;
       this.invoice_name = "";
       this.dialog_data = "";
+      this.selected = [];
     });
   },
 };

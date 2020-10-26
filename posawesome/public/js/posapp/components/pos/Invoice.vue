@@ -655,7 +655,7 @@ export default {
           this.save_draft_invoice(doc);
         }
       }
-      if (!data.name) {
+      if (!data.name && !data.is_return) {
         this.items = [];
         this.customer = this.pos_profile.customer;
         this.invoice_doc = "";
@@ -718,6 +718,7 @@ export default {
       doc.posa_pos_opening_shift = this.pos_opening_shift.name;
       doc.payments = this.get_payments();
       doc.taxes = [];
+      doc.is_return = this.invoice_doc.is_return
       return doc;
     },
     get_invoice_items() {
@@ -1123,7 +1124,6 @@ export default {
       this.stock_settings = data.stock_settings;
     });
     evntBus.$on("add_item", (item) => {
-      // this.expanded = []
       this.add_item(item);
     });
     evntBus.$on("update_customer", (customer) => {
@@ -1134,6 +1134,9 @@ export default {
       this.cancel_invoice();
     });
     evntBus.$on("load_invoice", (data) => {
+      this.new_invoice(data);
+    });
+    evntBus.$on("load_return_invoice", (data) => {
       this.new_invoice(data);
     });
   },

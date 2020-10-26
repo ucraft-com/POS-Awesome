@@ -252,11 +252,11 @@ def submit_invoice(data):
         invoice_doc.redeem_loyalty_points = data.get("redeem_loyalty_points")
         invoice_doc.loyalty_points = data.get("loyalty_points")
     for payment in data.get("payments"):
-        if payment.get("amount"):
-            for i in invoice_doc.payments:
-                if i.mode_of_payment == payment["mode_of_payment"]:
-                    i.amount = payment["amount"]
-                    break
+        for i in invoice_doc.payments:
+            if i.mode_of_payment == payment["mode_of_payment"]:
+                i.amount = payment["amount"]
+                i.base_amount = 0
+                break
     invoice_doc.due_date = data.get("due_date")
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
@@ -502,3 +502,10 @@ def search_invoices(invoice_name, company):
     for invoice in invoices_list:
         data.append(frappe.get_doc("Sales Invoice", invoice["name"]))
     return data
+
+
+# @frappe.whitelist()
+# def make_sales_return(invoice_name, target_doc=None):
+#     from erpnext.controllers.sales_and_purchase_return import make_return_doc
+#     return_doc = make_return_doc("Sales Invoice", invoice_name, target_doc)
+#     return return_doc

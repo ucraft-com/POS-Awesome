@@ -60,6 +60,7 @@
             type="number"
             :prefix="invoice_doc.currency"
             @focus="set_rest_amount(payment.idx)"
+            :readonly ="invoice_doc.is_return ? true : false"
           ></v-text-field>
         </v-col>
         <v-col cols="5">
@@ -75,7 +76,7 @@
       </v-row>
       <v-row
         class="pyments px-1 py-0"
-        v-if="invoice_doc && available_pioints_amount > 0"
+        v-if="invoice_doc && available_pioints_amount > 0 && !invoice_doc.is_return"
       >
         <v-col cols="7">
           <v-text-field
@@ -182,7 +183,7 @@
         <v-row class="px-1 py-0">
          <v-col cols="6">
             <v-switch
-              v-if="pos_profile.posa_allow_credit_sale"
+              v-if="pos_profile.posa_allow_credit_sale && !invoice_doc.is_return"
               v-model="is_credit_sale"
               flat
               label="Is Credit Sale"
@@ -280,7 +281,7 @@ export default {
       evntBus.$emit("show_payment", "false");
     },
     submit() {
-      if (this.total_payments < 0) {
+      if (!this.invoice_doc.is_return && this.total_payments < 0) {
         evntBus.$emit("show_mesage", {
           text: `Payments not correct`,
           color: "error",
@@ -411,7 +412,9 @@ export default {
           (payment) => payment.default == 1
         );
         this.is_credit_sale = 0;
-        default_payment.amount = invoice_doc.grand_total.toFixed(2);
+        if (default_payment) {
+          default_payment.amount = invoice_doc.grand_total.toFixed(2);
+        }
         this.loyalty_amount = 0;
       });
       evntBus.$on("register_pos_profile", (data) => {
@@ -442,6 +445,7 @@ export default {
       if (value == 1) {
         this.invoice_doc.payments.forEach(payment => {
           payment.amount = 0;
+          payment.base_amount = 0;
         })
       }
     },
