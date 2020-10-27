@@ -514,6 +514,7 @@ export default {
       pos_opening_shift: "",
       stock_settings: "",
       invoice_doc: "",
+      return_doc: "",
       customer: "",
       customer_info: "",
       discount_amount: 0,
@@ -663,12 +664,14 @@ export default {
       this.items = [];
       this.customer = this.pos_profile.customer;
       this.invoice_doc = "";
+      this.return_doc = "";
       this.discount_amount = 0;
       evntBus.$emit("set_customer_readonly", false);
     },
     new_invoice(data = {}) {
       evntBus.$emit("set_customer_readonly", false);
       this.expanded = [];
+      this.return_doc = "";
       const doc = this.get_invoice_doc();
       if (doc.name) {
         this.update_invoice(doc);
@@ -868,6 +871,46 @@ export default {
             });
             value = false;
           }
+        }
+        if (this.invoice_doc.is_return) {
+          if (this.subtotal >= 0) {
+            evntBus.$emit("show_mesage", {
+              text: `Return Invoice Total Not Correct`,
+              color: "error",
+            });
+            value = false;
+            return value;
+          }
+          if ((this.subtotal * (-1)) > this.return_doc.total) {
+            evntBus.$emit("show_mesage", {
+              text: `Return Invoice Total should not be higher than ${this.return_doc.total}`,
+              color: "error",
+            });
+            value = false;
+            return value;
+          }
+          this.items.forEach(item => {
+            const return_item = this.return_doc.items.find(
+                (element) => element.item_code == item.item_code
+            );
+
+            if(!return_item) {
+              evntBus.$emit("show_mesage", {
+              text: `The item ${item.item_name} cannot be returned because it is not in the invoice ${this.return_doc.name}`,
+              color: "error",
+              });
+              value = false;
+              return value;
+            }
+            else if((item.qty * (-1)) > return_item.qty || item.qty >= 0) {
+              evntBus.$emit("show_mesage", {
+              text: `The QTY of the item ${item.item_name} cannot be greater than ${return_item.qty}`,
+              color: "error",
+              });
+              value = false;
+              return value;
+            }
+          });
         }
       });
       return value;
@@ -1166,7 +1209,8 @@ export default {
       this.new_invoice(data);
     });
     evntBus.$on("load_return_invoice", (data) => {
-      this.new_invoice(data);
+      this.new_invoice(data.invoice_doc);
+      this.return_doc = data.return_doc;
     });
   },
   mounted: function () {},

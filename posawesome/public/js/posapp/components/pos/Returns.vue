@@ -126,30 +126,18 @@ export default {
         const invoice_doc = {}
         const items = []
         return_doc.items.forEach(item => {
-          item.qty = item.qty * (-1)
-          item.stock_qty = item.stock_qty * (-1)
-          item.amount = item.amount * (-1)
-          items.push(item)
+          const new_item = {...item}
+          new_item.qty = item.qty * (-1)
+          new_item.stock_qty = item.stock_qty * (-1)
+          new_item.amount = item.amount * (-1)
+          items.push(new_item)
         });
         invoice_doc.items = items;
         invoice_doc.is_return = 1;
         invoice_doc.return_against = return_doc.name;
         invoice_doc.customer = return_doc.customer;
-      // const vm = this;
-      // frappe.call({
-      //   method: "posawesome.posawesome.api.posapp.make_sales_return",
-      //   args: {
-      //     invoice_name: return_doc.name,
-      //   },
-      //   async: false,
-      //   callback: function (r) {
-      //     if (r.message) {
-      //       evntBus.$emit("load_return_invoice", r.message);
-      //       vm.invoicesDialog = false;
-      //     }
-      //   },
-      // });
-        evntBus.$emit("load_return_invoice", invoice_doc);
+        const data = {invoice_doc,return_doc}
+        evntBus.$emit("load_return_invoice", data);
         this.invoicesDialog = false;
       }
     },

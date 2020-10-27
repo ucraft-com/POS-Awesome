@@ -517,10 +517,3 @@ def search_invoices_for_return(invoice_name, company):
     for invoice in invoices_list:
         data.append(frappe.get_doc("Sales Invoice", invoice["name"]))
     return data
-
-
-# @frappe.whitelist()
-# def make_sales_return(invoice_name, target_doc=None):
-#     from erpnext.controllers.sales_and_purchase_return import make_return_doc
-#     return_doc = make_return_doc("Sales Invoice", invoice_name, target_doc)
-#     return return_doc
