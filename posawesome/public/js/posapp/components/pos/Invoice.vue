@@ -1163,6 +1163,10 @@ export default {
       if (batch_no.btach_price) {
         item.btach_price = batch_no.btach_price;
         item.price_list_rate = batch_no.btach_price;
+        item.rate = batch_no.btach_price;
+      }else {
+        item.btach_price = null;
+        this.update_item_detail(item)
       }
     },
     set_customer_info(field, value) {
