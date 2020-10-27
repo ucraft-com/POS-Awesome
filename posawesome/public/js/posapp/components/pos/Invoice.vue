@@ -454,6 +454,7 @@
               <v-btn
                 block
                 class="pa-0"
+                :class="{ 'disable-events': !pos_profile.posa_allow_return }"
                 large
                 color="info"
                 dark
@@ -881,7 +882,7 @@ export default {
             value = false;
             return value;
           }
-          if ((this.subtotal * (-1)) > this.return_doc.total) {
+          if (this.subtotal * -1 > this.return_doc.total) {
             evntBus.$emit("show_mesage", {
               text: `Return Invoice Total should not be higher than ${this.return_doc.total}`,
               color: "error",
@@ -889,23 +890,22 @@ export default {
             value = false;
             return value;
           }
-          this.items.forEach(item => {
+          this.items.forEach((item) => {
             const return_item = this.return_doc.items.find(
-                (element) => element.item_code == item.item_code
+              (element) => element.item_code == item.item_code
             );
 
-            if(!return_item) {
+            if (!return_item) {
               evntBus.$emit("show_mesage", {
-              text: `The item ${item.item_name} cannot be returned because it is not in the invoice ${this.return_doc.name}`,
-              color: "error",
+                text: `The item ${item.item_name} cannot be returned because it is not in the invoice ${this.return_doc.name}`,
+                color: "error",
               });
               value = false;
               return value;
-            }
-            else if((item.qty * (-1)) > return_item.qty || item.qty >= 0) {
+            } else if (item.qty * -1 > return_item.qty || item.qty >= 0) {
               evntBus.$emit("show_mesage", {
-              text: `The QTY of the item ${item.item_name} cannot be greater than ${return_item.qty}`,
-              color: "error",
+                text: `The QTY of the item ${item.item_name} cannot be greater than ${return_item.qty}`,
+                color: "error",
               });
               value = false;
               return value;
@@ -1233,5 +1233,8 @@ export default {
 <style scoped>
 .border_line_bottom {
   border-bottom: 1px solid lightgray;
+}
+.disable-events {
+  pointer-events: none;
 }
 </style>

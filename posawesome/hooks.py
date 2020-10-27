@@ -156,6 +156,7 @@ fixtures = [
 		"POS Profile-posa_pos_awesome_advance_settings",
 		"Batch-posa_btach_price",
 		"POS Profile-posa_max_discount_allowed",
+		"POS Profile-posa_allow_return",
 	)]]},
 	{"doctype":"Property Setter", "filters": [["name", "in", (
 		"Sales Invoice-posa_pos_opening_shift-no_copy"
