@@ -88,6 +88,7 @@
                       item-value="uom"
                       hide-details
                       @change="calc_uom(item, $event)"
+                      :disabled="!!invoice_doc.is_return"
                     >
                     </v-select>
                   </v-col>
@@ -104,7 +105,12 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="rate"
-                      :disabled="item.pricing_rules || !pos_profile.posa_allow_user_to_edit_rate ? true : false"
+                      :disabled="
+                        item.pricing_rules ||
+                        !pos_profile.posa_allow_user_to_edit_rate
+                          ? true
+                          : false || !!invoice_doc.is_return
+                      "
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -119,7 +125,12 @@
                       type="number"
                       @change="calc_prices(item, $event)"
                       id="discount_percentage"
-                      :disabled="item.pricing_rules || !pos_profile.posa_allow_user_to_edit_item_discount ? true : false"
+                      :disabled="
+                        item.pricing_rules ||
+                        !pos_profile.posa_allow_user_to_edit_item_discount
+                          ? true
+                          : false || !!invoice_doc.is_return
+                      "
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -135,7 +146,12 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="discount_amount"
-                      :disabled="item.pricing_rules || !pos_profile.posa_allow_user_to_edit_item_discount ? true : false"
+                      :disabled="
+                        item.pricing_rules ||
+                        !pos_profile.posa_allow_user_to_edit_item_discount
+                          ? true
+                          : false || !!invoice_doc.is_return
+                      "
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -345,7 +361,11 @@
                     hide-details
                     type="number"
                     :prefix="pos_profile.currency"
-                    :disabled="!pos_profile.posa_allow_user_to_edit_additional_discount ? true : false"
+                    :disabled="
+                      !pos_profile.posa_allow_user_to_edit_additional_discount
+                        ? true
+                        : false
+                    "
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
@@ -723,8 +743,8 @@ export default {
       doc.posa_pos_opening_shift = this.pos_opening_shift.name;
       doc.payments = this.get_payments();
       doc.taxes = [];
-      doc.is_return = this.invoice_doc.is_return
-      doc.return_against = this.invoice_doc.return_against
+      doc.is_return = this.invoice_doc.is_return;
+      doc.return_against = this.invoice_doc.return_against;
       return doc;
     },
     get_invoice_items() {
@@ -796,7 +816,7 @@ export default {
         return;
       }
       if (!this.validate()) {
-        return
+        return;
       }
       evntBus.$emit("show_payment", "true");
       const invoice_doc = this.proces_invoice();
@@ -804,24 +824,30 @@ export default {
       evntBus.$emit("send_invoice_doc_payment", invoice_doc);
     },
     validate() {
-      let value = true
-      this.items.forEach(item => {
-        if (this.pos_profile.update_stock && this.stock_settings.allow_negative_stock != 1) {
+      let value = true;
+      this.items.forEach((item) => {
+        if (
+          this.pos_profile.update_stock &&
+          this.stock_settings.allow_negative_stock != 1
+        ) {
           if (item.stock_qty > item.actual_qty) {
             evntBus.$emit("show_mesage", {
               text: `The existing quantity of item ${item.item_name} is not enough`,
               color: "error",
             });
-            value = false
+            value = false;
           }
         }
         if (item.has_serial_no) {
-          if (!item.serial_no_selected || item.stock_qty != item.serial_no_selected.length) {
+          if (
+            !item.serial_no_selected ||
+            item.stock_qty != item.serial_no_selected.length
+          ) {
             evntBus.$emit("show_mesage", {
               text: `Selcted serial numbers of item ${item.item_name} is incorrect`,
               color: "error",
             });
-            value = false
+            value = false;
           }
         }
         if (item.has_batch_no) {
@@ -830,21 +856,21 @@ export default {
               text: `The existing batch quantity of item ${item.item_name} is not enough`,
               color: "error",
             });
-            value = false
+            value = false;
           }
         }
         if (this.pos_profile.posa_allow_user_to_edit_additional_discount) {
-          const clac_percentage = this.discount_amount / this.subtotal * 100
+          const clac_percentage = (this.discount_amount / this.subtotal) * 100;
           if (clac_percentage > this.pos_profile.posa_max_discount_allowed) {
             evntBus.$emit("show_mesage", {
               text: `The discount should not be higher than ${this.pos_profile.posa_max_discount_allowed}%`,
               color: "error",
             });
-            value = false
+            value = false;
           }
         }
-      })
-      return value
+      });
+      return value;
     },
     get_draft_invoices() {
       const vm = this;
@@ -1063,8 +1089,8 @@ export default {
       if (!item.has_pricing_rule) {
         item.discount_amount = 0;
         item.discount_percentage = 0;
-      } 
-      if(item.btach_price) {
+      }
+      if (item.btach_price) {
         item.price_list_rate = item.btach_price * new_uom.conversion_factor;
       }
       this.update_item_detail(item);
@@ -1095,14 +1121,11 @@ export default {
         item.btach_price = batch_no.btach_price;
         item.price_list_rate = batch_no.btach_price;
       }
-      
-      
     },
     set_customer_info(field, value) {
       const vm = this;
       frappe.call({
-        method:
-          "posawesome.posawesome.api.posapp.set_customer_info",
+        method: "posawesome.posawesome.api.posapp.set_customer_info",
         args: {
           fieldname: field,
           customer: this.customer_info.customer,
