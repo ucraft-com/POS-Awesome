@@ -216,6 +216,10 @@ def save_draft_invoice(data):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.set_missing_values()
+    if invoice_doc.is_return and get_version() == 12:
+        for payment in invoice_doc.payments:
+            if payment.default == 1:
+                payment.amount = data.get("total")
     if invoice_doc.get("taxes"):
         for tax in invoice_doc.taxes:
             tax.included_in_print_rate = 1
