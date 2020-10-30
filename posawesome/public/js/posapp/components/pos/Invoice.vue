@@ -579,12 +579,15 @@ export default {
     },
     add_one(item) {
       item.qty++;
+      if (item.qty == 0) {
+        this.remove_item(item);
+      }
       this.calc_sotck_gty(item, item.qty);
       // this.$forceUpdate();
     },
     subtract_one(item) {
       item.qty--;
-      if (item.qty <= 0) {
+      if (item.qty == 0) {
         this.remove_item(item);
       }
       this.calc_sotck_gty(item, item.qty);
