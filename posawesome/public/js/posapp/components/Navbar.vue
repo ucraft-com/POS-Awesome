@@ -119,7 +119,6 @@ export default {
       item: 0,
       items: [
         { text: "POS", icon: "mdi-point-of-sale" },
-        { text: "Dashboard", icon: "mdi-view-dashboard" },
       ],
       page: "",
       fav: true,
