@@ -234,7 +234,7 @@ export default {
     },
     get_item_qty(first_search) {
       let scal_qty = 1;
-      if (first_search.startsWith("221")) {
+      if (first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
         let pesokg1 = first_search.substr(7, 5);
         let pesokg;
         if (pesokg1.startsWith("0000")) {
@@ -256,7 +256,7 @@ export default {
     },
     get_search(first_search) {
       let search_term = "";
-      if (first_search && first_search.startsWith("221")) {
+      if (first_search && first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
         search_term = first_search.substr(0, 7);
       } else {
         search_term = first_search;
