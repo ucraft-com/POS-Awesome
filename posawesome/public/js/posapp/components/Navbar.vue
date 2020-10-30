@@ -28,6 +28,15 @@
                     <v-list-item-title>Close Shift</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
+                <v-divider class="my-0"></v-divider>
+                <v-list-item @click="go_about">
+                  <v-list-item-icon>
+                    <v-icon>mdi-information-outline</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title>About</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
               </v-list-item-group>
             </v-list>
           </v-card>
@@ -59,7 +68,7 @@
           </v-card>
         </v-menu>
       </div>
-      <v-btn text color="grey" @click="go_to">
+      <v-btn text color="grey" @click="go_desk">
         <span right>Erpnext</span>
       </v-btn>
     </v-app-bar>
@@ -137,9 +146,13 @@ export default {
     changePage(key) {
       this.$emit("changePage", key);
     },
-    go_to() {
+    go_desk() {
       frappe.set_route("");
       location.reload();
+    },
+    go_about(){
+      const win = window.open('https://github.com/yrestom/POS-Awesome', '_blank');
+      win.focus();
     },
     close_shift_dialog() {
       evntBus.$emit("open_closing_dialog");
