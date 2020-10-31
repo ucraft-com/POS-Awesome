@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import getdate, now_datetime, nowdate, flt, cint, get_datetime_str, add_days
+from frappe.utils import getdate, now_datetime, nowdate, flt, cint, get_datetime_str, nowdate
 from frappe import _
 from erpnext.accounts.party import get_party_account
 from erpnext.stock.get_item_details import get_item_details
@@ -216,6 +216,10 @@ def save_draft_invoice(data):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.set_missing_values()
+    if invoice_doc.is_return and get_version() == 12:
+        for payment in invoice_doc.payments:
+            if payment.default == 1:
+                payment.amount = data.get("total")
     if invoice_doc.get("taxes"):
         for tax in invoice_doc.taxes:
             tax.included_in_print_rate = 1
@@ -252,11 +256,12 @@ def submit_invoice(data):
         invoice_doc.redeem_loyalty_points = data.get("redeem_loyalty_points")
         invoice_doc.loyalty_points = data.get("loyalty_points")
     for payment in data.get("payments"):
-        if payment.get("amount"):
-            for i in invoice_doc.payments:
-                if i.mode_of_payment == payment["mode_of_payment"]:
-                    i.amount = payment["amount"]
-                    break
+        for i in invoice_doc.payments:
+            if i.mode_of_payment == payment["mode_of_payment"]:
+                i.amount = payment["amount"]
+                i.base_amount = 0
+                break
+    invoice_doc.due_date = data.get("due_date")
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
 
@@ -323,12 +328,17 @@ def get_items_details(pos_profile, items_data):
             }, fields=["name as serial_no"])
 
             if get_version() == 13: 
-                batch_no_data = frappe.get_all('Batch',
+                batch_no_data = []
+                batchs = frappe.get_all('Batch',
                                             filters={
                                                 "item": item_code,
-                                                "batch_qty": [">", 0]
+                                                "batch_qty": [">", 0],
+                                                "disabled": 0,
                                             },
-                                            fields=["name as batch_no, batch_qty", "expiry_date"])
+                                            fields=["name as batch_no, batch_qty", "expiry_date", "posa_btach_price as btach_price"])
+                for batch in batchs:
+                    if str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]:
+                        batch_no_data.append(batch)
             elif get_version() == 12:
                 batch_no_data = []
                 from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -336,13 +346,13 @@ def get_items_details(pos_profile, items_data):
                 for batch in batch_list:
                     if batch.qty > 0 :
                         expiry_date = frappe.get_value("Batch",batch.batch_no, "expiry_date")
-                        batch_no_data.append({
-                            "batch_no": batch.batch_no,
-                            "batch_qty": batch.qty,
-                            "expiry_date": expiry_date
-                        })
-                    
-
+                        if (str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]) and batch.disabled==0:
+                            batch_no_data.append({
+                                "batch_no": batch.batch_no,
+                                "batch_qty": batch.qty,
+                                "expiry_date": batch.expiry_date,
+                                "btach_price": batch.posa_btach_price,
+                            })
 
             row = {}
             row.update(item)
@@ -440,3 +450,70 @@ def get_version():
         return 13
     else:
         return 13
+    
+@frappe.whitelist()
+def set_customer_info(fieldname, customer, value=""):
+    if fieldname == 'loyalty_program':
+        frappe.db.set_value('Customer', customer, 'loyalty_program', value)
+
+    contact = frappe.get_cached_value('Customer', customer, 'customer_primary_contact') or ""
+
+    if contact:
+        contact_doc = frappe.get_doc('Contact', contact)
+        if fieldname == 'email_id':
+            contact_doc.set('email_ids', [{ 'email_id': value, 'is_primary': 1}])
+            frappe.db.set_value('Customer', customer, 'email_id', value)
+        elif fieldname == 'mobile_no':
+            contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
+            frappe.db.set_value('Customer', customer, 'mobile_no', value)
+        contact_doc.save()
+
+    else:
+        contact_doc = frappe.new_doc('Contact')
+        contact_doc.first_name = customer
+        contact_doc.is_primary_contact = 1
+        contact_doc.is_billing_contact = 1
+        if fieldname == "mobile_no":
+            contact_doc.add_phone(value, is_primary_mobile_no=1, is_primary_phone=1)
+
+        if fieldname == 'email_id':
+            contact_doc.add_email(value, is_primary=1)
+
+        contact_doc.append("links", {
+            "link_doctype": "Customer",
+            "link_name": customer
+        })
+
+        contact_doc.flags.ignore_mandatory = True
+        contact_doc.save()
+        frappe.set_value("Customer", customer, "customer_primary_contact", contact_doc.name )
+        
+
+@frappe.whitelist()
+def search_invoices_for_return(invoice_name, company):
+    invoices_list = frappe.get_list(
+        "Sales Invoice",
+        filters={
+            "name": invoice_name,
+            "company": company,
+            "docstatus": 1
+        },
+        fields=["name"],
+        limit_page_length=0,
+        order_by='customer'
+    )
+    data = []
+    is_returned = frappe.get_all(
+        "Sales Invoice",
+        filters={
+            "return_against": invoice_name,
+            "docstatus": 1
+        },
+        fields=["name"],
+        order_by='customer'
+    )
+    if len(is_returned):
+        return data
+    for invoice in invoices_list:
+        data.append(frappe.get_doc("Sales Invoice", invoice["name"]))
+    return data

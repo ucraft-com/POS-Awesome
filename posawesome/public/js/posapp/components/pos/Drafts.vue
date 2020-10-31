@@ -6,7 +6,7 @@
       </template>-->
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">Select Hold invoice</span>
+          <span class="headline indigo--text">Select Hold Invoice</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>

@@ -1,8 +1,8 @@
 {
-    "posawesome/js/toConsole.min.js": [
+    "js/toConsole.min.js": [
         "public/js/toConsole.js"
     ],
-    "posawesome/js/posapp.min.js": [
+    "js/posapp.min.js": [
         "public/js/posapp/posapp.js"
     ]
 }

@@ -88,6 +88,7 @@
                       item-value="uom"
                       hide-details
                       @change="calc_uom(item, $event)"
+                      :disabled="!!invoice_doc.is_return"
                     >
                     </v-select>
                   </v-col>
@@ -104,7 +105,12 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="rate"
-                      :disabled="item.pricing_rules || !pos_profile.posa_allow_user_to_edit_rate ? true : false"
+                      :disabled="
+                        item.pricing_rules ||
+                        !pos_profile.posa_allow_user_to_edit_rate
+                          ? true
+                          : false || !!invoice_doc.is_return
+                      "
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -119,7 +125,12 @@
                       type="number"
                       @change="calc_prices(item, $event)"
                       id="discount_percentage"
-                      :disabled="item.pricing_rules || !pos_profile.posa_allow_user_to_edit_item_discount ? true : false"
+                      :disabled="
+                        item.pricing_rules ||
+                        !pos_profile.posa_allow_user_to_edit_item_discount
+                          ? true
+                          : false || !!invoice_doc.is_return
+                      "
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -135,7 +146,12 @@
                       :prefix="invoice_doc.currency"
                       @change="calc_prices(item, $event)"
                       id="discount_amount"
-                      :disabled="item.pricing_rules || !pos_profile.posa_allow_user_to_edit_item_discount ? true : false"
+                      :disabled="
+                        item.pricing_rules ||
+                        !pos_profile.posa_allow_user_to_edit_item_discount
+                          ? true
+                          : false || !!invoice_doc.is_return
+                      "
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -345,7 +361,11 @@
                     hide-details
                     type="number"
                     :prefix="pos_profile.currency"
-                    :disabled="!pos_profile.posa_allow_user_to_edit_additional_discount ? true : false"
+                    :disabled="
+                      !pos_profile.posa_allow_user_to_edit_additional_discount
+                        ? true
+                        : false
+                    "
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
@@ -419,7 +439,7 @@
           class="cards mb-0 mt-3 py-0"
         >
           <v-row align="start" style="height: 52%">
-            <v-col cols="12">
+            <v-col cols="6">
               <v-btn
                 block
                 class="pa-0"
@@ -427,7 +447,19 @@
                 color="warning"
                 dark
                 @click="get_draft_invoices"
-                >Get Hold Invoice</v-btn
+                >Get Hold</v-btn
+              >
+            </v-col>
+            <v-col cols="6">
+              <v-btn
+                block
+                class="pa-0"
+                :class="{ 'disable-events': !pos_profile.posa_allow_return }"
+                large
+                color="info"
+                dark
+                @click="open_returns"
+                >Return</v-btn
               >
             </v-col>
             <v-col cols="6">
@@ -483,6 +515,7 @@ export default {
       pos_opening_shift: "",
       stock_settings: "",
       invoice_doc: "",
+      return_doc: "",
       customer: "",
       customer_info: "",
       discount_amount: 0,
@@ -546,12 +579,15 @@ export default {
     },
     add_one(item) {
       item.qty++;
+      if (item.qty == 0) {
+        this.remove_item(item);
+      }
       this.calc_sotck_gty(item, item.qty);
       // this.$forceUpdate();
     },
     subtract_one(item) {
       item.qty--;
-      if (item.qty <= 0) {
+      if (item.qty == 0) {
         this.remove_item(item);
       }
       this.calc_sotck_gty(item, item.qty);
@@ -632,10 +668,14 @@ export default {
       this.items = [];
       this.customer = this.pos_profile.customer;
       this.invoice_doc = "";
+      this.return_doc = "";
       this.discount_amount = 0;
+      evntBus.$emit("set_customer_readonly", false);
     },
     new_invoice(data = {}) {
+      evntBus.$emit("set_customer_readonly", false);
       this.expanded = [];
+      this.return_doc = "";
       const doc = this.get_invoice_doc();
       if (doc.name) {
         this.update_invoice(doc);
@@ -644,12 +684,15 @@ export default {
           this.save_draft_invoice(doc);
         }
       }
-      if (!data.name) {
+      if (!data.name && !data.is_return) {
         this.items = [];
         this.customer = this.pos_profile.customer;
         this.invoice_doc = "";
         this.discount_amount = 0;
       } else {
+        if (data.is_return) {
+          evntBus.$emit("set_customer_readonly", true);
+        }
         this.invoice_doc = data;
         this.items = data.items;
         let cont = 0;
@@ -707,6 +750,8 @@ export default {
       doc.posa_pos_opening_shift = this.pos_opening_shift.name;
       doc.payments = this.get_payments();
       doc.taxes = [];
+      doc.is_return = this.invoice_doc.is_return;
+      doc.return_against = this.invoice_doc.return_against;
       return doc;
     },
     get_invoice_items() {
@@ -777,33 +822,39 @@ export default {
         });
         return;
       }
-      if (!this.validate_items()) {
-        return
+      if (!this.validate()) {
+        return;
       }
       evntBus.$emit("show_payment", "true");
       const invoice_doc = this.proces_invoice();
       invoice_doc.customer_info = this.customer_info;
       evntBus.$emit("send_invoice_doc_payment", invoice_doc);
     },
-    validate_items() {
-      let value = true
-      this.items.forEach(item => {
-        if (this.pos_profile.update_stock && this.stock_settings.allow_negative_stock != 1) {
+    validate() {
+      let value = true;
+      this.items.forEach((item) => {
+        if (
+          this.pos_profile.update_stock &&
+          this.stock_settings.allow_negative_stock != 1
+        ) {
           if (item.stock_qty > item.actual_qty) {
             evntBus.$emit("show_mesage", {
               text: `The existing quantity of item ${item.item_name} is not enough`,
               color: "error",
             });
-            value = false
+            value = false;
           }
         }
         if (item.has_serial_no) {
-          if (!item.serial_no_selected || item.stock_qty != item.serial_no_selected.length) {
+          if (
+            !item.serial_no_selected ||
+            item.stock_qty != item.serial_no_selected.length
+          ) {
             evntBus.$emit("show_mesage", {
               text: `Selcted serial numbers of item ${item.item_name} is incorrect`,
               color: "error",
             });
-            value = false
+            value = false;
           }
         }
         if (item.has_batch_no) {
@@ -812,11 +863,60 @@ export default {
               text: `The existing batch quantity of item ${item.item_name} is not enough`,
               color: "error",
             });
-            value = false
+            value = false;
           }
         }
-      })
-      return value
+        if (this.pos_profile.posa_allow_user_to_edit_additional_discount) {
+          const clac_percentage = (this.discount_amount / this.subtotal) * 100;
+          if (clac_percentage > this.pos_profile.posa_max_discount_allowed) {
+            evntBus.$emit("show_mesage", {
+              text: `The discount should not be higher than ${this.pos_profile.posa_max_discount_allowed}%`,
+              color: "error",
+            });
+            value = false;
+          }
+        }
+        if (this.invoice_doc.is_return) {
+          if (this.subtotal >= 0) {
+            evntBus.$emit("show_mesage", {
+              text: `Return Invoice Total Not Correct`,
+              color: "error",
+            });
+            value = false;
+            return value;
+          }
+          if (this.subtotal * -1 > this.return_doc.total) {
+            evntBus.$emit("show_mesage", {
+              text: `Return Invoice Total should not be higher than ${this.return_doc.total}`,
+              color: "error",
+            });
+            value = false;
+            return value;
+          }
+          this.items.forEach((item) => {
+            const return_item = this.return_doc.items.find(
+              (element) => element.item_code == item.item_code
+            );
+
+            if (!return_item) {
+              evntBus.$emit("show_mesage", {
+                text: `The item ${item.item_name} cannot be returned because it is not in the invoice ${this.return_doc.name}`,
+                color: "error",
+              });
+              value = false;
+              return value;
+            } else if (item.qty * -1 > return_item.qty || item.qty >= 0) {
+              evntBus.$emit("show_mesage", {
+                text: `The QTY of the item ${item.item_name} cannot be greater than ${return_item.qty}`,
+                color: "error",
+              });
+              value = false;
+              return value;
+            }
+          });
+        }
+      });
+      return value;
     },
     get_draft_invoices() {
       const vm = this;
@@ -832,6 +932,9 @@ export default {
           }
         },
       });
+    },
+    open_returns() {
+      evntBus.$emit("open_returns", this.pos_profile.company);
     },
     close_payments() {
       evntBus.$emit("show_payment", "false");
@@ -901,7 +1004,9 @@ export default {
                 data.discount_percentage_on_rate;
               item.discount_amount = data.discount_amount || 0;
             }
-            item.price_list_rate = data.price_list_rate;
+            if (!item.btach_price) {
+              item.price_list_rate = data.price_list_rate;
+            }
             item.has_pricing_rule = data.has_pricing_rule;
             item.last_purchase_rate = data.last_purchase_rate;
             item.price_or_product_discount = data.price_or_product_discount;
@@ -1031,6 +1136,9 @@ export default {
         item.discount_amount = 0;
         item.discount_percentage = 0;
       }
+      if (item.btach_price) {
+        item.price_list_rate = item.btach_price * new_uom.conversion_factor;
+      }
       this.update_item_detail(item);
     },
     calc_sotck_gty(item, value) {
@@ -1055,12 +1163,19 @@ export default {
       );
       item.actual_batch_qty = batch_no.batch_qty;
       item.batch_no_expiry_date = batch_no.expiry_date;
+      if (batch_no.btach_price) {
+        item.btach_price = batch_no.btach_price;
+        item.price_list_rate = batch_no.btach_price;
+        item.rate = batch_no.btach_price;
+      }else {
+        item.btach_price = null;
+        this.update_item_detail(item)
+      }
     },
     set_customer_info(field, value) {
       const vm = this;
       frappe.call({
-        method:
-          "erpnext.selling.page.point_of_sale.point_of_sale.set_customer_info",
+        method: "posawesome.posawesome.api.posapp.set_customer_info",
         args: {
           fieldname: field,
           customer: this.customer_info.customer,
@@ -1088,7 +1203,6 @@ export default {
       this.stock_settings = data.stock_settings;
     });
     evntBus.$on("add_item", (item) => {
-      // this.expanded = []
       this.add_item(item);
     });
     evntBus.$on("update_customer", (customer) => {
@@ -1100,6 +1214,10 @@ export default {
     });
     evntBus.$on("load_invoice", (data) => {
       this.new_invoice(data);
+    });
+    evntBus.$on("load_return_invoice", (data) => {
+      this.new_invoice(data.invoice_doc);
+      this.return_doc = data.return_doc;
     });
   },
   mounted: function () {},
@@ -1122,5 +1240,8 @@ export default {
 <style scoped>
 .border_line_bottom {
   border-bottom: 1px solid lightgray;
+}
+.disable-events {
+  pointer-events: none;
 }
 </style>

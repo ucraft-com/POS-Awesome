@@ -3,7 +3,7 @@
 
 #### How to Install
 
-1. `bench get-app  git@github.com:yrestom/POS-Awesome.git`
+1. `bench get-app  https://github.com/yrestom/POS-Awesome.git`
 
 2. `bench setup requirements`
 

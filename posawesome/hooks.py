@@ -19,8 +19,8 @@ app_license = "GPLv3"
 # app_include_js = "/assets/posawesome/js/posawesome.js"
 app_include_js = [
 	"/assets/posawesome/node_modules/vuetify/dist/vuetify.js",
-	"/assets/posawesome/js/toConsole.min.js",
-	"/assets/posawesome/js/posapp.min.js",
+	"/assets/js/toConsole.min.js",
+	"/assets/js/posapp.min.js",
 	]
 
 # include js, css files in header of web template
@@ -154,5 +154,13 @@ fixtures = [
 		"POS Profile-posa_allow_partial_payment",
 		"POS Profile-posa_allow_credit_sale",
 		"POS Profile-posa_pos_awesome_advance_settings",
+		"Batch-posa_btach_price",
+		"POS Profile-posa_max_discount_allowed",
+		"POS Profile-posa_allow_return",
+		"POS Profile-posa_col_1",
+		"POS Profile-posa_scale_barcode_start",
+	)]]},
+	{"doctype":"Property Setter", "filters": [["name", "in", (
+		"Sales Invoice-posa_pos_opening_shift-no_copy"
 	)]]},
 ]
