@@ -264,11 +264,17 @@ def submit_invoice(data):
     invoice_doc.due_date = data.get("due_date")
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
-
+    invoice_doc.posa_is_printed = 1
     invoice_doc.save()
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_allow_submissions_in_background_job"):
-        enqueue(method=submit_in_background_job, queue='short',
-                timeout=1000, is_async=True, kwargs=invoice_doc.name)
+        invoices_list = frappe.get_all("Sales Invoice", filters = {
+            "posa_pos_opening_shift": invoice_doc.posa_pos_opening_shift,
+            "docstatus": 0,
+            "posa_is_printed": 1
+        })
+        for invoice in invoices_list:
+            enqueue(method=submit_in_background_job, queue='short',
+                    timeout=1000, is_async=True, kwargs=invoice.name)
     else:
         invoice_doc.submit()
     return {
@@ -288,7 +294,8 @@ def get_draft_invoices(pos_opening_shift):
         "Sales Invoice",
         filters={
             "posa_pos_opening_shift": pos_opening_shift,
-            "docstatus": 0
+            "docstatus": 0,
+            "posa_is_printed": 0
         },
         fields=["name"],
         limit_page_length=0,
@@ -302,6 +309,8 @@ def get_draft_invoices(pos_opening_shift):
 
 @frappe.whitelist()
 def delete_invoice(invoice):
+    if frappe.get_value("Sales Invoice", invoice, "posa_is_printed"):
+        frappe.throw(_("This invoice {0} cannot be deleted".format(invoice)))
     frappe.delete_doc("Sales Invoice", invoice, force=1)
     return "Inovice {0} Deleted".format(invoice)
 

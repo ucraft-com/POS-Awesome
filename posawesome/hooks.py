@@ -159,6 +159,7 @@ fixtures = [
 		"POS Profile-posa_allow_return",
 		"POS Profile-posa_col_1",
 		"POS Profile-posa_scale_barcode_start",
+		"Sales Invoice-posa_is_printed"
 	)]]},
 	{"doctype":"Property Setter", "filters": [["name", "in", (
 		"Sales Invoice-posa_pos_opening_shift-no_copy"

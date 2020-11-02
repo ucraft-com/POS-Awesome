@@ -45,7 +45,7 @@ class POSClosingShift(Document):
                 from
                     `tabSales Invoice`
                 where
-                    docstatus = 0 and posa_pos_opening_shift = %s
+                    docstatus = 0 and posa_is_printed = 0 and posa_pos_opening_shift = %s
                 """, (self.pos_opening_shift), as_dict=1)
 
             for invoice in data:
@@ -68,6 +68,7 @@ def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_pos_invoices(pos_opening_shift):
+    submit_printed_invoices(pos_opening_shift)
     data = frappe.db.sql("""
 	select
 		name
@@ -85,6 +86,7 @@ def get_pos_invoices(pos_opening_shift):
 @frappe.whitelist()
 def make_closing_shift_from_opening(opening_shift):
     opening_shift = json.loads(opening_shift)
+    submit_printed_invoices(opening_shift.get("name"))
     closing_shift = frappe.new_doc("POS Closing Shift")
     closing_shift.pos_opening_shift = opening_shift.get("name")
     closing_shift.period_start_date = opening_shift.get("period_start_date")
@@ -158,3 +160,15 @@ def submit_closing_shift(closing_shift):
     closing_shift_doc.save()
     closing_shift_doc.submit()
     return closing_shift_doc.name
+
+
+
+def submit_printed_invoices(pos_opening_shift):
+    invoices_list = frappe.get_all("Sales Invoice", filters = {
+            "posa_pos_opening_shift": pos_opening_shift,
+            "docstatus": 0,
+            "posa_is_printed": 1
+        })
+    for invoice in invoices_list:
+        invoice_doc = frappe.get_doc("Sales Invoice", invoice.name)
+        invoice_doc.submit()
