@@ -450,16 +450,6 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
         return item
 
 
-def get_version():
-    from frappe.utils.gitutils import get_app_branch
-    branch_name = get_app_branch("erpnext")
-    if "12" in branch_name:
-        return 12
-    elif "13" in branch_name:
-        return 13
-    else:
-        return 13
-    
 @frappe.whitelist()
 def set_customer_info(fieldname, customer, value=""):
     if fieldname == 'loyalty_program':
@@ -526,3 +516,27 @@ def search_invoices_for_return(invoice_name, company):
     for invoice in invoices_list:
         data.append(frappe.get_doc("Sales Invoice", invoice["name"]))
     return data
+
+
+
+def get_version():
+    branch_name = get_app_branch("erpnext")
+    if "12" in branch_name:
+        return 12
+    elif "13" in branch_name:
+        return 13
+    else:
+        return 13
+
+
+def get_app_branch(app):
+    '''Returns branch of an app'''
+    import subprocess
+    try:
+        branch = subprocess.check_output('cd ../apps/{0} && git rev-parse --abbrev-ref HEAD'.format(app),
+            shell=True)
+        branch = branch.decode('utf-8')
+        branch = branch.strip()
+        return branch
+    except Exception:
+        return ''
