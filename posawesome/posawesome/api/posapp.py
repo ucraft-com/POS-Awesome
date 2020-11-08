@@ -344,7 +344,7 @@ def get_items_details(pos_profile, items_data):
                                                 "batch_qty": [">", 0],
                                                 "disabled": 0,
                                             },
-                                            fields=["name as batch_no, batch_qty", "expiry_date", "posa_btach_price as btach_price"])
+                                            fields=["name as batch_no", "batch_qty", "expiry_date", "posa_btach_price as btach_price"])
                 for batch in batchs:
                     if str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]:
                         batch_no_data.append(batch)
