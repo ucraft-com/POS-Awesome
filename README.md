@@ -9,14 +9,14 @@
 1. Supports Erpnext Version 12 & 13
 2. User friendly and it provides a good user experience and speed of use
 3. The cashier has the option of either list view or card view for the items
-4. Support invoice submission after printing the receipt for faster printing
+4. Supports invoice submission after printing the receipt for faster printing
 5. Supports batch & serial numbering
 6. Supports batch based pricing
 7. Supports UOM specific barcode and pricing
 8. Supports sales of scale (weighted) products
 9. Ability to make returns from POS
 10. Allow user to choose a due date for credit sales
-11. Support customer loyalty points
+11. Supports customer loyalty points
 
 ---
 
