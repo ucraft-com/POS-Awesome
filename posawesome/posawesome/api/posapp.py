@@ -354,7 +354,6 @@ def get_items_details(pos_profile, items_data):
                 batch_list = get_batch_qty(warehouse = warehouse, item_code = item_code)
                 for batch in batch_list:
                     if batch.qty > 0 :
-                        expiry_date = frappe.get_value("Batch",batch.batch_no, "expiry_date")
                         if (str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]) and batch.disabled==0:
                             batch_no_data.append({
                                 "batch_no": batch.batch_no,
