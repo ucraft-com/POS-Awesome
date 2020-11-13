@@ -166,7 +166,7 @@ export default {
       }
       const vm = this;
       this.loading = true;
-      if (localStorage.items_storage) {
+      if (vm.pos_profile.posa_local_storage && localStorage.items_storage) {
         vm.items = JSON.parse(localStorage.getItem("items_storage"));
         vm.loading = false;
       }
@@ -175,13 +175,13 @@ export default {
         args: { pos_profile: vm.pos_profile },
         callback: function (r) {
           if (r.message) {
-            localStorage.setItem("items_storage", "");
-            localStorage.setItem("items_storage", JSON.stringify(r.message));
-            vm.$nextTick(() => {
-              console.log("loadItmes");
-              vm.items = JSON.parse(localStorage.getItem("items_storage"));
-              vm.loading = false;
-            });
+            vm.items = r.message;
+            vm.loading = false;
+            console.log("loadItmes");
+            if (vm.pos_profile.posa_local_storage) {
+              localStorage.setItem("items_storage", "");
+              localStorage.setItem("items_storage", JSON.stringify(r.message));
+            }
           }
         },
       });

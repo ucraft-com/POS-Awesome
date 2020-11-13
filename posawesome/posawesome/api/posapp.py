@@ -264,11 +264,17 @@ def submit_invoice(data):
     invoice_doc.due_date = data.get("due_date")
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
-
+    invoice_doc.posa_is_printed = 1
     invoice_doc.save()
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_allow_submissions_in_background_job"):
-        enqueue(method=submit_in_background_job, queue='short',
-                timeout=1000, is_async=True, kwargs=invoice_doc.name)
+        invoices_list = frappe.get_all("Sales Invoice", filters = {
+            "posa_pos_opening_shift": invoice_doc.posa_pos_opening_shift,
+            "docstatus": 0,
+            "posa_is_printed": 1
+        })
+        for invoice in invoices_list:
+            enqueue(method=submit_in_background_job, queue='short',
+                    timeout=1000, is_async=True, kwargs=invoice.name)
     else:
         invoice_doc.submit()
     return {
@@ -288,7 +294,8 @@ def get_draft_invoices(pos_opening_shift):
         "Sales Invoice",
         filters={
             "posa_pos_opening_shift": pos_opening_shift,
-            "docstatus": 0
+            "docstatus": 0,
+            "posa_is_printed": 0
         },
         fields=["name"],
         limit_page_length=0,
@@ -302,6 +309,8 @@ def get_draft_invoices(pos_opening_shift):
 
 @frappe.whitelist()
 def delete_invoice(invoice):
+    if frappe.get_value("Sales Invoice", invoice, "posa_is_printed"):
+        frappe.throw(_("This invoice {0} cannot be deleted".format(invoice)))
     frappe.delete_doc("Sales Invoice", invoice, force=1)
     return "Inovice {0} Deleted".format(invoice)
 
@@ -335,7 +344,7 @@ def get_items_details(pos_profile, items_data):
                                                 "batch_qty": [">", 0],
                                                 "disabled": 0,
                                             },
-                                            fields=["name as batch_no, batch_qty", "expiry_date", "posa_btach_price as btach_price"])
+                                            fields=["name as batch_no", "batch_qty", "expiry_date", "posa_btach_price as btach_price"])
                 for batch in batchs:
                     if str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]:
                         batch_no_data.append(batch)
@@ -345,7 +354,6 @@ def get_items_details(pos_profile, items_data):
                 batch_list = get_batch_qty(warehouse = warehouse, item_code = item_code)
                 for batch in batch_list:
                     if batch.qty > 0 :
-                        expiry_date = frappe.get_value("Batch",batch.batch_no, "expiry_date")
                         if (str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]) and batch.disabled==0:
                             batch_no_data.append({
                                 "batch_no": batch.batch_no,
@@ -441,16 +449,6 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
         return item
 
 
-def get_version():
-    from frappe.utils.gitutils import get_app_branch
-    branch_name = get_app_branch("erpnext")
-    if "12" in branch_name:
-        return 12
-    elif "13" in branch_name:
-        return 13
-    else:
-        return 13
-    
 @frappe.whitelist()
 def set_customer_info(fieldname, customer, value=""):
     if fieldname == 'loyalty_program':
@@ -517,3 +515,27 @@ def search_invoices_for_return(invoice_name, company):
     for invoice in invoices_list:
         data.append(frappe.get_doc("Sales Invoice", invoice["name"]))
     return data
+
+
+
+def get_version():
+    branch_name = get_app_branch("erpnext")
+    if "12" in branch_name:
+        return 12
+    elif "13" in branch_name:
+        return 13
+    else:
+        return 13
+
+
+def get_app_branch(app):
+    '''Returns branch of an app'''
+    import subprocess
+    try:
+        branch = subprocess.check_output('cd ../apps/{0} && git rev-parse --abbrev-ref HEAD'.format(app),
+            shell=True)
+        branch = branch.decode('utf-8')
+        branch = branch.strip()
+        return branch
+    except Exception:
+        return ''
