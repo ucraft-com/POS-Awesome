@@ -12,6 +12,7 @@
         v-model="customer"
         :items="customers"
         item-text="customer_name"
+        item-value="name"
         background-color="white"
         no-data-text="Customer not found"
         hide-details
@@ -22,8 +23,13 @@
           <template>
             <v-list-item-content>
               <v-list-item-title class="indigo--text subtitle-1"
-                v-html="data.item.customer_name"
+                v-html="data.item.name"
               ></v-list-item-title>
+              <v-list-item-subtitle v-if="data.item.customer_name" != "data.item.name"
+                v-html="
+                  `TAX ID: ${data.item.customer_name}`
+                "
+              ></v-list-item-subtitle>
               <v-list-item-subtitle v-if="data.item.name"
                 v-html="
                   `ID: ${data.item.name}`
