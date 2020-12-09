@@ -96,6 +96,9 @@ def update_opening_shift_data(data,pos_profile):
 def get_items(pos_profile):
     pos_profile = json.loads(pos_profile)
     price_list = pos_profile.get("selling_price_list")
+    #HELKYds
+    print ('Pricelist ', price_list)
+    print (pos_profile.get("item_groups"))
 
     item_groups_list = []
     if pos_profile.get("item_groups"):
@@ -114,6 +117,9 @@ def get_items(pos_profile):
             conditon = "AND item_group in {0}".format(tuple(item_groups_list))
 
     result = []
+
+    #HELKYDs
+    print ('condition ', conditon)
 
     items_data = frappe.db.sql("""
         SELECT
@@ -142,6 +148,9 @@ def get_items(pos_profile):
                                .format(
                                    conditon
                                ), as_dict=1)
+
+    #HELKYDs
+    print ('items_date ', items_data)
 
     if items_data:
         items = [d.item_code for d in items_data]
