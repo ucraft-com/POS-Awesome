@@ -84,23 +84,25 @@ export default {
     submit_dialog() {
       if (this.customer_name) {
         const vm = this;
-        frappe.call({
-          method: "posawesome.posawesome.api.posapp.create_customer",
-          args: {
+        const args = {
             customer_name: this.customer_name,
             tax_id: this.tax_id,
             mobile_no: this.mobile_no,
             email_id: this.email_id,
-          },
+        };
+        frappe.call({
+          method: "posawesome.posawesome.api.posapp.create_customer",
+          args: args,
           callback: (r) => {
             if (!r.exc && r.message.name) {
               evntBus.$emit("show_mesage", {
                 text: "Customer contact created successfully.",
                 color: "success",
               });
+              args.name = r.message.name
               frappe.utils.play_sound("submit");
-              evntBus.$emit("add_customer_to_list", this.customer_name);
-              evntBus.$emit("set_customer", this.customer_name);
+              evntBus.$emit("add_customer_to_list", args);
+              evntBus.$emit("set_customer", r.message.name);
               this.customer_name = "";
               this.tax_id = "";
               this.mobile_no = "";
