@@ -255,12 +255,18 @@ def submit_invoice(data):
         invoice_doc.loyalty_amount = data.get("loyalty_amount")
         invoice_doc.redeem_loyalty_points = data.get("redeem_loyalty_points")
         invoice_doc.loyalty_points = data.get("loyalty_points")
+    payments = []
     for payment in data.get("payments"):
         for i in invoice_doc.payments:
             if i.mode_of_payment == payment["mode_of_payment"]:
                 i.amount = payment["amount"]
                 i.base_amount = 0
+                if i.amount:
+                    payments.append(i)
                 break
+    if len(payments) == 0:
+        payments = [invoice_doc.payments[0]]
+    invoice_doc.payments = payments
     invoice_doc.due_date = data.get("due_date")
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
