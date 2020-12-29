@@ -210,7 +210,7 @@ def get_items_groups():
 @frappe.whitelist()
 def get_customer_names():
     customers = frappe.db.sql("""
-        select name, mobile_no, email_id, tax_id
+        select name, mobile_no, email_id, tax_id, customer_name
         from `tabCustomer`
         order by name
         LIMIT 0, 10000 """, as_dict=1)
@@ -362,13 +362,14 @@ def get_items_details(pos_profile, items_data):
                 from erpnext.stock.doctype.batch.batch import get_batch_qty
                 batch_list = get_batch_qty(warehouse = warehouse, item_code = item_code)
                 for batch in batch_list:
-                    if batch.qty > 0 :
-                        if (str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]) and batch.disabled==0:
+                    if batch.qty > 0 and batch.batch_no:
+                        batch_doc = frappe.get_doc("Batch", batch.batch_no)
+                        if (str(batch_doc.expiry_date) > str(nowdate()) or batch_doc.expiry_date in ["", None]) and batch_doc.disabled==0:
                             batch_no_data.append({
                                 "batch_no": batch.batch_no,
                                 "batch_qty": batch.qty,
-                                "expiry_date": batch.expiry_date,
-                                "btach_price": batch.posa_btach_price,
+                                "expiry_date": batch_doc.expiry_date,
+                                "btach_price": batch_doc.posa_btach_price,
                             })
 
             row = {}

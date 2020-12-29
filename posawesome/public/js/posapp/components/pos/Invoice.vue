@@ -837,7 +837,7 @@ export default {
           this.pos_profile.update_stock &&
           this.stock_settings.allow_negative_stock != 1
         ) {
-          if (item.stock_qty > item.actual_qty) {
+          if (item.is_stock_item && item.stock_qty > item.actual_qty) {
             evntBus.$emit("show_mesage", {
               text: `The existing quantity of item ${item.item_name} is not enough`,
               color: "error",

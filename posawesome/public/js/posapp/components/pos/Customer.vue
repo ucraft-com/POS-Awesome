@@ -11,7 +11,8 @@
         label="Customer"
         v-model="customer"
         :items="customers"
-        item-text="name"
+        item-text="customer_name"
+        item-value="name"
         background-color="white"
         no-data-text="Customer not found"
         hide-details
@@ -22,8 +23,13 @@
           <template>
             <v-list-item-content>
               <v-list-item-title class="indigo--text subtitle-1"
-                v-html="data.item.name"
+                v-html="data.item.customer_name"
               ></v-list-item-title>
+              <v-list-item-subtitle v-if="data.item.customer_name != data.item.name"
+                v-html="
+                  `ID: ${data.item.name}`
+                "
+              ></v-list-item-subtitle>
               <v-list-item-subtitle v-if="data.item.tax_id"
                 v-html="
                   `TAX ID: ${data.item.tax_id}`
@@ -87,19 +93,21 @@ export default {
       evntBus.$emit("open_new_customer");
     },
     customFilter (item, queryText, itemText) {
-        const textOne = item.name.toLowerCase()
+        const textOne = item.customer_name ? item.customer_name.toLowerCase() : ""
         const textTwo = item.tax_id ? item.tax_id.toLowerCase() : ""
         const textThree = item.email_id ? item.email_id.toLowerCase() : ""
         const textFour = item.mobile_no ? item.mobile_no.toLowerCase() : ""
+        const textFifth = item.name.toLowerCase()
         const searchText = queryText.toLowerCase()
 
         return textOne.indexOf(searchText) > -1 ||
           textTwo.indexOf(searchText) > -1 || 
           textThree.indexOf(searchText) > -1 || 
-          textFour.indexOf(searchText) > -1
-
+          textFour.indexOf(searchText) > -1 ||
+          textFifth.indexOf(searchText) > -1
       },
   },
+  
   computed: {},
 
   created: function () {
