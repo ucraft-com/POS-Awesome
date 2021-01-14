@@ -38,14 +38,8 @@
                     hide-default-footer
                   >
                     <template v-slot:item.amount="props">
-                      <v-edit-dialog
-                        :return-value.sync="props.item.amount"
-                        @save="save"
-                        @cancel="cancel"
-                        @open="open"
-                        @close="close"
-                      >
-                        {{ props.item.amount }}
+                      <v-edit-dialog :return-value.sync="props.item.amount">
+                        {{ formtCurrency(props.item.amount) }}
                         <template v-slot:input>
                           <v-text-field
                             v-model="props.item.amount"
@@ -74,38 +68,38 @@
 </template>
 
 <script>
-import { evntBus } from "../../bus";
+import { evntBus } from '../../bus';
 export default {
-  props: ["dialog"],
+  props: ['dialog'],
   data: () => ({
     dialog_data: {},
     companys: [],
-    company: "",
+    company: '',
     pos_profiles_data: [],
     pos_profiles: [],
-    pos_profile: "",
+    pos_profile: '',
     payments_method_data: [],
     payments_methods: [],
     payments_methods_headers: [
       {
-        text: "Mode of Payment",
-        align: "start",
+        text: 'Mode of Payment',
+        align: 'start',
         sortable: false,
-        value: "mode_of_payment",
+        value: 'mode_of_payment',
       },
       {
-        text: "Opening Amount",
-        value: "amount",
-        align: "center",
+        text: 'Opening Amount',
+        value: 'amount',
+        align: 'center',
         sortable: false,
       },
     ],
     itemsPerPage: 100,
-    max25chars: (v) => v.length <= 12 || "Input too long!", // TODO : should validate as number
+    max25chars: (v) => v.length <= 12 || 'Input too long!', // TODO : should validate as number
     pagination: {},
     snack: false, // TODO : need to remove
-    snackColor: "", // TODO : need to remove
-    snackText: "", // TODO : need to remove
+    snackColor: '', // TODO : need to remove
+    snackText: '', // TODO : need to remove
   }),
   watch: {
     company(val) {
@@ -117,7 +111,7 @@ export default {
         if (this.pos_profiles.length) {
           this.pos_profile = this.pos_profiles[0];
         } else {
-          this.pos_profile = "";
+          this.pos_profile = '';
         }
       });
     },
@@ -135,12 +129,12 @@ export default {
   },
   methods: {
     close_opening_dialog() {
-      evntBus.$emit("close_opening_dialog");
+      evntBus.$emit('close_opening_dialog');
     },
     get_opening_dialog_data() {
       const vm = this;
       frappe.call({
-        method: "posawesome.posawesome.api.posapp.get_opening_dialog_data",
+        method: 'posawesome.posawesome.api.posapp.get_opening_dialog_data',
         args: {},
         callback: function (r) {
           if (r.message) {
@@ -160,30 +154,22 @@ export default {
       }
       const vm = this;
       return frappe
-        .call("posawesome.posawesome.api.posapp.create_opening_voucher", {
+        .call('posawesome.posawesome.api.posapp.create_opening_voucher', {
           pos_profile: this.pos_profile,
           company: this.company,
           balance_details: this.payments_methods,
         })
         .then((r) => {
           if (r.message) {
-            evntBus.$emit("register_pos_data", r.message);
-            evntBus.$emit("set_company", r.message.company);
+            evntBus.$emit('register_pos_data', r.message);
+            evntBus.$emit('set_company', r.message.company);
             vm.close_opening_dialog();
           }
         });
     },
-    save() {
-      // TODO : need to remove
-    },
-    cancel() {
-      // TODO : need to remove
-    },
-    open() {
-      // TODO : need to remove
-    },
-    close() {
-      // TODO : need to remove
+    formtCurrency(value) {
+      value = parseFloat(value);
+      return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
   },
   created: function () {

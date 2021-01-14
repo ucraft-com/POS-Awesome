@@ -20,13 +20,14 @@ def get_opening_dialog_data():
     data["companys"] = frappe.get_list(
         "Company", limit_page_length=0, order_by='name')
     data["pos_profiles_data"] = frappe.get_list(
-        "POS Profile", filters = {"disabled" : 0}, fields=["name", "company"], limit_page_length=0, order_by='name')
+        "POS Profile", filters={"disabled": 0}, fields=["name", "company"], limit_page_length=0, order_by='name')
 
     pos_profiles_list = []
     for i in data["pos_profiles_data"]:
         pos_profiles_list.append(i.name)
 
-    payment_method_table = "POS Payment Method" if get_version() == 13 else "Sales Invoice Payment"
+    payment_method_table = "POS Payment Method" if get_version(
+    ) == 13 else "Sales Invoice Payment"
     data["payments_method"] = frappe.get_list(
         payment_method_table,
         filters={"parent": ["in", pos_profiles_list]},
@@ -52,7 +53,7 @@ def create_opening_voucher(pos_profile, company, balance_details):
     })
     new_pos_opening.set("balance_details", balance_details)
     new_pos_opening.submit()
-    
+
     data = {}
     data["pos_opening_shift"] = new_pos_opening.as_dict()
     update_opening_shift_data(data, new_pos_opening.pos_profile)
@@ -80,7 +81,8 @@ def check_opening_shift(user):
         update_opening_shift_data(data, open_vouchers[0]["pos_profile"])
     return data
 
-def update_opening_shift_data(data,pos_profile):
+
+def update_opening_shift_data(data, pos_profile):
     data["pos_profile"] = frappe.get_doc(
         "POS Profile", pos_profile)
     data["company"] = frappe.get_doc(
@@ -91,6 +93,7 @@ def update_opening_shift_data(data,pos_profile):
     data["stock_settings"].update({
         "allow_negative_stock": allow_negative_stock
     })
+
 
 @frappe.whitelist()
 def get_items(pos_profile):
@@ -255,19 +258,25 @@ def submit_invoice(data):
         invoice_doc.loyalty_amount = data.get("loyalty_amount")
         invoice_doc.redeem_loyalty_points = data.get("redeem_loyalty_points")
         invoice_doc.loyalty_points = data.get("loyalty_points")
+    payments = []
     for payment in data.get("payments"):
         for i in invoice_doc.payments:
             if i.mode_of_payment == payment["mode_of_payment"]:
                 i.amount = payment["amount"]
                 i.base_amount = 0
+                if i.amount:
+                    payments.append(i)
                 break
+    if len(payments) == 0:
+        payments = [invoice_doc.payments[0]]
+    invoice_doc.payments = payments
     invoice_doc.due_date = data.get("due_date")
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
     invoice_doc.save()
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_allow_submissions_in_background_job"):
-        invoices_list = frappe.get_all("Sales Invoice", filters = {
+        invoices_list = frappe.get_all("Sales Invoice", filters={
             "posa_pos_opening_shift": invoice_doc.posa_pos_opening_shift,
             "docstatus": 0,
             "posa_is_printed": 1
@@ -326,7 +335,8 @@ def get_items_details(pos_profile, items_data):
         for item in items_data:
             item_code = item.get("item_code")
             item_stock_qty = get_stock_availability(item_code, warehouse)
-            has_batch_no, has_serial_no = frappe.get_value("Item", item_code, ["has_batch_no","has_serial_no"])
+            has_batch_no, has_serial_no = frappe.get_value(
+                "Item", item_code, ["has_batch_no", "has_serial_no"])
 
             uoms = frappe.get_all("UOM Conversion Detail", filters={
                 "parent": item_code}, fields=["uom", "conversion_factor"])
@@ -336,32 +346,20 @@ def get_items_details(pos_profile, items_data):
                 "status": "Active"
             }, fields=["name as serial_no"])
 
-            if get_version() == 13: 
-                batch_no_data = []
-                batchs = frappe.get_all('Batch',
-                                            filters={
-                                                "item": item_code,
-                                                "batch_qty": [">", 0],
-                                                "disabled": 0,
-                                            },
-                                            fields=["name as batch_no", "batch_qty", "expiry_date", "posa_btach_price as btach_price"])
-                for batch in batchs:
-                    if str(batch.expiry_date) > str(nowdate()) or batch.expiry_date in ["", None]:
-                        batch_no_data.append(batch)
-            elif get_version() == 12:
-                batch_no_data = []
-                from erpnext.stock.doctype.batch.batch import get_batch_qty
-                batch_list = get_batch_qty(warehouse = warehouse, item_code = item_code)
-                for batch in batch_list:
-                    if batch.qty > 0 and batch.batch_no:
-                        batch_doc = frappe.get_doc("Batch", batch.batch_no)
-                        if (str(batch_doc.expiry_date) > str(nowdate()) or batch_doc.expiry_date in ["", None]) and batch_doc.disabled==0:
-                            batch_no_data.append({
-                                "batch_no": batch.batch_no,
-                                "batch_qty": batch.qty,
-                                "expiry_date": batch_doc.expiry_date,
-                                "btach_price": batch_doc.posa_btach_price,
-                            })
+            batch_no_data = []
+            from erpnext.stock.doctype.batch.batch import get_batch_qty
+            batch_list = get_batch_qty(
+                warehouse=warehouse, item_code=item_code)
+            for batch in batch_list:
+                if batch.qty > 0 and batch.batch_no:
+                    batch_doc = frappe.get_doc("Batch", batch.batch_no)
+                    if (str(batch_doc.expiry_date) > str(nowdate()) or batch_doc.expiry_date in ["", None]) and batch_doc.disabled == 0:
+                        batch_no_data.append({
+                            "batch_no": batch.batch_no,
+                            "batch_qty": batch.qty,
+                            "expiry_date": batch_doc.expiry_date,
+                            "btach_price": batch_doc.posa_btach_price,
+                        })
 
             row = {}
             row.update(item)
@@ -433,17 +431,17 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
                                           fields=[
                                               "item_code", "price_list_rate", "currency"],
                                           filters={'price_list': selling_price_list, 'item_code': item_code})
-        
+
         item_price = 0
         if len(item_prices_data):
             item_price = item_prices_data[0].get("price_list_rate")
             currency = item_prices_data[0].get("currency")
-        
+
         item.update({
             'rate': item_price,
             'currency': currency,
             'item_code': item_code,
-            'barcode' : barcode,
+            'barcode': barcode,
             'actual_qty': 0,
             'item_barcode': search_item,
         })
@@ -455,15 +453,18 @@ def set_customer_info(fieldname, customer, value=""):
     if fieldname == 'loyalty_program':
         frappe.db.set_value('Customer', customer, 'loyalty_program', value)
 
-    contact = frappe.get_cached_value('Customer', customer, 'customer_primary_contact') or ""
+    contact = frappe.get_cached_value(
+        'Customer', customer, 'customer_primary_contact') or ""
 
     if contact:
         contact_doc = frappe.get_doc('Contact', contact)
         if fieldname == 'email_id':
-            contact_doc.set('email_ids', [{ 'email_id': value, 'is_primary': 1}])
+            contact_doc.set(
+                'email_ids', [{'email_id': value, 'is_primary': 1}])
             frappe.db.set_value('Customer', customer, 'email_id', value)
         elif fieldname == 'mobile_no':
-            contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
+            contact_doc.set(
+                'phone_nos', [{'phone': value, 'is_primary_mobile_no': 1}])
             frappe.db.set_value('Customer', customer, 'mobile_no', value)
         contact_doc.save()
 
@@ -473,7 +474,8 @@ def set_customer_info(fieldname, customer, value=""):
         contact_doc.is_primary_contact = 1
         contact_doc.is_billing_contact = 1
         if fieldname == "mobile_no":
-            contact_doc.add_phone(value, is_primary_mobile_no=1, is_primary_phone=1)
+            contact_doc.add_phone(
+                value, is_primary_mobile_no=1, is_primary_phone=1)
 
         if fieldname == 'email_id':
             contact_doc.add_email(value, is_primary=1)
@@ -485,8 +487,9 @@ def set_customer_info(fieldname, customer, value=""):
 
         contact_doc.flags.ignore_mandatory = True
         contact_doc.save()
-        frappe.set_value("Customer", customer, "customer_primary_contact", contact_doc.name )
-        
+        frappe.set_value("Customer", customer,
+                         "customer_primary_contact", contact_doc.name)
+
 
 @frappe.whitelist()
 def search_invoices_for_return(invoice_name, company):
@@ -518,7 +521,6 @@ def search_invoices_for_return(invoice_name, company):
     return data
 
 
-
 def get_version():
     branch_name = get_app_branch("erpnext")
     if "12" in branch_name:
@@ -534,7 +536,7 @@ def get_app_branch(app):
     import subprocess
     try:
         branch = subprocess.check_output('cd ../apps/{0} && git rev-parse --abbrev-ref HEAD'.format(app),
-            shell=True)
+                                         shell=True)
         branch = branch.decode('utf-8')
         branch = branch.strip()
         return branch

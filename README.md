@@ -33,7 +33,7 @@
 
 ### Dependencies:
 
-- [Fappe](https://github.com/frappe/frappe)
+- [Frappe](https://github.com/frappe/frappe)
 - [Erpnext](https://github.com/frappe/erpnext)
 - [Vue.js](https://github.com/vuejs/vue)
 - [Vuetify.js](https://github.com/vuetifyjs/vuetify)
