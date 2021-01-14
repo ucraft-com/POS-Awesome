@@ -22,7 +22,7 @@
                       <v-edit-dialog
                         :return-value.sync="props.item.closing_amount"
                       >
-                        {{ props.item.closing_amount }}
+                        {{ formtCurrency(props.item.closing_amount) }}
                         <template v-slot:input>
                           <v-text-field
                             v-model="props.item.closing_amount"
@@ -36,8 +36,15 @@
                       </v-edit-dialog>
                     </template>
                     <template v-slot:item.difference="{ item }">{{
-                      (item.difference =
-                        item.expected_amount - item.closing_amount)
+                      (item.difference = formtCurrency(
+                        item.expected_amount - item.closing_amount
+                      ))
+                    }}</template>
+                    <template v-slot:item.opening_amount="{ item }">{{
+                      formtCurrency(item.opening_amount)
+                    }}</template>
+                    <template v-slot:item.expected_amount="{ item }">{{
+                      formtCurrency(item.expected_amount)
                     }}</template>
                   </v-data-table>
                 </template>
@@ -56,7 +63,7 @@
 </template>
 
 <script>
-import { evntBus } from "../../bus";
+import { evntBus } from '../../bus';
 export default {
   data: () => ({
     closingDialog: false,
@@ -64,37 +71,37 @@ export default {
     dialog_data: {},
     headers: [
       {
-        text: "Mode of Payment",
-        value: "mode_of_payment",
-        align: "start",
+        text: 'Mode of Payment',
+        value: 'mode_of_payment',
+        align: 'start',
         sortable: true,
       },
       {
-        text: "Opening Amount",
-        align: "end",
+        text: 'Opening Amount',
+        align: 'end',
         sortable: true,
-        value: "opening_amount",
+        value: 'opening_amount',
       },
       {
-        text: "Closing Amount",
-        value: "closing_amount",
-        align: "end",
+        text: 'Closing Amount',
+        value: 'closing_amount',
+        align: 'end',
         sortable: true,
       },
       {
-        text: "Expected Amount",
-        value: "expected_amount",
-        align: "end",
+        text: 'Expected Amount',
+        value: 'expected_amount',
+        align: 'end',
         sortable: false,
       },
       {
-        text: "Difference",
-        value: "difference",
-        align: "end",
+        text: 'Difference',
+        value: 'difference',
+        align: 'end',
         sortable: false,
       },
     ],
-    max25chars: (v) => v.length <= 20 || "Input too long!", // TODO : should validate as number
+    max25chars: (v) => v.length <= 20 || 'Input too long!', // TODO : should validate as number
     pagination: {},
   }),
   watch: {},
@@ -104,12 +111,16 @@ export default {
     },
 
     submit_dialog() {
-      evntBus.$emit("submit_closing_pos", this.dialog_data);
+      evntBus.$emit('submit_closing_pos', this.dialog_data);
       this.closingDialog = false;
+    },
+    formtCurrency(value) {
+      value = parseFloat(value);
+      return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
   },
   created: function () {
-    evntBus.$on("open_ClosingDialog", (data) => {
+    evntBus.$on('open_ClosingDialog', (data) => {
       this.closingDialog = true;
       this.dialog_data = data;
     });

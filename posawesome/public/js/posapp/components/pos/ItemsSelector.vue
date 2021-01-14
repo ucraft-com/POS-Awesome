@@ -58,7 +58,7 @@
                   </v-img>
                   <v-card-text class="text--primary pa-1">
                     <div class="text-caption indigo--text accent-3">
-                      {{ item.rate || 0 }} {{ item.currency || "" }}
+                      {{ item.rate || 0 }} {{ item.currency || '' }}
                     </div>
                   </v-card-text>
                 </v-card>
@@ -76,7 +76,14 @@
                   :items-per-page="itemsPerPage"
                   hide-default-footer
                   @click:row="add_item"
-                ></v-data-table>
+                >
+                  <template v-slot:item.rate="{ item }">
+                    {{ formtCurrency(item.rate) }}
+                  </template>
+                  <template v-slot:item.actual_qty="{ item }">
+                    {{ formtCurrency(item.actual_qty) }}
+                  </template>
+                </v-data-table>
               </template>
             </div>
           </div>
@@ -128,27 +135,27 @@
 
 
 <script>
-import { evntBus } from "../../bus";
+import { evntBus } from '../../bus';
 // import debounce from 'lodash.debounce'
 import _ from 'lodash';
 export default {
   data: () => ({
-    pos_profile: "",
-    items_view: "list",
-    item_group: "ALL",
+    pos_profile: '',
+    items_view: 'list',
+    item_group: 'ALL',
     favourites_view: false,
     loading: false,
-    items_group: ["ALL"],
+    items_group: ['ALL'],
     items: [],
-    search: "",
-    first_search: "",
+    search: '',
+    first_search: '',
     itemsPerPage: 1000,
     items_headers: [
-      { text: "Name", align: "start", sortable: true, value: "item_name" },
-      { text: "Rate", value: "rate", align: "start" },
-      { text: "Currency", value: "currency", align: "start" },
-      { text: "Available QTY", value: "actual_qty", align: "start" },
-      { text: "UOM", value: "stock_uom", align: "start" },
+      { text: 'Name', align: 'start', sortable: true, value: 'item_name' },
+      { text: 'Rate', value: 'rate', align: 'start' },
+      { text: 'Currency', value: 'currency', align: 'start' },
+      { text: 'Available QTY', value: 'actual_qty', align: 'start' },
+      { text: 'UOM', value: 'stock_uom', align: 'start' },
     ],
   }),
 
@@ -161,26 +168,26 @@ export default {
   methods: {
     get_items() {
       if (!this.pos_profile) {
-        console.log("No POS Profile");
+        console.log('No POS Profile');
         return;
       }
       const vm = this;
       this.loading = true;
       if (vm.pos_profile.posa_local_storage && localStorage.items_storage) {
-        vm.items = JSON.parse(localStorage.getItem("items_storage"));
+        vm.items = JSON.parse(localStorage.getItem('items_storage'));
         vm.loading = false;
       }
       frappe.call({
-        method: "posawesome.posawesome.api.posapp.get_items",
+        method: 'posawesome.posawesome.api.posapp.get_items',
         args: { pos_profile: vm.pos_profile },
         callback: function (r) {
           if (r.message) {
             vm.items = r.message;
             vm.loading = false;
-            console.log("loadItmes");
+            console.log('loadItmes');
             if (vm.pos_profile.posa_local_storage) {
-              localStorage.setItem("items_storage", "");
-              localStorage.setItem("items_storage", JSON.stringify(r.message));
+              localStorage.setItem('items_storage', '');
+              localStorage.setItem('items_storage', JSON.stringify(r.message));
             }
           }
         },
@@ -188,19 +195,19 @@ export default {
     },
     get_items_groups() {
       if (!this.pos_profile) {
-        console.log("No POS Profile");
+        console.log('No POS Profile');
         return;
       }
       if (this.pos_profile.item_groups.length > 0) {
         this.pos_profile.item_groups.forEach((element) => {
-          if (element.item_group !== "All Item Groups") {
+          if (element.item_group !== 'All Item Groups') {
             this.items_group.push(element.item_group);
           }
         });
       } else {
         const vm = this;
         frappe.call({
-          method: "posawesome.posawesome.api.posapp.get_items_groups",
+          method: 'posawesome.posawesome.api.posapp.get_items_groups',
           args: {},
           callback: function (r) {
             if (r.message) {
@@ -213,7 +220,7 @@ export default {
       }
     },
     add_item(item) {
-      evntBus.$emit("add_item", item);
+      evntBus.$emit('add_item', item);
     },
     enter_event() {
       if (!this.filtred_items.length || !this.first_search) {
@@ -237,26 +244,29 @@ export default {
       if (first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
         let pesokg1 = first_search.substr(7, 5);
         let pesokg;
-        if (pesokg1.startsWith("0000")) {
-          pesokg = "0.00" + pesokg1.substr(4);
-        } else if (pesokg1.startsWith("000")) {
-          pesokg = "0.0" + pesokg1.substr(3);
-        } else if (pesokg1.startsWith("00")) {
-          pesokg = "0." + pesokg1.substr(2);
-        } else if (pesokg1.startsWith("0")) {
+        if (pesokg1.startsWith('0000')) {
+          pesokg = '0.00' + pesokg1.substr(4);
+        } else if (pesokg1.startsWith('000')) {
+          pesokg = '0.0' + pesokg1.substr(3);
+        } else if (pesokg1.startsWith('00')) {
+          pesokg = '0.' + pesokg1.substr(2);
+        } else if (pesokg1.startsWith('0')) {
           pesokg =
-            pesokg1.substr(1, 1) + "." + pesokg1.substr(2, pesokg1.length);
-        } else if (!pesokg1.startsWith("0")) {
+            pesokg1.substr(1, 1) + '.' + pesokg1.substr(2, pesokg1.length);
+        } else if (!pesokg1.startsWith('0')) {
           pesokg =
-            pesokg1.substr(0, 2) + "." + pesokg1.substr(2, pesokg1.length);
+            pesokg1.substr(0, 2) + '.' + pesokg1.substr(2, pesokg1.length);
         }
         scal_qty = pesokg;
       }
       return scal_qty;
     },
     get_search(first_search) {
-      let search_term = "";
-      if (first_search && first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
+      let search_term = '';
+      if (
+        first_search &&
+        first_search.startsWith(this.pos_profile.posa_scale_barcode_start)
+      ) {
         search_term = first_search.substr(0, 7);
       } else {
         search_term = first_search;
@@ -270,7 +280,7 @@ export default {
     update_items_details(items) {
       const vm = this;
       frappe.call({
-        method: "posawesome.posawesome.api.posapp.get_items_details",
+        method: 'posawesome.posawesome.api.posapp.get_items_details',
         args: {
           pos_profile: vm.pos_profile,
           items_data: items,
@@ -297,29 +307,33 @@ export default {
       const vm = this;
       onScan.attachTo(document, {
         suffixKeyCodes: [],
-         keyCodeMapper: function (oEvent) {
-          oEvent.stopImmediatePropagation()
+        keyCodeMapper: function (oEvent) {
+          oEvent.stopImmediatePropagation();
           return onScan.decodeKeyEvent(oEvent);
         },
         onScan: function (sCode) {
-           setTimeout(() => {
-          vm.trigger_onscan(sCode)
-          }, 300)
+          setTimeout(() => {
+            vm.trigger_onscan(sCode);
+          }, 300);
         },
       });
     },
-    trigger_onscan(sCode){
+    trigger_onscan(sCode) {
       if (this.filtred_items.length == 0) {
-        evntBus.$emit("show_mesage", {
+        evntBus.$emit('show_mesage', {
           text: `No Item has this barcode "${sCode}"`,
-          color: "error",
+          color: 'error',
         });
-        frappe.utils.play_sound("error");
+        frappe.utils.play_sound('error');
       } else {
-      this.enter_event();
-      this.debounce_search = null;
-      this.search = null;
+        this.enter_event();
+        this.debounce_search = null;
+        this.search = null;
       }
+    },
+    formtCurrency(value) {
+      value = parseFloat(value);
+      return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
   },
 
@@ -328,7 +342,7 @@ export default {
       this.search = this.get_search(this.first_search);
       let filtred_list = [];
       let filtred_group_list = [];
-      if (this.item_group != "ALL") {
+      if (this.item_group != 'ALL') {
         filtred_group_list = this.items.filter((item) =>
           item.item_group.toLowerCase().includes(this.item_group.toLowerCase())
         );
@@ -361,24 +375,24 @@ export default {
       }
       return filtred_list.slice(0, 50);
     },
-    debounce_search:{
+    debounce_search: {
       get() {
         return this.first_search;
       },
-      set: _.debounce(function(newValue) {
+      set: _.debounce(function (newValue) {
         this.first_search = newValue;
-      }, 200)
-    }
+      }, 200),
+    },
   },
 
   created: function () {
     this.$nextTick(function () {});
-    evntBus.$on("register_pos_profile", (data) => {
+    evntBus.$on('register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
       this.get_items();
       this.get_items_groups();
     });
-    evntBus.$on("update_cur_items_details", () => {
+    evntBus.$on('update_cur_items_details', () => {
       this.update_cur_items_details();
     });
   },
