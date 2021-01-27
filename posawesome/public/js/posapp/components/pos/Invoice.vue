@@ -300,7 +300,7 @@
                       outlined
                       dense
                       color="indigo"
-                      label="Bacth No"
+                      label="Batch No"
                       @change="set_batch_qty(item, $event)"
                     >
                       <template v-slot:item="data">
