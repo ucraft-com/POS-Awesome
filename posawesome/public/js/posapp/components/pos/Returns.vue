@@ -10,13 +10,14 @@
           <span class="headline indigo--text">Select Return Invoice</span>
         </v-card-title>
           <v-container>
-            <v-row class="mb-4">
+            <v-row class="ml-4 mb-4">
               <v-text-field
                 color="indigo"
                 label="Invoice ID"
                 background-color="white"
                 hide-details
                 v-model="invoice_name"
+                @keydown="search_invoices_by_enter"
                 dense
                 clearable
               ></v-text-field>
@@ -36,7 +37,7 @@
                     :headers="headers"
                     :items="dialog_data"
                     item-key="name"
-                    class="elevation-1"
+                    class="elevation-0 mx-4"
                     :single-select="singleSelect"
                     show-select
                     v-model="selected"
@@ -48,7 +49,7 @@
           </v-container>
         <v-card-actions class="mt-4">
           <v-spacer></v-spacer>
-          <v-btn color="error" dark @click="close_dialog">Close</v-btn>
+          <v-btn color="error mx-2" dark @click="close_dialog">Close</v-btn>
           <v-btn
             v-if="selected.length"
             color="primary"
@@ -103,6 +104,11 @@ export default {
   methods: {
     close_dialog() {
       this.invoicesDialog = false;
+    },
+    search_invoices_by_enter(e){
+      if (e.keyCode === 13){
+        this.search_invoices();
+      }
     },
     search_invoices() {
       const vm = this;
