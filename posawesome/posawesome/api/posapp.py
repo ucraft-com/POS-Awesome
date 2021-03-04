@@ -496,7 +496,7 @@ def search_invoices_for_return(invoice_name, company):
     invoices_list = frappe.get_list(
         "Sales Invoice",
         filters={
-            "name": invoice_name,
+            "name": ["like", f"%{invoice_name}%"],
             "company": company,
             "docstatus": 1
         },
