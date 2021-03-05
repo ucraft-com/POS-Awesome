@@ -39,6 +39,34 @@
               dense
             ></v-text-field>
           </v-col>
+
+          <v-col cols="7" v-if="diff_payment<0 && !invoice_doc.is_return">
+            <v-text-field
+              outlined
+              color="indigo"
+              label="Paid Change"
+              background-color="white"
+              v-model="paid_change"
+              @input="set_paid_change()"
+              :prefix="invoice_doc.currency"
+              :rules="paid_change_rules"
+              dense
+            ></v-text-field>
+          </v-col>
+          
+          <v-col cols="5" v-if="diff_payment<0 && !invoice_doc.is_return">
+            <v-text-field
+              outlined
+              color="indigo"
+              label="Credit Change"
+              background-color="white"
+              hide-details
+              :value="formtCurrency(credit_change)"
+              disabled
+              :prefix="invoice_doc.currency"
+              dense
+            ></v-text-field>
+          </v-col>
         </v-row>
         <v-divider></v-divider>
         <v-row
@@ -269,6 +297,9 @@ export default {
     loyalty_amount: 0,
     is_credit_sale: 0,
     date_menu: false,
+    paid_change: 0,
+    paid_change_rules: [],
+    is_return: false,
   }),
 
   methods: {
@@ -308,16 +339,42 @@ export default {
         frappe.utils.play_sound('error');
         return;
       }
+
+      if (this.paid_change > -(this.diff_payment)) {
+        evntBus.$emit('show_mesage', {
+          text: `Paid change can not be greater than total change!`,
+          color: 'error',
+        });
+        frappe.utils.play_sound('error');
+        return;
+      }
+      
+      let total_change = parseInt(this.paid_change) + parseInt(-(this.credit_change));
+
+      if (total_change != -(this.diff_payment)) {
+        evntBus.$emit('show_mesage', {
+          text: `Error in change calculations!`,
+          color: 'error',
+        });
+        frappe.utils.play_sound('error');
+        return;
+      }
+      
       this.submit_invoice();
       evntBus.$emit('new_invoice', 'false');
       this.back_to_invoice();
     },
     submit_invoice() {
+      let formData  = this.invoice_doc;
+      formData["total_change"] = -(this.diff_payment);
+      formData["paid_change"] = this.paid_change;
+      formData["credit_change"] = -(this.credit_change);
+
       const vm = this;
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.submit_invoice',
         args: {
-          data: this.invoice_doc,
+          data: formData,
         },
         async: true,
         callback: function (r) {
@@ -358,9 +415,7 @@ export default {
         '/printview?doctype=Sales%20Invoice&name=' +
         this.invoice_doc.name +
         '&trigger_print=1' +
-        '&format=' +
-        print_format +
-        '&no_letterhead=' +
+        '&format=POS%20Invoice&no_letterhead=' +
         letter_head;
 
       // TODO : need better way for printing
@@ -389,6 +444,14 @@ export default {
       value = parseFloat(value);
       return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
+    set_paid_change(){
+      this.paid_change_rules = []
+      let change = -(this.diff_payment);
+      if (this.paid_change > change){
+        this.paid_change_rules = ["Paid change can not be greater than total change!"];
+        this.credit_change = 0
+      }
+    }
   },
 
   computed: {
@@ -400,7 +463,14 @@ export default {
       return total.toFixed(2);
     },
     diff_payment() {
-      return (this.invoice_doc.grand_total - this.total_payments).toFixed(2);
+      let diff_payment = (this.invoice_doc.grand_total - this.total_payments).toFixed(2);
+      this.paid_change = -(diff_payment);
+      return diff_payment;
+    },
+    credit_change() { 
+      let change = -(this.diff_payment);
+      if(this.paid_change > change) return 0;
+      return (this.paid_change - change).toFixed(2);
     },
     diff_lable() {
       let lable = this.diff_payment < 0 ? 'Change' : 'To Be Paid';

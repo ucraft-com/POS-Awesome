@@ -219,10 +219,15 @@ def save_draft_invoice(data):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.set_missing_values()
+    
     if invoice_doc.is_return and get_version() == 12:
-        for payment in invoice_doc.payments:
-            if payment.default == 1:
-                payment.amount = data.get("total")
+        invoice_doc.is_pos = 0
+        invoice_doc.payments = []
+        
+        # for payment in invoice_doc.payments:
+        #     if payment.default == 1:
+        #         payment.amount = data.get("total")
+        
     if invoice_doc.get("taxes"):
         for tax in invoice_doc.taxes:
             tax.included_in_print_rate = 1
@@ -249,16 +254,41 @@ def update_invoice(data):
     invoice_doc.save()
     return invoice_doc
 
+@frappe.whitelist()
+def return_invoice(data):
+    
+    
+    sales_invoice.save()
 
 @frappe.whitelist()
 def submit_invoice(data):
     data = json.loads(data)
+    # creating advance payment
+    if(data.get("credit_change")):
+        advance_payment_entry = frappe.get_doc({
+            "doctype": "Payment Entry",
+            "mode_of_payment": "Cash",
+            "paid_to": "Cash - HS",
+            "payment_type": "Receive",
+            "party_type": "Customer",
+            "party": data.get("customer"),
+            "paid_amount":  data.get("credit_change"),
+            "received_amount":  data.get("credit_change"),
+        })
+        
+        advance_payment_entry.flags.ignore_permissions = True
+        frappe.flags.ignore_account_permission = True
+        advance_payment_entry.save()
+        advance_payment_entry.submit()
+    
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
+    
     if data.get("loyalty_amount") > 0:
         invoice_doc.loyalty_amount = data.get("loyalty_amount")
         invoice_doc.redeem_loyalty_points = data.get("redeem_loyalty_points")
         invoice_doc.loyalty_points = data.get("loyalty_points")
     payments = []
+    
     for payment in data.get("payments"):
         for i in invoice_doc.payments:
             if i.mode_of_payment == payment["mode_of_payment"]:
@@ -267,7 +297,8 @@ def submit_invoice(data):
                 if i.amount:
                     payments.append(i)
                 break
-    if len(payments) == 0:
+    
+    if len(payments) == 0 and not invoice_doc.is_return:
         payments = [invoice_doc.payments[0]]
     invoice_doc.payments = payments
     invoice_doc.due_date = data.get("due_date")
@@ -275,6 +306,7 @@ def submit_invoice(data):
     frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
     invoice_doc.save()
+    
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_allow_submissions_in_background_job"):
         invoices_list = frappe.get_all("Sales Invoice", filters={
             "posa_pos_opening_shift": invoice_doc.posa_pos_opening_shift,
@@ -286,6 +318,7 @@ def submit_invoice(data):
                     timeout=1000, is_async=True, kwargs=invoice.name)
     else:
         invoice_doc.submit()
+    
     return {
         "name": invoice_doc.name,
         "status": invoice_doc.docstatus
