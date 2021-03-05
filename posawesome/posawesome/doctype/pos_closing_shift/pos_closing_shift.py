@@ -136,7 +136,11 @@ def make_closing_shift_from_opening(opening_shift):
             existing_pay = [
                 pay for pay in payments if pay.mode_of_payment == p.mode_of_payment]
             if existing_pay:
-                if existing_pay[0].mode_of_payment == "Cash":
+                cash_mode_of_payment = frappe.get_value(
+                    "POS Profile", opening_shift.get("pos_profile"), "posa_cash_mode_of_payment")
+                if not cash_mode_of_payment:
+                    cash_mode_of_payment = "Cash"
+                if existing_pay[0].mode_of_payment == cash_mode_of_payment:
                     amount = p.amount - d.change_amount
                 else:
                     amount = p.amount

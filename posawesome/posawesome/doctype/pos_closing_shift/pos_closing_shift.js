@@ -93,7 +93,11 @@ function add_to_payments (d, frm) {
 		const payment = frm.doc.payment_reconciliation.find(pay => pay.mode_of_payment === p.mode_of_payment);
 		if (payment) {
 			let amount = p.amount;
-			if (payment.mode_of_payment == 'Cash') {
+			let cash_mode_of_payment = get_value("POS Profile", frm.doc.pos_profile, 'posa_cash_mode_of_payment');
+			if (!cash_mode_of_payment) {
+				cash_mode_of_payment = 'Cash';
+			}
+			if (payment.mode_of_payment == cash_mode_of_payment) {
 				amount = p.amount - d.change_amount;
 			}
 			payment.expected_amount += flt(amount);
@@ -150,3 +154,21 @@ function set_html_data (frm) {
 	});
 }
 
+const get_value = (doctype, name, field) => {
+	let value;
+	frappe.call({
+		method: 'frappe.client.get_value',
+		args: {
+			'doctype': doctype,
+			'filters': { 'name': name },
+			'fieldname': field
+		},
+		async: false,
+		callback: function (r) {
+			if (!r.exc) {
+				value = r.message[field];
+			}
+		}
+	});
+	return value;
+};
