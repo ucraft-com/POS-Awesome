@@ -135,7 +135,45 @@
             ></v-text-field>
           </v-col>
         </v-row>
+
+        <v-row
+          class="pyments px-1 py-0"
+          v-if="
+            invoice_doc &&
+            available_customer_credit > 0 &&
+            !invoice_doc.is_return && redeem_customer_credit
+          "
+        >
+          <v-col cols="7">
+            <v-text-field
+              dense
+              outlined
+              color="indigo"
+              label="Redeemed Customer Credit"
+              background-color="white"
+              hide-details
+              v-model="redeemed_customer_credit"
+              type="number"
+              :prefix="invoice_doc.currency"
+              disabled
+            ></v-text-field>
+          </v-col>
+          <v-col cols="5">
+            <v-text-field
+              dense
+              outlined
+              color="indigo"
+              label="You can redeem credit upto"
+              background-color="white"
+              hide-details
+              :value="formtCurrency(available_customer_credit)"
+              :prefix="invoice_doc.currency"
+              disabled
+            ></v-text-field>
+          </v-col>
+        </v-row>
         <v-divider></v-divider>
+      
         <v-row class="px-1 py-0">
           <v-col cols="6">
             <v-text-field
@@ -205,7 +243,7 @@
         </v-row>
         <v-divider></v-divider>
         <v-row class="px-1 py-0">
-          <v-col cols="6">
+          <v-col cols="6 my-0 py-0">
             <v-switch
               v-if="
                 pos_profile.posa_allow_credit_sale && !invoice_doc.is_return
@@ -213,6 +251,7 @@
               v-model="is_credit_sale"
               flat
               label="Is Credit Sale"
+              class="my-0 py-0"
             ></v-switch>
           </v-col>
           <v-col cols="6">
@@ -258,6 +297,17 @@
             </v-menu>
           </v-col>
         </v-row>
+
+        <v-row class="px-1 py-0 my-0">
+          <v-col cols="6 my-0 py-0">
+            <v-switch
+              v-model="redeem_customer_credit"
+              flat
+              label="Use Customer Credit"
+              class="my-0 py-0"
+            ></v-switch>
+          </v-col>
+        </v-row>
       </div>
     </v-card>
     <v-card
@@ -300,6 +350,8 @@ export default {
     paid_change: 0,
     paid_change_rules: [],
     is_return: false,
+    redeem_customer_credit: false,
+    redeemed_customer_credit: 0,
   }),
 
   methods: {
@@ -485,6 +537,10 @@ export default {
       }
       return amount;
     },
+    available_customer_credit() {
+      let amount = 10;
+      return amount;
+    },
   },
 
   created: function () {
@@ -532,6 +588,15 @@ export default {
         });
       }
     },
+    redeemed_customer_credit(value){
+      if (value > this.available_customer_credit) {
+        evntBus.$emit('show_mesage', {
+          text: `Customer credit amount can not be more then ${this.available_customer_credit}`,
+          color: 'error',
+        });
+      } else {
+      }
+     }
   },
 };
 </script>

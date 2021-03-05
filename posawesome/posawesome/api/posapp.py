@@ -255,11 +255,11 @@ def update_invoice(data):
     return invoice_doc
 
 @frappe.whitelist()
-def return_invoice(data):
+def return_total_credit(customer):
+    sales_invoices_total = frappe.get_all("Sales Invoice", filters = {
+        ""
+    })
     
-    
-    sales_invoice.save()
-
 @frappe.whitelist()
 def submit_invoice(data):
     data = json.loads(data)
