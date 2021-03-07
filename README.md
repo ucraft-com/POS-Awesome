@@ -13,10 +13,11 @@
 5. Supports batch & serial numbering
 6. Supports batch based pricing
 7. Supports UOM specific barcode and pricing
-8. Supports sales of scale (weighted) products
+8. Supports sales of [scale (weighted) products](https://github.com/yrestom/POS-Awesome/discussions/30#discussioncomment-381369)
 9. Ability to make returns from POS
 10. Allow user to choose a due date for credit sales
 11. Supports customer loyalty points
+12. Shortcuts keys
 
 ---
 
@@ -28,6 +29,16 @@
 4. `bench restart`
 5. `bench --site [your.site.name] install-app posawesome`
 6. `bench --site [your.site.name] migrate`
+
+---
+
+### Shortcuts:
+
+- `CTRL or CMD + S` open payments
+- `CTRL or CMD + X` submit payments
+- `CTRL or CMD + D` remove first item from the top
+- `CTRL or CMD + A` expand first item from the top
+- `CTRL or CMD + E` focus on discount field
 
 ---
 
@@ -51,4 +62,5 @@ Will using for this the same guidelines from Erpnext
 
 ### License
 
-GPLv3
+GNU/General Public License (see [license.txt](https://github.com/yrestom/POS-Awesome/blob/master/license.txt))
+The POS Awesome code is licensed as GNU General Public License (v3)
