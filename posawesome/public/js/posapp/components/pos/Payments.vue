@@ -362,8 +362,6 @@ export default {
         print_format +
         '&no_letterhead=' +
         letter_head;
-
-      // TODO : need better way for printing
       const printWindow = window.open(url, 'Print');
       printWindow.addEventListener(
         'load',
@@ -388,6 +386,12 @@ export default {
     formtCurrency(value) {
       value = parseFloat(value);
       return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    },
+    shortPay(e) {
+      if (e.key === 'x' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        this.submit();
+      }
     },
   },
 
@@ -434,6 +438,11 @@ export default {
         this.pos_profile = data.pos_profile;
       });
     });
+    document.addEventListener('keydown', this.shortPay.bind(this));
+  },
+
+  destroyed() {
+    document.removeEventListener('keydown', this.shortPay);
   },
 
   watch: {
