@@ -51,7 +51,6 @@ class POSClosingShift(Document):
             for invoice in data:
                 frappe.delete_doc("Sales Invoice", invoice.name, force=1)
 
-
     def get_payment_reconciliation_details(self):
         currency = frappe.get_cached_value(
             'Company', self.company,  "default_currency")
@@ -107,7 +106,7 @@ def make_closing_shift_from_opening(opening_shift):
         payments.append(frappe._dict({
             'mode_of_payment': detail.get("mode_of_payment"),
             'opening_amount': detail.get("amount") or 0,
-            'expected_amount': detail.get("amount")or 0
+            'expected_amount': detail.get("amount") or 0
         }))
 
     for d in invoices:
@@ -137,7 +136,15 @@ def make_closing_shift_from_opening(opening_shift):
             existing_pay = [
                 pay for pay in payments if pay.mode_of_payment == p.mode_of_payment]
             if existing_pay:
-                existing_pay[0].expected_amount += flt(p.amount)
+                cash_mode_of_payment = frappe.get_value(
+                    "POS Profile", opening_shift.get("pos_profile"), "posa_cash_mode_of_payment")
+                if not cash_mode_of_payment:
+                    cash_mode_of_payment = "Cash"
+                if existing_pay[0].mode_of_payment == cash_mode_of_payment:
+                    amount = p.amount - d.change_amount
+                else:
+                    amount = p.amount
+                existing_pay[0].expected_amount += flt(amount)
             else:
                 payments.append(frappe._dict({
                     'mode_of_payment': p.mode_of_payment,
@@ -162,13 +169,12 @@ def submit_closing_shift(closing_shift):
     return closing_shift_doc.name
 
 
-
 def submit_printed_invoices(pos_opening_shift):
-    invoices_list = frappe.get_all("Sales Invoice", filters = {
-            "posa_pos_opening_shift": pos_opening_shift,
-            "docstatus": 0,
-            "posa_is_printed": 1
-        })
+    invoices_list = frappe.get_all("Sales Invoice", filters={
+        "posa_pos_opening_shift": pos_opening_shift,
+        "docstatus": 0,
+        "posa_is_printed": 1
+    })
     for invoice in invoices_list:
         invoice_doc = frappe.get_doc("Sales Invoice", invoice.name)
         invoice_doc.submit()

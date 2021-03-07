@@ -13,6 +13,7 @@
   "parenttype": null,
   "property": "no_copy",
   "property_type": "Check",
+  "row_name": null,
   "value": "1"
  }
 ]
