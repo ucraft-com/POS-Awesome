@@ -259,9 +259,28 @@ def submit_invoice(data):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
 
+    # creating advance payment
+    if(data.get("credit_change")):
+        advance_payment_entry = frappe.get_doc({
+            "doctype": "Payment Entry",
+            "mode_of_payment": "Cash",
+            "paid_to": "Cash - N",
+            "payment_type": "Receive",
+            "party_type": "Customer",
+            "party": data.get("customer"),
+            "paid_amount":  data.get("credit_change"),
+            "received_amount":  data.get("credit_change"),
+        })
+
+        advance_payment_entry.flags.ignore_permissions = True
+        frappe.flags.ignore_account_permission = True
+        advance_payment_entry.save()
+        advance_payment_entry.submit()
+
+
     # calculating cash
     if(data.get("redeemed_customer_credit")):
-        total_cash = total - float(data.get("redeemed_customer_credit"))
+        total_cash = invoice_doc.total - float(data.get("redeemed_customer_credit"))
         
     is_payment_entry = 0
     if(data.get("redeemed_customer_credit")):
@@ -281,7 +300,7 @@ def submit_invoice(data):
                 invoice_doc.is_pos = 0
                 is_payment_entry = 1
                 
-    
+    payments = []
     # redeeming customer loyalty
     if data.get("loyalty_amount") > 0:
         invoice_doc.loyalty_amount = data.get("loyalty_amount")
@@ -305,16 +324,6 @@ def submit_invoice(data):
     
     invoice_doc.payments = payments
     
-    if is_payment_entry:
-        payment_entry_doc = frappe.get_doc({
-            "doctype": "Payment Entry",
-            "posting_date": nowdate(),
-            "payment_type": receive,
-            "party_type": "Customer",
-            "party": invoice_doc.customer,
-            "paid_amount": total_cash
-        })
-     
     invoice_doc.due_date = data.get("due_date")
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
@@ -333,61 +342,7 @@ def submit_invoice(data):
     else:
         invoice_doc.submit()
     
-    
     # redeeming customer credit with journal voucher
-    # this section will used for manual adjustments
-    # if(data.get("redeemed_customer_credit")):
-    #     outstanding_invoices = frappe.get_all("Sales Invoice", {
-    #         "outstanding_amount": ["<", 0],
-    #         "docstatus": 1,
-    #         "customer": invoice_doc.customer
-    #     }, ["name", "outstanding_amount", "debit_to"])
-        
-    #     for row in outstanding_invoices:
-    #         if amount_to_redeem > 0:
-    #             jv_doc = frappe.get_doc({
-    #                 "doctype": "Journal Entry",
-    #                 "voucher_type": "Journal Entry",
-    #                 "posting_date": nowdate()                    
-    #             })
-                
-    #             jv_debit_entry = {
-    #                 "account": row.debit_to,
-    #                 "party_type": "Customer",
-    #                 "party": invoice_doc.customer,
-    #                 "reference_type": "Sales Invoice",
-    #                 "reference_name": row.name
-    #             }
-                
-    #             jv_credit_entry = {
-    #                 "account": invoice_doc.debit_to,
-    #                 "party_type": "Customer",
-    #                 "party": invoice_doc.customer,
-    #                 "reference_type": "Sales Invoice",
-    #                 "reference_name": invoice_doc.name
-    #             }
-                
-    #             if amount_to_redeem < float(row.outstanding_amount):
-    #                 jv_debit_entry["debit_in_account_currency"] = amount_to_redeem
-    #                 jv_credit_entry["credit_in_account_currency"] = amount_to_redeem
-    #             else:
-    #                 jv_debit_entry["debit_in_account_currency"] = -(row.outstanding_amount)
-    #                 jv_credit_entry["credit_in_account_currency"] = -(row.outstanding_amount)
-                
-    #             jv_doc.append("accounts", jv_debit_entry)
-    #             jv_doc.append("accounts", jv_credit_entry)
-                
-    #             jv_doc.flags.ignore_permissions = True
-    #             frappe.flags.ignore_account_permission = True
-    #             jv_doc.set_missing_values()
-    #             jv_doc.save()
-    #             jv_doc.submit()
-                
-    #             amount_to_redeem -= row.outstanding_amount
-                
-    
-    # redeeming customer credit with journal voucher
-    # this section will used for manual adjustments
     if(data.get("redeemed_customer_credit")):
         for row in data.get("customer_credit_dict"):
             if row["type"] == "Invoice":
@@ -425,7 +380,36 @@ def submit_invoice(data):
                 jv_doc.set_missing_values()
                 jv_doc.save()
                 jv_doc.submit()
-                
+
+
+    if is_payment_entry:
+        payment_entry_doc = frappe.get_doc({
+            "doctype": "Payment Entry",
+            "posting_date": nowdate(),
+            "payment_type": "Receive",
+            "party_type": "Customer",
+            "party": invoice_doc.customer,
+            "paid_amount": total_cash,
+            "received_amount": total_cash,
+            "paid_from": invoice_doc.debit_to,
+            "paid_to": "Cash - N"
+        })
+    
+        payment_reference = {
+            "allocated_amount": total_cash,
+            "due_date": data.get("due_date"),
+            "outstanding_amount": total_cash,
+            "reference_doctype": "Sales Invoice",
+            "reference_name": invoice_doc.name,
+            "total_amount": total_cash,
+        }
+
+        payment_entry_doc.append("references", payment_reference)
+        payment_entry_doc.flags.ignore_permissions = True
+        frappe.flags.ignore_account_permission = True
+        payment_entry_doc.save()
+        payment_entry_doc.submit()
+
     return {
         "name": invoice_doc.name,
         "status": invoice_doc.docstatus

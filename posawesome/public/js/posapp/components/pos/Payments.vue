@@ -457,7 +457,7 @@ export default {
         return;
       }
       
-      if (this.redeemed_customer_credit > this.invoice_doc.grand_total) {
+      if (!this.invoice_doc.is_return && this.redeemed_customer_credit > this.invoice_doc.grand_total) {
         evntBus.$emit('show_mesage', {
           text: `can not redeam customer credit more than invoice total`,
           color: 'error',
