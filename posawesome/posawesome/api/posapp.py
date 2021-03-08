@@ -13,7 +13,7 @@ import json
 from frappe.utils.background_jobs import enqueue
 from posawesome import console
 from posawesome.posawesome.api.posapp_customization import get_available_credit
-
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 
 @frappe.whitelist()
 def get_opening_dialog_data():
@@ -259,12 +259,14 @@ def submit_invoice(data):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
 
+    cash_account = get_bank_cash_account("Cash", invoice_doc.company)
+
     # creating advance payment
     if(data.get("credit_change")):
         advance_payment_entry = frappe.get_doc({
             "doctype": "Payment Entry",
             "mode_of_payment": "Cash",
-            "paid_to": "Cash - N",
+            "paid_to": cash_account["account"],
             "payment_type": "Receive",
             "party_type": "Customer",
             "party": data.get("customer"),
@@ -392,7 +394,7 @@ def submit_invoice(data):
             "paid_amount": total_cash,
             "received_amount": total_cash,
             "paid_from": invoice_doc.debit_to,
-            "paid_to": "Cash - N"
+            "paid_to": cash_account["account"]
         })
     
         payment_reference = {
