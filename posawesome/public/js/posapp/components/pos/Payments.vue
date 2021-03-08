@@ -100,6 +100,7 @@
             >
           </v-col>
         </v-row>
+
         <v-row
           class="pyments px-1 py-0"
           v-if="
@@ -148,6 +149,7 @@
             <v-text-field
               dense
               outlined
+              disabled
               color="indigo"
               label="Redeemed Customer Credit"
               background-color="white"
@@ -155,7 +157,6 @@
               v-model="redeemed_customer_credit"
               type="number"
               :prefix="invoice_doc.currency"
-              disabled
             ></v-text-field>
           </v-col>
           <v-col cols="5">
@@ -253,6 +254,14 @@
               label="Is Credit Sale"
               class="my-0 py-0"
             ></v-switch>
+            
+            <v-switch
+              v-if="invoice_doc.is_return"
+              v-model="is_cashback"
+              flat
+              label="Is Cashback"
+              class="my-0 py-0"
+            ></v-switch>
           </v-col>
           <v-col cols="6">
             <v-menu
@@ -298,18 +307,51 @@
           </v-col>
         </v-row>
 
-        <v-row class="px-1 py-0 my-0">
-          <v-col cols="6 my-0 py-0">
-            <v-switch
-              v-model="redeem_customer_credit"
-              flat
-              label="Use Customer Credit"
-              class="my-0 py-0"
-            ></v-switch>
-          </v-col>
-        </v-row>
+          <v-switch
+            v-if="!invoice_doc.is_return"
+            v-model="redeem_customer_credit"
+            flat
+            label="Use Customer Credit"
+            class="my-0 py-0"
+            @change="get_available_credit($event)"
+          ></v-switch>
+
+          <div v-if="invoice_doc && available_customer_credit > 0 
+            && !invoice_doc.is_return && redeem_customer_credit">
+            <v-row v-for="(row, idx) in customer_credit_dict" :key="idx">
+              <v-col cols="4">
+                <div class="pa-2 py-3">{{ row.credit_origin }}</div>
+              </v-col>
+              <v-col cols="4">
+                <v-text-field
+                dense
+                outlined
+                color="indigo"
+                label="Available Credit"
+                background-color="white"
+                hide-details
+                :value="formtCurrency(row.total_credit)"
+                disabled
+                :prefix="invoice_doc.currency"
+              ></v-text-field>
+              </v-col>
+              <v-col cols="4">
+                  <v-text-field
+                    dense
+                    outlined
+                    color="indigo"
+                    label="Redeem Credit"
+                    background-color="white"
+                    hide-details
+                    v-model="row.credit_to_redeem"
+                    :prefix="invoice_doc.currency"
+                  ></v-text-field>  
+              </v-col>
+            </v-row>
+          </div>
       </div>
     </v-card>
+
     <v-card
       flat
       style="max-height: 11vh; height: 11vh"
@@ -350,8 +392,9 @@ export default {
     paid_change: 0,
     paid_change_rules: [],
     is_return: false,
+    is_cashback: true,
     redeem_customer_credit: false,
-    redeemed_customer_credit: 0,
+    customer_credit_dict: [],
   }),
 
   methods: {
@@ -368,6 +411,7 @@ export default {
         frappe.utils.play_sound('error');
         return;
       }
+
       if (
         !this.pos_profile.posa_allow_partial_payment &&
         this.total_payments < this.invoice_doc.grand_total
@@ -379,6 +423,7 @@ export default {
         frappe.utils.play_sound('error');
         return;
       }
+
       if (
         this.pos_profile.posa_allow_partial_payment &&
         !this.pos_profile.posa_allow_credit_sale &&
@@ -412,7 +457,19 @@ export default {
         return;
       }
       
+      if (this.redeemed_customer_credit > this.invoice_doc.grand_total) {
+        evntBus.$emit('show_mesage', {
+          text: `can not redeam customer credit more than invoice total`,
+          color: 'error',
+        });
+        frappe.utils.play_sound('error');
+        return;
+      }
+      
       this.submit_invoice();
+      this.customer_credit_dict = [];
+      this.redeem_customer_credit = false;
+
       evntBus.$emit('new_invoice', 'false');
       this.back_to_invoice();
     },
@@ -421,6 +478,9 @@ export default {
       formData["total_change"] = -(this.diff_payment);
       formData["paid_change"] = this.paid_change;
       formData["credit_change"] = -(this.credit_change);
+      formData["redeemed_customer_credit"] = this.redeemed_customer_credit;
+      formData["customer_credit_dict"] = this.customer_credit_dict;
+      formData["is_cashback"] = this.is_cashback;
 
       const vm = this;
       frappe.call({
@@ -503,6 +563,22 @@ export default {
         this.paid_change_rules = ["Paid change can not be greater than total change!"];
         this.credit_change = 0
       }
+    },
+    get_available_credit(e){
+      if(e){
+        frappe.call("posawesome.posawesome.api.posapp_customization.get_available_credit", {
+          customer: this.invoice_doc.customer
+        }).then((r) => {
+          const data = r.message;
+          if(data.length){
+            this.customer_credit_dict = data;
+          }else{
+            this.customer_credit_dict = [];
+          }
+        })
+      }else{
+        this.customer_credit_dict = [];
+      }
     }
   },
 
@@ -512,6 +588,9 @@ export default {
       this.invoice_doc.payments.forEach((payment) => {
         total += flt(payment.amount);
       });
+
+      total += flt(this.redeemed_customer_credit);
+      
       return total.toFixed(2);
     },
     diff_payment() {
@@ -537,10 +616,22 @@ export default {
       }
       return amount;
     },
-    available_customer_credit() {
-      let amount = 10;
-      return amount;
+    available_customer_credit(){
+        let total = 0;
+        this.customer_credit_dict.map((row) => {
+          total += row.total_credit;
+        });
+
+        return total;
     },
+    redeemed_customer_credit(){
+        let total = 0;
+        this.customer_credit_dict.map((row) => {
+          total += parseFloat(row.credit_to_redeem);
+        });
+
+        return total;
+    }
   },
 
   created: function () {
@@ -591,13 +682,12 @@ export default {
     redeemed_customer_credit(value){
       if (value > this.available_customer_credit) {
         evntBus.$emit('show_mesage', {
-          text: `Customer credit amount can not be more then ${this.available_customer_credit}`,
+          text: `You can redeem customer credit upto ${this.available_customer_credit}`,
           color: 'error',
         });
-      } else {
       }
      }
-  },
+    },
 };
 </script>
 
