@@ -307,14 +307,18 @@
           </v-col>
         </v-row>
 
-          <v-switch
-            v-if="!invoice_doc.is_return"
-            v-model="redeem_customer_credit"
-            flat
-            label="Use Customer Credit"
-            class="my-0 py-0"
-            @change="get_available_credit($event)"
-          ></v-switch>
+        <v-row>
+          <v-col cols="4">
+            <v-switch
+              v-if="!invoice_doc.is_return"
+              v-model="redeem_customer_credit"
+              flat
+              label="Use Customer Credit"
+              class="my-0 py-0"
+              @change="get_available_credit($event)"
+            ></v-switch>
+          </v-col>
+        </v-row>
 
           <div v-if="invoice_doc && available_customer_credit > 0 
             && !invoice_doc.is_return && redeem_customer_credit">
@@ -457,6 +461,17 @@ export default {
         return;
       }
       
+      let credit_calc_check = this.customer_credit_dict.filter(row => row.credit_to_redeem > row.total_credit);
+
+      if(credit_calc_check.length > 0){
+        evntBus.$emit('show_mesage', {
+          text: `redeamed credit can not greater than its total.`,
+          color: 'error',
+        });
+        frappe.utils.play_sound('error');
+        return;
+      }
+
       if (!this.invoice_doc.is_return && this.redeemed_customer_credit > this.invoice_doc.grand_total) {
         evntBus.$emit('show_mesage', {
           text: `can not redeam customer credit more than invoice total`,
