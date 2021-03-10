@@ -7,6 +7,7 @@ def get_available_credit(customer = None):
     outstanding_invoices = frappe.get_all("Sales Invoice", {
         "outstanding_amount": ["<", 0],
         "docstatus": 1,
+        "is_return": 0,
         "customer": customer
     }, ["name", "outstanding_amount"])
     
