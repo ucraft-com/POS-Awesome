@@ -51,6 +51,7 @@
               :prefix="invoice_doc.currency"
               :rules="paid_change_rules"
               dense
+              type="number"
             ></v-text-field>
           </v-col>
           
@@ -308,7 +309,7 @@
         </v-row>
 
         <v-row>
-          <v-col cols="4">
+          <v-col cols="12" md="6">
             <v-switch
               v-if="!invoice_doc.is_return"
               v-model="redeem_customer_credit"
@@ -347,6 +348,7 @@
                     label="Redeem Credit"
                     background-color="white"
                     hide-details
+                    type="number"
                     v-model="row.credit_to_redeem"
                     :prefix="invoice_doc.currency"
                   ></v-text-field>  
@@ -441,6 +443,8 @@ export default {
         return;
       }
 
+      if (!this.paid_change) this.paid_change = 0;
+      
       if (this.paid_change > -(this.diff_payment)) {
         evntBus.$emit('show_mesage', {
           text: `Paid change can not be greater than total change!`,
@@ -461,7 +465,12 @@ export default {
         return;
       }
       
-      let credit_calc_check = this.customer_credit_dict.filter(row => row.credit_to_redeem > row.total_credit);
+      let credit_calc_check = this.customer_credit_dict.filter(row =>{ 
+        if(row.credit_to_redeem)
+          return row.credit_to_redeem > row.total_credit
+        else
+          return false
+      });
 
       if(credit_calc_check.length > 0){
         evntBus.$emit('show_mesage', {
@@ -480,7 +489,7 @@ export default {
         frappe.utils.play_sound('error');
         return;
       }
-      
+
       this.submit_invoice();
       this.customer_credit_dict = [];
       this.redeem_customer_credit = false;
@@ -572,6 +581,8 @@ export default {
       return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
     set_paid_change(){
+      if (!this.paid_change) this.paid_change = 0;
+
       this.paid_change_rules = []
       let change = -(this.diff_payment);
       if (this.paid_change > change){
@@ -642,7 +653,10 @@ export default {
     redeemed_customer_credit(){
         let total = 0;
         this.customer_credit_dict.map((row) => {
-          total += parseFloat(row.credit_to_redeem);
+          if (row.credit_to_redeem)
+            total += parseFloat(row.credit_to_redeem);
+          else
+            row.credit_to_redeem = 0
         });
 
         return total;
