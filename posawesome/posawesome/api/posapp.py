@@ -384,7 +384,7 @@ def submit_invoice(data):
                 jv_doc.submit()
 
 
-    if is_payment_entry:
+    if is_payment_entry and total_cash > 0:
         payment_entry_doc = frappe.get_doc({
             "doctype": "Payment Entry",
             "posting_date": nowdate(),
