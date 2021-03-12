@@ -493,6 +493,7 @@ export default {
       this.submit_invoice();
       this.customer_credit_dict = [];
       this.redeem_customer_credit = false;
+      this.is_cashback = true;
 
       evntBus.$emit('new_invoice', 'false');
       this.back_to_invoice();
@@ -679,6 +680,14 @@ export default {
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
       });
+    });
+
+    evntBus.$on('update_customer', (customer) => {
+      if(this.customer != customer){
+        this.customer_credit_dict = [];
+        this.redeem_customer_credit = false;
+        this.is_cashback = true;
+      }
     });
   },
 

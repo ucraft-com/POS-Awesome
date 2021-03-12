@@ -287,7 +287,7 @@ def submit_invoice(data):
     is_payment_entry = 0
     if(data.get("redeemed_customer_credit")):
         for row in data.get("customer_credit_dict"):
-            if row["type"] == "Advance": 
+            if row["type"] == "Advance" and row["credit_to_redeem"]: 
                 advance = frappe.get_doc("Payment Entry", row["credit_origin"])
                 
                 advance_payment = {
@@ -347,7 +347,7 @@ def submit_invoice(data):
     # redeeming customer credit with journal voucher
     if(data.get("redeemed_customer_credit")):
         for row in data.get("customer_credit_dict"):
-            if row["type"] == "Invoice":
+            if row["type"] == "Invoice" and row["credit_to_redeem"]:
                 outstanding_invoice = frappe.get_doc("Sales Invoice", row["credit_origin"])
 
                 jv_doc = frappe.get_doc({
