@@ -18,10 +18,10 @@ app_license = "GPLv3"
 # app_include_css = "/assets/posawesome/css/posawesome.css"
 # app_include_js = "/assets/posawesome/js/posawesome.js"
 app_include_js = [
-	"/assets/posawesome/node_modules/vuetify/dist/vuetify.js",
-	"/assets/js/toConsole.min.js",
-	"/assets/js/posapp.min.js",
-	]
+    "/assets/posawesome/node_modules/vuetify/dist/vuetify.js",
+    "/assets/js/toConsole.min.js",
+    "/assets/js/posapp.min.js",
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/posawesome/css/posawesome.css"
@@ -141,28 +141,30 @@ app_include_js = [
 # auto_cancel_exempted_doctypes = ["Auto Repeat"]
 
 fixtures = [
-	{"doctype":"Custom Field", "filters": [["name", "in", (
-		"Sales Invoice-posa_pos_opening_shift",
-		"Item Barcode-posa_uom",
-		"POS Profile-posa_pos_awesome_settings",
-		"POS Profile-posa_allow_delete",
-		"POS Profile-posa_allow_user_to_edit_rate",
-		"POS Profile-posa_allow_user_to_edit_additional_discount",
-		"POS Profile-posa_allow_user_to_edit_item_discount",
-		"POS Profile-posa_display_items_in_stock",
-		"POS Profile-posa_allow_submissions_in_background_job",
-		"POS Profile-posa_allow_partial_payment",
-		"POS Profile-posa_allow_credit_sale",
-		"POS Profile-posa_pos_awesome_advance_settings",
-		"Batch-posa_btach_price",
-		"POS Profile-posa_max_discount_allowed",
-		"POS Profile-posa_allow_return",
-		"POS Profile-posa_col_1",
-		"POS Profile-posa_scale_barcode_start",
-		"Sales Invoice-posa_is_printed",
-		"POS Profile-posa_local_storage",
-	)]]},
-	{"doctype":"Property Setter", "filters": [["name", "in", (
-		"Sales Invoice-posa_pos_opening_shift-no_copy"
-	)]]},
+    {"doctype": "Custom Field", "filters": [["name", "in", (
+        "Sales Invoice-posa_pos_opening_shift",
+        "Item Barcode-posa_uom",
+                "POS Profile-posa_pos_awesome_settings",
+                "POS Profile-posa_allow_delete",
+                "POS Profile-posa_allow_user_to_edit_rate",
+                "POS Profile-posa_allow_user_to_edit_additional_discount",
+                "POS Profile-posa_allow_user_to_edit_item_discount",
+                "POS Profile-posa_display_items_in_stock",
+                "POS Profile-posa_allow_submissions_in_background_job",
+                "POS Profile-posa_allow_partial_payment",
+                "POS Profile-posa_allow_credit_sale",
+                "POS Profile-posa_pos_awesome_advance_settings",
+                "Batch-posa_btach_price",
+                "POS Profile-posa_max_discount_allowed",
+                "POS Profile-posa_allow_return",
+                "POS Profile-posa_col_1",
+                "POS Profile-posa_scale_barcode_start",
+                "Sales Invoice-posa_is_printed",
+                "POS Profile-posa_local_storage",
+                "POS Profile-use_customer_credit",
+                "POS Profile-use_cashback",
+    )]]},
+    {"doctype": "Property Setter", "filters": [["name", "in", (
+        "Sales Invoice-posa_pos_opening_shift-no_copy"
+    )]]},
 ]

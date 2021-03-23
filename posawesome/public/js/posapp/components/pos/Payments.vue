@@ -257,7 +257,7 @@
             ></v-switch>
             
             <v-switch
-              v-if="invoice_doc.is_return"
+              v-if="invoice_doc.is_return && pos_profile.use_cashback"
               v-model="is_cashback"
               flat
               label="Is Cashback"
@@ -311,7 +311,7 @@
         <v-row>
           <v-col cols="12" md="6">
             <v-switch
-              v-if="!invoice_doc.is_return"
+              v-if="!invoice_doc.is_return && pos_profile.use_customer_credit"
               v-model="redeem_customer_credit"
               flat
               label="Use Customer Credit"
