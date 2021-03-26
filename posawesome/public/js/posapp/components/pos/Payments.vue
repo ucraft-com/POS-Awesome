@@ -71,6 +71,7 @@
         </v-row>
         <v-divider></v-divider>
         <v-row
+          :v-if="this.is_cashback"
           class="pyments px-1 py-0"
           v-for="payment in invoice_doc.payments"
           :key="payment.name"
