@@ -1249,6 +1249,8 @@ export default {
     });
     evntBus.$on('load_return_invoice', (data) => {
       this.new_invoice(data.invoice_doc);
+      this.discount_amount = -data.return_doc.discount_amount;
+      console.log(data);
       this.return_doc = data.return_doc;
     });
     document.addEventListener('keydown', this.shortOpenPayment.bind(this));
