@@ -12,6 +12,8 @@ from erpnext.stock.get_item_details import get_item_details
 import json
 from frappe.utils.background_jobs import enqueue
 from posawesome import console
+from posawesome.posawesome.api.posapp_customization import get_available_credit
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 
 
 @frappe.whitelist()
@@ -219,10 +221,12 @@ def save_draft_invoice(data):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.set_missing_values()
+
     if invoice_doc.is_return and get_version() == 12:
         for payment in invoice_doc.payments:
             if payment.default == 1:
                 payment.amount = data.get("total")
+
     if invoice_doc.get("taxes"):
         for tax in invoice_doc.taxes:
             tax.included_in_print_rate = 1
@@ -243,9 +247,11 @@ def update_invoice(data):
         "items": data.get("items")
     })
     invoice_doc.set_missing_values()
+
     if invoice_doc.get("taxes"):
         for tax in invoice_doc.taxes:
             tax.included_in_print_rate = 1
+
     invoice_doc.save()
     return invoice_doc
 
@@ -254,27 +260,80 @@ def update_invoice(data):
 def submit_invoice(data):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
+
+    cash_account = get_bank_cash_account("Cash", invoice_doc.company)
+
+    # creating advance payment
+    if(data.get("credit_change")):
+        advance_payment_entry = frappe.get_doc({
+            "doctype": "Payment Entry",
+            "mode_of_payment": "Cash",
+            "paid_to": cash_account["account"],
+            "payment_type": "Receive",
+            "party_type": "Customer",
+            "party": data.get("customer"),
+            "paid_amount":  data.get("credit_change"),
+            "received_amount":  data.get("credit_change"),
+        })
+
+        advance_payment_entry.flags.ignore_permissions = True
+        frappe.flags.ignore_account_permission = True
+        advance_payment_entry.save()
+        advance_payment_entry.submit()
+
+    # calculating cash
+    if(data.get("redeemed_customer_credit")):
+        total_cash = invoice_doc.total - \
+            float(data.get("redeemed_customer_credit"))
+
+    is_payment_entry = 0
+    if(data.get("redeemed_customer_credit")):
+        for row in data.get("customer_credit_dict"):
+            if row["type"] == "Advance" and row["credit_to_redeem"]:
+                advance = frappe.get_doc("Payment Entry", row["credit_origin"])
+
+                advance_payment = {
+                    "reference_type": "Payment Entry",
+                    "reference_name": advance.name,
+                    "remarks": advance.remarks,
+                    "advance_amount": advance.unallocated_amount,
+                    "allocated_amount": row["credit_to_redeem"]
+                }
+
+                invoice_doc.append("advances", advance_payment)
+                invoice_doc.is_pos = 0
+                is_payment_entry = 1
+
+    payments = []
+    # redeeming customer loyalty
     if data.get("loyalty_amount") > 0:
         invoice_doc.loyalty_amount = data.get("loyalty_amount")
         invoice_doc.redeem_loyalty_points = data.get("redeem_loyalty_points")
         invoice_doc.loyalty_points = data.get("loyalty_points")
-    payments = []
-    for payment in data.get("payments"):
-        for i in invoice_doc.payments:
-            if i.mode_of_payment == payment["mode_of_payment"]:
-                i.amount = payment["amount"]
-                i.base_amount = 0
-                if i.amount:
-                    payments.append(i)
-                break
-    if len(payments) == 0:
-        payments = [invoice_doc.payments[0]]
+
+    if data.get("is_cashback") and not is_payment_entry:
+        for payment in data.get("payments"):
+            for i in invoice_doc.payments:
+                if i.mode_of_payment == payment["mode_of_payment"]:
+                    i.amount = payment["amount"]
+                    i.base_amount = 0
+                    if i.amount:
+                        payments.append(i)
+                    break
+
+        if len(payments) == 0 and not invoice_doc.is_return and invoice_doc.is_pos:
+            payments = [invoice_doc.payments[0]]
+    else:
+        invoice_doc.is_pos = 0
+
     invoice_doc.payments = payments
+
     invoice_doc.due_date = data.get("due_date")
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
     invoice_doc.save()
+
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_allow_submissions_in_background_job"):
         invoices_list = frappe.get_all("Sales Invoice", filters={
             "posa_pos_opening_shift": invoice_doc.posa_pos_opening_shift,
@@ -286,6 +345,75 @@ def submit_invoice(data):
                     timeout=1000, is_async=True, kwargs=invoice.name)
     else:
         invoice_doc.submit()
+
+    # redeeming customer credit with journal voucher
+    if(data.get("redeemed_customer_credit")):
+        for row in data.get("customer_credit_dict"):
+            if row["type"] == "Invoice" and row["credit_to_redeem"]:
+                outstanding_invoice = frappe.get_doc(
+                    "Sales Invoice", row["credit_origin"])
+
+                jv_doc = frappe.get_doc({
+                    "doctype": "Journal Entry",
+                    "voucher_type": "Journal Entry",
+                    "posting_date": nowdate()
+                })
+
+                jv_debit_entry = {
+                    "account": outstanding_invoice.debit_to,
+                    "party_type": "Customer",
+                    "party": invoice_doc.customer,
+                    "reference_type": "Sales Invoice",
+                    "reference_name": outstanding_invoice.name,
+                    "debit_in_account_currency": row["credit_to_redeem"]
+                }
+
+                jv_credit_entry = {
+                    "account": invoice_doc.debit_to,
+                    "party_type": "Customer",
+                    "party": invoice_doc.customer,
+                    "reference_type": "Sales Invoice",
+                    "reference_name": invoice_doc.name,
+                    "credit_in_account_currency": row["credit_to_redeem"]
+                }
+
+                jv_doc.append("accounts", jv_debit_entry)
+                jv_doc.append("accounts", jv_credit_entry)
+
+                jv_doc.flags.ignore_permissions = True
+                frappe.flags.ignore_account_permission = True
+                jv_doc.set_missing_values()
+                jv_doc.save()
+                jv_doc.submit()
+
+    if is_payment_entry and total_cash > 0:
+        payment_entry_doc = frappe.get_doc({
+            "doctype": "Payment Entry",
+            "posting_date": nowdate(),
+            "payment_type": "Receive",
+            "party_type": "Customer",
+            "party": invoice_doc.customer,
+            "paid_amount": total_cash,
+            "received_amount": total_cash,
+            "paid_from": invoice_doc.debit_to,
+            "paid_to": cash_account["account"]
+        })
+
+        payment_reference = {
+            "allocated_amount": total_cash,
+            "due_date": data.get("due_date"),
+            "outstanding_amount": total_cash,
+            "reference_doctype": "Sales Invoice",
+            "reference_name": invoice_doc.name,
+            "total_amount": total_cash,
+        }
+
+        payment_entry_doc.append("references", payment_reference)
+        payment_entry_doc.flags.ignore_permissions = True
+        frappe.flags.ignore_account_permission = True
+        payment_entry_doc.save()
+        payment_entry_doc.submit()
+
     return {
         "name": invoice_doc.name,
         "status": invoice_doc.docstatus
@@ -350,16 +478,18 @@ def get_items_details(pos_profile, items_data):
             from erpnext.stock.doctype.batch.batch import get_batch_qty
             batch_list = get_batch_qty(
                 warehouse=warehouse, item_code=item_code)
-            for batch in batch_list:
-                if batch.qty > 0 and batch.batch_no:
-                    batch_doc = frappe.get_doc("Batch", batch.batch_no)
-                    if (str(batch_doc.expiry_date) > str(nowdate()) or batch_doc.expiry_date in ["", None]) and batch_doc.disabled == 0:
-                        batch_no_data.append({
-                            "batch_no": batch.batch_no,
-                            "batch_qty": batch.qty,
-                            "expiry_date": batch_doc.expiry_date,
-                            "btach_price": batch_doc.posa_btach_price,
-                        })
+
+            if batch_list:
+                for batch in batch_list:
+                    if batch.qty > 0 and batch.batch_no:
+                        batch_doc = frappe.get_doc("Batch", batch.batch_no)
+                        if (str(batch_doc.expiry_date) > str(nowdate()) or batch_doc.expiry_date in ["", None]) and batch_doc.disabled == 0:
+                            batch_no_data.append({
+                                "batch_no": batch.batch_no,
+                                "batch_qty": batch.qty,
+                                "expiry_date": batch_doc.expiry_date,
+                                "btach_price": batch_doc.posa_btach_price,
+                            })
 
             row = {}
             row.update(item)
@@ -497,7 +627,7 @@ def search_invoices_for_return(invoice_name, company):
     invoices_list = frappe.get_list(
         "Sales Invoice",
         filters={
-            "name": ["like", "%"+invoice_name+"%"],
+            "name": ["like", f"%{invoice_name}%"],
             "company": company,
             "docstatus": 1
         },
