@@ -70,37 +70,40 @@
           </v-col>
         </v-row>
         <v-divider></v-divider>
-        <v-row
-          class="pyments px-1 py-0"
-          v-for="payment in invoice_doc.payments"
-          :key="payment.name"
-        >
-          <v-col cols="7">
-            <v-text-field
-              dense
-              outlined
-              color="indigo"
-              :label="payment.mode_of_payment"
-              background-color="white"
-              hide-details
-              v-model="payment.amount"
-              type="number"
-              :prefix="invoice_doc.currency"
-              @focus="set_rest_amount(payment.idx)"
-              :readonly="invoice_doc.is_return ? true : false"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="5">
-            <v-btn
-              block
-              class=""
-              color="primary"
-              dark
-              @click="set_full_amount(payment.idx)"
-              >{{ payment.mode_of_payment }}</v-btn
-            >
-          </v-col>
-        </v-row>
+
+        <div v-if="is_cashback">
+          <v-row
+            class="pyments px-1 py-0"
+            v-for="payment in invoice_doc.payments"
+            :key="payment.name"
+          >
+            <v-col cols="7">
+              <v-text-field
+                dense
+                outlined
+                color="indigo"
+                :label="payment.mode_of_payment"
+                background-color="white"
+                hide-details
+                v-model="payment.amount"
+                type="number"
+                :prefix="invoice_doc.currency"
+                @focus="set_rest_amount(payment.idx)"
+                :readonly="invoice_doc.is_return ? true : false"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="5">
+              <v-btn
+                block
+                class=""
+                color="primary"
+                dark
+                @click="set_full_amount(payment.idx)"
+                >{{ payment.mode_of_payment }}</v-btn
+              >
+            </v-col>
+          </v-row>
+        </div>
 
         <v-row
           class="pyments px-1 py-0"
@@ -617,6 +620,8 @@ export default {
       });
 
       total += flt(this.redeemed_customer_credit);
+      
+      if(!this.is_cashback) total = 0;
       
       return total.toFixed(2);
     },
