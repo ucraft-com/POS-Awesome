@@ -163,7 +163,9 @@ fixtures = [
         "POS Profile-posa_scale_barcode_start",
         "Sales Invoice-posa_is_printed",
         "POS Profile-posa_local_storage",
-        "POS Profile-posa_cash_mode_of_payment"
+        "POS Profile-posa_cash_mode_of_payment",
+        "POS Profile-use_customer_credit",
+        "POS Profile-use_cashback",
     )]]},
     {"doctype": "Property Setter", "filters": [["name", "in", (
         "Sales Invoice-posa_pos_opening_shift-no_copy"
