@@ -666,7 +666,7 @@ export default {
       let amount = 0;
       if (this.invoice_doc.customer_info.loyalty_points) {
         amount =
-          this.invoice_doc.customer_info.loyalty_points /
+          this.invoice_doc.customer_info.loyalty_points *
           this.invoice_doc.customer_info.conversion_factor;
       }
       return amount;
