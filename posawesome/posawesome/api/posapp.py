@@ -387,11 +387,26 @@ def submit_invoice(data):
                 queue="short",
                 timeout=1000,
                 is_async=True,
-                kwargs=invoice.name,
+                kwargs={
+                    "invoice": invoice.name,
+                    "data": data,
+                    "is_payment_entry": is_payment_entry,
+                    "total_cash": total_cash,
+                    "cash_account": cash_account,
+                },
             )
     else:
         invoice_doc.submit()
+        redeeming_customer_credit(
+            invoice_doc, data, is_payment_entry, total_cash, cash_account
+        )
 
+    return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
+
+
+def redeeming_customer_credit(
+    invoice_doc, data, is_payment_entry, total_cash, cash_account
+):
     # redeeming customer credit with journal voucher
     if data.get("redeemed_customer_credit"):
         for row in data.get("customer_credit_dict"):
@@ -465,12 +480,20 @@ def submit_invoice(data):
         payment_entry_doc.save()
         payment_entry_doc.submit()
 
-    return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
-
 
 def submit_in_background_job(kwargs):
-    invoice_doc = frappe.get_doc("Sales Invoice", kwargs)
+    invoice = kwargs.get("invoice")
+    invoice_doc = kwargs.get("invoice_doc")
+    data = kwargs.get("data")
+    is_payment_entry = kwargs.get("is_payment_entry")
+    total_cash = kwargs.get("total_cash")
+    cash_account = kwargs.get("cash_account")
+
+    invoice_doc = frappe.get_doc("Sales Invoice", invoice)
     invoice_doc.submit()
+    redeeming_customer_credit(
+        invoice_doc, data, is_payment_entry, total_cash, cash_account
+    )
 
 
 @frappe.whitelist()
