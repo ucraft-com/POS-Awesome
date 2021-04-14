@@ -35,9 +35,7 @@ app_include_js = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {
-    "POS Profile": "posawesome/api/pos_profile.js"
-}
+doctype_js = {"POS Profile": "posawesome/api/pos_profile.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -50,7 +48,7 @@ doctype_js = {
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+# 	"Role": "home_page"
 # }
 
 # Website user home page (by function)
@@ -95,7 +93,7 @@ doctype_js = {
 # 		"on_update": "method",
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
-#	}
+# 	}
 # }
 
 # Scheduled Tasks
@@ -143,31 +141,42 @@ doctype_js = {
 # auto_cancel_exempted_doctypes = ["Auto Repeat"]
 
 fixtures = [
-    {"doctype": "Custom Field", "filters": [["name", "in", (
-        "Sales Invoice-posa_pos_opening_shift",
-        "Item Barcode-posa_uom",
-        "POS Profile-posa_pos_awesome_settings",
-        "POS Profile-posa_allow_delete",
-        "POS Profile-posa_allow_user_to_edit_rate",
-        "POS Profile-posa_allow_user_to_edit_additional_discount",
-        "POS Profile-posa_allow_user_to_edit_item_discount",
-        "POS Profile-posa_display_items_in_stock",
-        "POS Profile-posa_allow_submissions_in_background_job",
-        "POS Profile-posa_allow_partial_payment",
-        "POS Profile-posa_allow_credit_sale",
-        "POS Profile-posa_pos_awesome_advance_settings",
-        "Batch-posa_btach_price",
-        "POS Profile-posa_max_discount_allowed",
-        "POS Profile-posa_allow_return",
-        "POS Profile-posa_col_1",
-        "POS Profile-posa_scale_barcode_start",
-        "Sales Invoice-posa_is_printed",
-        "POS Profile-posa_local_storage",
-        "POS Profile-posa_cash_mode_of_payment",
-        "POS Profile-use_customer_credit",
-        "POS Profile-use_cashback",
-    )]]},
-    {"doctype": "Property Setter", "filters": [["name", "in", (
-        "Sales Invoice-posa_pos_opening_shift-no_copy"
-    )]]},
+    {
+        "doctype": "Custom Field",
+        "filters": [
+            [
+                "name",
+                "in",
+                (
+                    "Sales Invoice-posa_pos_opening_shift",
+                    "Item Barcode-posa_uom",
+                    "POS Profile-posa_pos_awesome_settings",
+                    "POS Profile-posa_allow_delete",
+                    "POS Profile-posa_allow_user_to_edit_rate",
+                    "POS Profile-posa_allow_user_to_edit_additional_discount",
+                    "POS Profile-posa_allow_user_to_edit_item_discount",
+                    "POS Profile-posa_display_items_in_stock",
+                    "POS Profile-posa_allow_submissions_in_background_job",
+                    "POS Profile-posa_allow_partial_payment",
+                    "POS Profile-posa_allow_credit_sale",
+                    "POS Profile-posa_pos_awesome_advance_settings",
+                    "Batch-posa_btach_price",
+                    "POS Profile-posa_max_discount_allowed",
+                    "POS Profile-posa_allow_return",
+                    "POS Profile-posa_col_1",
+                    "POS Profile-posa_scale_barcode_start",
+                    "Sales Invoice-posa_is_printed",
+                    "POS Profile-posa_local_storage",
+                    "POS Profile-posa_cash_mode_of_payment",
+                    "POS Profile-use_customer_credit",
+                    "POS Profile-use_cashback",
+                    "POS Profile-posa_hide_closing_shift",
+                ),
+            ]
+        ],
+    },
+    {
+        "doctype": "Property Setter",
+        "filters": [["name", "in", ("Sales Invoice-posa_pos_opening_shift-no_copy")]],
+    },
 ]
