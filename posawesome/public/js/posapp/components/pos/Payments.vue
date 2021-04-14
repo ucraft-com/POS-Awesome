@@ -565,7 +565,9 @@ export default {
         '/printview?doctype=Sales%20Invoice&name=' +
         this.invoice_doc.name +
         '&trigger_print=1' +
-        '&format=POS%20Invoice&no_letterhead=' +
+        '&format=' +
+        print_format +
+        '&no_letterhead=' +
         letter_head;
       const printWindow = window.open(url, 'Print');
       printWindow.addEventListener(
