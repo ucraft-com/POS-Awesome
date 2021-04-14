@@ -317,6 +317,7 @@ def submit_invoice(data):
         advance_payment_entry.submit()
 
     # calculating cash
+    total_cash = 0
     if data.get("redeemed_customer_credit"):
         total_cash = invoice_doc.total - float(data.get("redeemed_customer_credit"))
 
