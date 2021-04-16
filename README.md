@@ -7,17 +7,20 @@
 ### Main Features
 
 1. Supports Erpnext Version 12 & 13
-2. User friendly and it provides a good user experience and speed of use
-3. The cashier has the option of either list view or card view for the items
+2. User friendly and provides a good user experience and speed of use
+3. The cashier has the option of either using list view or card view during sales transactions. Card view shows the images of the items
 4. Supports invoice submission after printing the receipt for faster printing
 5. Supports batch & serial numbering
 6. Supports batch based pricing
 7. Supports UOM specific barcode and pricing
 8. Supports sales of [scale (weighted) products](https://github.com/yrestom/POS-Awesome/discussions/30#discussioncomment-381369)
 9. Ability to make returns from POS
-10. Allow user to choose a due date for credit sales
-11. Supports customer loyalty points
-12. Shortcuts keys
+10. Supports Making returns for either cash or customer credit
+11. Supports using customer credit note for payment
+12. Supports credit sales
+13. Allows user to choose a due date for credit sales
+14. Supports customer loyalty points
+15. Shortcuts keys
 
 ---
 

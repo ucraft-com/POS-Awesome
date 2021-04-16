@@ -48,7 +48,7 @@
         </v-container>
         <v-card-actions class="mt-4">
           <v-spacer></v-spacer>
-          <v-btn color="error" dark @click="close_dialog">Close</v-btn>
+          <v-btn color="error mx-2" dark @click="close_dialog">Close</v-btn>
           <v-btn
             v-if="selected.length"
             color="primary"
@@ -103,6 +103,11 @@ export default {
   methods: {
     close_dialog() {
       this.invoicesDialog = false;
+    },
+    search_invoices_by_enter(e) {
+      if (e.keyCode === 13) {
+        this.search_invoices();
+      }
     },
     search_invoices() {
       const vm = this;
