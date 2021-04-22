@@ -136,15 +136,8 @@ def get_items(pos_profile):
 
     result = []
 
-<<<<<<< HEAD
-    #HELKYDs
-    print ('condition ', conditon)
-
-    items_data = frappe.db.sql("""
-=======
     items_data = frappe.db.sql(
         """
->>>>>>> d28a9ce8785d1dbd3e28fb7213efa30313ba3fa2
         SELECT
             name AS item_code,
             item_name,
