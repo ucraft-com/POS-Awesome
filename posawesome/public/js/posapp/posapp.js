@@ -11,7 +11,7 @@ frappe.PosApp.posapp = class {
                 
         }
         make_body() {
-                this.$el = this.$parent.find('#body_div');
+                this.$el = this.$parent.find('.main-section');
                 this.vue = new Vue({
                         vuetify: new Vuetify(),
                         el: this.$el[0],
