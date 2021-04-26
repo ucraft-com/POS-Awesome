@@ -294,8 +294,12 @@ def submit_invoice(data):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
 
-    cash_account = get_bank_cash_account("Cash", invoice_doc.company)
-
+    mop_cash_list = [i.mode_of_payment for i in invoice_doc.payments if "cash" in i.mode_of_payment.lower() and i.type == "Cash"]
+    if len(mop_cash_list) > 0 :
+        cash_account = get_bank_cash_account(mop_cash_list[0], invoice_doc.company)
+    else:
+        cash_account = {"account": frappe.get_value("Company", invoice_doc.company, "default_cash_account")}
+    
     # creating advance payment
     if data.get("credit_change"):
         advance_payment_entry = frappe.get_doc(
