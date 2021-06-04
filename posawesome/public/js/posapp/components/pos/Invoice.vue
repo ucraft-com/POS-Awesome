@@ -522,6 +522,7 @@ export default {
       return_doc: '',
       customer: '',
       customer_info: '',
+      customer_doc: '',
       discount_amount: 0,
       total_tax: 0,
       total: 0,
@@ -1017,6 +1018,19 @@ export default {
               item.discount_percentage_on_rate =
                 data.discount_percentage_on_rate;
               item.discount_amount = data.discount_amount || 0;
+            } else if (
+              vm.pos_profile.posa_apply_customer_discount &&
+              vm.customer_doc.posa_discount > 0 &&
+              vm.customer_doc.posa_discount <= 100
+            ) {
+              if (item.max_discount > 0) {
+                item.discount_percentage =
+                  item.max_discount < vm.customer_doc.posa_discount
+                    ? item.max_discount
+                    : vm.customer_doc.posa_discount;
+              } else {
+                item.discount_percentage = vm.customer_doc.posa_discount;
+              }
             }
             if (!item.btach_price) {
               item.price_list_rate = data.price_list_rate;
@@ -1038,6 +1052,23 @@ export default {
           }
         },
       });
+    },
+    fetch_customer_doc() {
+      const vm = this;
+      if (this.customer) {
+        frappe.call({
+          method: 'frappe.client.get',
+          args: {
+            doctype: 'Customer',
+            name: vm.customer,
+          },
+          callback(r) {
+            if (r.message) {
+              vm.customer_doc = r.message;
+            }
+          },
+        });
+      }
     },
     fetch_customer_details() {
       const vm = this;
@@ -1278,6 +1309,7 @@ export default {
     customer() {
       this.close_payments();
       evntBus.$emit('set_customer', this.customer);
+      this.fetch_customer_doc();
       this.fetch_customer_details();
     },
     expanded(data_value) {

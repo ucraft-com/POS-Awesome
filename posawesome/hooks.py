@@ -171,6 +171,8 @@ fixtures = [
                     "POS Profile-use_customer_credit",
                     "POS Profile-use_cashback",
                     "POS Profile-posa_hide_closing_shift",
+                    "Customer-posa_discount",
+                    "POS Profile-posa_apply_customer_discount",
                 ),
             ]
         ],
