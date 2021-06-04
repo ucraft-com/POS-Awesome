@@ -147,7 +147,8 @@ def get_items(pos_profile):
             item_group,
             idx as idx,
             has_batch_no,
-            has_serial_no
+            has_serial_no,
+            max_discount
         FROM
             `tabItem`
         WHERE
@@ -294,12 +295,20 @@ def submit_invoice(data):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
 
-    mop_cash_list = [i.mode_of_payment for i in invoice_doc.payments if "cash" in i.mode_of_payment.lower() and i.type == "Cash"]
-    if len(mop_cash_list) > 0 :
+    mop_cash_list = [
+        i.mode_of_payment
+        for i in invoice_doc.payments
+        if "cash" in i.mode_of_payment.lower() and i.type == "Cash"
+    ]
+    if len(mop_cash_list) > 0:
         cash_account = get_bank_cash_account(mop_cash_list[0], invoice_doc.company)
     else:
-        cash_account = {"account": frappe.get_value("Company", invoice_doc.company, "default_cash_account")}
-    
+        cash_account = {
+            "account": frappe.get_value(
+                "Company", invoice_doc.company, "default_cash_account"
+            )
+        }
+
     # creating advance payment
     if data.get("credit_change"):
         advance_payment_entry = frappe.get_doc(
@@ -597,7 +606,11 @@ def get_items_details(pos_profile, items_data):
 
 @frappe.whitelist()
 def get_item_detail(data, doc=None):
-    return get_item_details(data, doc)
+    item_code = json.loads(data).get("item_code")
+    max_discount = frappe.get_value("Item", item_code, "max_discount")
+    res = get_item_details(data, doc)
+    res["max_discount"] = max_discount
+    return res
 
 
 def get_stock_availability(item_code, warehouse):

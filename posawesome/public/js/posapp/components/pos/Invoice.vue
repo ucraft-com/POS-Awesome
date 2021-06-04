@@ -849,6 +849,16 @@ export default {
             value = false;
           }
         }
+        if (
+          item.max_discount > 0 &&
+          item.discount_percentage > item.max_discount
+        ) {
+          evntBus.$emit('show_mesage', {
+            text: `Maximum discount for Item ${item.item_name} is ${item.max_discount}%`,
+            color: 'error',
+          });
+          value = false;
+        }
         if (item.has_serial_no) {
           if (
             !item.serial_no_selected ||
@@ -1251,7 +1261,6 @@ export default {
     evntBus.$on('load_return_invoice', (data) => {
       this.new_invoice(data.invoice_doc);
       this.discount_amount = -data.return_doc.discount_amount;
-      console.log(data);
       this.return_doc = data.return_doc;
     });
     document.addEventListener('keydown', this.shortOpenPayment.bind(this));
