@@ -1012,6 +1012,7 @@ export default {
         callback: function (r) {
           if (r.message) {
             const data = r.message;
+            console.info(data);
             if (data.has_pricing_rule) {
               item.discount_amount_on_rate = data.discount_amount_on_rate;
               item.discount_percentage = data.discount_percentage;
