@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "field:title",
  "creation": "2021-06-06 14:05:24.843820",
  "doctype": "DocType",
@@ -22,6 +23,7 @@
   "valid_from",
   "valid_upto",
   "priority",
+  "auto",
   "quantity_and_amount_section",
   "min_qty",
   "max_qty",
@@ -259,11 +261,17 @@
   {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto",
+   "fieldtype": "Check",
+   "label": "Auto Apply"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-07 17:48:53.569570",
+ "modified": "2021-06-07 22:15:57.019516",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Offer",
@@ -282,6 +290,8 @@
    "write": 1
   }
  ],
+ "show_name_in_global_search": 1,
+ "show_preview_popup": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

@@ -7,7 +7,6 @@ frappe.ui.form.on('POS Offer', {
 		controllers(frm);
 	},
 	refresh: function (frm) {
-		set_filters(frm);
 		controllers(frm);
 	},
 	onload: function (frm) {
@@ -29,6 +28,9 @@ frappe.ui.form.on('POS Offer', {
 			if (!frm.doc.loyalty_points > 0) {
 				frappe.throw("Loyalty Points most be more then zero");
 			}
+		}
+		if (frm.doc.apply_type === 'Item Group') {
+			frm.set_value('auto', 0);
 		}
 	},
 	apply_on: function (frm) {
@@ -97,6 +99,9 @@ const controllers = (frm) => {
 	} else {
 		frm.set_df_property('discount_type', 'options', ['', 'Rate', 'Discount Percentage', 'Discount Amount']);
 	}
+	if (frm.doc.apply_type === 'Item Group') {
+		frm.set_value('auto', 0);
+	}
 
 };
 
@@ -112,6 +117,7 @@ const set_filters = (frm) => {
 		return {
 			filters: {
 				'company': frm.doc.company,
+				'is_group': 0,
 			}
 		};
 	});
@@ -119,6 +125,20 @@ const set_filters = (frm) => {
 		return {
 			filters: {
 				'company': frm.doc.company,
+			}
+		};
+	});
+	frm.set_query('item_group', function () {
+		return {
+			filters: {
+				'is_group': 0,
+			}
+		};
+	});
+	frm.set_query('apply_item_group', function () {
+		return {
+			filters: {
+				'is_group': 0,
 			}
 		};
 	});
