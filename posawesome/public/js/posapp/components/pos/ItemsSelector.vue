@@ -118,15 +118,7 @@
           </v-btn-toggle>
         </v-col>
         <v-col cols="4" class="mt-1">
-          <v-btn-toggle
-            v-model="favourites_view"
-            color="success accent-3"
-            group
-            dense
-            rounded
-          >
-            <v-btn value="True">Favourites</v-btn>
-          </v-btn-toggle>
+          <v-btn color="warning" text @click="show_offers">Offers</v-btn>
         </v-col>
       </v-row>
     </v-card>
@@ -143,7 +135,6 @@ export default {
     pos_profile: '',
     items_view: 'list',
     item_group: 'ALL',
-    favourites_view: false,
     loading: false,
     items_group: ['ALL'],
     items: [],
@@ -166,6 +157,9 @@ export default {
   },
 
   methods: {
+    show_offers() {
+      evntBus.$emit('show_offers', 'true');
+    },
     get_items() {
       if (!this.pos_profile) {
         console.log('No POS Profile');
@@ -184,7 +178,7 @@ export default {
           if (r.message) {
             vm.items = r.message;
             vm.loading = false;
-            console.log('loadItmes');
+            console.info('loadItmes');
             if (vm.pos_profile.posa_local_storage) {
               localStorage.setItem('items_storage', '');
               localStorage.setItem('items_storage', JSON.stringify(r.message));

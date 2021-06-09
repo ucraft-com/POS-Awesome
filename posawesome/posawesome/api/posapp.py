@@ -147,7 +147,8 @@ def get_items(pos_profile):
             idx as idx,
             has_batch_no,
             has_serial_no,
-            max_discount
+            max_discount,
+            brand
         FROM
             `tabItem`
         WHERE

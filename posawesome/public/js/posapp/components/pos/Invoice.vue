@@ -13,7 +13,7 @@
             :single-expand="singleExpand"
             :expanded.sync="expanded"
             show-expand
-            item-key="item_id"
+            item-key="posa_row_id"
             class="elevation-1"
             :items-per-page="itemsPerPage"
             hide-default-footer
@@ -512,7 +512,6 @@
 import { evntBus } from '../../bus';
 import Customer from './Customer.vue';
 export default {
-  // props: ["pos_profile"],
   data() {
     return {
       pos_profile: '',
@@ -527,6 +526,7 @@ export default {
       total_tax: 0,
       total: 0,
       items: [],
+      posOffers: [],
       itemsPerPage: 1000,
       expanded: [],
       singleExpand: true,
@@ -647,10 +647,11 @@ export default {
       new_item.uom = item.uom ? item.uom : item.stock_uom;
       new_item.actual_batch_qty = '';
       new_item.conversion_factor = 1;
-      new_item.item_id = Date.now();
+      new_item.posa_row_id = this.makeid(20);
       if (new_item.has_batch_no || new_item.has_serial_no) {
         this.expanded.push(new_item);
       }
+      console.info('new_item', new_item);
       return new_item;
     },
     cancel_invoice() {
@@ -702,8 +703,9 @@ export default {
         this.items = data.items;
         let cont = 0;
         this.items.forEach((item) => {
-          cont++;
-          item.item_id = Date.now() + cont;
+          if (!item.posa_row_id) {
+            item.posa_row_id = this.makeid(20);
+          }
         });
         this.update_items_details(this.items);
         this.customer = data.customer;
@@ -764,6 +766,7 @@ export default {
       this.items.forEach((item) => {
         items_list.push({
           item_code: item.item_code,
+          posa_row_id: item.posa_row_id,
           qty: item.qty,
           rate: item.rate,
           uom: item.uom,
@@ -774,6 +777,7 @@ export default {
           batch_no: item.batch_no,
         });
       });
+      console.info('get_invoice_items', items_list);
       return items_list;
     },
     get_payments() {
@@ -969,7 +973,7 @@ export default {
           if (r.message) {
             items.forEach((item) => {
               const updated_item = r.message.find(
-                (element) => element.item_id == item.item_id
+                (element) => element.posa_row_id == item.posa_row_id
               );
               item.actual_qty = updated_item.actual_qty;
               item.serial_no_data = updated_item.serial_no_data;
@@ -1012,13 +1016,13 @@ export default {
         callback: function (r) {
           if (r.message) {
             const data = r.message;
-            console.info(data);
+            // console.info(data);
             if (data.has_pricing_rule) {
-              item.discount_amount_on_rate = data.discount_amount_on_rate;
-              item.discount_percentage = data.discount_percentage;
-              item.discount_percentage_on_rate =
-                data.discount_percentage_on_rate;
-              item.discount_amount = data.discount_amount || 0;
+              // item.discount_amount_on_rate = data.discount_amount_on_rate;
+              // item.discount_percentage = data.discount_percentage;
+              // item.discount_percentage_on_rate =
+              //   data.discount_percentage_on_rate;
+              // item.discount_amount = data.discount_amount || 0;
             } else if (
               vm.pos_profile.posa_apply_customer_discount &&
               vm.customer_doc.posa_discount > 0 &&
@@ -1036,11 +1040,11 @@ export default {
             if (!item.btach_price) {
               item.price_list_rate = data.price_list_rate;
             }
-            item.has_pricing_rule = data.has_pricing_rule;
+            // item.has_pricing_rule = data.has_pricing_rule;
             item.last_purchase_rate = data.last_purchase_rate;
-            item.price_or_product_discount = data.price_or_product_discount;
-            item.pricing_rule_for = data.pricing_rule_for;
-            item.pricing_rules = data.pricing_rules;
+            // item.price_or_product_discount = data.price_or_product_discount;
+            // item.pricing_rule_for = data.pricing_rule_for;
+            // item.pricing_rules = data.pricing_rules;
             item.projected_qty = data.projected_qty;
             item.reserved_qty = data.reserved_qty;
             item.conversion_factor = data.conversion_factor;
@@ -1269,6 +1273,18 @@ export default {
         this.$refs.discount.focus();
       }
     },
+    makeid(length) {
+      let result = '';
+      const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      const charactersLength = characters.length;
+      for (var i = 0; i < length; i++) {
+        result += characters.charAt(
+          Math.floor(Math.random() * charactersLength)
+        );
+      }
+      console.info(result);
+      return result;
+    },
   },
   created() {
     evntBus.$on('register_pos_profile', (data) => {
@@ -1289,6 +1305,10 @@ export default {
     });
     evntBus.$on('load_invoice', (data) => {
       this.new_invoice(data);
+    });
+    evntBus.$on('set_offers', (data) => {
+      // console.info(data);
+      this.posOffers = data;
     });
     evntBus.$on('load_return_invoice', (data) => {
       this.new_invoice(data.invoice_doc);

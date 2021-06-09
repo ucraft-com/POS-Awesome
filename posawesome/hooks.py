@@ -175,6 +175,7 @@ fixtures = [
                     "POS Profile-posa_apply_customer_discount",
                     "Sales Invoice Item-posa_offers",
                     "Sales Invoice-posa_offers",
+                    "Sales Invoice Item-posa_row_id",
                 ),
             ]
         ],
