@@ -1289,21 +1289,16 @@ export default {
     },
     handelOffers() {
       const itemOffers = this.getItemOffers();
-      if (itemOffers.length > 0) {
-        console.info('item Offers', itemOffers);
-      }
       const groupOffers = this.getGroupOffers();
-      if (groupOffers.length > 0) {
-        console.info('group Offers', groupOffers);
-      }
       const brandOffers = this.getBrandOffers();
-      if (brandOffers.length > 0) {
-        console.info('brand Offers', brandOffers);
-      }
       const transactionOffers = this.getTransactionOffers();
-      if (transactionOffers.length > 0) {
-        console.info('transaction Offers', transactionOffers);
-      }
+      const offers = []
+        .concat(itemOffers)
+        .concat(groupOffers)
+        .concat(brandOffers)
+        .concat(transactionOffers);
+      console.info(offers);
+      this.updatePosOffers(offers);
     },
     checkQtyAnountOffer(offer, qty, amount) {
       let min_qty = false;
@@ -1312,14 +1307,11 @@ export default {
       let max_amt = false;
       const applys = [];
 
-      console.info('amount ==> ' + amount);
-
       if (offer.min_qty || offer.min_qty == 0) {
         if (qty >= offer.min_qty) {
           min_qty = true;
         }
         applys.push(min_qty);
-        console.info('min_qty ==> ' + min_qty);
       }
 
       if (offer.max_qty > 0) {
@@ -1327,7 +1319,6 @@ export default {
           max_qty = true;
         }
         applys.push(max_qty);
-        console.info('max_qty ==> ' + max_qty);
       }
 
       if (offer.min_amt > 0) {
@@ -1335,7 +1326,6 @@ export default {
           min_amt = true;
         }
         applys.push(min_amt);
-        console.info('min_amt ==> ' + min_amt);
       }
 
       if (offer.max_amt > 0) {
@@ -1343,7 +1333,6 @@ export default {
           max_amt = true;
         }
         applys.push(max_amt);
-        console.info('max_amt ==> ' + max_amt);
       }
       let apply = false;
       if (!applys.includes(false)) {
@@ -1353,8 +1342,6 @@ export default {
         apply: apply,
         conditions: { min_qty, max_qty, min_amt, max_amt },
       };
-      console.log(applys);
-      console.log(res);
       return res;
     },
     getItemOffers() {
@@ -1363,12 +1350,18 @@ export default {
         if (offer.apply_on === 'Item Code') {
           this.items.forEach((item) => {
             if (item.item_code === offer.item) {
+              const items = [];
               const res = this.checkQtyAnountOffer(
                 offer,
                 item.stock_qty,
                 item.stock_qty * item.price_list_rate
               );
               if (res.apply) {
+                items.push({
+                  item_code: item.item_code,
+                  posa_row_id: item.posa_row_id,
+                });
+                offer.items = items;
                 offers.push(offer);
               }
             }
@@ -1381,12 +1374,17 @@ export default {
       const offers = [];
       this.posOffers.forEach((offer) => {
         if (offer.apply_on === 'Item Group') {
+          const items = [];
           let total_count = 0;
           let total_amount = 0;
           this.items.forEach((item) => {
             if (item.item_group === offer.item_group) {
               total_count += item.stock_qty;
               total_amount += item.stock_qty * item.price_list_rate;
+              items.push({
+                item_code: item.item_code,
+                posa_row_id: item.posa_row_id,
+              });
             }
           });
           if (total_count || total_amount) {
@@ -1396,6 +1394,7 @@ export default {
               total_amount
             );
             if (res.apply) {
+              offer.items = items;
               offers.push(offer);
             }
           }
@@ -1407,12 +1406,17 @@ export default {
       const offers = [];
       this.posOffers.forEach((offer) => {
         if (offer.apply_on === 'Brand') {
+          const items = [];
           let total_count = 0;
           let total_amount = 0;
           this.items.forEach((item) => {
             if (item.brand === offer.brand) {
               total_count += item.stock_qty;
               total_amount += item.stock_qty * item.price_list_rate;
+              items.push({
+                item_code: item.item_code,
+                posa_row_id: item.posa_row_id,
+              });
             }
           });
           if (total_count || total_amount) {
@@ -1422,6 +1426,7 @@ export default {
               total_amount
             );
             if (res.apply) {
+              offer.items = items;
               offers.push(offer);
             }
           }
@@ -1433,6 +1438,7 @@ export default {
       const offers = [];
       this.posOffers.forEach((offer) => {
         if (offer.apply_on === 'Transaction') {
+          const items = [];
           const total_count = this.total_qty;
           const total_amount = this.Total;
           if (total_count || total_amount) {
@@ -1442,12 +1448,22 @@ export default {
               total_amount
             );
             if (res.apply) {
+              this.items.forEach((item) => {
+                items.push({
+                  item_code: item.item_code,
+                  posa_row_id: item.posa_row_id,
+                });
+              });
+              offer.items = items;
               offers.push(offer);
             }
           }
         }
       });
       return offers;
+    },
+    updatePosOffers(offers) {
+      evntBus.$emit('update_pos_offers', offers);
     },
   },
   created() {
