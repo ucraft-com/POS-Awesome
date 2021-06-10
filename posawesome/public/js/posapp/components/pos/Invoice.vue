@@ -524,7 +524,6 @@ export default {
       customer_doc: '',
       discount_amount: 0,
       total_tax: 0,
-      total: 0,
       items: [],
       posOffers: [],
       itemsPerPage: 1000,
@@ -555,6 +554,13 @@ export default {
         qty += item.qty;
       });
       return flt(qty).toFixed(2);
+    },
+    Total() {
+      let sum = 0;
+      this.items.forEach((item) => {
+        sum += item.qty * item.rate;
+      });
+      return flt(sum).toFixed(2);
     },
     subtotal() {
       this.close_payments();
@@ -651,7 +657,6 @@ export default {
       if (new_item.has_batch_no || new_item.has_serial_no) {
         this.expanded.push(new_item);
       }
-      console.info('new_item', new_item);
       return new_item;
     },
     cancel_invoice() {
@@ -777,7 +782,6 @@ export default {
           batch_no: item.batch_no,
         });
       });
-      console.info('get_invoice_items', items_list);
       return items_list;
     },
     get_payments() {
@@ -886,7 +890,7 @@ export default {
           }
         }
         if (this.pos_profile.posa_allow_user_to_edit_additional_discount) {
-          const clac_percentage = (this.discount_amount / this.subtotal) * 100;
+          const clac_percentage = (this.discount_amount / this.Total) * 100;
           if (clac_percentage > this.pos_profile.posa_max_discount_allowed) {
             evntBus.$emit('show_mesage', {
               text: `The discount should not be higher than ${this.pos_profile.posa_max_discount_allowed}%`,
@@ -1016,7 +1020,6 @@ export default {
         callback: function (r) {
           if (r.message) {
             const data = r.message;
-            // console.info(data);
             if (data.has_pricing_rule) {
               // item.discount_amount_on_rate = data.discount_amount_on_rate;
               // item.discount_percentage = data.discount_percentage;
@@ -1282,8 +1285,169 @@ export default {
           Math.floor(Math.random() * charactersLength)
         );
       }
-      console.info(result);
       return result;
+    },
+    handelOffers() {
+      const itemOffers = this.getItemOffers();
+      if (itemOffers.length > 0) {
+        console.info('item Offers', itemOffers);
+      }
+      const groupOffers = this.getGroupOffers();
+      if (groupOffers.length > 0) {
+        console.info('group Offers', groupOffers);
+      }
+      const brandOffers = this.getBrandOffers();
+      if (brandOffers.length > 0) {
+        console.info('brand Offers', brandOffers);
+      }
+      const transactionOffers = this.getTransactionOffers();
+      if (transactionOffers.length > 0) {
+        console.info('transaction Offers', transactionOffers);
+      }
+    },
+    checkQtyAnountOffer(offer, qty, amount) {
+      let min_qty = false;
+      let max_qty = false;
+      let min_amt = false;
+      let max_amt = false;
+      const applys = [];
+
+      console.info('amount ==> ' + amount);
+
+      if (offer.min_qty || offer.min_qty == 0) {
+        if (qty >= offer.min_qty) {
+          min_qty = true;
+        }
+        applys.push(min_qty);
+        console.info('min_qty ==> ' + min_qty);
+      }
+
+      if (offer.max_qty > 0) {
+        if (qty <= offer.max_qty) {
+          max_qty = true;
+        }
+        applys.push(max_qty);
+        console.info('max_qty ==> ' + max_qty);
+      }
+
+      if (offer.min_amt > 0) {
+        if (amount >= offer.min_amt) {
+          min_amt = true;
+        }
+        applys.push(min_amt);
+        console.info('min_amt ==> ' + min_amt);
+      }
+
+      if (offer.max_amt > 0) {
+        if (amount <= offer.max_amt) {
+          max_amt = true;
+        }
+        applys.push(max_amt);
+        console.info('max_amt ==> ' + max_amt);
+      }
+      let apply = false;
+      if (!applys.includes(false)) {
+        apply = true;
+      }
+      const res = {
+        apply: apply,
+        conditions: { min_qty, max_qty, min_amt, max_amt },
+      };
+      console.log(applys);
+      console.log(res);
+      return res;
+    },
+    getItemOffers() {
+      const offers = [];
+      this.posOffers.forEach((offer) => {
+        if (offer.apply_on === 'Item Code') {
+          this.items.forEach((item) => {
+            if (item.item_code === offer.item) {
+              const res = this.checkQtyAnountOffer(
+                offer,
+                item.stock_qty,
+                item.stock_qty * item.price_list_rate
+              );
+              if (res.apply) {
+                offers.push(offer);
+              }
+            }
+          });
+        }
+      });
+      return offers;
+    },
+    getGroupOffers() {
+      const offers = [];
+      this.posOffers.forEach((offer) => {
+        if (offer.apply_on === 'Item Group') {
+          let total_count = 0;
+          let total_amount = 0;
+          this.items.forEach((item) => {
+            if (item.item_group === offer.item_group) {
+              total_count += item.stock_qty;
+              total_amount += item.stock_qty * item.price_list_rate;
+            }
+          });
+          if (total_count || total_amount) {
+            const res = this.checkQtyAnountOffer(
+              offer,
+              total_count,
+              total_amount
+            );
+            if (res.apply) {
+              offers.push(offer);
+            }
+          }
+        }
+      });
+      return offers;
+    },
+    getBrandOffers() {
+      const offers = [];
+      this.posOffers.forEach((offer) => {
+        if (offer.apply_on === 'Brand') {
+          let total_count = 0;
+          let total_amount = 0;
+          this.items.forEach((item) => {
+            if (item.brand === offer.brand) {
+              total_count += item.stock_qty;
+              total_amount += item.stock_qty * item.price_list_rate;
+            }
+          });
+          if (total_count || total_amount) {
+            const res = this.checkQtyAnountOffer(
+              offer,
+              total_count,
+              total_amount
+            );
+            if (res.apply) {
+              offers.push(offer);
+            }
+          }
+        }
+      });
+      return offers;
+    },
+    getTransactionOffers() {
+      const offers = [];
+      this.posOffers.forEach((offer) => {
+        if (offer.apply_on === 'Transaction') {
+          const total_count = this.total_qty;
+          const total_amount = this.Total;
+          if (total_count || total_amount) {
+            const res = this.checkQtyAnountOffer(
+              offer,
+              total_count,
+              total_amount
+            );
+            if (res.apply) {
+              offers.push(offer);
+            }
+          }
+        }
+      });
+      return offers;
     },
   },
   created() {
@@ -1307,7 +1471,6 @@ export default {
       this.new_invoice(data);
     });
     evntBus.$on('set_offers', (data) => {
-      // console.info(data);
       this.posOffers = data;
     });
     evntBus.$on('load_return_invoice', (data) => {
@@ -1338,6 +1501,13 @@ export default {
       if (data_value.length > 0) {
         this.update_item_detail(data_value[0]);
       }
+    },
+    items: {
+      deep: true,
+      // We have to move our method to a handler field
+      handler(items) {
+        this.handelOffers();
+      },
     },
   },
 };
