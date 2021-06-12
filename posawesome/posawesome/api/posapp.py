@@ -280,6 +280,8 @@ def update_invoice(data):
     invoice_doc.items = []
     invoice_doc.discount_amount = data.get("discount_amount")
     invoice_doc.update({"items": data.get("items")})
+    invoice_doc.posa_offers = []
+    invoice_doc.update({"posa_offers": data.get("posa_offers")})
     invoice_doc.set_missing_values()
 
     if invoice_doc.get("taxes"):

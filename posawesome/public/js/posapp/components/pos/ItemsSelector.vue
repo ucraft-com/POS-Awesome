@@ -105,7 +105,7 @@
             v-model="item_group"
           ></v-select>
         </v-col>
-        <v-col cols="8" class="mt-1">
+        <v-col cols="7" class="mt-1">
           <v-btn-toggle
             v-model="items_view"
             color="primary accent-3"
@@ -117,8 +117,10 @@
             <v-btn value="list">List View</v-btn>
           </v-btn-toggle>
         </v-col>
-        <v-col cols="4" class="mt-1">
-          <v-btn color="warning" text @click="show_offers">Offers</v-btn>
+        <v-col cols="3" class="mt-1">
+          <v-btn color="warning" text @click="show_offers"
+            >{{ offersCount }} Offers : {{ appliedOffersCount }} Applied</v-btn
+          >
         </v-col>
       </v-row>
     </v-card>
@@ -148,6 +150,8 @@ export default {
       { text: 'Available QTY', value: 'actual_qty', align: 'start' },
       { text: 'UOM', value: 'stock_uom', align: 'start' },
     ],
+    offersCount: 0,
+    appliedOffersCount: 0,
   }),
 
   watch: {
@@ -388,6 +392,10 @@ export default {
     });
     evntBus.$on('update_cur_items_details', () => {
       this.update_cur_items_details();
+    });
+    evntBus.$on('update_offers_counters', (data) => {
+      this.offersCount = data.offersCount;
+      this.appliedOffersCount = data.appliedOffersCount;
     });
   },
 

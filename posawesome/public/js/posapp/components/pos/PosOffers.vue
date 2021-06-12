@@ -96,7 +96,14 @@ export default {
     ],
   }),
 
-  computed: {},
+  computed: {
+    offersCount() {
+      return this.pos_offers.length;
+    },
+    appliedOffersCount() {
+      return this.pos_offers.filter((el) => !!el.offer_applied).length;
+    },
+  },
 
   methods: {
     back_to_invoice() {
@@ -138,21 +145,22 @@ export default {
         if (pos_offer) {
           pos_offer.items = offer.items;
         } else {
-          if (!offer.row_id) {
-            offer.row_id = this.makeid(20);
+          const newOffer = { ...offer };
+          if (!newOffer.row_id) {
+            newOffer.row_id = this.makeid(20);
           }
-          if (offer.apply_type == 'Item Code') {
-            offer.give_item = offer.apply_item_code;
+          if (newOffer.apply_type == 'Item Code') {
+            newOffer.give_item = offer.apply_item_code;
           }
-          if (offer.offer_applied) {
-            offer.offer_applied == !!offer.offer_applied;
+          if (newOffer.offer_applied) {
+            newOffer.offer_applied == !!offer.offer_applied;
           } else {
-            offer.offer_applied = false;
-            if (offer.apply_type != 'Item Group') {
-              offer.offer_applied = !!offer.auto;
+            newOffer.offer_applied = false;
+            if (newOffer.apply_type != 'Item Group') {
+              newOffer.offer_applied = !!offer.auto;
             }
           }
-          this.pos_offers.push(offer);
+          this.pos_offers.push(newOffer);
           evntBus.$emit('show_mesage', {
             text: 'New Offer Available',
             color: 'warning',
@@ -191,6 +199,12 @@ export default {
         return [];
       }
     },
+    updateCounters() {
+      evntBus.$emit('update_offers_counters', {
+        offersCount: this.offersCount,
+        appliedOffersCount: this.appliedOffersCount,
+      });
+    },
   },
 
   watch: {
@@ -198,6 +212,7 @@ export default {
       deep: true,
       handler(pos_offers) {
         this.handelOffers();
+        this.updateCounters();
       },
     },
   },

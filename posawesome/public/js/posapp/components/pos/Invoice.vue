@@ -38,13 +38,19 @@
               <td :colspan="headers.length" class="ma-0 pa-0">
                 <v-row class="ma-0 pa-0">
                   <v-col cols="1">
-                    <v-btn icon color="red" @click.stop="remove_item(item)">
+                    <v-btn
+                      :disabled="!!item.posa_is_offer"
+                      icon
+                      color="red"
+                      @click.stop="remove_item(item)"
+                    >
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
                   </v-col>
                   <v-spacer></v-spacer>
                   <v-col cols="1">
                     <v-btn
+                      :disabled="!!item.posa_is_offer"
                       icon
                       color="indigo lighten-1"
                       @click.stop="subtract_one(item)"
@@ -54,6 +60,7 @@
                   </v-col>
                   <v-col cols="1">
                     <v-btn
+                      :disabled="!!item.posa_is_offer"
                       icon
                       color="indigo lighten-1"
                       @click.stop="add_one(item)"
@@ -86,6 +93,7 @@
                       v-model.number="item.qty"
                       type="number"
                       @change="calc_sotck_gty(item, $event)"
+                      :disabled="!!item.posa_is_offer"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -100,7 +108,9 @@
                       item-value="uom"
                       hide-details
                       @change="calc_uom(item, $event)"
-                      :disabled="!!invoice_doc.is_return"
+                      :disabled="
+                        !!invoice_doc.is_return || !!item.posa_is_offer
+                      "
                     >
                     </v-select>
                   </v-col>
@@ -118,10 +128,11 @@
                       @change="calc_prices(item, $event)"
                       id="rate"
                       :disabled="
-                        item.pricing_rules ||
-                        !pos_profile.posa_allow_user_to_edit_rate
+                        !!item.posa_is_offer ||
+                        !pos_profile.posa_allow_user_to_edit_rate ||
+                        !!invoice_doc.is_return
                           ? true
-                          : false || !!invoice_doc.is_return
+                          : false
                       "
                     ></v-text-field>
                   </v-col>
@@ -138,10 +149,11 @@
                       @change="calc_prices(item, $event)"
                       id="discount_percentage"
                       :disabled="
-                        item.pricing_rules ||
-                        !pos_profile.posa_allow_user_to_edit_item_discount
+                        !!item.posa_is_offer ||
+                        !pos_profile.posa_allow_user_to_edit_item_discount ||
+                        !!invoice_doc.is_return
                           ? true
-                          : false || !!invoice_doc.is_return
+                          : false
                       "
                     ></v-text-field>
                   </v-col>
@@ -159,10 +171,11 @@
                       @change="calc_prices(item, $event)"
                       id="discount_amount"
                       :disabled="
-                        item.pricing_rules ||
-                        !pos_profile.posa_allow_user_to_edit_item_discount
+                        !!item.posa_is_offer ||
+                        !pos_profile.posa_allow_user_to_edit_item_discount ||
+                        !!invoice_doc.is_return
                           ? true
-                          : false || !!invoice_doc.is_return
+                          : false
                       "
                     ></v-text-field>
                   </v-col>
@@ -589,9 +602,16 @@ export default {
   },
   methods: {
     remove_item(item) {
-      const index = this.items.findIndex((el) => el === item);
-      this.items.splice(index, 1);
-      const idx = this.expanded.findIndex((el) => el === item);
+      const index = this.items.findIndex(
+        (el) => el.posa_row_id == item.posa_row_id
+      );
+      if (index >= 0) {
+        this.items.splice(index, 1);
+      }
+
+      const idx = this.expanded.findIndex(
+        (el) => el.posa_row_id == item.posa_row_id
+      );
       if (idx >= 0) {
         this.expanded.splice(idx, 1);
       }
@@ -1060,13 +1080,15 @@ export default {
               vm.customer_doc.posa_discount > 0 &&
               vm.customer_doc.posa_discount <= 100
             ) {
-              if (item.max_discount > 0) {
-                item.discount_percentage =
-                  item.max_discount < vm.customer_doc.posa_discount
-                    ? item.max_discount
-                    : vm.customer_doc.posa_discount;
-              } else {
-                item.discount_percentage = vm.customer_doc.posa_discount;
+              if (item.posa_is_offer == 0 && item.posa_offer_applied == 0) {
+                if (item.max_discount > 0) {
+                  item.discount_percentage =
+                    item.max_discount < vm.customer_doc.posa_discount
+                      ? item.max_discount
+                      : vm.customer_doc.posa_discount;
+                } else {
+                  item.discount_percentage = vm.customer_doc.posa_discount;
+                }
               }
             }
             if (!item.btach_price) {
@@ -1379,7 +1401,7 @@ export default {
       this.posOffers.forEach((offer) => {
         if (offer.apply_on === 'Item Code') {
           this.items.forEach((item) => {
-            if (item.item_code === offer.item) {
+            if (!item.posa_is_offer && item.item_code === offer.item) {
               const items = [];
               const res = this.checkQtyAnountOffer(
                 offer,
@@ -1408,7 +1430,7 @@ export default {
           let total_count = 0;
           let total_amount = 0;
           this.items.forEach((item) => {
-            if (item.item_group === offer.item_group) {
+            if (!item.posa_is_offer && item.item_group === offer.item_group) {
               total_count += item.stock_qty;
               total_amount += item.stock_qty * item.price_list_rate;
               items.push({
@@ -1440,7 +1462,7 @@ export default {
           let total_count = 0;
           let total_amount = 0;
           this.items.forEach((item) => {
-            if (item.brand === offer.brand) {
+            if (!item.posa_is_offer && item.brand === offer.brand) {
               total_count += item.stock_qty;
               total_amount += item.stock_qty * item.price_list_rate;
               items.push({
@@ -1468,8 +1490,14 @@ export default {
       const offers = [];
       this.posOffers.forEach((offer) => {
         if (offer.apply_on === 'Transaction') {
+          let total_qty = 0;
+          this.items.forEach((item) => {
+            if (!item.posa_is_offer) {
+              total_qty += item.stock_qty;
+            }
+          });
           const items = [];
-          const total_count = this.total_qty;
+          const total_count = total_qty;
           const total_amount = this.Total;
           if (total_count || total_amount) {
             const res = this.checkQtyAnountOffer(
@@ -1509,21 +1537,32 @@ export default {
           (invoiceOffer) => invoiceOffer.row_id == offer.row_id
         );
         if (existOffer) {
-          console.info('to update existOffer ==>', existOffer);
+          console.info('to update existOffer ==>');
+          existOffer.items = JSON.stringify(offer.items);
+          if (existOffer.give_item && existOffer.give_item != offer.give_item) {
+            const item_to_remove = this.items.find(
+              (item) => item.posa_row_id == existOffer.give_item_row_id
+            );
+            if (item_to_remove) {
+              this.remove_item(item_to_remove);
+              existOffer.give_item_row_id = null;
+              existOffer.give_item = null;
+            }
+            const newItemOffer = this.ApplyOnGiveProduct(offer);
+            existOffer.give_item_row_id = newItemOffer.posa_row_id;
+            existOffer.give_item = newItemOffer.item_code;
+          }
         } else {
-          console.info('new offer ==> ', offer);
           this.applyNewOffer(offer);
         }
       });
     },
 
     removeApplyOffer(invoiceOffer) {
-      console.info('to remove offer ==> ', invoiceOffer);
       if (invoiceOffer.offer === 'Item Price') {
         console.info('To remove on Item Price');
       }
       if (invoiceOffer.offer === 'Give Product') {
-        console.info('To remove on Give Product');
         const item_to_remove = this.items.find(
           (item) => item.posa_row_id == invoiceOffer.give_item_row_id
         );
@@ -1570,7 +1609,6 @@ export default {
     ApplyOnGiveProduct(offer) {
       const items = JSON.parse(localStorage.getItem('items_storage'));
       const item = items.find((item) => item.item_code == offer.give_item);
-      console.log(item);
       if (!item) {
         return;
       }
@@ -1591,7 +1629,6 @@ export default {
       new_item.posa_offers = '';
       new_item.posa_offer_applied = 0;
       new_item.posa_is_offer = 1;
-      new_item.has_pricing_rule = 1;
       new_item.is_free_item =
         (offer.discount_type === 'Rate' && !offer.rate) ||
         (offer.discount_type === 'Discount Percentage' &&
