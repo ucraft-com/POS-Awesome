@@ -19,7 +19,6 @@ frappe.PosApp.posapp = class {
             },
             render: h => h(Home),
         });
-
     }
     setup_header () {
 

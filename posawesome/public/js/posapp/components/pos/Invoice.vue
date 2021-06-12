@@ -526,6 +526,7 @@ export default {
       total_tax: 0,
       items: [],
       posOffers: [],
+      posa_offers: [],
       itemsPerPage: 1000,
       expanded: [],
       singleExpand: true,
@@ -644,6 +645,9 @@ export default {
       if (!item.qty) {
         item.qty = 1;
       }
+      if (!item.posa_is_offer) {
+        item.posa_is_offer = 0;
+      }
       new_item.stock_qty = item.qty;
       new_item.discount_amount = 0;
       new_item.discount_percentage = 0;
@@ -653,6 +657,10 @@ export default {
       new_item.uom = item.uom ? item.uom : item.stock_uom;
       new_item.actual_batch_qty = '';
       new_item.conversion_factor = 1;
+      new_item.posa_offers = '';
+      new_item.posa_offer_applied = 0;
+      new_item.posa_is_offer = item.posa_is_offer;
+      new_item.is_free_item = 0;
       new_item.posa_row_id = this.makeid(20);
       if (new_item.has_batch_no || new_item.has_serial_no) {
         this.expanded.push(new_item);
@@ -764,6 +772,7 @@ export default {
       doc.taxes = [];
       doc.is_return = this.invoice_doc.is_return;
       doc.return_against = this.invoice_doc.return_against;
+      doc.posa_offers = this.posa_offers;
       return doc;
     },
     get_invoice_items() {
@@ -772,6 +781,10 @@ export default {
         items_list.push({
           item_code: item.item_code,
           posa_row_id: item.posa_row_id,
+          posa_offers: item.posa_offers,
+          posa_offer_applied: item.posa_offer_applied,
+          posa_is_offer: item.posa_is_offer,
+          is_free_item: item.is_free_item,
           qty: item.qty,
           rate: item.rate,
           uom: item.uom,
@@ -1297,7 +1310,6 @@ export default {
         .concat(groupOffers)
         .concat(brandOffers)
         .concat(transactionOffers);
-      console.info(offers);
       this.updatePosOffers(offers);
     },
     checkQtyAnountOffer(offer, qty, amount) {
@@ -1489,6 +1501,10 @@ export default {
     evntBus.$on('set_offers', (data) => {
       this.posOffers = data;
     });
+    evntBus.$on('update_invoice_offers', (data) => {
+      // this.updateInvoiceOffers(data);
+      console.info(data);
+    });
     evntBus.$on('load_return_invoice', (data) => {
       this.new_invoice(data.invoice_doc);
       this.discount_amount = -data.return_doc.discount_amount;
@@ -1520,7 +1536,6 @@ export default {
     },
     items: {
       deep: true,
-      // We have to move our method to a handler field
       handler(items) {
         this.handelOffers();
       },

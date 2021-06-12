@@ -2,7 +2,7 @@
   <div>
     <v-card
       class="selection mx-auto grey lighten-5"
-      style="max-height: 85vh; height: 85vh"
+      style="max-height: 80vh; height: 80vh"
     >
       <v-card-title>
         <span class="text-h6 warning--text">POS Offers</span>
@@ -23,7 +23,32 @@
             <template v-slot:item.offer_applied="{ item }">
               <v-simple-checkbox
                 v-model="item.offer_applied"
+                :disabled="!item.give_item"
               ></v-simple-checkbox>
+            </template>
+            <template v-slot:expanded-item="{ headers, item }">
+              <td :colspan="headers.length">
+                <v-row class="mt-2">
+                  <v-col v-if="item.description">
+                    <div
+                      class="indigo--text"
+                      v-html="handleNewLine(item.description)"
+                    ></div>
+                  </v-col>
+                  <v-col v-if="item.offer == 'Give Product'">
+                    <v-autocomplete
+                      v-model="item.give_item"
+                      :items="get_give_items(item)"
+                      item-text="item_code"
+                      outlined
+                      dense
+                      color="indigo"
+                      label="Give Item"
+                      :disabled="item.apply_type != 'Item Group'"
+                    ></v-autocomplete>
+                  </v-col>
+                </v-row>
+              </td>
             </template>
           </v-data-table>
         </template>
@@ -47,11 +72,6 @@
             >Back</v-btn
           >
         </v-col>
-        <!-- <v-col cols="12">
-          <v-btn block class="mt-2" large color="primary" dark @click="submit"
-            >Submit Payments</v-btn
-          >
-        </v-col> -->
       </v-row>
     </v-card>
   </div>
@@ -69,12 +89,13 @@ export default {
     singleExpand: true,
     items_headers: [
       { text: 'Name', value: 'name', align: 'start' },
-      // { text: 'Item Code', value: 'item_code', align: 'start' },
       { text: 'Apply On', value: 'apply_on', align: 'start' },
       { text: 'Offer', value: 'offer', align: 'start' },
       { text: 'Applied', value: 'offer_applied', align: 'start' },
     ],
   }),
+
+  computed: {},
 
   methods: {
     back_to_invoice() {
@@ -111,7 +132,22 @@ export default {
         if (pos_offer) {
           pos_offer.items = offer.items;
         } else {
-          offer.row_id = this.makeid(20);
+          if (!offer.row_id) {
+            offer.row_id = this.makeid(20);
+          }
+          if (offer.apply_type == 'Item Code') {
+            offer.give_item = offer.apply_item_code;
+          }
+          if (offer.offer_applied) {
+            offer.offer_applied == !!offer.offer_applied;
+          } else {
+            offer.offer_applied = false;
+            if (offer.apply_type != 'Item Group') {
+              offer.offer_applied = !!offer.auto;
+            }
+          }
+          console.info('offer_applied ==> ' + offer.offer_applied);
+
           this.pos_offers.push(offer);
           evntBus.$emit('show_mesage', {
             text: 'New Offer Available',
@@ -125,9 +161,43 @@ export default {
         (offer) => !offers_id_list.includes(offer.row_id)
       );
     },
+    handelOffers() {
+      console.info('Trigger handelOffers');
+      const applyedOffers = this.pos_offers.filter(
+        (offer) => offer.offer_applied
+      );
+      evntBus.$emit('update_invoice_offers', applyedOffers);
+    },
+    handleNewLine(str) {
+      if (str) {
+        return str.replace(/(?:\r\n|\r|\n)/g, '<br />');
+      } else {
+        return '';
+      }
+    },
+    get_give_items(offer) {
+      if (offer.apply_type == 'Item Code') {
+        return [offer.apply_item_code];
+      } else if (offer.apply_type == 'Item Group') {
+        const items = JSON.parse(localStorage.getItem('items_storage'));
+        const filterd_items = items.filter(
+          (item) => item.item_group == offer.apply_item_group
+        );
+        return filterd_items;
+      } else {
+        return [];
+      }
+    },
   },
 
-  computed: {},
+  watch: {
+    pos_offers: {
+      deep: true,
+      handler(pos_offers) {
+        this.handelOffers();
+      },
+    },
+  },
 
   created: function () {
     this.$nextTick(function () {
@@ -146,7 +216,5 @@ export default {
   },
 
   destroyed() {},
-
-  watch: {},
 };
 </script>
