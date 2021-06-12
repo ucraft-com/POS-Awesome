@@ -617,7 +617,10 @@ export default {
         item.uom = item.stock_uom;
       }
       const index = this.items.findIndex(
-        (el) => el.item_code === item.item_code && el.uom === item.uom
+        (el) =>
+          el.item_code === item.item_code &&
+          el.uom === item.uom &&
+          !el.posa_is_offer
       );
       if (index === -1) {
         const new_item = this.get_new_item(item);
@@ -1513,9 +1516,31 @@ export default {
         }
       });
     },
+
     removeApplyOffer(invoiceOffer) {
-      console.info('to remove offer ==> ' + invoiceOffer.name);
+      console.info('to remove offer ==> ', invoiceOffer);
+      if (invoiceOffer.offer === 'Item Price') {
+        console.info('To remove on Item Price');
+      }
+      if (invoiceOffer.offer === 'Give Product') {
+        console.info('To remove on Give Product');
+        const item_to_remove = this.items.find(
+          (item) => item.posa_row_id == invoiceOffer.give_item_row_id
+        );
+        const index = this.posa_offers.findIndex(
+          (el) => el.row_id === invoiceOffer.row_id
+        );
+        this.posa_offers.splice(index, 1);
+        this.remove_item(item_to_remove);
+      }
+      if (invoiceOffer.offer === 'Grand Total') {
+        console.info('To remove on Grand Total');
+      }
+      if (invoiceOffer.offer === 'Loyalty Point') {
+        console.info('To remove on Loyalty Point');
+      }
     },
+
     applyNewOffer(offer) {
       if (offer.offer === 'Item Price') {
         console.info('Aplly on Item Price');
@@ -1525,7 +1550,6 @@ export default {
         if (item) {
           offer.give_item_row_id = item.posa_row_id;
         }
-        console.info('Offer Item', item);
       }
       if (offer.offer === 'Grand Total') {
         console.info('Aplly on Grand Total');
