@@ -103,7 +103,8 @@ export default {
       evntBus.$emit('show_offers', 'false');
     },
     forceUpdateItem() {
-      const list_offers = [...this.pos_offers];
+      let list_offers = [];
+      list_offers = [...this.pos_offers];
       this.pos_offers = list_offers;
     },
     makeid(length) {
@@ -151,8 +152,6 @@ export default {
               offer.offer_applied = !!offer.auto;
             }
           }
-          console.info('offer_applied ==> ' + offer.offer_applied);
-
           this.pos_offers.push(offer);
           evntBus.$emit('show_mesage', {
             text: 'New Offer Available',
@@ -167,7 +166,6 @@ export default {
       );
     },
     handelOffers() {
-      console.info('Trigger handelOffers');
       const applyedOffers = this.pos_offers.filter(
         (offer) => offer.offer_applied
       );

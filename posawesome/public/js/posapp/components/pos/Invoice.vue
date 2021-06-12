@@ -27,6 +27,12 @@
             <template v-slot:item.amount="{ item }">{{
               formtCurrency(item.qty * item.rate)
             }}</template>
+            <template v-slot:item.posa_is_offer="{ item }">
+              <v-simple-checkbox
+                v-model="item.posa_is_offer"
+                disabled
+              ></v-simple-checkbox>
+            </template>
 
             <template v-slot:expanded-item="{ headers, item }">
               <td :colspan="headers.length" class="ma-0 pa-0">
@@ -541,6 +547,7 @@ export default {
         { text: 'UOM', value: 'uom', align: 'center' },
         { text: 'Rate', value: 'rate', align: 'center' },
         { text: 'Amount', value: 'amount', align: 'center' },
+        { text: 'is Offer', value: 'posa_is_offer', align: 'center' },
       ],
     };
   },
@@ -685,6 +692,7 @@ export default {
         });
       }
       this.items = [];
+      this.posa_offers = [];
       this.customer = this.pos_profile.customer;
       this.invoice_doc = '';
       this.return_doc = '';
@@ -714,6 +722,7 @@ export default {
         }
         this.invoice_doc = data;
         this.items = data.items;
+        this.posa_offers = data.posa_offers;
         let cont = 0;
         this.items.forEach((item) => {
           if (!item.posa_row_id) {
@@ -778,7 +787,7 @@ export default {
     get_invoice_items() {
       const items_list = [];
       this.items.forEach((item) => {
-        items_list.push({
+        const new_item = {
           item_code: item.item_code,
           posa_row_id: item.posa_row_id,
           posa_offers: item.posa_offers,
@@ -788,13 +797,17 @@ export default {
           qty: item.qty,
           rate: item.rate,
           uom: item.uom,
+          amount: item.qty * item.rate,
           conversion_factor: item.conversion_factor,
           serial_no: item.serial_no,
           discount_percentage: item.discount_percentage,
           discount_amount: item.discount_amount,
           batch_no: item.batch_no,
-        });
+          price_list_rate: item.price_list_rate,
+        };
+        items_list.push(new_item);
       });
+
       return items_list;
     },
     get_payments() {
@@ -1054,7 +1067,9 @@ export default {
               }
             }
             if (!item.btach_price) {
-              item.price_list_rate = data.price_list_rate;
+              if (!item.is_free_item && !item.posa_is_offer) {
+                item.price_list_rate = data.price_list_rate;
+              }
             }
             // item.has_pricing_rule = data.has_pricing_rule;
             item.last_purchase_rate = data.last_purchase_rate;
@@ -1477,6 +1492,102 @@ export default {
     updatePosOffers(offers) {
       evntBus.$emit('update_pos_offers', offers);
     },
+    updateInvoiceOffers(offers) {
+      this.posa_offers.forEach((invoiceOffer) => {
+        const existOffer = offers.find(
+          (offer) => invoiceOffer.row_id == offer.row_id
+        );
+        if (!existOffer) {
+          this.removeApplyOffer(invoiceOffer);
+        }
+      });
+      offers.forEach((offer) => {
+        const existOffer = this.posa_offers.find(
+          (invoiceOffer) => invoiceOffer.row_id == offer.row_id
+        );
+        if (existOffer) {
+          console.info('to update existOffer ==>', existOffer);
+        } else {
+          console.info('new offer ==> ', offer);
+          this.applyNewOffer(offer);
+        }
+      });
+    },
+    removeApplyOffer(invoiceOffer) {
+      console.info('to remove offer ==> ' + invoiceOffer.name);
+    },
+    applyNewOffer(offer) {
+      if (offer.offer === 'Item Price') {
+        console.info('Aplly on Item Price');
+      }
+      if (offer.offer === 'Give Product') {
+        const item = this.ApplyOnGiveProduct(offer);
+        if (item) {
+          offer.give_item_row_id = item.posa_row_id;
+        }
+        console.info('Offer Item', item);
+      }
+      if (offer.offer === 'Grand Total') {
+        console.info('Aplly on Grand Total');
+      }
+
+      const newOffer = {
+        offer_name: offer.name,
+        row_id: offer.row_id,
+        apply_on: offer.apply_on,
+        offer: offer.offer,
+        items: JSON.stringify(offer.items),
+        give_item: offer.give_item,
+        give_item_row_id: offer.give_item_row_id,
+        offer_applied: offer.offer_applied,
+      };
+      this.posa_offers.push(newOffer);
+    },
+    ApplyOnGiveProduct(offer) {
+      const items = JSON.parse(localStorage.getItem('items_storage'));
+      const item = items.find((item) => item.item_code == offer.give_item);
+      console.log(item);
+      if (!item) {
+        return;
+      }
+      const new_item = { ...item };
+      new_item.qty = offer.given_qty;
+      new_item.stock_qty = offer.given_qty;
+      new_item.rate = offer.discount_type === 'Rate' ? offer.rate : item.rate;
+      new_item.discount_amount =
+        offer.discount_type === 'Discount Amount' ? offer.discount_amount : 0;
+      new_item.discount_percentage =
+        offer.discount_type === 'Discount Percentage'
+          ? offer.discount_percentage
+          : 0;
+      new_item.discount_amount_per_item = 0;
+      new_item.uom = item.uom ? item.uom : item.stock_uom;
+      new_item.actual_batch_qty = '';
+      new_item.conversion_factor = 1;
+      new_item.posa_offers = '';
+      new_item.posa_offer_applied = 0;
+      new_item.posa_is_offer = 1;
+      new_item.has_pricing_rule = 1;
+      new_item.is_free_item =
+        (offer.discount_type === 'Rate' && !offer.rate) ||
+        (offer.discount_type === 'Discount Percentage' &&
+          offer.discount_percentage == 0)
+          ? 1
+          : 0;
+      new_item.posa_row_id = this.makeid(20);
+      new_item.price_list_rate =
+        (offer.discount_type === 'Rate' && !offer.rate) ||
+        (offer.discount_type === 'Discount Percentage' &&
+          offer.discount_percentage == 0)
+          ? 0
+          : item.rate;
+      if (new_item.has_batch_no || new_item.has_serial_no) {
+        this.expanded.push(new_item);
+      }
+      this.items.unshift(new_item);
+      this.update_item_detail(new_item);
+      return new_item;
+    },
   },
   created() {
     evntBus.$on('register_pos_profile', (data) => {
@@ -1502,8 +1613,7 @@ export default {
       this.posOffers = data;
     });
     evntBus.$on('update_invoice_offers', (data) => {
-      // this.updateInvoiceOffers(data);
-      console.info(data);
+      this.updateInvoiceOffers(data);
     });
     evntBus.$on('load_return_invoice', (data) => {
       this.new_invoice(data.invoice_doc);
