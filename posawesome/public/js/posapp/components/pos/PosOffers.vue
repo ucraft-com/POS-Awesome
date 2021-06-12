@@ -22,6 +22,7 @@
           >
             <template v-slot:item.offer_applied="{ item }">
               <v-simple-checkbox
+                @click="forceUpdateItem"
                 v-model="item.offer_applied"
                 :disabled="!item.give_item"
               ></v-simple-checkbox>
@@ -100,6 +101,10 @@ export default {
   methods: {
     back_to_invoice() {
       evntBus.$emit('show_offers', 'false');
+    },
+    forceUpdateItem() {
+      const list_offers = [...this.pos_offers];
+      this.pos_offers = list_offers;
     },
     makeid(length) {
       let result = '';
