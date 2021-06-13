@@ -24,7 +24,7 @@
               <v-simple-checkbox
                 @click="forceUpdateItem"
                 v-model="item.offer_applied"
-                :disabled="!item.give_item"
+                :disabled="item.offer == 'Give Product' && !item.give_item"
               ></v-simple-checkbox>
             </template>
             <template v-slot:expanded-item="{ headers, item }">
@@ -146,17 +146,21 @@ export default {
           pos_offer.items = offer.items;
         } else {
           const newOffer = { ...offer };
-          if (!newOffer.row_id) {
+          if (!offer.row_id) {
             newOffer.row_id = this.makeid(20);
           }
-          if (newOffer.apply_type == 'Item Code') {
+          if (offer.apply_type == 'Item Code') {
             newOffer.give_item = offer.apply_item_code;
           }
-          if (newOffer.offer_applied) {
+          if (offer.offer_applied) {
             newOffer.offer_applied == !!offer.offer_applied;
           } else {
-            newOffer.offer_applied = false;
-            if (newOffer.apply_type != 'Item Group') {
+            if (
+              offer.apply_type == 'Item Group' &&
+              offer.offer == 'Give Product'
+            ) {
+              newOffer.offer_applied = false;
+            } else {
               newOffer.offer_applied = !!offer.auto;
             }
           }

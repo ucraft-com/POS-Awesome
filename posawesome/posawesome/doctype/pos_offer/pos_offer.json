@@ -64,6 +64,8 @@
    "default": "0",
    "fieldname": "disable",
    "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Disable"
   },
   {
@@ -79,6 +81,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -86,6 +89,7 @@
   {
    "fieldname": "pos_profile",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "POS Profile",
    "options": "POS Profile"
   },
@@ -93,6 +97,7 @@
    "fetch_from": "pos_profile.warehouse",
    "fieldname": "warehouse",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Warehouse",
    "options": "Warehouse",
    "search_index": 1
@@ -255,6 +260,8 @@
   {
    "fieldname": "offer",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Offer",
    "options": "Item Price\nGive Product\nGrand Total\nLoyalty Point",
    "reqd": 1
@@ -278,7 +285,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-10 15:07:08.245854",
+ "modified": "2021-06-13 15:50:16.941056",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Offer",

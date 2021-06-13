@@ -29,7 +29,7 @@ frappe.ui.form.on('POS Offer', {
 				frappe.throw("Loyalty Points most be more then zero");
 			}
 		}
-		if (frm.doc.apply_type === 'Item Group') {
+		if (frm.doc.apply_type === 'Item Group' && frm.doc.offer === 'Give Product') {
 			frm.set_value('auto', 0);
 		}
 	},
@@ -61,8 +61,8 @@ const controllers = (frm) => {
 
 	frm.toggle_reqd('min_amt', frm.doc.apply_on === 'Transaction');
 
-	frm.toggle_display('apply_for_section', frm.doc.offer === 'Item Price' || frm.doc.offer === 'Give Product');
-	frm.toggle_reqd('apply_type', frm.doc.offer === 'Item Price' || frm.doc.offer === 'Give Product');
+	frm.toggle_display('apply_for_section', frm.doc.offer === 'Give Product');
+	frm.toggle_reqd('apply_type', frm.doc.offer === 'Give Product');
 
 	frm.toggle_display('apply_item_code', frm.doc.apply_type === 'Item Code');
 	frm.toggle_reqd('apply_item_code', frm.doc.apply_type === 'Item Code');
@@ -99,7 +99,14 @@ const controllers = (frm) => {
 	} else {
 		frm.set_df_property('discount_type', 'options', ['', 'Rate', 'Discount Percentage', 'Discount Amount']);
 	}
-	if (frm.doc.apply_type === 'Item Group') {
+
+	if (frm.doc.apply_on === 'Transaction') {
+		frm.set_df_property('offer', 'options', ['', 'Give Product', 'Grand Total', 'Loyalty Point']);
+	} else {
+		frm.set_df_property('offer', 'options', ['', 'Item Price', 'Give Product', 'Grand Total', 'Loyalty Point']);
+	}
+
+	if (frm.doc.apply_type === 'Item Group' && frm.doc.offer === 'Give Product') {
 		frm.set_value('auto', 0);
 	}
 
