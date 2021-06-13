@@ -129,6 +129,7 @@
                       id="rate"
                       :disabled="
                         !!item.posa_is_offer ||
+                        !!item.posa_offer_applied ||
                         !pos_profile.posa_allow_user_to_edit_rate ||
                         !!invoice_doc.is_return
                           ? true
@@ -150,6 +151,7 @@
                       id="discount_percentage"
                       :disabled="
                         !!item.posa_is_offer ||
+                        item.posa_offer_applied ||
                         !pos_profile.posa_allow_user_to_edit_item_discount ||
                         !!invoice_doc.is_return
                           ? true
@@ -172,6 +174,7 @@
                       id="discount_amount"
                       :disabled="
                         !!item.posa_is_offer ||
+                        !!item.posa_offer_applied ||
                         !pos_profile.posa_allow_user_to_edit_item_discount ||
                         !!invoice_doc.is_return
                           ? true
@@ -242,6 +245,16 @@
                       v-model="item.stock_uom"
                       disabled
                     ></v-text-field>
+                  </v-col>
+                  <v-col align="center" cols="4" v-if="item.posa_offer_applied">
+                    <v-checkbox
+                      dense
+                      label="Offer Applied"
+                      v-model="item.posa_offer_applied"
+                      readonly
+                      hide-details
+                      class="shrink mr-2 mt-0"
+                    ></v-checkbox>
                   </v-col>
                   <v-col
                     cols="4"
@@ -726,6 +739,7 @@ export default {
     new_invoice(data = {}) {
       evntBus.$emit('set_customer_readonly', false);
       this.expanded = [];
+      this.posa_offers = [];
       this.return_doc = '';
       const doc = this.get_invoice_doc();
       if (doc.name) {
@@ -747,7 +761,6 @@ export default {
         this.invoice_doc = data;
         this.items = data.items;
         this.posa_offers = data.posa_offers;
-        let cont = 0;
         this.items.forEach((item) => {
           if (!item.posa_row_id) {
             item.posa_row_id = this.makeid(20);
@@ -1216,7 +1229,7 @@ export default {
         }
       }
     },
-    calc_item_price(item, offer_applied) {
+    calc_item_price(item) {
       if (!item.posa_offer_applied) {
         if (item.price_list_rate) {
           item.rate = item.price_list_rate;
@@ -1234,7 +1247,7 @@ export default {
           flt(item.price_list_rate) - flt(item.discount_amount)
         ).toFixed(2);
       }
-      // else if (item.posa_offer_applied === 'Rate') {
+      // else {
       //   item.rate = item.price_list_rate;
       // }
     },
@@ -1342,6 +1355,18 @@ export default {
       }
       return result;
     },
+    checkOfferIsAppley(item, offer) {
+      let applied = false;
+      const item_offers = JSON.parse(item.posa_offers);
+      for (const row_id of item_offers) {
+        const exist_offer = this.posa_offers.find((el) => row_id == el.row_id);
+        if (exist_offer && exist_offer.offer_name == offer.name) {
+          applied = true;
+          break;
+        }
+      }
+      return applied;
+    },
     handelOffers() {
       const itemOffers = this.getItemOffers();
       const groupOffers = this.getGroupOffers();
@@ -1405,7 +1430,11 @@ export default {
           this.items.forEach((item) => {
             if (!item.posa_is_offer && item.item_code === offer.item) {
               const items = [];
-              if (offer.offer === 'Item Price' && item.posa_offer_applied) {
+              if (
+                offer.offer === 'Item Price' &&
+                item.posa_offer_applied &&
+                !this.checkOfferIsAppley(item, offer)
+              ) {
               } else {
                 const res = this.checkQtyAnountOffer(
                   offer,
@@ -1433,7 +1462,11 @@ export default {
           let total_amount = 0;
           this.items.forEach((item) => {
             if (!item.posa_is_offer && item.item_group === offer.item_group) {
-              if (offer.offer === 'Item Price' && item.posa_offer_applied) {
+              if (
+                offer.offer === 'Item Price' &&
+                item.posa_offer_applied &&
+                !this.checkOfferIsAppley(item, offer)
+              ) {
               } else {
                 total_count += item.stock_qty;
                 total_amount += item.stock_qty * item.price_list_rate;
@@ -1465,7 +1498,11 @@ export default {
           let total_amount = 0;
           this.items.forEach((item) => {
             if (!item.posa_is_offer && item.brand === offer.brand) {
-              if (offer.offer === 'Item Price' && item.posa_offer_applied) {
+              if (
+                offer.offer === 'Item Price' &&
+                item.posa_offer_applied &&
+                !this.checkOfferIsAppley(item, offer)
+              ) {
               } else {
                 total_count += item.stock_qty;
                 total_amount += item.stock_qty * item.price_list_rate;
@@ -1565,8 +1602,11 @@ export default {
 
     removeApplyOffer(invoiceOffer) {
       if (invoiceOffer.offer === 'Item Price') {
-        console.info('To remove on Item Price');
         this.RemoveOnPrice(invoiceOffer);
+        const index = this.posa_offers.findIndex(
+          (el) => el.row_id === invoiceOffer.row_id
+        );
+        this.posa_offers.splice(index, 1);
       }
       if (invoiceOffer.offer === 'Give Product') {
         const item_to_remove = this.items.find(
@@ -1690,6 +1730,11 @@ export default {
               item.rate = item.price_list_rate;
             } else if (originalOffer.discount_type === 'Discount Percentage') {
               item.discount_percentage -= offer.discount_percentage;
+              if (!item.discount_percentage) {
+                item.discount_percentage = 0;
+                item.discount_amount = 0;
+                item.rate = item.price_list_rate;
+              }
             } else if (originalOffer.discount_type === 'Discount Amount') {
               item.discount_amount -= offer.discount_amount;
             }
@@ -1707,7 +1752,9 @@ export default {
             const item_offers = JSON.parse(exist_item.posa_offers);
             if (!item_offers.includes(offer.row_id)) {
               item_offers.push(offer.row_id);
-              exist_item.posa_offer_applied = 1;
+              if (offer.offer === 'Item Price') {
+                exist_item.posa_offer_applied = 1;
+              }
             }
             exist_item.posa_offers = JSON.stringify(item_offers);
           }
@@ -1724,7 +1771,7 @@ export default {
             const updated_item_offers = item_offers.filter(
               (row_id) => row_id != offer.row_id
             );
-            if (updated_item_offers.length == 0) {
+            if (offer.offer === 'Item Price') {
               exist_item.posa_offer_applied = 0;
             }
             exist_item.posa_offers = JSON.stringify(updated_item_offers);
