@@ -1084,11 +1084,6 @@ export default {
           if (r.message) {
             const data = r.message;
             if (data.has_pricing_rule) {
-              // item.discount_amount_on_rate = data.discount_amount_on_rate;
-              // item.discount_percentage = data.discount_percentage;
-              // item.discount_percentage_on_rate =
-              //   data.discount_percentage_on_rate;
-              // item.discount_amount = data.discount_amount || 0;
             } else if (
               vm.pos_profile.posa_apply_customer_discount &&
               vm.customer_doc.posa_discount > 0 &&
@@ -1110,11 +1105,7 @@ export default {
                 item.price_list_rate = data.price_list_rate;
               }
             }
-            // item.has_pricing_rule = data.has_pricing_rule;
             item.last_purchase_rate = data.last_purchase_rate;
-            // item.price_or_product_discount = data.price_or_product_discount;
-            // item.pricing_rule_for = data.pricing_rule_for;
-            // item.pricing_rules = data.pricing_rules;
             item.projected_qty = data.projected_qty;
             item.reserved_qty = data.reserved_qty;
             item.conversion_factor = data.conversion_factor;
@@ -1247,9 +1238,6 @@ export default {
           flt(item.price_list_rate) - flt(item.discount_amount)
         ).toFixed(2);
       }
-      // else {
-      //   item.rate = item.price_list_rate;
-      // }
     },
     calc_uom(item, value) {
       const new_uom = item.item_uoms.find((element) => element.uom == value);
