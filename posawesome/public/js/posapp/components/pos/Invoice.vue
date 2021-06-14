@@ -1622,7 +1622,10 @@ export default {
         console.info('To remove on Grand Total');
       }
       if (invoiceOffer.offer === 'Loyalty Point') {
-        console.info('To remove on Loyalty Point');
+        const index = this.posa_offers.findIndex(
+          (el) => el.row_id === invoiceOffer.row_id
+        );
+        this.posa_offers.splice(index, 1);
       }
       this.deleteOfferFromItems(invoiceOffer);
     },
@@ -1639,6 +1642,12 @@ export default {
       }
       if (offer.offer === 'Grand Total') {
         console.info('Aplly on Grand Total');
+      }
+      if (offer.offer === 'Loyalty Point') {
+        evntBus.$emit('show_mesage', {
+          text: 'Loyalty Point Offer Applied',
+          color: 'success',
+        });
       }
 
       const newOffer = {

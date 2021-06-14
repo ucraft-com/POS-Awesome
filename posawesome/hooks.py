@@ -88,13 +88,11 @@ doctype_js = {"POS Profile": "posawesome/api/pos_profile.js"}
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+    "Sales Invoice": {
+        "before_submit": "posawesome.posawesome.api.invoice.before_submit",
+    }
+}
 
 # Scheduled Tasks
 # ---------------
