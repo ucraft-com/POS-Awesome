@@ -1869,10 +1869,9 @@ export default {
       }
     },
     discount_percentage_offer_name() {
-      evntBus.$emit(
-        'update_discount_percentage_offer_name',
-        this.discount_percentage_offer_name
-      );
+      evntBus.$emit('update_discount_percentage_offer_name', {
+        value: this.discount_percentage_offer_name,
+      });
     },
     items: {
       deep: true,

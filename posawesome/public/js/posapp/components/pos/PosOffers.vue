@@ -26,7 +26,8 @@
                 v-model="item.offer_applied"
                 :disabled="
                   (item.offer == 'Give Product' && !item.give_item) ||
-                  (discount_percentage_offer_name &&
+                  (item.offer == 'Grand Total' &&
+                    discount_percentage_offer_name &&
                     discount_percentage_offer_name != item.name)
                 "
               ></v-simple-checkbox>
@@ -149,6 +150,12 @@ export default {
         );
         if (pos_offer) {
           pos_offer.items = offer.items;
+          if (
+            pos_offer.offer === 'Grand Total' &&
+            !this.discount_percentage_offer_name
+          ) {
+            pos_offer.offer_applied = !!pos_offer.auto;
+          }
         } else {
           const newOffer = { ...offer };
           if (!offer.row_id) {
@@ -246,7 +253,7 @@ export default {
       this.updatePosOffers(data);
     });
     evntBus.$on('update_discount_percentage_offer_name', (data) => {
-      this.discount_percentage_offer_name = data;
+      this.discount_percentage_offer_name = data.value;
     });
   },
 
