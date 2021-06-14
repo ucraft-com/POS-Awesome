@@ -140,7 +140,7 @@ export default {
       snackColor: '',
       snackText: '',
       company: 'POS Awesome',
-      company_img: '/assets/erpnext/images/erp-icon.svg',
+      company_img: '/assets/erpnext/images/erpnext-logo.svg',
       pos_profile: '',
     };
   },
@@ -149,7 +149,7 @@ export default {
       this.$emit('changePage', key);
     },
     go_desk() {
-      frappe.set_route('');
+      frappe.set_route('/');
       location.reload();
     },
     go_about() {
