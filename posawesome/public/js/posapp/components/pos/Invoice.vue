@@ -399,7 +399,8 @@
                     type="number"
                     :prefix="pos_profile.currency"
                     :disabled="
-                      !pos_profile.posa_allow_user_to_edit_additional_discount
+                      !pos_profile.posa_allow_user_to_edit_additional_discount ||
+                      discount_percentage_offer_name
                         ? true
                         : false
                     "
@@ -559,6 +560,7 @@ export default {
       items: [],
       posOffers: [],
       posa_offers: [],
+      discount_percentage_offer_name: null,
       itemsPerPage: 1000,
       expanded: [],
       singleExpand: true,
@@ -1580,6 +1582,8 @@ export default {
             existOffer.give_item = newItemOffer.item_code;
           } else if (existOffer.offer === 'Item Price') {
             this.ApplyOnPrice(offer);
+          } else if (existOffer.offer === 'Grand Total') {
+            this.ApplyOnTotal(offer);
           }
           this.addOfferToItems(existOffer);
         } else {
@@ -1607,7 +1611,11 @@ export default {
         this.remove_item(item_to_remove);
       }
       if (invoiceOffer.offer === 'Grand Total') {
-        console.info('To remove on Grand Total');
+        this.RemoveOnTotal(invoiceOffer);
+        const index = this.posa_offers.findIndex(
+          (el) => el.row_id === invoiceOffer.row_id
+        );
+        this.posa_offers.splice(index, 1);
       }
       if (invoiceOffer.offer === 'Loyalty Point') {
         const index = this.posa_offers.findIndex(
@@ -1629,7 +1637,7 @@ export default {
         }
       }
       if (offer.offer === 'Grand Total') {
-        console.info('Aplly on Grand Total');
+        this.ApplyOnTotal(offer);
       }
       if (offer.offer === 'Loyalty Point') {
         evntBus.$emit('show_mesage', {
@@ -1740,6 +1748,33 @@ export default {
         }
       });
     },
+    ApplyOnTotal(offer) {
+      if (!offer.name) {
+        offer = this.posOffers.find((el) => el.name == offer.offer_name);
+      }
+      if (
+        (!this.discount_percentage_offer_name ||
+          this.discount_percentage_offer_name == offer.name) &&
+        offer.discount_percentage > 0 &&
+        offer.discount_percentage <= 100
+      ) {
+        this.discount_amount = (
+          (flt(this.Total) * flt(offer.discount_percentage)) /
+          100
+        ).toFixed(2);
+        this.discount_percentage_offer_name = offer.name;
+      }
+    },
+
+    RemoveOnTotal(offer) {
+      if (
+        this.discount_percentage_offer_name &&
+        this.discount_percentage_offer_name == offer.offer_name
+      ) {
+        this.discount_amount = 0;
+        this.discount_percentage_offer_name = null;
+      }
+    },
 
     addOfferToItems(offer) {
       const offer_items = JSON.parse(offer.items);
@@ -1832,6 +1867,12 @@ export default {
       if (data_value.length > 0) {
         this.update_item_detail(data_value[0]);
       }
+    },
+    discount_percentage_offer_name() {
+      evntBus.$emit(
+        'update_discount_percentage_offer_name',
+        this.discount_percentage_offer_name
+      );
     },
     items: {
       deep: true,

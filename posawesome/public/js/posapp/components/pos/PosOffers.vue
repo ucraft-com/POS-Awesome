@@ -24,7 +24,11 @@
               <v-simple-checkbox
                 @click="forceUpdateItem"
                 v-model="item.offer_applied"
-                :disabled="item.offer == 'Give Product' && !item.give_item"
+                :disabled="
+                  (item.offer == 'Give Product' && !item.give_item) ||
+                  (discount_percentage_offer_name &&
+                    discount_percentage_offer_name != item.name)
+                "
               ></v-simple-checkbox>
             </template>
             <template v-slot:expanded-item="{ headers, item }">
@@ -85,6 +89,7 @@ export default {
     loading: false,
     pos_profile: '',
     pos_offers: [],
+    discount_percentage_offer_name: null,
     itemsPerPage: 1000,
     expanded: [],
     singleExpand: true,
@@ -158,6 +163,11 @@ export default {
             if (
               offer.apply_type == 'Item Group' &&
               offer.offer == 'Give Product'
+            ) {
+              newOffer.offer_applied = false;
+            } else if (
+              offer.offer === 'Grand Total' &&
+              this.discount_percentage_offer_name
             ) {
               newOffer.offer_applied = false;
             } else {
@@ -234,6 +244,9 @@ export default {
     });
     evntBus.$on('update_pos_offers', (data) => {
       this.updatePosOffers(data);
+    });
+    evntBus.$on('update_discount_percentage_offer_name', (data) => {
+      this.discount_percentage_offer_name = data;
     });
   },
 
