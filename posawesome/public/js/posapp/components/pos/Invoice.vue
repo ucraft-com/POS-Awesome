@@ -1,11 +1,11 @@
 <template>
   <div>
     <v-card
-      style="max-height: 65vh; height: 65vh"
+      style="max-height: 70vh; height: 70vh"
       class="cards my-0 py-0 grey lighten-5"
     >
       <Customer></Customer>
-      <div class="my-0 py-0 overflow-y-auto" style="max-height: 55vh">
+      <div class="my-0 py-0 overflow-y-auto" style="max-height: 60vh">
         <template @mouseover="style = 'cursor: pointer'">
           <v-data-table
             :headers="items_headers"
@@ -358,176 +358,111 @@
         </template>
       </div>
     </v-card>
-    <v-row>
-      <v-col class="pt-0 pr-0" cols="8">
-        <v-card
-          style="max-height: 25vh; height: 25vh"
-          class="cards mb-0 mt-3 py-0 grey lighten-5"
-        >
-          <v-row no-gutters class="pa-1 pt-2" style="height: 100%">
-            <v-col cols="6" no-gutters>
-              <v-row no-gutters class="ma-1 pa-0" style="height: 100%">
-                <v-col cols="12">
-                  <v-text-field
-                    :value="formtCurrency(total_qty)"
-                    label="Total Qty"
-                    outlined
-                    dense
-                    readonly
-                    hide-details
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    :value="formtCurrency(total_items_discount_amount)"
-                    label="Items Discounts"
-                    outlined
-                    dense
-                    readonly
-                    hide-details
-                    :prefix="pos_profile.currency"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="discount_amount"
-                    label="ِAdditional Discount"
-                    ref="discount"
-                    outlined
-                    dense
-                    hide-details
-                    type="number"
-                    :prefix="pos_profile.currency"
-                    :disabled="
-                      !pos_profile.posa_allow_user_to_edit_additional_discount ||
-                      discount_percentage_offer_name
-                        ? true
-                        : false
-                    "
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    :value="formtCurrency(subtotal)"
-                    label="Total"
-                    outlined
-                    dense
-                    readonly
-                    hide-details
-                    class="text--red"
-                    :prefix="pos_profile.currency"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
+    <v-card class="cards mb-0 mt-3 py-0 grey lighten-5">
+      <v-row no-gutters>
+        <v-col cols="7">
+          <v-row no-gutters class="pa-1 pt-9 pr-1">
+            <v-col cols="6" class="pa-1">
+              <v-text-field
+                :value="formtCurrency(total_qty)"
+                label="Total Qty"
+                outlined
+                dense
+                readonly
+                hide-details
+              ></v-text-field>
             </v-col>
-            <v-col no-gutters cols="6">
-              <v-row no-gutters class="ma-1 pa-0" style="height: 100%">
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="customer_info.email_id"
-                    label="Email"
-                    outlined
-                    dense
-                    @change="set_customer_info('email_id', $event)"
-                    hide-details
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="customer_info.mobile_no"
-                    label="ِPhone Number"
-                    outlined
-                    dense
-                    hide-details
-                    @change="set_customer_info('mobile_no', $event)"
-                    type="number"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="customer_info.loyalty_program"
-                    label="Loyalty Program"
-                    outlined
-                    dense
-                    disabled
-                    hide-details
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12">
-                  <v-text-field
-                    v-model="customer_info.loyalty_points"
-                    label="Loyalty Points"
-                    outlined
-                    dense
-                    disabled
-                    hide-details
-                    type="number"
-                  ></v-text-field>
-                </v-col>
-              </v-row>
+            <v-col cols="6" class="pa-1">
+              <v-text-field
+                v-model="discount_amount"
+                label="ِAdditional Discount"
+                ref="discount"
+                outlined
+                dense
+                hide-details
+                type="number"
+                :prefix="pos_profile.currency"
+                :disabled="
+                  !pos_profile.posa_allow_user_to_edit_additional_discount ||
+                  discount_percentage_offer_name
+                    ? true
+                    : false
+                "
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6" class="pa-1 mt-2">
+              <v-text-field
+                :value="formtCurrency(total_items_discount_amount)"
+                label="Items Discounts"
+                outlined
+                dense
+                readonly
+                hide-details
+                :prefix="pos_profile.currency"
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="6" class="pa-1 mt-2">
+              <v-text-field
+                :value="formtCurrency(subtotal)"
+                label="Total"
+                outlined
+                dense
+                readonly
+                hide-details
+                class="text--red"
+                :prefix="pos_profile.currency"
+              ></v-text-field>
             </v-col>
           </v-row>
-        </v-card>
-      </v-col>
-      <v-col class="pt-0 pr-3" cols="4">
-        <v-card
-          flat
-          style="max-height: 25vh; height: 25vh"
-          class="cards mb-0 mt-3 py-0"
-        >
-          <v-row align="start" style="height: 52%">
-            <v-col cols="6">
+        </v-col>
+        <v-col cols="5">
+          <v-row no-gutters class="pa-1 pt-2 pl-0">
+            <v-col cols="6" class="pa-1">
               <v-btn
                 block
                 class="pa-0"
-                large
                 color="warning"
                 dark
                 @click="get_draft_invoices"
-                >Get Hold</v-btn
+                >Hold</v-btn
               >
             </v-col>
-            <v-col cols="6">
+            <v-col cols="6" class="pa-1">
               <v-btn
                 block
                 class="pa-0"
                 :class="{ 'disable-events': !pos_profile.posa_allow_return }"
-                large
                 color="info"
                 dark
                 @click="open_returns"
                 >Return</v-btn
               >
             </v-col>
-            <v-col cols="6">
+            <v-col cols="6" class="pa-1">
               <v-btn
                 block
                 class="pa-0"
-                large
                 color="error"
                 dark
                 @click="cancel_invoice"
                 >Cancel</v-btn
               >
             </v-col>
-            <v-col cols="6">
+            <v-col cols="6" class="pa-1">
               <v-btn
                 block
                 class="pa-0"
-                large
                 color="success"
                 dark
                 @click="new_invoice"
                 >New</v-btn
               >
             </v-col>
-          </v-row>
-          <v-row align="end" style="height: 54%">
-            <v-col cols="12">
+            <v-col cols="12" class="pa-1">
               <v-btn
                 block
                 class="pa-0"
-                large
                 color="primary"
                 @click="show_payment"
                 dark
@@ -535,9 +470,9 @@
               >
             </v-col>
           </v-row>
-        </v-card>
-      </v-col>
-    </v-row>
+        </v-col>
+      </v-row>
+    </v-card>
   </div>
 </template>
 
@@ -1284,27 +1219,7 @@ export default {
         this.update_item_detail(item);
       }
     },
-    set_customer_info(field, value) {
-      const vm = this;
-      frappe.call({
-        method: 'posawesome.posawesome.api.posapp.set_customer_info',
-        args: {
-          fieldname: field,
-          customer: this.customer_info.customer,
-          value: value,
-        },
-        callback: (r) => {
-          if (!r.exc) {
-            vm.customer_info[field] = value;
-            evntBus.$emit('show_mesage', {
-              text: 'Customer contact updated successfully.',
-              color: 'success',
-            });
-            frappe.utils.play_sound('submit');
-          }
-        },
-      });
-    },
+
     formtCurrency(value) {
       value = parseFloat(value);
       return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
@@ -1861,6 +1776,9 @@ export default {
       evntBus.$emit('set_customer', this.customer);
       this.fetch_customer_doc();
       this.fetch_customer_details();
+    },
+    customer_info() {
+      evntBus.$emit('set_customer_info_to_edit', this.customer_info);
     },
     expanded(data_value) {
       this.update_items_details(data_value);

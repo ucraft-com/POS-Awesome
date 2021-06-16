@@ -17,6 +17,10 @@
         hide-details
         :filter="customFilter"
         :disabled="readonly"
+        append-icon="mdi-plus"
+        @click:append="new_customer"
+        prepend-inner-icon="mdi-account-edit"
+        @click:prepend-inner="edit_customer"
       >
         <template v-slot:item="data">
           <template>
@@ -43,11 +47,6 @@
               ></v-list-item-subtitle>
             </v-list-item-content>
           </template>
-        </template>
-        <template v-slot:append-outer>
-          <v-slide-x-reverse-transition mode="out-in">
-            <v-icon @click="new_customer">mdi-plus</v-icon>
-          </v-slide-x-reverse-transition>
         </template>
       </v-autocomplete>
     </v-col>
@@ -90,6 +89,9 @@ export default {
     },
     new_customer() {
       evntBus.$emit('open_new_customer');
+    },
+    edit_customer() {
+      evntBus.$emit('open_edit_customer');
     },
     customFilter(item, queryText, itemText) {
       const textOne = item.customer_name

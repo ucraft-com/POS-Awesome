@@ -1,8 +1,8 @@
 <template>
   <div>
     <v-card
-      class="selection mx-auto grey lighten-5"
-      style="max-height: 78vh; height: 78vh"
+      class="selection mx-auto grey lighten-5 pa-1"
+      style="max-height: 76vh; height: 76vh"
     >
       <v-progress-linear
         :active="loading"
@@ -11,7 +11,7 @@
         top
         color="deep-purple accent-4"
       ></v-progress-linear>
-      <div class="overflow-y-auto px-2 pt-2" style="max-height: 78vh">
+      <div class="overflow-y-auto px-2 pt-2" style="max-height: 75vh">
         <v-row v-if="invoice_doc" class="px-1 py-0">
           <v-col cols="7">
             <v-text-field
@@ -368,11 +368,7 @@
       </div>
     </v-card>
 
-    <v-card
-      flat
-      style="max-height: 11vh; height: 11vh"
-      class="cards mb-0 mt-3 py-0"
-    >
+    <v-card flat class="cards mb-0 mt-3 py-0">
       <v-row align="start" no-gutters>
         <v-col cols="12">
           <v-btn

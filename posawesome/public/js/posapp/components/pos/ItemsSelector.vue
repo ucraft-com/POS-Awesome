@@ -2,7 +2,7 @@
   <div>
     <v-card
       class="selection mx-auto grey lighten-5"
-      style="max-height: 77vh; height: 77vh"
+      style="max-height: 75vh; height: 75vh"
     >
       <v-progress-linear
         :active="loading"
@@ -66,7 +66,7 @@
             </v-row>
           </div>
           <div fluid class="items" v-if="items_view == 'list'">
-            <div class="my-0 py-0 overflow-y-auto" style="max-height: 67vh">
+            <div class="my-0 py-0 overflow-y-auto" style="max-height: 65vh">
               <template>
                 <v-data-table
                   :headers="items_headers"
@@ -90,10 +90,7 @@
         </v-col>
       </v-row>
     </v-card>
-    <v-card
-      style="max-height: 13vh; height: 13vh"
-      class="cards mb-0 mt-3 pa-2 grey lighten-5"
-    >
+    <v-card class="cards mb-0 mt-3 pa-2 grey lighten-5">
       <v-row no-gutters>
         <v-col cols="12">
           <v-select
@@ -105,7 +102,7 @@
             v-model="item_group"
           ></v-select>
         </v-col>
-        <v-col cols="7" class="mt-1">
+        <v-col cols="6" class="mt-1">
           <v-btn-toggle
             v-model="items_view"
             color="primary accent-3"
@@ -117,7 +114,7 @@
             <v-btn value="list">List View</v-btn>
           </v-btn-toggle>
         </v-col>
-        <v-col cols="3" class="mt-1">
+        <v-col cols="6" class="mt-1">
           <v-btn color="warning" text @click="show_offers"
             >{{ offersCount }} Offers : {{ appliedOffersCount }} Applied</v-btn
           >
@@ -146,7 +143,6 @@ export default {
     items_headers: [
       { text: 'Name', align: 'start', sortable: true, value: 'item_name' },
       { text: 'Rate', value: 'rate', align: 'start' },
-      { text: 'Currency', value: 'currency', align: 'start' },
       { text: 'Available QTY', value: 'actual_qty', align: 'start' },
       { text: 'UOM', value: 'stock_uom', align: 'start' },
     ],
