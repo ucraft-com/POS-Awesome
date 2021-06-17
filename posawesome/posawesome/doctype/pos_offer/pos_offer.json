@@ -251,7 +251,7 @@
   {
    "fieldname": "quantity_and_amount_section",
    "fieldtype": "Section Break",
-   "label": "Quantity and Amount"
+   "label": "Quantity and Amount Conditions"
   },
   {
    "fieldname": "offer",
@@ -302,7 +302,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-17 17:58:39.950055",
+ "modified": "2021-06-17 18:20:35.290378",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Offer",

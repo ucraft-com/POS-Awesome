@@ -29,7 +29,7 @@
             }}</template>
             <template v-slot:item.posa_is_offer="{ item }">
               <v-simple-checkbox
-                v-model="item.posa_is_offer"
+                :value="item.posa_is_offer || item.posa_is_replace"
                 disabled
               ></v-simple-checkbox>
             </template>

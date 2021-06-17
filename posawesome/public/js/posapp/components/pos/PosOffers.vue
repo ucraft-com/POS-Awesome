@@ -212,9 +212,17 @@ export default {
         return [offer.apply_item_code];
       } else if (offer.apply_type == 'Item Group') {
         const items = JSON.parse(localStorage.getItem('items_storage'));
-        const filterd_items = items.filter(
+        let filterd_items = [];
+        const filterd_items_1 = items.filter(
           (item) => item.item_group == offer.apply_item_group
         );
+        if (offer.less_then > 0) {
+          filterd_items = filterd_items_1.filter(
+            (item) => item.rate < offer.less_then
+          );
+        } else {
+          filterd_items = filterd_items_1;
+        }
         return filterd_items;
       } else {
         return [];
