@@ -118,7 +118,6 @@ export default {
     });
     evntBus.$on('set_customer_info_to_edit', (data) => {
       this.customer_info = data;
-      console.info(this.customer_info);
     });
   },
 };

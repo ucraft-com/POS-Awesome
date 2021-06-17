@@ -176,6 +176,7 @@ fixtures = [
                     "Sales Invoice Item-posa_row_id",
                     "Sales Invoice Item-posa_offer_applied",
                     "Sales Invoice Item-posa_is_offer",
+                    "Sales Invoice Item-posa_is_replace",
                 ),
             ]
         ],

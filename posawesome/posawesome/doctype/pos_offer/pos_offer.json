@@ -33,9 +33,12 @@
   "max_amt",
   "apply_for_section",
   "apply_type",
+  "replace_item",
+  "replace_cheapest_item",
   "column_break_15",
   "apply_item_code",
   "apply_item_group",
+  "less_then",
   "product_discount_scheme_section",
   "given_qty",
   "price_discount_scheme_section",
@@ -278,11 +281,28 @@
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "replace_item",
+   "fieldtype": "Check",
+   "label": "Replace Same Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "replace_cheapest_item",
+   "fieldtype": "Check",
+   "label": "Replace Cheapest Item"
+  },
+  {
+   "fieldname": "less_then",
+   "fieldtype": "Float",
+   "label": "Item Rate Should Less Then"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-06-14 02:43:32.186904",
+ "modified": "2021-06-17 17:58:39.950055",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Offer",

@@ -45,6 +45,12 @@ frappe.ui.form.on('POS Offer', {
 	discount_type: function (frm) {
 		controllers(frm);
 	},
+	replace_item: function (frm) {
+		controllers(frm);
+	},
+	replace_cheapest_item: function (frm) {
+		controllers(frm);
+	},
 });
 
 
@@ -64,11 +70,16 @@ const controllers = (frm) => {
 	frm.toggle_display('apply_for_section', frm.doc.offer === 'Give Product');
 	frm.toggle_reqd('apply_type', frm.doc.offer === 'Give Product');
 
-	frm.toggle_display('apply_item_code', frm.doc.apply_type === 'Item Code');
-	frm.toggle_reqd('apply_item_code', frm.doc.apply_type === 'Item Code');
+	frm.toggle_display('replace_item', frm.doc.apply_on === 'Item Code' && frm.doc.offer === 'Give Product' && frm.doc.apply_type === 'Item Code');
+	frm.toggle_display('replace_cheapest_item', frm.doc.apply_on === 'Item Group' && frm.doc.offer === 'Give Product' && frm.doc.apply_type === 'Item Group');
 
-	frm.toggle_display('apply_item_group', frm.doc.apply_type === 'Item Group');
-	frm.toggle_reqd('apply_item_group', frm.doc.apply_type === 'Item Group');
+	frm.toggle_display('apply_item_code', frm.doc.apply_type === 'Item Code' && !frm.doc.replace_item);
+	frm.toggle_reqd('apply_item_code', frm.doc.apply_type === 'Item Code' && !frm.doc.replace_item);
+
+	frm.toggle_display('apply_item_group', frm.doc.apply_type === 'Item Group' && !frm.doc.replace_cheapest_item);
+	frm.toggle_reqd('apply_item_group', frm.doc.apply_type === 'Item Group' && !frm.doc.replace_cheapest_item);
+
+	frm.toggle_display('less_then', frm.doc.apply_type === 'Item Group' && !frm.doc.replace_cheapest_item);
 
 	frm.toggle_display('product_discount_scheme_section', frm.doc.offer === 'Give Product');
 	frm.toggle_display('given_qty', frm.doc.offer === 'Give Product');
@@ -108,6 +119,12 @@ const controllers = (frm) => {
 
 	if (frm.doc.apply_type === 'Item Group' && frm.doc.offer === 'Give Product') {
 		frm.set_value('auto', 0);
+	}
+	if (frm.doc.apply_on !== 'Item Code' || frm.doc.offer !== 'Give Product' || frm.doc.apply_type !== 'Item Code') {
+		frm.set_value('replace_item', 0);
+	}
+	if (frm.doc.apply_on !== 'Item Group' || frm.doc.offer !== 'Give Product' || frm.doc.apply_type !== 'Item Group') {
+		frm.set_value('replace_cheapest_item', 0);
 	}
 
 };
