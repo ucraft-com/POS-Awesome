@@ -1612,13 +1612,15 @@ export default {
                 (el) => el.posa_row_id == item_to_remove.posa_is_replace
               );
               newItemOffer.qty = item_to_remove.qty;
-              if (!oldBaseItem.posa_is_replace) {
+              if (oldBaseItem && !oldBaseItem.posa_is_replace) {
                 oldBaseItem.qty += item_to_remove.qty;
               } else {
-                const restoredItem = this.ApplyOnGiveProduct({
-                  item_code: item_to_remove.item_code,
-                  given_qty: item_to_remove.qty,
-                });
+                const restoredItem = this.ApplyOnGiveProduct(
+                  {
+                    given_qty: item_to_remove.qty,
+                  },
+                  item_to_remove.item_code
+                );
                 restoredItem.posa_is_offer = 0;
                 this.items.unshift(restoredItem);
               }
@@ -1628,7 +1630,8 @@ export default {
               if (diffQty <= 0) {
                 newItemOffer.qty += diffQty;
                 this.remove_item(cheapestItem);
-                newItemOffer.posa_row_id = cheapestItem.posa_is_replace;
+                newItemOffer.posa_row_id = cheapestItem.posa_row_id;
+                newItemOffer.posa_is_replace = newItemOffer.posa_row_id;
               } else {
                 cheapestItem.qty = diffQty;
               }
@@ -1636,6 +1639,40 @@ export default {
             this.items.unshift(newItemOffer);
             existOffer.give_item_row_id = newItemOffer.posa_row_id;
             existOffer.give_item = newItemOffer.item_code;
+          } else if (
+            existOffer.offer === 'Give Product' &&
+            existOffer.give_item &&
+            existOffer.give_item == offer.give_item &&
+            (offer.replace_item || offer.replace_cheapest_item)
+          ) {
+            this.$nextTick(function () {
+              const offerItem = this.getItemFromRowID(
+                existOffer.give_item_row_id
+              );
+              const diff = offer.given_qty - offerItem.qty;
+              if (diff > 0) {
+                const itemsRowID = JSON.parse(existOffer.items);
+                const itemsList = [];
+                itemsRowID.forEach((row_id) => {
+                  itemsList.push(this.getItemFromRowID(row_id));
+                });
+                const existItem = itemsList.find(
+                  (el) =>
+                    el.item_code == offerItem.item_code &&
+                    el.posa_is_replace != offerItem.posa_row_id
+                );
+                if (existItem) {
+                  const diffExistQty = existItem.qty - diff;
+                  if (diffExistQty > 0) {
+                    offerItem.qty += diff;
+                    existItem.qty -= diff;
+                  } else {
+                    offerItem.qty += existItem.qty;
+                    this.remove_item(existItem);
+                  }
+                }
+              }
+            });
           } else if (existOffer.offer === 'Item Price') {
             this.ApplyOnPrice(offer);
           } else if (existOffer.offer === 'Grand Total') {
