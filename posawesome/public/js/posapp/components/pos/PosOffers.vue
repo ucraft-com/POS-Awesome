@@ -25,7 +25,9 @@
                 @click="forceUpdateItem"
                 v-model="item.offer_applied"
                 :disabled="
-                  (item.offer == 'Give Product' && !item.give_item) ||
+                  (item.offer == 'Give Product' &&
+                    !item.give_item &&
+                    (!offer.replace_cheapest_item || !offer.replace_item)) ||
                   (item.offer == 'Grand Total' &&
                     discount_percentage_offer_name &&
                     discount_percentage_offer_name != item.name)
@@ -162,14 +164,15 @@ export default {
             newOffer.row_id = this.makeid(20);
           }
           if (offer.apply_type == 'Item Code') {
-            newOffer.give_item = offer.apply_item_code;
+            newOffer.give_item = offer.apply_item_code || 'Nothing';
           }
           if (offer.offer_applied) {
             newOffer.offer_applied == !!offer.offer_applied;
           } else {
             if (
               offer.apply_type == 'Item Group' &&
-              offer.offer == 'Give Product'
+              offer.offer == 'Give Product' &&
+              (!offer.replace_cheapest_item || !offer.replace_item)
             ) {
               newOffer.offer_applied = false;
             } else if (
@@ -181,6 +184,7 @@ export default {
               newOffer.offer_applied = !!offer.auto;
             }
           }
+          console.info('newOffer.give_item', newOffer.give_item);
           this.pos_offers.push(newOffer);
           evntBus.$emit('show_mesage', {
             text: 'New Offer Available',
@@ -264,7 +268,5 @@ export default {
       this.discount_percentage_offer_name = data.value;
     });
   },
-
-  destroyed() {},
 };
 </script>

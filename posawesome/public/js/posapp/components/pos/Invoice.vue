@@ -29,7 +29,7 @@
             }}</template>
             <template v-slot:item.posa_is_offer="{ item }">
               <v-simple-checkbox
-                :value="item.posa_is_offer || item.posa_is_replace"
+                :value="!!item.posa_is_offer || !!item.posa_is_replace"
                 disabled
               ></v-simple-checkbox>
             </template>
@@ -39,7 +39,7 @@
                 <v-row class="ma-0 pa-0">
                   <v-col cols="1">
                     <v-btn
-                      :disabled="!!item.posa_is_offer"
+                      :disabled="!!item.posa_is_offer || !!item.posa_is_replace"
                       icon
                       color="red"
                       @click.stop="remove_item(item)"
@@ -50,7 +50,7 @@
                   <v-spacer></v-spacer>
                   <v-col cols="1">
                     <v-btn
-                      :disabled="!!item.posa_is_offer"
+                      :disabled="!!item.posa_is_offer || !!item.posa_is_replace"
                       icon
                       color="indigo lighten-1"
                       @click.stop="subtract_one(item)"
@@ -60,7 +60,7 @@
                   </v-col>
                   <v-col cols="1">
                     <v-btn
-                      :disabled="!!item.posa_is_offer"
+                      :disabled="!!item.posa_is_offer || !!item.posa_is_replace"
                       icon
                       color="indigo lighten-1"
                       @click.stop="add_one(item)"
@@ -93,7 +93,7 @@
                       v-model.number="item.qty"
                       type="number"
                       @change="calc_sotck_gty(item, $event)"
-                      :disabled="!!item.posa_is_offer"
+                      :disabled="!!item.posa_is_offer || !!item.posa_is_replace"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -109,7 +109,9 @@
                       hide-details
                       @change="calc_uom(item, $event)"
                       :disabled="
-                        !!invoice_doc.is_return || !!item.posa_is_offer
+                        !!invoice_doc.is_return ||
+                        !!item.posa_is_offer ||
+                        !!item.posa_is_replace
                       "
                     >
                     </v-select>
@@ -129,6 +131,7 @@
                       id="rate"
                       :disabled="
                         !!item.posa_is_offer ||
+                        !!item.posa_is_replace ||
                         !!item.posa_offer_applied ||
                         !pos_profile.posa_allow_user_to_edit_rate ||
                         !!invoice_doc.is_return
@@ -151,6 +154,7 @@
                       id="discount_percentage"
                       :disabled="
                         !!item.posa_is_offer ||
+                        !!item.posa_is_replace ||
                         item.posa_offer_applied ||
                         !pos_profile.posa_allow_user_to_edit_item_discount ||
                         !!invoice_doc.is_return
@@ -174,6 +178,7 @@
                       id="discount_amount"
                       :disabled="
                         !!item.posa_is_offer ||
+                        !!item.posa_is_replace ||
                         !!item.posa_offer_applied ||
                         !pos_profile.posa_allow_user_to_edit_item_discount ||
                         !!invoice_doc.is_return
@@ -558,7 +563,6 @@ export default {
       if (index >= 0) {
         this.items.splice(index, 1);
       }
-
       const idx = this.expanded.findIndex(
         (el) => el.posa_row_id == item.posa_row_id
       );
@@ -629,6 +633,9 @@ export default {
       if (!item.posa_is_offer) {
         item.posa_is_offer = 0;
       }
+      if (!item.posa_is_replace) {
+        item.posa_is_replace = '';
+      }
       new_item.stock_qty = item.qty;
       new_item.discount_amount = 0;
       new_item.discount_percentage = 0;
@@ -641,6 +648,7 @@ export default {
       new_item.posa_offers = JSON.stringify([]);
       new_item.posa_offer_applied = 0;
       new_item.posa_is_offer = item.posa_is_offer;
+      new_item.posa_is_replace = item.posa_is_replace || null;
       new_item.is_free_item = 0;
       new_item.posa_row_id = this.makeid(20);
       if (new_item.has_batch_no || new_item.has_serial_no) {
@@ -767,6 +775,7 @@ export default {
           posa_offers: item.posa_offers,
           posa_offer_applied: item.posa_offer_applied,
           posa_is_offer: item.posa_is_offer,
+          posa_is_replace: item.posa_is_replace,
           is_free_item: item.is_free_item,
           qty: item.qty,
           rate: item.rate,
@@ -1026,7 +1035,11 @@ export default {
               vm.customer_doc.posa_discount > 0 &&
               vm.customer_doc.posa_discount <= 100
             ) {
-              if (item.posa_is_offer == 0 && item.posa_offer_applied == 0) {
+              if (
+                item.posa_is_offer == 0 &&
+                !item.posa_is_replace &&
+                item.posa_offer_applied == 0
+              ) {
                 if (item.max_discount > 0) {
                   item.discount_percentage =
                     item.max_discount < vm.customer_doc.posa_discount
@@ -1038,7 +1051,11 @@ export default {
               }
             }
             if (!item.btach_price) {
-              if (!item.is_free_item && !item.posa_is_offer) {
+              if (
+                !item.is_free_item &&
+                !item.posa_is_offer &&
+                !item.posa_is_replace
+              ) {
                 item.price_list_rate = data.price_list_rate;
               }
             }
@@ -1282,7 +1299,50 @@ export default {
         .concat(groupOffers)
         .concat(brandOffers)
         .concat(transactionOffers);
+      this.setItemGiveOffer(offers);
       this.updatePosOffers(offers);
+    },
+    setItemGiveOffer(offers) {
+      // Set item give offer for replace
+      offers.forEach((offer) => {
+        if (
+          offer.apply_on == 'Item Code' &&
+          offer.apply_type == 'Item Code' &&
+          offer.replace_item
+        ) {
+          offer.give_item = offer.item;
+          offer.apply_item_code = offer.item;
+        } else if (
+          offer.apply_on == 'Item Group' &&
+          offer.apply_type == 'Item Group' &&
+          offer.replace_cheapest_item
+        ) {
+          const offerItemCode = this.getCheapestItem(offer);
+          offer.give_item = offerItemCode;
+          offer.apply_item_code = offerItemCode;
+        }
+      });
+    },
+    getCheapestItem(offer) {
+      let itemsRowID;
+      if (typeof offer.items === 'string') {
+        itemsRowID = JSON.parse(offer.items);
+      } else {
+        itemsRowID = offer.items;
+      }
+      const itemsList = [];
+      itemsRowID.forEach((row_id) => {
+        itemsList.push(this.getItemFromRowID(row_id));
+      });
+      const result = itemsList.reduce(function (res, obj) {
+        return obj.price_list_rate < res.price_list_rate ? obj : res;
+      });
+      console.info('getCheapestItem', result.item_code);
+      return result.item_code;
+    },
+    getItemFromRowID(row_id) {
+      const item = this.items.find((el) => el.posa_row_id == row_id);
+      return item;
     },
     checkQtyAnountOffer(offer, qty, amount) {
       let min_qty = false;
@@ -1436,7 +1496,7 @@ export default {
         if (offer.apply_on === 'Transaction') {
           let total_qty = 0;
           this.items.forEach((item) => {
-            if (!item.posa_is_offer) {
+            if (!item.posa_is_offer && !item.posa_is_replace) {
               total_qty += item.stock_qty;
             }
           });
@@ -1493,6 +1553,7 @@ export default {
               existOffer.give_item = null;
             }
             const newItemOffer = this.ApplyOnGiveProduct(offer);
+            this.items.unshift(newItemOffer);
             existOffer.give_item_row_id = newItemOffer.posa_row_id;
             existOffer.give_item = newItemOffer.item_code;
           } else if (existOffer.offer === 'Item Price') {
@@ -1546,9 +1607,64 @@ export default {
         this.ApplyOnPrice(offer);
       }
       if (offer.offer === 'Give Product') {
-        const item = this.ApplyOnGiveProduct(offer);
-        if (item) {
+        let itemsRowID;
+        if (typeof offer.items === 'string') {
+          itemsRowID = JSON.parse(offer.items);
+        } else {
+          itemsRowID = offer.items;
+        }
+        if (
+          offer.apply_on == 'Item Code' &&
+          offer.apply_type == 'Item Code' &&
+          offer.replace_item
+        ) {
+          const item = this.ApplyOnGiveProduct(offer, offer.item);
+          item.posa_is_replace = itemsRowID[0];
+          const baseItem = this.items.find(
+            (el) => el.posa_row_id == item.posa_is_replace
+          );
+          const diffQty = baseItem.qty - offer.given_qty;
+          item.posa_is_offer = 0;
+          if (diffQty <= 0) {
+            item.qty = baseItem.qty;
+            this.remove_item(baseItem);
+            item.posa_row_id = item.posa_is_replace;
+          } else {
+            baseItem.qty = diffQty;
+          }
+          this.items.unshift(item);
           offer.give_item_row_id = item.posa_row_id;
+        } else if (
+          offer.apply_on == 'Item Group' &&
+          offer.apply_type == 'Item Group' &&
+          offer.replace_cheapest_item
+        ) {
+          const itemsList = [];
+          itemsRowID.forEach((row_id) => {
+            itemsList.push(this.getItemFromRowID(row_id));
+          });
+          const baseItem = itemsList.find(
+            (el) => el.item_code == offer.give_item
+          );
+          const item = this.ApplyOnGiveProduct(offer, offer.give_item);
+          item.posa_is_offer = 0;
+          item.posa_is_replace = baseItem.posa_row_id;
+          const diffQty = baseItem.qty - offer.given_qty;
+          if (diffQty <= 0) {
+            item.qty = baseItem.qty;
+            this.remove_item(baseItem);
+            item.posa_row_id = item.posa_is_replace;
+          } else {
+            baseItem.qty = diffQty;
+          }
+          this.items.unshift(item);
+          offer.give_item_row_id = item.posa_row_id;
+        } else {
+          const item = this.ApplyOnGiveProduct(offer);
+          this.items.unshift(item);
+          if (item) {
+            offer.give_item_row_id = item.posa_row_id;
+          }
         }
       }
       if (offer.offer === 'Grand Total') {
@@ -1575,9 +1691,12 @@ export default {
       this.addOfferToItems(newOffer);
     },
 
-    ApplyOnGiveProduct(offer) {
+    ApplyOnGiveProduct(offer, item_code) {
+      if (!item_code) {
+        item_code = offer.give_item;
+      }
       const items = JSON.parse(localStorage.getItem('items_storage'));
-      const item = items.find((item) => item.item_code == offer.give_item);
+      const item = items.find((item) => item.item_code == item_code);
       if (!item) {
         return;
       }
@@ -1598,6 +1717,7 @@ export default {
       new_item.posa_offers = JSON.stringify([]);
       new_item.posa_offer_applied = 0;
       new_item.posa_is_offer = 1;
+      new_item.posa_is_replace = null;
       new_item.is_free_item =
         (offer.discount_type === 'Rate' && !offer.rate) ||
         (offer.discount_type === 'Discount Percentage' &&
@@ -1614,7 +1734,6 @@ export default {
       if (new_item.has_batch_no || new_item.has_serial_no) {
         this.expanded.push(new_item);
       }
-      this.items.unshift(new_item);
       this.update_item_detail(new_item);
       return new_item;
     },
