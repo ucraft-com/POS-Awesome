@@ -52,7 +52,11 @@
                       dense
                       color="indigo"
                       label="Give Item"
-                      :disabled="item.apply_type != 'Item Group'"
+                      :disabled="
+                        item.apply_type != 'Item Group' ||
+                        item.replace_item ||
+                        item.replace_cheapest_item
+                      "
                     ></v-autocomplete>
                   </v-col>
                 </v-row>
@@ -158,6 +162,14 @@ export default {
           ) {
             pos_offer.offer_applied = !!pos_offer.auto;
           }
+          if (
+            offer.apply_on == 'Item Group' &&
+            offer.apply_type == 'Item Group' &&
+            offer.replace_cheapest_item
+          ) {
+            pos_offer.give_item = offer.give_item;
+            pos_offer.apply_item_code = offer.apply_item_code;
+          }
         } else {
           const newOffer = { ...offer };
           if (!offer.row_id) {
@@ -184,7 +196,6 @@ export default {
               newOffer.offer_applied = !!offer.auto;
             }
           }
-          console.info('newOffer.give_item', newOffer.give_item);
           this.pos_offers.push(newOffer);
           evntBus.$emit('show_mesage', {
             text: 'New Offer Available',

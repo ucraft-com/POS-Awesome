@@ -519,9 +519,11 @@ export default {
       ],
     };
   },
+
   components: {
     Customer,
   },
+
   computed: {
     total_qty() {
       this.close_payments();
@@ -555,6 +557,7 @@ export default {
       return flt(sum).toFixed(2);
     },
   },
+
   methods: {
     remove_item(item) {
       const index = this.items.findIndex(
@@ -570,6 +573,7 @@ export default {
         this.expanded.splice(idx, 1);
       }
     },
+
     add_one(item) {
       item.qty++;
       if (item.qty == 0) {
@@ -586,6 +590,7 @@ export default {
       this.calc_sotck_gty(item, item.qty);
       this.$forceUpdate();
     },
+
     add_item(item) {
       if (!item.uom) {
         item.uom = item.stock_uom;
@@ -594,7 +599,8 @@ export default {
         (el) =>
           el.item_code === item.item_code &&
           el.uom === item.uom &&
-          !el.posa_is_offer
+          !el.posa_is_offer &&
+          !el.posa_is_replace
       );
       if (index === -1) {
         const new_item = this.get_new_item(item);
@@ -625,6 +631,7 @@ export default {
       }
       this.$forceUpdate();
     },
+
     get_new_item(item) {
       const new_item = { ...item };
       if (!item.qty) {
@@ -656,6 +663,7 @@ export default {
       }
       return new_item;
     },
+
     cancel_invoice() {
       const doc = this.get_invoice_doc();
       if (doc.name && this.pos_profile.posa_allow_delete) {
@@ -681,6 +689,7 @@ export default {
       this.discount_amount = 0;
       evntBus.$emit('set_customer_readonly', false);
     },
+
     new_invoice(data = {}) {
       evntBus.$emit('set_customer_readonly', false);
       this.expanded = [];
@@ -728,6 +737,7 @@ export default {
         });
       }
     },
+
     save_draft_invoice() {
       const vm = this;
       const doc = this.get_invoice_doc();
@@ -743,6 +753,7 @@ export default {
       });
       return this.invoice_doc;
     },
+
     get_invoice_doc() {
       let doc = {};
       if (this.invoice_doc.name) {
@@ -766,6 +777,7 @@ export default {
       doc.posa_offers = this.posa_offers;
       return doc;
     },
+
     get_invoice_items() {
       const items_list = [];
       this.items.forEach((item) => {
@@ -793,6 +805,7 @@ export default {
 
       return items_list;
     },
+
     get_payments() {
       const payments = [];
       this.pos_profile.payments.forEach((payment) => {
@@ -805,6 +818,7 @@ export default {
       });
       return payments;
     },
+
     update_invoice(doc) {
       const vm = this;
       frappe.call({
@@ -821,6 +835,7 @@ export default {
       });
       return this.invoice_doc;
     },
+
     proces_invoice() {
       const doc = this.get_invoice_doc();
       if (doc.name) {
@@ -829,6 +844,7 @@ export default {
         return this.save_draft_invoice(doc);
       }
     },
+
     show_payment() {
       if (!this.customer) {
         evntBus.$emit('show_mesage', {
@@ -852,6 +868,7 @@ export default {
       invoice_doc.customer_info = this.customer_info;
       evntBus.$emit('send_invoice_doc_payment', invoice_doc);
     },
+
     validate() {
       let value = true;
       this.items.forEach((item) => {
@@ -950,6 +967,7 @@ export default {
       });
       return value;
     },
+
     get_draft_invoices() {
       const vm = this;
       frappe.call({
@@ -965,12 +983,15 @@ export default {
         },
       });
     },
+
     open_returns() {
       evntBus.$emit('open_returns', this.pos_profile.company);
     },
+
     close_payments() {
       evntBus.$emit('show_payment', 'false');
     },
+
     update_items_details(items) {
       if (!items.length > 0) {
         return;
@@ -999,6 +1020,7 @@ export default {
         },
       });
     },
+
     update_item_detail(item) {
       const vm = this;
       frappe.call({
@@ -1073,6 +1095,7 @@ export default {
         },
       });
     },
+
     fetch_customer_doc() {
       const vm = this;
       if (this.customer) {
@@ -1090,6 +1113,7 @@ export default {
         });
       }
     },
+
     fetch_customer_details() {
       const vm = this;
       if (this.customer) {
@@ -1138,6 +1162,7 @@ export default {
         });
       }
     },
+
     calc_prices(item, value, $event) {
       if (event.target.id === 'rate') {
         item.discount_percentage = 0;
@@ -1174,6 +1199,7 @@ export default {
         }
       }
     },
+
     calc_item_price(item) {
       if (!item.posa_offer_applied) {
         if (item.price_list_rate) {
@@ -1193,6 +1219,7 @@ export default {
         ).toFixed(2);
       }
     },
+
     calc_uom(item, value) {
       const new_uom = item.item_uoms.find((element) => element.uom == value);
       item.conversion_factor = new_uom.conversion_factor;
@@ -1205,9 +1232,11 @@ export default {
       }
       this.update_item_detail(item);
     },
+
     calc_sotck_gty(item, value) {
       item.stock_qty = item.conversion_factor * value;
     },
+
     set_serial_no(item) {
       item.serial_no = '';
       item.serial_no_selected.forEach((element) => {
@@ -1221,6 +1250,7 @@ export default {
         });
       }
     },
+
     set_batch_qty(item, value) {
       const batch_no = item.batch_no_data.find(
         (element) => element.batch_no == value
@@ -1241,18 +1271,21 @@ export default {
       value = parseFloat(value);
       return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
+
     shortOpenPayment(e) {
       if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         this.show_payment();
       }
     },
+
     shortDeleteFirstItem(e) {
       if (e.key === 'd' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         this.remove_item(this.items[0]);
       }
     },
+
     shortOpenFirstItem(e) {
       if (e.key === 'a' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
@@ -1260,12 +1293,14 @@ export default {
         this.expanded.push(this.items[0]);
       }
     },
+
     shortSelectDiscount(e) {
       if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         this.$refs.discount.focus();
       }
     },
+
     makeid(length) {
       let result = '';
       const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -1277,6 +1312,7 @@ export default {
       }
       return result;
     },
+
     checkOfferIsAppley(item, offer) {
       let applied = false;
       const item_offers = JSON.parse(item.posa_offers);
@@ -1289,6 +1325,7 @@ export default {
       }
       return applied;
     },
+
     handelOffers() {
       const itemOffers = this.getItemOffers();
       const groupOffers = this.getGroupOffers();
@@ -1302,6 +1339,7 @@ export default {
       this.setItemGiveOffer(offers);
       this.updatePosOffers(offers);
     },
+
     setItemGiveOffer(offers) {
       // Set item give offer for replace
       offers.forEach((offer) => {
@@ -1317,12 +1355,13 @@ export default {
           offer.apply_type == 'Item Group' &&
           offer.replace_cheapest_item
         ) {
-          const offerItemCode = this.getCheapestItem(offer);
+          const offerItemCode = this.getCheapestItem(offer).item_code;
           offer.give_item = offerItemCode;
           offer.apply_item_code = offerItemCode;
         }
       });
     },
+
     getCheapestItem(offer) {
       let itemsRowID;
       if (typeof offer.items === 'string') {
@@ -1335,15 +1374,20 @@ export default {
         itemsList.push(this.getItemFromRowID(row_id));
       });
       const result = itemsList.reduce(function (res, obj) {
-        return obj.price_list_rate < res.price_list_rate ? obj : res;
+        return !obj.posa_is_replace &&
+          !obj.posa_is_offer &&
+          obj.price_list_rate < res.price_list_rate
+          ? obj
+          : res;
       });
-      console.info('getCheapestItem', result.item_code);
-      return result.item_code;
+      return result;
     },
+
     getItemFromRowID(row_id) {
       const item = this.items.find((el) => el.posa_row_id == row_id);
       return item;
     },
+
     checkQtyAnountOffer(offer, qty, amount) {
       let min_qty = false;
       let max_qty = false;
@@ -1388,6 +1432,7 @@ export default {
       };
       return res;
     },
+
     getItemOffers() {
       const offers = [];
       this.posOffers.forEach((offer) => {
@@ -1418,6 +1463,7 @@ export default {
       });
       return offers;
     },
+
     getGroupOffers() {
       const offers = [];
       this.posOffers.forEach((offer) => {
@@ -1454,6 +1500,7 @@ export default {
       });
       return offers;
     },
+
     getBrandOffers() {
       const offers = [];
       this.posOffers.forEach((offer) => {
@@ -1521,9 +1568,11 @@ export default {
       });
       return offers;
     },
+
     updatePosOffers(offers) {
       evntBus.$emit('update_pos_offers', offers);
     },
+
     updateInvoiceOffers(offers) {
       this.posa_offers.forEach((invoiceOffer) => {
         const existOffer = offers.find(
@@ -1548,11 +1597,42 @@ export default {
               (item) => item.posa_row_id == existOffer.give_item_row_id
             );
             if (item_to_remove) {
+              const updated_item_offers = offer.items.filter(
+                (row_id) => row_id != item_to_remove.posa_row_id
+              );
+              offer.items = updated_item_offers;
               this.remove_item(item_to_remove);
               existOffer.give_item_row_id = null;
               existOffer.give_item = null;
             }
             const newItemOffer = this.ApplyOnGiveProduct(offer);
+            if (offer.replace_cheapest_item) {
+              const cheapestItem = this.getCheapestItem(offer);
+              const oldBaseItem = this.items.find(
+                (el) => el.posa_row_id == item_to_remove.posa_is_replace
+              );
+              newItemOffer.qty = item_to_remove.qty;
+              if (!oldBaseItem.posa_is_replace) {
+                oldBaseItem.qty += item_to_remove.qty;
+              } else {
+                const restoredItem = this.ApplyOnGiveProduct({
+                  item_code: item_to_remove.item_code,
+                  given_qty: item_to_remove.qty,
+                });
+                restoredItem.posa_is_offer = 0;
+                this.items.unshift(restoredItem);
+              }
+              newItemOffer.posa_is_offer = 0;
+              newItemOffer.posa_is_replace = cheapestItem.posa_row_id;
+              const diffQty = cheapestItem.qty - newItemOffer.qty;
+              if (diffQty <= 0) {
+                newItemOffer.qty += diffQty;
+                this.remove_item(cheapestItem);
+                newItemOffer.posa_row_id = cheapestItem.posa_is_replace;
+              } else {
+                cheapestItem.qty = diffQty;
+              }
+            }
             this.items.unshift(newItemOffer);
             existOffer.give_item_row_id = newItemOffer.posa_row_id;
             existOffer.give_item = newItemOffer.item_code;
@@ -1782,6 +1862,7 @@ export default {
         }
       });
     },
+
     ApplyOnTotal(offer) {
       if (!offer.name) {
         offer = this.posOffers.find((el) => el.name == offer.offer_name);
@@ -1914,6 +1995,7 @@ export default {
       deep: true,
       handler(items) {
         this.handelOffers();
+        this.$forceUpdate();
       },
     },
   },
