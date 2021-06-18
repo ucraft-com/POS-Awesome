@@ -184,7 +184,8 @@ export default {
             if (
               offer.apply_type == 'Item Group' &&
               offer.offer == 'Give Product' &&
-              (!offer.replace_cheapest_item || !offer.replace_item)
+              !offer.replace_cheapest_item &&
+              !offer.replace_item
             ) {
               newOffer.offer_applied = false;
             } else if (
