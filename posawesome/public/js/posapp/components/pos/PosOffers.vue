@@ -196,6 +196,9 @@ export default {
               newOffer.offer_applied = !!offer.auto;
             }
           }
+          if (newOffer.offer == 'Give Product' && !newOffer.give_item) {
+            newOffer.give_item = this.get_give_items(newOffer)[0];
+          }
           this.pos_offers.push(newOffer);
           evntBus.$emit('show_mesage', {
             text: 'New Offer Available',

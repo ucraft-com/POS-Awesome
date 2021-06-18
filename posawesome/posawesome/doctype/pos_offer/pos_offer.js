@@ -29,7 +29,7 @@ frappe.ui.form.on('POS Offer', {
 				frappe.throw("Loyalty Points most be more then zero");
 			}
 		}
-		if (frm.doc.apply_type === 'Item Group' && frm.doc.offer === 'Give Product') {
+		if (frm.doc.apply_type === 'Item Group' && frm.doc.offer === 'Give Product' && !frm.doc.replace_item && !frm.doc.replace_cheapest_item) {
 			frm.set_value('auto', 0);
 		}
 	},
@@ -117,7 +117,7 @@ const controllers = (frm) => {
 		frm.set_df_property('offer', 'options', ['', 'Item Price', 'Give Product', 'Grand Total', 'Loyalty Point']);
 	}
 
-	if (frm.doc.apply_type === 'Item Group' && frm.doc.offer === 'Give Product') {
+	if (frm.doc.apply_type === 'Item Group' && frm.doc.offer === 'Give Product' && !frm.doc.replace_item && !frm.doc.replace_cheapest_item) {
 		frm.set_value('auto', 0);
 	}
 	if (frm.doc.apply_on !== 'Item Code' || frm.doc.offer !== 'Give Product' || frm.doc.apply_type !== 'Item Code') {
