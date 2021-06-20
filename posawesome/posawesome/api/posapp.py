@@ -19,7 +19,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_a
 from erpnext.stock.get_item_details import get_item_details
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 from frappe.utils.background_jobs import enqueue
-from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty
+from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
 import json
 from posawesome.posawesome.api.posapp_customization import get_available_credit
 from posawesome import console
@@ -418,6 +418,8 @@ def submit_invoice(data):
         invoice_doc.is_pos = 0
 
     invoice_doc.payments = payments
+    if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_auto_set_batch"):
+        set_batch_nos(invoice_doc, "warehouse", throw=True)
     set_batch_nos_for_bundels(invoice_doc, "warehouse", throw=True)
     invoice_doc.due_date = data.get("due_date")
     invoice_doc.flags.ignore_permissions = True

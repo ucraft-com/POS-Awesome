@@ -658,7 +658,10 @@ export default {
       new_item.posa_is_replace = item.posa_is_replace || null;
       new_item.is_free_item = 0;
       new_item.posa_row_id = this.makeid(20);
-      if (new_item.has_batch_no || new_item.has_serial_no) {
+      if (
+        (!this.pos_profile.posa_auto_set_batch && new_item.has_batch_no) ||
+        new_item.has_serial_no
+      ) {
         this.expanded.push(new_item);
       }
       return new_item;
@@ -906,7 +909,7 @@ export default {
             value = false;
           }
         }
-        if (item.has_batch_no) {
+        if (!this.pos_profile.posa_auto_set_batch && item.has_batch_no) {
           if (item.stock_qty > item.actual_batch_qty) {
             evntBus.$emit('show_mesage', {
               text: `The existing batch quantity of item ${item.item_name} is not enough`,
@@ -1848,7 +1851,10 @@ export default {
           offer.discount_percentage == 0)
           ? 0
           : item.rate;
-      if (new_item.has_batch_no || new_item.has_serial_no) {
+      if (
+        (!this.pos_profile.posa_auto_set_batch && new_item.has_batch_no) ||
+        new_item.has_serial_no
+      ) {
         this.expanded.push(new_item);
       }
       this.update_item_detail(new_item);
