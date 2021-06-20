@@ -15,12 +15,13 @@ from frappe.utils import (
 )
 from frappe import _
 from erpnext.accounts.party import get_party_account
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.stock.get_item_details import get_item_details
-import json
+from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 from frappe.utils.background_jobs import enqueue
+import json
 from posawesome import console
 from posawesome.posawesome.api.posapp_customization import get_available_credit
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 
 
 @frappe.whitelist()
@@ -114,21 +115,8 @@ def get_items(pos_profile):
     pos_profile = json.loads(pos_profile)
     price_list = pos_profile.get("selling_price_list")
 
-    item_groups_list = []
-    if pos_profile.get("item_groups"):
-        for group in pos_profile.get("item_groups"):
-            if not frappe.db.exists("Item Group", group.get("item_group")):
-                item_group = get_root_of(group.get("item_group"))
-                item_groups_list.append(item_group)
-            else:
-                item_groups_list.append(group.get("item_group"))
-
-    conditon = ""
-    if len(item_groups_list) > 0:
-        if len(item_groups_list) == 1:
-            conditon = "AND item_group = '{0}'".format(item_groups_list[0])
-        else:
-            conditon = "AND item_group in {0}".format(tuple(item_groups_list))
+    condition = ""
+    condition += get_item_group_condition(pos_profile.get("name"))
 
     result = []
 
@@ -159,7 +147,7 @@ def get_items(pos_profile):
         ORDER BY
             name asc
             """.format(
-            conditon
+            condition
         ),
         as_dict=1,
     )
@@ -208,6 +196,15 @@ def get_items(pos_profile):
                 result.append(row)
 
     return result
+
+
+def get_item_group_condition(pos_profile):
+    cond = "and 1=1"
+    item_groups = get_item_groups(pos_profile)
+    if item_groups:
+        cond = "and item_group in (%s)" % (", ".join(["%s"] * len(item_groups)))
+
+    return cond % tuple(item_groups)
 
 
 def get_root_of(doctype):
