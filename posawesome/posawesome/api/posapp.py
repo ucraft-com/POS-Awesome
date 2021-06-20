@@ -233,17 +233,60 @@ def get_items_groups():
     )
 
 
-@frappe.whitelist()
-def get_customer_names():
-    customers = frappe.db.sql(
-        """
-        select name, mobile_no, email_id, tax_id, customer_name
-        from `tabCustomer`
-        order by name
-        LIMIT 0, 10000 """,
+def get_customer_groups(pos_profile):
+    customer_groups = []
+    if pos_profile.get("customer_groups"):
+        # Get items based on the item groups defined in the POS profile
+        for data in pos_profile.get("customer_groups"):
+            customer_groups.extend(
+                [
+                    "%s" % frappe.db.escape(d.get("name"))
+                    for d in get_child_nodes(
+                        "Customer Group", data.get("customer_group")
+                    )
+                ]
+            )
+
+    return list(set(customer_groups))
+
+
+def get_child_nodes(group_type, root):
+    lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
+    return frappe.db.sql(
+        """ Select name, lft, rgt from `tab{tab}` where
+			lft >= {lft} and rgt <= {rgt} order by lft""".format(
+            tab=group_type, lft=lft, rgt=rgt
+        ),
         as_dict=1,
     )
 
+
+def get_customer_group_condition(pos_profile):
+    cond = "1=1"
+    customer_groups = get_customer_groups(pos_profile)
+    if customer_groups:
+        cond = " customer_group in (%s)" % (", ".join(["%s"] * len(customer_groups)))
+
+    return cond % tuple(customer_groups)
+
+
+@frappe.whitelist()
+def get_customer_names(pos_profile):
+    pos_profile = json.loads(pos_profile)
+    condition = ""
+    condition += get_customer_group_condition(pos_profile)
+    customers = frappe.db.sql(
+        """
+        SELECT name, mobile_no, email_id, tax_id, customer_name
+        FROM `tabCustomer`
+        WHERE {0}
+        ORDER by name
+        LIMIT 0, 10000 
+        """.format(
+            condition
+        ),
+        as_dict=1,
+    )
     return customers
 
 

@@ -71,7 +71,9 @@ export default {
       }
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.get_customer_names',
-        args: {},
+        args: {
+          pos_profile: this.pos_profile.pos_profile,
+        },
         callback: function (r) {
           if (r.message) {
             vm.customers = r.message;
