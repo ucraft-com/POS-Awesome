@@ -604,11 +604,28 @@ export default {
       );
       if (index === -1) {
         const new_item = this.get_new_item(item);
+        if (item.has_serial_no && item.to_set_serial_no) {
+          new_item.serial_no_selected = [];
+          new_item.serial_no_selected.push(item.to_set_serial_no);
+          item.to_set_serial_no = null;
+        }
         this.items.unshift(new_item);
         this.update_item_detail(new_item);
       } else {
         const cur_item = this.items[index];
         this.update_items_details([cur_item]);
+        if (item.has_serial_no && item.to_set_serial_no) {
+          if (cur_item.serial_no_selected.includes(item.to_set_serial_no)) {
+            evntBus.$emit('show_mesage', {
+              text: `This Serial Number ${item.to_set_serial_no} has already been added!`,
+              color: 'warning',
+            });
+            item.to_set_serial_no = null;
+            return;
+          }
+          cur_item.serial_no_selected.push(item.to_set_serial_no);
+          item.to_set_serial_no = null;
+        }
         if (!cur_item.has_batch_no) {
           cur_item.qty += item.qty;
           this.calc_sotck_gty(cur_item, cur_item.qty);

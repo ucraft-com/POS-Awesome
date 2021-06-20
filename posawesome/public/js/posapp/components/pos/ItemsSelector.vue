@@ -127,11 +127,11 @@
 
 <script>
 import { evntBus } from '../../bus';
-// import debounce from 'lodash.debounce'
 import _ from 'lodash';
 export default {
   data: () => ({
     pos_profile: '',
+    flags: {},
     items_view: 'list',
     item_group: 'ALL',
     loading: false,
@@ -228,10 +228,14 @@ export default {
           new_item.uom = element.posa_uom;
         }
       });
+      if (this.flags.serial_no) {
+        new_item.to_set_serial_no = this.flags.serial_no;
+      }
       this.add_item(new_item);
       this.search = null;
       this.first_search = null;
       this.debounce_search = null;
+      this.flags.serial_no = null;
     },
     get_item_qty(first_search) {
       let scal_qty = 1;
@@ -364,6 +368,23 @@ export default {
             filtred_list = filtred_group_list.filter((item) =>
               item.item_code.toLowerCase().includes(this.search.toLowerCase())
             );
+          }
+          if (
+            filtred_list.length == 0 &&
+            this.pos_profile.posa_search_serial_no
+          ) {
+            filtred_list = filtred_group_list.filter((item) => {
+              let found = false;
+              for (let element of item.serial_no_data) {
+                if (element.serial_no == this.search) {
+                  found = true;
+                  this.flags.serial_no = null;
+                  this.flags.serial_no = this.search;
+                  break;
+                }
+              }
+              return found;
+            });
           }
         }
       }

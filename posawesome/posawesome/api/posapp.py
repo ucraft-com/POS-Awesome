@@ -173,7 +173,13 @@ def get_items(pos_profile):
                 filters={"parent": item_code},
                 fields=["barcode", "posa_uom"],
             )
-
+            serial_no_data = []
+            if pos_profile.get("posa_search_serial_no"):
+                serial_no_data = frappe.get_all(
+                    "Serial No",
+                    filters={"item_code": item_code, "status": "Active"},
+                    fields=["name as serial_no"],
+                )
             if pos_profile.get("posa_display_items_in_stock"):
                 item_stock_qty = get_stock_availability(
                     item_code, pos_profile.get("warehouse")
@@ -192,6 +198,7 @@ def get_items(pos_profile):
                         or pos_profile.get("currency"),
                         "item_barcode": item_barcode or [],
                         "actual_qty": 0,
+                        "serial_no_data": serial_no_data or [],
                     }
                 )
                 result.append(row)
