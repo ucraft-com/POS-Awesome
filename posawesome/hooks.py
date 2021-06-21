@@ -179,6 +179,15 @@ fixtures = [
                     "Sales Invoice Item-posa_is_replace",
                     "POS Profile-posa_auto_set_batch",
                     "POS Profile-posa_search_serial_no",
+                    "Sales Invoice-posa_additional_notes_section",
+                    "Sales Invoice-posa_notes",
+                    "Sales Invoice-posa_column_break_111",
+                    "Sales Invoice-posa_delivery_date",
+                    "Sales Invoice Item-posa_notes"
+                    "Sales Invoice Item-posa_delivery_date",
+                    "Sales Order-posa_additional_notes_section",
+                    "Sales Order-posa_notes",
+                    "Sales Order Item-posa_notes",
                 ),
             ]
         ],
