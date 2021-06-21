@@ -356,6 +356,74 @@
                       </template>
                     </v-autocomplete>
                   </v-col>
+                  <v-col cols="4">
+                    <v-menu
+                      ref="item_delivery_date"
+                      v-model="item.item_delivery_date"
+                      :close-on-content-click="false"
+                      :return-value.sync="item.posa_delivery_date"
+                      transition="scale-transition"
+                      dense
+                    >
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field
+                          v-model="item.posa_delivery_date"
+                          label="Delivery Date"
+                          readonly
+                          outlined
+                          dense
+                          color="indigo"
+                          hide-details
+                          v-bind="attrs"
+                          v-on="on"
+                        ></v-text-field>
+                      </template>
+                      <v-date-picker
+                        v-model="item.posa_delivery_date"
+                        no-title
+                        scrollable
+                        color="indigo"
+                        :min="frappe.datetime.now_date()"
+                      >
+                        <v-spacer></v-spacer>
+                        <v-btn
+                          text
+                          color="primary"
+                          @click="item.item_delivery_date = false"
+                        >
+                          Cancel
+                        </v-btn>
+                        <v-btn
+                          text
+                          color="primary"
+                          @click="
+                            [
+                              $refs.item_delivery_date.save(
+                                item.posa_delivery_date
+                              ),
+                              validate_due_date(item),
+                            ]
+                          "
+                        >
+                          OK
+                        </v-btn>
+                      </v-date-picker>
+                    </v-menu>
+                  </v-col>
+                  <v-col cols="8">
+                    <v-textarea
+                      class="pa-0"
+                      outlined
+                      dense
+                      clearable
+                      color="indigo"
+                      auto-grow
+                      rows="1"
+                      label="Additional Notes"
+                      v-model="item.posa_notes"
+                      :value="item.posa_notes"
+                    ></v-textarea>
+                  </v-col>
                 </v-row>
               </td>
             </template>
@@ -380,7 +448,7 @@
             <v-col cols="6" class="pa-1">
               <v-text-field
                 v-model="discount_amount"
-                label="ِAdditional Discount"
+                label="Additional Discount"
                 ref="discount"
                 outlined
                 dense
@@ -674,6 +742,8 @@ export default {
       new_item.posa_is_offer = item.posa_is_offer;
       new_item.posa_is_replace = item.posa_is_replace || null;
       new_item.is_free_item = 0;
+      new_item.posa_notes = '';
+      new_item.posa_delivery_date = frappe.datetime.now_date();
       new_item.posa_row_id = this.makeid(20);
       if (
         (!this.pos_profile.posa_auto_set_batch && new_item.has_batch_no) ||
@@ -818,6 +888,8 @@ export default {
           discount_percentage: item.discount_percentage,
           discount_amount: item.discount_amount,
           batch_no: item.batch_no,
+          posa_notes: item.posa_notes,
+          posa_delivery_date: item.posa_delivery_date,
           price_list_rate: item.price_list_rate,
         };
         items_list.push(new_item);
@@ -1855,6 +1927,8 @@ export default {
       new_item.posa_offer_applied = 0;
       new_item.posa_is_offer = 1;
       new_item.posa_is_replace = null;
+      new_item.posa_notes = '';
+      new_item.posa_delivery_date = frappe.datetime.now_date();
       new_item.is_free_item =
         (offer.discount_type === 'Rate' && !offer.rate) ||
         (offer.discount_type === 'Discount Percentage' &&
@@ -1985,6 +2059,17 @@ export default {
           }
         });
       });
+    },
+
+    validate_due_date(item) {
+      const today = frappe.datetime.now_date();
+      const parse_today = Date.parse(today);
+      const new_date = Date.parse(item.posa_delivery_date);
+      if (new_date < parse_today) {
+        setTimeout(() => {
+          item.posa_delivery_date = today;
+        }, 0);
+      }
     },
   },
 

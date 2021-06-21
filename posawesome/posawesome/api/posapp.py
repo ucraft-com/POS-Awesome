@@ -344,7 +344,8 @@ def update_invoice(data):
 def submit_invoice(data):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
-
+    invoice_doc.posa_delivery_date = data.get("posa_delivery_date")
+    invoice_doc.posa_notes = data.get("posa_notes")
     mop_cash_list = [
         i.mode_of_payment
         for i in invoice_doc.payments

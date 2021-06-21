@@ -246,10 +246,77 @@
               :prefix="invoice_doc.currency"
             ></v-text-field>
           </v-col>
+          <v-col cols="6">
+            <v-menu
+              ref="order_delivery_date"
+              v-model="order_delivery_date"
+              :close-on-content-click="false"
+              :return-value.sync="invoice_doc.posa_delivery_date"
+              transition="scale-transition"
+              dense
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="invoice_doc.posa_delivery_date"
+                  label="Delivery Date"
+                  readonly
+                  outlined
+                  dense
+                  color="indigo"
+                  hide-details
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="invoice_doc.posa_delivery_date"
+                no-title
+                scrollable
+                color="indigo"
+                :min="frappe.datetime.now_date()"
+              >
+                <v-spacer></v-spacer>
+                <v-btn
+                  text
+                  color="primary"
+                  @click="order_delivery_date = false"
+                >
+                  Cancel
+                </v-btn>
+                <v-btn
+                  text
+                  color="primary"
+                  @click="
+                    [
+                      $refs.order_delivery_date.save(
+                        invoice_doc.posa_delivery_date
+                      ),
+                    ]
+                  "
+                >
+                  OK
+                </v-btn>
+              </v-date-picker>
+            </v-menu>
+          </v-col>
+          <v-col cols="12" v-if="invoice_doc.posa_delivery_date">
+            <v-textarea
+              class="pa-0"
+              outlined
+              dense
+              clearable
+              color="indigo"
+              auto-grow
+              rows="2"
+              label="Additional Notes"
+              v-model="invoice_doc.posa_notes"
+              :value="invoice_doc.posa_notes"
+            ></v-textarea>
+          </v-col>
         </v-row>
         <v-divider></v-divider>
-        <v-row class="px-1 py-0">
-          <v-col cols="6 my-0 py-0">
+        <v-row class="px-1 py-0" justify="center" align="start">
+          <v-col cols="6">
             <v-switch
               v-if="
                 pos_profile.posa_allow_credit_sale && !invoice_doc.is_return
@@ -276,21 +343,27 @@
               :close-on-content-click="false"
               :return-value.sync="invoice_doc.due_date"
               transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
             >
-              <template v-slot:activator="{ on, attrs }">
+              <template v-slot:activator="{ on1, attrs1 }">
                 <v-text-field
                   v-model="invoice_doc.due_date"
                   label="Due Date"
-                  prepend-icon="mdi-calendar"
                   readonly
-                  v-bind="attrs"
-                  v-on="on"
+                  outlined
+                  dense
+                  hide-details
+                  v-bind="attrs1"
+                  v-on="on1"
+                  color="indigo"
                 ></v-text-field>
               </template>
-              <v-date-picker v-model="invoice_doc.due_date" no-title scrollable>
+              <v-date-picker
+                v-model="invoice_doc.due_date"
+                no-title
+                scrollable
+                color="indigo"
+                :min="frappe.datetime.now_date()"
+              >
                 <v-spacer></v-spacer>
                 <v-btn text color="primary" @click="date_menu = false">
                   Cancel
@@ -402,6 +475,7 @@ export default {
     is_credit_sale: 0,
     date_menu: false,
     paid_change: 0,
+    order_delivery_date: false,
     paid_change_rules: [],
     is_return: false,
     is_cashback: true,
