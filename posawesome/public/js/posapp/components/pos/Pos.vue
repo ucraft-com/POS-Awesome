@@ -5,6 +5,7 @@
     <Returns></Returns>
     <NewCustomer></NewCustomer>
     <EditCustomer></EditCustomer>
+    <NewAddress></NewAddress>
     <OpeningDialog v-if="dialog" :dialog="dialog"></OpeningDialog>
     <v-row v-show="!dialog">
       <v-col
@@ -60,6 +61,7 @@ import Drafts from './Drafts.vue';
 import ClosingDialog from './ClosingDialog.vue';
 import NewCustomer from './NewCustomer.vue';
 import EditCustomer from './EditCustomer.vue';
+import NewAddress from './NewAddress.vue';
 import Returns from './Returns.vue';
 
 export default {
@@ -84,6 +86,7 @@ export default {
     Returns,
     PosOffers,
     EditCustomer,
+    NewAddress,
   },
 
   methods: {

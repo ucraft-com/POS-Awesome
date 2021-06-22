@@ -346,6 +346,9 @@ def submit_invoice(data):
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
     invoice_doc.posa_delivery_date = data.get("posa_delivery_date")
     invoice_doc.posa_notes = data.get("posa_notes")
+    invoice_doc.shipping_address_name = data.get("shipping_address_name")
+    if data.get("posa_delivery_date"):
+        invoice_doc.update_stock = 0
     mop_cash_list = [
         i.mode_of_payment
         for i in invoice_doc.payments
@@ -892,3 +895,53 @@ def get_offers(profile):
         as_dict=1,
     )
     return data
+
+
+@frappe.whitelist()
+def get_customer_addresses(customer):
+    return frappe.db.sql(
+        """
+        SELECT 
+            address.name,
+            address.address_line1,
+            address.address_line2,
+            address.address_title,
+            address.city,
+            address.state,
+            address.country,
+            address.address_type
+        FROM `tabAddress` as address
+        INNER JOIN `tabDynamic Link` AS link
+				ON address.name = link.parent
+        WHERE link.link_doctype = 'Customer'
+            AND link.link_name = '{0}'
+            AND address.disabled = 0
+        ORDER BY address.name
+        """.format(
+            customer
+        ),
+        as_dict=1,
+    )
+
+
+@frappe.whitelist()
+def make_address(args):
+    args = json.loads(args)
+    address = frappe.get_doc(
+        {
+            "doctype": "Address",
+            "address_title": args.get("name"),
+            "address_line1": args.get("address_line1"),
+            "address_line2": args.get("address_line2"),
+            "city": args.get("city"),
+            "state": args.get("state"),
+            "pincode": args.get("pincode"),
+            "country": args.get("country"),
+            "address_type": "Shipping",
+            "links": [
+                {"link_doctype": args.get("doctype"), "link_name": args.get("customer")}
+            ],
+        }
+    ).insert()
+
+    return address

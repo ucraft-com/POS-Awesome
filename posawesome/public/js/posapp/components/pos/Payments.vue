@@ -246,7 +246,7 @@
               :prefix="invoice_doc.currency"
             ></v-text-field>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="6" v-if="pos_profile.posa_allow_sales_order">
             <v-menu
               ref="order_delivery_date"
               v-model="order_delivery_date"
@@ -262,6 +262,8 @@
                   readonly
                   outlined
                   dense
+                  background-color="white"
+                  clearable
                   color="indigo"
                   hide-details
                   v-bind="attrs"
@@ -300,10 +302,65 @@
             </v-menu>
           </v-col>
           <v-col cols="12" v-if="invoice_doc.posa_delivery_date">
+            <v-autocomplete
+              dense
+              clearable
+              auto-select-first
+              outlined
+              color="indigo"
+              label="Address"
+              v-model="invoice_doc.shipping_address_name"
+              :items="addresses"
+              item-text="address_title"
+              item-value="name"
+              background-color="white"
+              no-data-text="Address not found"
+              hide-details
+              :filter="addressFilter"
+              append-icon="mdi-plus"
+              @click:append="new_address"
+            >
+              <template v-slot:item="data">
+                <template>
+                  <v-list-item-content>
+                    <v-list-item-title
+                      class="indigo--text subtitle-1"
+                      v-html="data.item.address_title"
+                    ></v-list-item-title>
+                    <v-list-item-title
+                      v-html="data.item.address_line1"
+                    ></v-list-item-title>
+                    <v-list-item-subtitle
+                      v-if="data.item.custoaddress_line2mer_name"
+                      v-html="data.item.address_line2"
+                    ></v-list-item-subtitle>
+                    <v-list-item-subtitle
+                      v-if="data.item.city"
+                      v-html="data.item.city"
+                    ></v-list-item-subtitle>
+                    <v-list-item-subtitle
+                      v-if="data.item.state"
+                      v-html="data.item.state"
+                    ></v-list-item-subtitle>
+                    <v-list-item-subtitle
+                      v-if="data.item.country"
+                      v-html="data.item.mobile_no"
+                    ></v-list-item-subtitle>
+                    <v-list-item-subtitle
+                      v-if="data.item.address_type"
+                      v-html="data.item.address_type"
+                    ></v-list-item-subtitle>
+                  </v-list-item-content>
+                </template>
+              </template>
+            </v-autocomplete>
+          </v-col>
+          <v-col cols="12" v-if="invoice_doc.posa_delivery_date">
             <v-textarea
               class="pa-0"
               outlined
               dense
+              background-color="white"
               clearable
               color="indigo"
               auto-grow
@@ -474,6 +531,7 @@ export default {
     loyalty_amount: 0,
     is_credit_sale: 0,
     date_menu: false,
+    addresses: [],
     paid_change: 0,
     order_delivery_date: false,
     paid_change_rules: [],
@@ -605,6 +663,7 @@ export default {
               color: 'success',
             });
             frappe.utils.play_sound('submit');
+            this.addresses = [];
           }
         },
       });
@@ -703,6 +762,47 @@ export default {
         this.customer_credit_dict = [];
       }
     },
+    get_addresses() {
+      const vm = this;
+      let addresses = [];
+      if (!vm.invoice_doc) {
+        return addresses;
+      }
+      frappe.call({
+        method: 'posawesome.posawesome.api.posapp.get_customer_addresses',
+        args: { customer: vm.invoice_doc.customer },
+        async: true,
+        callback: function (r) {
+          if (r.message) {
+            this.addresses = r.message;
+          }
+        },
+      });
+    },
+    addressFilter(item, queryText, itemText) {
+      const textOne = item.address_title
+        ? item.address_title.toLowerCase()
+        : '';
+      const textTwo = item.address_line1
+        ? item.address_line1.toLowerCase()
+        : '';
+      const textThree = item.address_line2
+        ? item.address_line2.toLowerCase()
+        : '';
+      const textFour = item.city ? item.city.toLowerCase() : '';
+      const textFifth = item.name.toLowerCase();
+      const searchText = queryText.toLowerCase();
+      return (
+        textOne.indexOf(searchText) > -1 ||
+        textTwo.indexOf(searchText) > -1 ||
+        textThree.indexOf(searchText) > -1 ||
+        textFour.indexOf(searchText) > -1 ||
+        textFifth.indexOf(searchText) > -1
+      );
+    },
+    new_address() {
+      evntBus.$emit('open_new_address', this.invoice_doc.customer);
+    },
   },
 
   computed: {
@@ -774,9 +874,14 @@ export default {
           default_payment.amount = invoice_doc.grand_total.toFixed(2);
         }
         this.loyalty_amount = 0;
+        this.get_addresses();
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
+      });
+      evntBus.$on('add_the_new_address', (data) => {
+        this.addresses.push(data);
+        this.$forceUpdate();
       });
     });
     evntBus.$on('update_customer', (customer) => {

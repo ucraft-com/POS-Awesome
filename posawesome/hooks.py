@@ -188,6 +188,7 @@ fixtures = [
                     "Sales Order-posa_additional_notes_section",
                     "Sales Order-posa_notes",
                     "Sales Order Item-posa_notes",
+                    "POS Profile-posa_allow_sales_order",
                 ),
             ]
         ],

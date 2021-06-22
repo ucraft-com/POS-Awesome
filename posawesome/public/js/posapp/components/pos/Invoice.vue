@@ -356,7 +356,7 @@
                       </template>
                     </v-autocomplete>
                   </v-col>
-                  <v-col cols="4">
+                  <v-col cols="4" v-if="pos_profile.posa_allow_sales_order">
                     <v-menu
                       ref="item_delivery_date"
                       v-model="item.item_delivery_date"
@@ -372,6 +372,7 @@
                           readonly
                           outlined
                           dense
+                          clearable
                           color="indigo"
                           hide-details
                           v-bind="attrs"
@@ -410,7 +411,7 @@
                       </v-date-picker>
                     </v-menu>
                   </v-col>
-                  <v-col cols="8">
+                  <v-col cols="8" v-if="pos_profile.posa_allow_sales_order">
                     <v-textarea
                       class="pa-0"
                       outlined
@@ -743,7 +744,7 @@ export default {
       new_item.posa_is_replace = item.posa_is_replace || null;
       new_item.is_free_item = 0;
       new_item.posa_notes = '';
-      new_item.posa_delivery_date = frappe.datetime.now_date();
+      new_item.posa_delivery_date = '';
       new_item.posa_row_id = this.makeid(20);
       if (
         (!this.pos_profile.posa_auto_set_batch && new_item.has_batch_no) ||
@@ -1928,7 +1929,7 @@ export default {
       new_item.posa_is_offer = 1;
       new_item.posa_is_replace = null;
       new_item.posa_notes = '';
-      new_item.posa_delivery_date = frappe.datetime.now_date();
+      new_item.posa_delivery_date = '';
       new_item.is_free_item =
         (offer.discount_type === 'Rate' && !offer.rate) ||
         (offer.discount_type === 'Discount Percentage' &&
