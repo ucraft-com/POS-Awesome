@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 from frappe.utils.background_jobs import enqueue
 from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
 import json
+
 # from posawesome import console
 
 
@@ -812,6 +813,7 @@ def search_invoices_for_return(invoice_name, company):
             "name": ["like", f"%{invoice_name}%"],
             "company": company,
             "docstatus": 1,
+            "is_return": 0,
         },
         fields=["name"],
         limit_page_length=0,
