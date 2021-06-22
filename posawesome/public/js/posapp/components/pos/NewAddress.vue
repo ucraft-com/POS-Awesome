@@ -100,7 +100,6 @@ export default {
               text: 'Customer Address created successfully.',
               color: 'success',
             });
-            frappe.utils.play_sound('submit');
             vm.addressDialog = false;
             vm.customer = '';
             vm.address = {};

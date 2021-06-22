@@ -764,17 +764,18 @@ export default {
     },
     get_addresses() {
       const vm = this;
-      let addresses = [];
       if (!vm.invoice_doc) {
-        return addresses;
+        return;
       }
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.get_customer_addresses',
         args: { customer: vm.invoice_doc.customer },
         async: true,
         callback: function (r) {
-          if (r.message) {
-            this.addresses = r.message;
+          if (!r.exc) {
+            vm.addresses = r.message;
+          } else {
+            vm.addresses = [];
           }
         },
       });
