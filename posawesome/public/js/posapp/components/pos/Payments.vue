@@ -246,7 +246,10 @@
               :prefix="invoice_doc.currency"
             ></v-text-field>
           </v-col>
-          <v-col cols="6" v-if="pos_profile.posa_allow_sales_order">
+          <v-col
+            cols="6"
+            v-if="pos_profile.posa_allow_sales_order && invoiceType == 'Order'"
+          >
             <v-menu
               ref="order_delivery_date"
               v-model="order_delivery_date"
@@ -512,7 +515,14 @@
           >
         </v-col>
         <v-col cols="12">
-          <v-btn block class="mt-2" large color="primary" dark @click="submit"
+          <v-btn
+            block
+            class="mt-2"
+            large
+            color="primary"
+            dark
+            @click="submit"
+            :disabled="vaildatPayment"
             >Submit Payments</v-btn
           >
         </v-col>
@@ -539,6 +549,7 @@ export default {
     is_cashback: true,
     redeem_customer_credit: false,
     customer_credit_dict: [],
+    invoiceType: 'Inovice',
   }),
 
   methods: {
@@ -861,6 +872,20 @@ export default {
 
       return total;
     },
+    vaildatPayment() {
+      if (this.pos_profile.posa_allow_sales_order) {
+        if (
+          this.invoiceType == 'Order' &&
+          !this.invoice_doc.posa_delivery_date
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    },
   },
 
   created: function () {
@@ -883,6 +908,14 @@ export default {
       evntBus.$on('add_the_new_address', (data) => {
         this.addresses.push(data);
         this.$forceUpdate();
+      });
+      evntBus.$on('update_invoice_type', (data) => {
+        this.invoiceType = data;
+        if (data != 'Order') {
+          this.invoice_doc.posa_delivery_date = null;
+          this.invoice_doc.posa_notes = null;
+          this.invoice_doc.shipping_address_name = null;
+        }
       });
     });
     evntBus.$on('update_customer', (customer) => {

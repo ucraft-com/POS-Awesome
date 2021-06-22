@@ -4,7 +4,40 @@
       style="max-height: 70vh; height: 70vh"
       class="cards my-0 py-0 grey lighten-5"
     >
-      <Customer></Customer>
+      <v-row align="center" class="items px-2 py-1">
+        <v-col
+          v-if="pos_profile.posa_allow_sales_order"
+          cols="9"
+          class="pb-0 mb-2 pr-0"
+        >
+          <Customer></Customer>
+        </v-col>
+        <v-col
+          v-if="!pos_profile.posa_allow_sales_order"
+          cols="12"
+          class="pb-0 mb-2"
+        >
+          <Customer></Customer>
+        </v-col>
+        <v-col
+          v-if="pos_profile.posa_allow_sales_order"
+          cols="3"
+          class="pb-0 mb-2"
+        >
+          <v-select
+            dense
+            hide-details
+            outlined
+            color="indigo"
+            background-color="white"
+            :items="invoiceTypes"
+            label="Type"
+            v-model="invoiceType"
+            :disabled="invoiceType == 'Return'"
+          ></v-select>
+        </v-col>
+      </v-row>
+
       <div class="my-0 py-0 overflow-y-auto" style="max-height: 60vh">
         <template @mouseover="style = 'cursor: pointer'">
           <v-data-table
@@ -356,7 +389,13 @@
                       </template>
                     </v-autocomplete>
                   </v-col>
-                  <v-col cols="4" v-if="pos_profile.posa_allow_sales_order">
+                  <v-col
+                    cols="4"
+                    v-if="
+                      pos_profile.posa_allow_sales_order &&
+                      invoiceType == 'Order'
+                    "
+                  >
                     <v-menu
                       ref="item_delivery_date"
                       v-model="item.item_delivery_date"
@@ -411,7 +450,13 @@
                       </v-date-picker>
                     </v-menu>
                   </v-col>
-                  <v-col cols="8" v-if="pos_profile.posa_allow_sales_order">
+                  <v-col
+                    cols="8"
+                    v-if="
+                      pos_profile.posa_allow_sales_order &&
+                      invoiceType == 'Order'
+                    "
+                  >
                     <v-textarea
                       class="pa-0"
                       outlined
@@ -570,6 +615,8 @@ export default {
       posOffers: [],
       posa_offers: [],
       discount_percentage_offer_name: null,
+      invoiceTypes: ['Invoice', 'Order'],
+      invoiceType: 'Invoice',
       itemsPerPage: 1000,
       expanded: [],
       singleExpand: true,
@@ -757,6 +804,8 @@ export default {
 
     cancel_invoice() {
       const doc = this.get_invoice_doc();
+      this.invoiceType = 'Invoice';
+      this.invoiceTypes = ['Invoice', 'Order'];
       if (doc.name && this.pos_profile.posa_allow_delete) {
         frappe.call({
           method: 'posawesome.posawesome.api.posapp.delete_invoice',
@@ -799,13 +848,17 @@ export default {
         this.customer = this.pos_profile.customer;
         this.invoice_doc = '';
         this.discount_amount = 0;
+        this.invoiceType = 'Invoice';
+        this.invoiceTypes = ['Invoice', 'Order'];
       } else {
         if (data.is_return) {
           evntBus.$emit('set_customer_readonly', true);
+          this.invoiceType = 'Return';
+          this.invoiceTypes = ['Return'];
         }
         this.invoice_doc = data;
         this.items = data.items;
-        this.posa_offers = data.posa_offers;
+        this.posa_offers = data.posa_offers || [];
         this.items.forEach((item) => {
           if (!item.posa_row_id) {
             item.posa_row_id = this.makeid(20);
@@ -2143,6 +2196,9 @@ export default {
         this.handelOffers();
         this.$forceUpdate();
       },
+    },
+    invoiceType() {
+      evntBus.$emit('update_invoice_type', this.invoiceType);
     },
   },
 };

@@ -1,56 +1,54 @@
 <template>
-  <v-row class="items px-2 py-1">
-    <v-col cols="12" class="pb-0 mb-2">
-      <v-autocomplete
-        dense
-        clearable
-        auto-select-first
-        outlined
-        color="indigo"
-        label="Customer"
-        v-model="customer"
-        :items="customers"
-        item-text="customer_name"
-        item-value="name"
-        background-color="white"
-        no-data-text="Customer not found"
-        hide-details
-        :filter="customFilter"
-        :disabled="readonly"
-        append-icon="mdi-plus"
-        @click:append="new_customer"
-        prepend-inner-icon="mdi-account-edit"
-        @click:prepend-inner="edit_customer"
-      >
-        <template v-slot:item="data">
-          <template>
-            <v-list-item-content>
-              <v-list-item-title
-                class="indigo--text subtitle-1"
-                v-html="data.item.customer_name"
-              ></v-list-item-title>
-              <v-list-item-subtitle
-                v-if="data.item.customer_name != data.item.name"
-                v-html="`ID: ${data.item.name}`"
-              ></v-list-item-subtitle>
-              <v-list-item-subtitle
-                v-if="data.item.tax_id"
-                v-html="`TAX ID: ${data.item.tax_id}`"
-              ></v-list-item-subtitle>
-              <v-list-item-subtitle
-                v-if="data.item.email_id"
-                v-html="`Email: ${data.item.email_id}`"
-              ></v-list-item-subtitle>
-              <v-list-item-subtitle
-                v-if="data.item.mobile_no"
-                v-html="`Mobile No: ${data.item.mobile_no}`"
-              ></v-list-item-subtitle>
-            </v-list-item-content>
-          </template>
+  <div>
+    <v-autocomplete
+      dense
+      clearable
+      auto-select-first
+      outlined
+      color="indigo"
+      label="Customer"
+      v-model="customer"
+      :items="customers"
+      item-text="customer_name"
+      item-value="name"
+      background-color="white"
+      no-data-text="Customer not found"
+      hide-details
+      :filter="customFilter"
+      :disabled="readonly"
+      append-icon="mdi-plus"
+      @click:append="new_customer"
+      prepend-inner-icon="mdi-account-edit"
+      @click:prepend-inner="edit_customer"
+    >
+      <template v-slot:item="data">
+        <template>
+          <v-list-item-content>
+            <v-list-item-title
+              class="indigo--text subtitle-1"
+              v-html="data.item.customer_name"
+            ></v-list-item-title>
+            <v-list-item-subtitle
+              v-if="data.item.customer_name != data.item.name"
+              v-html="`ID: ${data.item.name}`"
+            ></v-list-item-subtitle>
+            <v-list-item-subtitle
+              v-if="data.item.tax_id"
+              v-html="`TAX ID: ${data.item.tax_id}`"
+            ></v-list-item-subtitle>
+            <v-list-item-subtitle
+              v-if="data.item.email_id"
+              v-html="`Email: ${data.item.email_id}`"
+            ></v-list-item-subtitle>
+            <v-list-item-subtitle
+              v-if="data.item.mobile_no"
+              v-html="`Mobile No: ${data.item.mobile_no}`"
+            ></v-list-item-subtitle>
+          </v-list-item-content>
         </template>
-      </v-autocomplete>
-    </v-col>
-  </v-row>
+      </template>
+    </v-autocomplete>
+  </div>
 </template>
 
 <script>
