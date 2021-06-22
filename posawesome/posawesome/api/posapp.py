@@ -5,24 +5,15 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import (
-    getdate,
-    now_datetime,
-    nowdate,
-    flt,
-    cint,
-    get_datetime_str,
-)
+from frappe.utils import getdate, nowdate, flt
 from frappe import _
-from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.stock.get_item_details import get_item_details
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 from frappe.utils.background_jobs import enqueue
 from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
 import json
-from posawesome.posawesome.api.posapp_customization import get_available_credit
-from posawesome import console
+# from posawesome import console
 
 
 @frappe.whitelist()
