@@ -64,7 +64,9 @@ def create_sales_order(doc):
             msgprint = "Sales Order Created at <a href='{0}'>{1}</a>".format(
                 url, sales_order_doc.name
             )
-            frappe.msgprint(_(msgprint), title="Sales Order Created", indicator="green")
+            frappe.msgprint(
+                _(msgprint), title="Sales Order Created", indicator="green", alert=True
+            )
             i = 0
             for item in sales_order_doc.items:
                 doc.items[i].sales_order = sales_order_doc.name
