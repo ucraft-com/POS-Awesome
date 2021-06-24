@@ -103,7 +103,7 @@
           ></v-select>
         </v-col>
         <v-col cols="6" class="mt-1">
-          <v-btn-toggle v-model="items_view" color="indigo" group dense rounded>
+          <v-btn-toggle v-model="items_view" color="orange" group dense rounded>
             <v-btn value="list">List</v-btn>
             <v-btn value="card">Card</v-btn>
           </v-btn-toggle>
@@ -346,7 +346,16 @@ export default {
         filtred_group_list = this.items;
       }
       if (!this.search || this.search.length < 3) {
-        return (filtred_list = filtred_group_list.slice(0, 50));
+        if (
+          this.pos_profile.posa_show_template_items &&
+          this.pos_profile.posa_hide_variants_items
+        ) {
+          return (filtred_list = filtred_group_list
+            .filter((item) => !item.variant_of)
+            .slice(0, 50));
+        } else {
+          return (filtred_list = filtred_group_list.slice(0, 50));
+        }
       } else if (this.search) {
         filtred_list = filtred_group_list.filter((item) => {
           let found = false;
@@ -386,7 +395,14 @@ export default {
           }
         }
       }
-      return filtred_list.slice(0, 50);
+      if (
+        this.pos_profile.posa_show_template_items &&
+        this.pos_profile.posa_hide_variants_items
+      ) {
+        return filtred_list.filter((item) => !item.variant_of).slice(0, 50);
+      } else {
+        return filtred_list.slice(0, 50);
+      }
     },
     debounce_search: {
       get() {
