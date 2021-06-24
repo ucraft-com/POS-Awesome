@@ -91,7 +91,7 @@
       </v-row>
     </v-card>
     <v-card class="cards mb-0 mt-3 pa-2 grey lighten-5">
-      <v-row no-gutters>
+      <v-row no-gutters align="center" justify="center">
         <v-col cols="12">
           <v-select
             :items="items_group"
@@ -103,18 +103,12 @@
           ></v-select>
         </v-col>
         <v-col cols="6" class="mt-1">
-          <v-btn-toggle
-            v-model="items_view"
-            color="primary accent-3"
-            group
-            dense
-            rounded
-          >
-            <v-btn value="card">Card View</v-btn>
-            <v-btn value="list">List View</v-btn>
+          <v-btn-toggle v-model="items_view" color="indigo" group dense rounded>
+            <v-btn value="list">List</v-btn>
+            <v-btn value="card">Card</v-btn>
           </v-btn-toggle>
         </v-col>
-        <v-col cols="6" class="mt-1">
+        <v-col cols="6" class="mt-2">
           <v-btn color="warning" text @click="show_offers"
             >{{ offersCount }} Offers : {{ appliedOffersCount }} Applied</v-btn
           >
@@ -214,7 +208,11 @@ export default {
       }
     },
     add_item(item) {
-      evntBus.$emit('add_item', item);
+      if (item.has_variants) {
+        evntBus.$emit('open_variants_model', item, this.items);
+      } else {
+        evntBus.$emit('add_item', item);
+      }
     },
     enter_event() {
       if (!this.filtred_items.length || !this.first_search) {

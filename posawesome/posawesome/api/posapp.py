@@ -12,6 +12,9 @@ from erpnext.stock.get_item_details import get_item_details
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 from frappe.utils.background_jobs import enqueue
 from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
+from erpnext.portal.product_configurator.item_variants_cache import (
+    ItemVariantsCacheManager,
+)
 import json
 
 # from posawesome import console
@@ -110,6 +113,8 @@ def get_items(pos_profile):
 
     condition = ""
     condition += get_item_group_condition(pos_profile.get("name"))
+    if not pos_profile.get("posa_show_template_items"):
+        condition += " AND has_variants = 0"
 
     result = []
 
@@ -176,6 +181,16 @@ def get_items(pos_profile):
                 item_stock_qty = get_stock_availability(
                     item_code, pos_profile.get("warehouse")
                 )
+            attributes = ""
+            if pos_profile.get("posa_show_template_items") and item.has_variants:
+                attributes = get_item_attributes(item.item_code)
+            item_attributes = ""
+            if pos_profile.get("posa_show_template_items") and item.variant_of:
+                item_attributes = frappe.get_all(
+                    "Item Variant Attribute",
+                    fields=["attribute", "attribute_value"],
+                    filters={"parent": item.item_code, "parentfield": "attributes"},
+                )
             if pos_profile.get("posa_display_items_in_stock") and (
                 not item_stock_qty or item_stock_qty < 0
             ):
@@ -191,6 +206,8 @@ def get_items(pos_profile):
                         "item_barcode": item_barcode or [],
                         "actual_qty": 0,
                         "serial_no_data": serial_no_data or [],
+                        "attributes": attributes or "",
+                        "item_attributes": item_attributes or "",
                     }
                 )
                 result.append(row)
@@ -938,3 +955,28 @@ def make_address(args):
     ).insert()
 
     return address
+
+
+@frappe.whitelist()
+def get_item_attributes(item_code):
+    attributes = frappe.db.get_all(
+        "Item Variant Attribute",
+        fields=["attribute"],
+        filters={"parenttype": "Item", "parent": item_code},
+        order_by="idx asc",
+    )
+
+    optional_attributes = ItemVariantsCacheManager(item_code).get_optional_attributes()
+
+    for a in attributes:
+        values = frappe.db.get_all(
+            "Item Attribute Value",
+            fields=["attribute_value", "abbr"],
+            filters={"parenttype": "Item Attribute", "parent": a.attribute},
+            order_by="idx asc",
+        )
+        a.values = values
+        if a.attribute in optional_attributes:
+            a.optional = True
+
+    return attributes
