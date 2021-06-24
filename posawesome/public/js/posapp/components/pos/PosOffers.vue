@@ -96,6 +96,7 @@ export default {
     loading: false,
     pos_profile: '',
     pos_offers: [],
+    allItems: [],
     discount_percentage_offer_name: null,
     itemsPerPage: 1000,
     expanded: [],
@@ -230,7 +231,7 @@ export default {
       if (offer.apply_type == 'Item Code') {
         return [offer.apply_item_code];
       } else if (offer.apply_type == 'Item Group') {
-        const items = JSON.parse(localStorage.getItem('items_storage'));
+        const items = this.allItems;
         let filterd_items = [];
         const filterd_items_1 = items.filter(
           (item) => item.item_group == offer.apply_item_group
@@ -281,6 +282,9 @@ export default {
     });
     evntBus.$on('update_discount_percentage_offer_name', (data) => {
       this.discount_percentage_offer_name = data.value;
+    });
+    evntBus.$on('set_all_items', (data) => {
+      this.allItems = data;
     });
   },
 };

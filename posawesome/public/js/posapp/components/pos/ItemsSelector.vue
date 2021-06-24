@@ -163,6 +163,7 @@ export default {
       this.loading = true;
       if (vm.pos_profile.posa_local_storage && localStorage.items_storage) {
         vm.items = JSON.parse(localStorage.getItem('items_storage'));
+        evntBus.$emit('set_all_items', vm.items);
         vm.loading = false;
       }
       frappe.call({
@@ -171,6 +172,7 @@ export default {
         callback: function (r) {
           if (r.message) {
             vm.items = r.message;
+            evntBus.$emit('set_all_items', vm.items);
             vm.loading = false;
             console.info('loadItmes');
             if (vm.pos_profile.posa_local_storage) {

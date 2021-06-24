@@ -614,6 +614,7 @@ export default {
       items: [],
       posOffers: [],
       posa_offers: [],
+      allItems: [],
       discount_percentage_offer_name: null,
       invoiceTypes: ['Invoice', 'Order'],
       invoiceType: 'Invoice',
@@ -1958,7 +1959,7 @@ export default {
       if (!item_code) {
         item_code = offer.give_item;
       }
-      const items = JSON.parse(localStorage.getItem('items_storage'));
+      const items = this.allItems;
       const item = items.find((item) => item.item_code == item_code);
       if (!item) {
         return;
@@ -2152,6 +2153,9 @@ export default {
     });
     evntBus.$on('update_invoice_offers', (data) => {
       this.updateInvoiceOffers(data);
+    });
+    evntBus.$on('set_all_items', (data) => {
+      this.allItems = data;
     });
     evntBus.$on('load_return_invoice', (data) => {
       this.new_invoice(data.invoice_doc);
