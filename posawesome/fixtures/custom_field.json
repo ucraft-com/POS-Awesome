@@ -875,7 +875,7 @@
   "in_preview": 0,
   "in_standard_filter": 0,
   "insert_after": "posa_allow_user_to_edit_item_discount",
-  "label": "Display Items In Stock",
+  "label": "Hide Unavailable Items",
   "length": 0,
   "mandatory_depends_on": "",
   "modified": "2020-10-09 16:01:31.663626",
