@@ -183,7 +183,7 @@ fixtures = [
                     "Sales Invoice-posa_notes",
                     "Sales Invoice-posa_column_break_111",
                     "Sales Invoice-posa_delivery_date",
-                    "Sales Invoice Item-posa_notes"
+                    "Sales Invoice Item-posa_notes",
                     "Sales Invoice Item-posa_delivery_date",
                     "Sales Order-posa_additional_notes_section",
                     "Sales Order-posa_notes",
