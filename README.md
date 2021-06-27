@@ -13,7 +13,7 @@
 5. Supports batch & serial numbering
 6. Supports batch based pricing
 7. Supports UOM specific barcode and pricing
-8. Supports sales of [scale (weighted) products](https://github.com/yrestom/POS-Awesome/discussions/30#discussioncomment-381369)
+8. Supports sales of scale (weighted) products
 9. Ability to make returns from POS
 10. Supports Making returns for either cash or customer credit
 11. Supports using customer credit note for payment
