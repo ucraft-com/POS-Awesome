@@ -88,13 +88,11 @@ doctype_js = {"POS Profile": "posawesome/api/pos_profile.js"}
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+    "Sales Invoice": {
+        "before_submit": "posawesome.posawesome.api.invoice.before_submit",
+    }
+}
 
 # Scheduled Tasks
 # ---------------
@@ -171,6 +169,29 @@ fixtures = [
                     "POS Profile-use_customer_credit",
                     "POS Profile-use_cashback",
                     "POS Profile-posa_hide_closing_shift",
+                    "Customer-posa_discount",
+                    "POS Profile-posa_apply_customer_discount",
+                    "Sales Invoice-posa_offers",
+                    "Sales Invoice Item-posa_offers",
+                    "Sales Invoice Item-posa_row_id",
+                    "Sales Invoice Item-posa_offer_applied",
+                    "Sales Invoice Item-posa_is_offer",
+                    "Sales Invoice Item-posa_is_replace",
+                    "POS Profile-posa_auto_set_batch",
+                    "POS Profile-posa_search_serial_no",
+                    "Sales Invoice-posa_additional_notes_section",
+                    "Sales Invoice-posa_notes",
+                    "Sales Invoice-posa_column_break_111",
+                    "Sales Invoice-posa_delivery_date",
+                    "Sales Invoice Item-posa_notes",
+                    "Sales Invoice Item-posa_delivery_date",
+                    "Sales Order-posa_additional_notes_section",
+                    "Sales Order-posa_notes",
+                    "Sales Order Item-posa_notes",
+                    "POS Profile-posa_allow_sales_order",
+                    "POS Profile-posa_column_break_112",
+                    "POS Profile-posa_show_template_items",
+                    "POS Profile-posa_hide_variants_items",
                 ),
             ]
         ],

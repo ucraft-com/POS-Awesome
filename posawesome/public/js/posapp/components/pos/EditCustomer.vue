@@ -3,7 +3,7 @@
     <v-dialog v-model="customerDialog" max-width="600px">
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">New Customer</span>
+          <span class="headline indigo--text">Customer Info</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -15,17 +15,19 @@
                   label="Customer Name"
                   background-color="white"
                   hide-details
-                  v-model="customer_name"
+                  readonly
+                  v-model="customer_info.customer"
                 ></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
                   dense
                   color="indigo"
-                  label="Tax ID"
+                  label="Email"
                   background-color="white"
                   hide-details
-                  v-model="tax_id"
+                  v-model="customer_info.email_id"
+                  @change="set_customer_info('email_id', $event)"
                 ></v-text-field>
               </v-col>
               <v-col cols="6">
@@ -35,17 +37,26 @@
                   label="Mobile No"
                   background-color="white"
                   hide-details
-                  v-model="mobile_no"
+                  v-model="customer_info.mobile_no"
+                  @change="set_customer_info('mobile_no', $event)"
                 ></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
+                  v-model="customer_info.loyalty_program"
+                  label="Loyalty Program"
                   dense
-                  color="indigo"
-                  label="Email Id"
-                  background-color="white"
+                  readonly
                   hide-details
-                  v-model="email_id"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  v-model="customer_info.loyalty_points"
+                  label="Loyalty Points"
+                  dense
+                  readonly
+                  hide-details
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -54,7 +65,6 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="error" dark @click="close_dialog">Close</v-btn>
-          <v-btn color="primary" dark @click="submit_dialog">Submit</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -66,53 +76,48 @@ import { evntBus } from '../../bus';
 export default {
   data: () => ({
     customerDialog: false,
-    customer_name: '',
-    tax_id: '',
-    mobile_no: '',
-    email_id: '',
+    customer_info: '',
   }),
-  watch: {},
+
+  watch: {
+    customer() {
+      this.fetch_customer_details();
+    },
+  },
+
   methods: {
     close_dialog() {
       this.customerDialog = false;
     },
 
-    submit_dialog() {
-      if (this.customer_name) {
-        const vm = this;
-        const args = {
-          customer_name: this.customer_name,
-          tax_id: this.tax_id,
-          mobile_no: this.mobile_no,
-          email_id: this.email_id,
-        };
-        frappe.call({
-          method: 'posawesome.posawesome.api.posapp.create_customer',
-          args: args,
-          callback: (r) => {
-            if (!r.exc && r.message.name) {
-              evntBus.$emit('show_mesage', {
-                text: 'Customer contact created successfully.',
-                color: 'success',
-              });
-              args.name = r.message.name;
-              frappe.utils.play_sound('submit');
-              evntBus.$emit('add_customer_to_list', args);
-              evntBus.$emit('set_customer', r.message.name);
-              this.customer_name = '';
-              this.tax_id = '';
-              this.mobile_no = '';
-              this.email_id = '';
-            }
-          },
-        });
-        this.customerDialog = false;
-      }
+    set_customer_info(field, value) {
+      const vm = this;
+      frappe.call({
+        method: 'posawesome.posawesome.api.posapp.set_customer_info',
+        args: {
+          fieldname: field,
+          customer: this.customer_info.customer,
+          value: value,
+        },
+        callback: (r) => {
+          if (!r.exc) {
+            vm.customer_info[field] = value;
+            evntBus.$emit('show_mesage', {
+              text: 'Customer contact updated successfully.',
+              color: 'success',
+            });
+            frappe.utils.play_sound('submit');
+          }
+        },
+      });
     },
   },
   created: function () {
-    evntBus.$on('open_new_customer', () => {
+    evntBus.$on('open_edit_customer', () => {
       this.customerDialog = true;
+    });
+    evntBus.$on('set_customer_info_to_edit', (data) => {
+      this.customer_info = data;
     });
   },
 };

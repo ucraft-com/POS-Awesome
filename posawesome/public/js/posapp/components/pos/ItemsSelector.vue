@@ -2,7 +2,7 @@
   <div>
     <v-card
       class="selection mx-auto grey lighten-5"
-      style="max-height: 77vh; height: 77vh"
+      style="max-height: 75vh; height: 75vh"
     >
       <v-progress-linear
         :active="loading"
@@ -66,7 +66,7 @@
             </v-row>
           </div>
           <div fluid class="items" v-if="items_view == 'list'">
-            <div class="my-0 py-0 overflow-y-auto" style="max-height: 67vh">
+            <div class="my-0 py-0 overflow-y-auto" style="max-height: 65vh">
               <template>
                 <v-data-table
                   :headers="items_headers"
@@ -90,11 +90,8 @@
         </v-col>
       </v-row>
     </v-card>
-    <v-card
-      style="max-height: 13vh; height: 13vh"
-      class="cards mb-0 mt-3 pa-2 grey lighten-5"
-    >
-      <v-row no-gutters>
+    <v-card class="cards mb-0 mt-3 pa-2 grey lighten-5">
+      <v-row no-gutters align="center" justify="center">
         <v-col cols="12">
           <v-select
             :items="items_group"
@@ -105,28 +102,16 @@
             v-model="item_group"
           ></v-select>
         </v-col>
-        <v-col cols="8" class="mt-1">
-          <v-btn-toggle
-            v-model="items_view"
-            color="primary accent-3"
-            group
-            dense
-            rounded
-          >
-            <v-btn value="card">Card View</v-btn>
-            <v-btn value="list">List View</v-btn>
+        <v-col cols="6" class="mt-1">
+          <v-btn-toggle v-model="items_view" color="orange" group dense rounded>
+            <v-btn value="list">List</v-btn>
+            <v-btn value="card">Card</v-btn>
           </v-btn-toggle>
         </v-col>
-        <v-col cols="4" class="mt-1">
-          <v-btn-toggle
-            v-model="favourites_view"
-            color="success accent-3"
-            group
-            dense
-            rounded
+        <v-col cols="6" class="mt-2">
+          <v-btn color="warning" text @click="show_offers"
+            >{{ offersCount }} Offers : {{ appliedOffersCount }} Applied</v-btn
           >
-            <v-btn value="True">Favourites</v-btn>
-          </v-btn-toggle>
         </v-col>
       </v-row>
     </v-card>
@@ -136,14 +121,13 @@
 
 <script>
 import { evntBus } from '../../bus';
-// import debounce from 'lodash.debounce'
 import _ from 'lodash';
 export default {
   data: () => ({
     pos_profile: '',
+    flags: {},
     items_view: 'list',
     item_group: 'ALL',
-    favourites_view: false,
     loading: false,
     items_group: ['ALL'],
     items: [],
@@ -153,10 +137,11 @@ export default {
     items_headers: [
       { text: 'Name', align: 'start', sortable: true, value: 'item_name' },
       { text: 'Rate', value: 'rate', align: 'start' },
-      { text: 'Currency', value: 'currency', align: 'start' },
       { text: 'Available QTY', value: 'actual_qty', align: 'start' },
       { text: 'UOM', value: 'stock_uom', align: 'start' },
     ],
+    offersCount: 0,
+    appliedOffersCount: 0,
   }),
 
   watch: {
@@ -166,6 +151,9 @@ export default {
   },
 
   methods: {
+    show_offers() {
+      evntBus.$emit('show_offers', 'true');
+    },
     get_items() {
       if (!this.pos_profile) {
         console.log('No POS Profile');
@@ -175,6 +163,7 @@ export default {
       this.loading = true;
       if (vm.pos_profile.posa_local_storage && localStorage.items_storage) {
         vm.items = JSON.parse(localStorage.getItem('items_storage'));
+        evntBus.$emit('set_all_items', vm.items);
         vm.loading = false;
       }
       frappe.call({
@@ -183,8 +172,9 @@ export default {
         callback: function (r) {
           if (r.message) {
             vm.items = r.message;
+            evntBus.$emit('set_all_items', vm.items);
             vm.loading = false;
-            console.log('loadItmes');
+            console.info('loadItmes');
             if (vm.pos_profile.posa_local_storage) {
               localStorage.setItem('items_storage', '');
               localStorage.setItem('items_storage', JSON.stringify(r.message));
@@ -220,7 +210,11 @@ export default {
       }
     },
     add_item(item) {
-      evntBus.$emit('add_item', item);
+      if (item.has_variants) {
+        evntBus.$emit('open_variants_model', item, this.items);
+      } else {
+        evntBus.$emit('add_item', item);
+      }
     },
     enter_event() {
       if (!this.filtred_items.length || !this.first_search) {
@@ -234,10 +228,14 @@ export default {
           new_item.uom = element.posa_uom;
         }
       });
+      if (this.flags.serial_no) {
+        new_item.to_set_serial_no = this.flags.serial_no;
+      }
       this.add_item(new_item);
       this.search = null;
       this.first_search = null;
       this.debounce_search = null;
+      this.flags.serial_no = null;
     },
     get_item_qty(first_search) {
       let scal_qty = 1;
@@ -350,7 +348,16 @@ export default {
         filtred_group_list = this.items;
       }
       if (!this.search || this.search.length < 3) {
-        return (filtred_list = filtred_group_list.slice(0, 50));
+        if (
+          this.pos_profile.posa_show_template_items &&
+          this.pos_profile.posa_hide_variants_items
+        ) {
+          return (filtred_list = filtred_group_list
+            .filter((item) => !item.variant_of)
+            .slice(0, 50));
+        } else {
+          return (filtred_list = filtred_group_list.slice(0, 50));
+        }
       } else if (this.search) {
         filtred_list = filtred_group_list.filter((item) => {
           let found = false;
@@ -371,9 +378,33 @@ export default {
               item.item_code.toLowerCase().includes(this.search.toLowerCase())
             );
           }
+          if (
+            filtred_list.length == 0 &&
+            this.pos_profile.posa_search_serial_no
+          ) {
+            filtred_list = filtred_group_list.filter((item) => {
+              let found = false;
+              for (let element of item.serial_no_data) {
+                if (element.serial_no == this.search) {
+                  found = true;
+                  this.flags.serial_no = null;
+                  this.flags.serial_no = this.search;
+                  break;
+                }
+              }
+              return found;
+            });
+          }
         }
       }
-      return filtred_list.slice(0, 50);
+      if (
+        this.pos_profile.posa_show_template_items &&
+        this.pos_profile.posa_hide_variants_items
+      ) {
+        return filtred_list.filter((item) => !item.variant_of).slice(0, 50);
+      } else {
+        return filtred_list.slice(0, 50);
+      }
     },
     debounce_search: {
       get() {
@@ -394,6 +425,10 @@ export default {
     });
     evntBus.$on('update_cur_items_details', () => {
       this.update_cur_items_details();
+    });
+    evntBus.$on('update_offers_counters', (data) => {
+      this.offersCount = data.offersCount;
+      this.appliedOffersCount = data.appliedOffersCount;
     });
   },
 
