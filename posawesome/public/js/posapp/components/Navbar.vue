@@ -2,16 +2,22 @@
   <nav>
     <v-app-bar app height="40" class="elevation-2">
       <v-app-bar-nav-icon
-        @click.stop="mini = !mini"
+        @click.stop="drawer = !drawer"
         class="grey--text"
       ></v-app-bar-nav-icon>
-      <v-toolbar-title class="text-uppercase indigo--text">
+      <v-toolbar-title
+        @click="go_desk"
+        style="cursor: pointer"
+        class="text-uppercase indigo--text"
+      >
         <span class="font-weight-light">pos</span>
         <span>awesome</span>
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
-
+      <v-btn style="cursor: unset" text color="grey">
+        <span right>{{ pos_profile.name }}</span>
+      </v-btn>
       <div class="text-center">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
@@ -25,13 +31,21 @@
                   v-if="!pos_profile.posa_hide_closing_shift"
                 >
                   <v-list-item-icon>
-                    <v-icon>mdi-folder-open</v-icon>
+                    <v-icon>mdi-content-save-move-outline</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
                     <v-list-item-title>Close Shift</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
                 <v-divider class="my-0"></v-divider>
+                <v-list-item @click="logOut">
+                  <v-list-item-icon>
+                    <v-icon>mdi-logout</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title>Logut</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
                 <v-list-item @click="go_about">
                   <v-list-item-icon>
                     <v-icon>mdi-information-outline</v-icon>
@@ -45,35 +59,6 @@
           </v-card>
         </v-menu>
       </div>
-
-      <div class="text-center">
-        <v-menu offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn color="grey" dark text v-bind="attrs" v-on="on">Pages</v-btn>
-          </template>
-          <v-card class="mx-auto" max-width="300" tile>
-            <v-list dense>
-              <v-list-item-group v-model="item" color="primary">
-                <v-list-item
-                  v-for="(item, index) in items"
-                  :key="item.text"
-                  @click="[changePage(item.text), (item = index)]"
-                >
-                  <v-list-item-icon>
-                    <v-icon v-text="item.icon"></v-icon>
-                  </v-list-item-icon>
-                  <v-list-item-content>
-                    <v-list-item-title v-text="item.text"></v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list-item-group>
-            </v-list>
-          </v-card>
-        </v-menu>
-      </div>
-      <v-btn text color="grey" @click="go_desk">
-        <span right>Erpnext</span>
-      </v-btn>
     </v-app-bar>
     <v-navigation-drawer
       v-model="drawer"
@@ -126,7 +111,7 @@ export default {
   // components: {MyPopup},
   data() {
     return {
-      drawer: true,
+      drawer: false,
       mini: true,
       item: 0,
       items: [{ text: 'POS', icon: 'mdi-point-of-sale' }],
@@ -166,6 +151,20 @@ export default {
       this.snack = true;
       this.snackColor = data.color;
       this.snackText = data.text;
+    },
+    logOut() {
+      var me = this;
+      me.logged_out = true;
+      return frappe.call({
+        method: 'logout',
+        callback: function (r) {
+          if (r.exc) {
+            return;
+          }
+          frappe.set_route('/login');
+          location.reload();
+        },
+      });
     },
   },
   created: function () {
