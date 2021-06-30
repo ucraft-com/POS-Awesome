@@ -1,9 +1,6 @@
 <template>
   <v-row justify="center">
     <v-dialog v-model="customerDialog" max-width="600px">
-      <!-- <template v-slot:activator="{ on, attrs }">
-        <v-btn color="primary" dark v-bind="attrs" v-on="on">Open Dialog</v-btn>
-      </template>-->
       <v-card>
         <v-card-title>
           <span class="headline indigo--text">New Customer</span>
@@ -65,15 +62,14 @@
 </template>
 
 <script>
-import { evntBus } from "../../bus";
+import { evntBus } from '../../bus';
 export default {
-  // props: ["draftsDialog"],
   data: () => ({
     customerDialog: false,
-    customer_name: "",
-    tax_id: "",
-    mobile_no: "",
-    email_id: "",
+    customer_name: '',
+    tax_id: '',
+    mobile_no: '',
+    email_id: '',
   }),
   watch: {},
   methods: {
@@ -85,28 +81,28 @@ export default {
       if (this.customer_name) {
         const vm = this;
         const args = {
-            customer_name: this.customer_name,
-            tax_id: this.tax_id,
-            mobile_no: this.mobile_no,
-            email_id: this.email_id,
+          customer_name: this.customer_name,
+          tax_id: this.tax_id,
+          mobile_no: this.mobile_no,
+          email_id: this.email_id,
         };
         frappe.call({
-          method: "posawesome.posawesome.api.posapp.create_customer",
+          method: 'posawesome.posawesome.api.posapp.create_customer',
           args: args,
           callback: (r) => {
             if (!r.exc && r.message.name) {
-              evntBus.$emit("show_mesage", {
-                text: "Customer contact created successfully.",
-                color: "success",
+              evntBus.$emit('show_mesage', {
+                text: 'Customer contact created successfully.',
+                color: 'success',
               });
-              args.name = r.message.name
-              frappe.utils.play_sound("submit");
-              evntBus.$emit("add_customer_to_list", args);
-              evntBus.$emit("set_customer", r.message.name);
-              this.customer_name = "";
-              this.tax_id = "";
-              this.mobile_no = "";
-              this.email_id = "";
+              args.name = r.message.name;
+              frappe.utils.play_sound('submit');
+              evntBus.$emit('add_customer_to_list', args);
+              evntBus.$emit('set_customer', r.message.name);
+              this.customer_name = '';
+              this.tax_id = '';
+              this.mobile_no = '';
+              this.email_id = '';
             }
           },
         });
@@ -115,7 +111,7 @@ export default {
     },
   },
   created: function () {
-    evntBus.$on("open_new_customer", () => {
+    evntBus.$on('open_new_customer', () => {
       this.customerDialog = true;
     });
   },

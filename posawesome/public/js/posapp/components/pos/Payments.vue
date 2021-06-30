@@ -1,8 +1,8 @@
 <template>
   <div>
     <v-card
-      class="selection mx-auto grey lighten-5"
-      style="max-height: 78vh; height: 78vh"
+      class="selection mx-auto grey lighten-5 pa-1"
+      style="max-height: 76vh; height: 76vh"
     >
       <v-progress-linear
         :active="loading"
@@ -11,7 +11,7 @@
         top
         color="deep-purple accent-4"
       ></v-progress-linear>
-      <div class="overflow-y-auto px-2 pt-2" style="max-height: 78vh">
+      <div class="overflow-y-auto px-2 pt-2" style="max-height: 75vh">
         <v-row v-if="invoice_doc" class="px-1 py-0">
           <v-col cols="7">
             <v-text-field
@@ -246,10 +246,137 @@
               :prefix="invoice_doc.currency"
             ></v-text-field>
           </v-col>
+          <v-col
+            cols="6"
+            v-if="pos_profile.posa_allow_sales_order && invoiceType == 'Order'"
+          >
+            <v-menu
+              ref="order_delivery_date"
+              v-model="order_delivery_date"
+              :close-on-content-click="false"
+              :return-value.sync="invoice_doc.posa_delivery_date"
+              transition="scale-transition"
+              dense
+            >
+              <template v-slot:activator="{ on, attrs }">
+                <v-text-field
+                  v-model="invoice_doc.posa_delivery_date"
+                  label="Delivery Date"
+                  readonly
+                  outlined
+                  dense
+                  background-color="white"
+                  clearable
+                  color="indigo"
+                  hide-details
+                  v-bind="attrs"
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="invoice_doc.posa_delivery_date"
+                no-title
+                scrollable
+                color="indigo"
+                :min="frappe.datetime.now_date()"
+              >
+                <v-spacer></v-spacer>
+                <v-btn
+                  text
+                  color="primary"
+                  @click="order_delivery_date = false"
+                >
+                  Cancel
+                </v-btn>
+                <v-btn
+                  text
+                  color="primary"
+                  @click="
+                    [
+                      $refs.order_delivery_date.save(
+                        invoice_doc.posa_delivery_date
+                      ),
+                    ]
+                  "
+                >
+                  OK
+                </v-btn>
+              </v-date-picker>
+            </v-menu>
+          </v-col>
+          <v-col cols="12" v-if="invoice_doc.posa_delivery_date">
+            <v-autocomplete
+              dense
+              clearable
+              auto-select-first
+              outlined
+              color="indigo"
+              label="Address"
+              v-model="invoice_doc.shipping_address_name"
+              :items="addresses"
+              item-text="address_title"
+              item-value="name"
+              background-color="white"
+              no-data-text="Address not found"
+              hide-details
+              :filter="addressFilter"
+              append-icon="mdi-plus"
+              @click:append="new_address"
+            >
+              <template v-slot:item="data">
+                <template>
+                  <v-list-item-content>
+                    <v-list-item-title
+                      class="indigo--text subtitle-1"
+                      v-html="data.item.address_title"
+                    ></v-list-item-title>
+                    <v-list-item-title
+                      v-html="data.item.address_line1"
+                    ></v-list-item-title>
+                    <v-list-item-subtitle
+                      v-if="data.item.custoaddress_line2mer_name"
+                      v-html="data.item.address_line2"
+                    ></v-list-item-subtitle>
+                    <v-list-item-subtitle
+                      v-if="data.item.city"
+                      v-html="data.item.city"
+                    ></v-list-item-subtitle>
+                    <v-list-item-subtitle
+                      v-if="data.item.state"
+                      v-html="data.item.state"
+                    ></v-list-item-subtitle>
+                    <v-list-item-subtitle
+                      v-if="data.item.country"
+                      v-html="data.item.mobile_no"
+                    ></v-list-item-subtitle>
+                    <v-list-item-subtitle
+                      v-if="data.item.address_type"
+                      v-html="data.item.address_type"
+                    ></v-list-item-subtitle>
+                  </v-list-item-content>
+                </template>
+              </template>
+            </v-autocomplete>
+          </v-col>
+          <v-col cols="12" v-if="invoice_doc.posa_delivery_date">
+            <v-textarea
+              class="pa-0"
+              outlined
+              dense
+              background-color="white"
+              clearable
+              color="indigo"
+              auto-grow
+              rows="2"
+              label="Additional Notes"
+              v-model="invoice_doc.posa_notes"
+              :value="invoice_doc.posa_notes"
+            ></v-textarea>
+          </v-col>
         </v-row>
         <v-divider></v-divider>
-        <v-row class="px-1 py-0">
-          <v-col cols="6 my-0 py-0">
+        <v-row class="px-1 py-0" justify="center" align="start">
+          <v-col cols="6">
             <v-switch
               v-if="
                 pos_profile.posa_allow_credit_sale && !invoice_doc.is_return
@@ -276,21 +403,27 @@
               :close-on-content-click="false"
               :return-value.sync="invoice_doc.due_date"
               transition="scale-transition"
-              offset-y
-              max-width="290px"
-              min-width="290px"
             >
-              <template v-slot:activator="{ on, attrs }">
+              <template v-slot:activator="{ on1, attrs1 }">
                 <v-text-field
                   v-model="invoice_doc.due_date"
                   label="Due Date"
-                  prepend-icon="mdi-calendar"
                   readonly
-                  v-bind="attrs"
-                  v-on="on"
+                  outlined
+                  dense
+                  hide-details
+                  v-bind="attrs1"
+                  v-on="on1"
+                  color="indigo"
                 ></v-text-field>
               </template>
-              <v-date-picker v-model="invoice_doc.due_date" no-title scrollable>
+              <v-date-picker
+                v-model="invoice_doc.due_date"
+                no-title
+                scrollable
+                color="indigo"
+                :min="frappe.datetime.now_date()"
+              >
                 <v-spacer></v-spacer>
                 <v-btn text color="primary" @click="date_menu = false">
                   Cancel
@@ -368,11 +501,7 @@
       </div>
     </v-card>
 
-    <v-card
-      flat
-      style="max-height: 11vh; height: 11vh"
-      class="cards mb-0 mt-3 py-0"
-    >
+    <v-card flat class="cards mb-0 mt-3 py-0">
       <v-row align="start" no-gutters>
         <v-col cols="12">
           <v-btn
@@ -386,7 +515,14 @@
           >
         </v-col>
         <v-col cols="12">
-          <v-btn block class="mt-2" large color="primary" dark @click="submit"
+          <v-btn
+            block
+            class="mt-2"
+            large
+            color="primary"
+            dark
+            @click="submit"
+            :disabled="vaildatPayment"
             >Submit Payments</v-btn
           >
         </v-col>
@@ -405,12 +541,15 @@ export default {
     loyalty_amount: 0,
     is_credit_sale: 0,
     date_menu: false,
+    addresses: [],
     paid_change: 0,
+    order_delivery_date: false,
     paid_change_rules: [],
     is_return: false,
     is_cashback: true,
     redeem_customer_credit: false,
     customer_credit_dict: [],
+    invoiceType: 'Inovice',
   }),
 
   methods: {
@@ -535,6 +674,7 @@ export default {
               color: 'success',
             });
             frappe.utils.play_sound('submit');
+            this.addresses = [];
           }
         },
       });
@@ -633,6 +773,48 @@ export default {
         this.customer_credit_dict = [];
       }
     },
+    get_addresses() {
+      const vm = this;
+      if (!vm.invoice_doc) {
+        return;
+      }
+      frappe.call({
+        method: 'posawesome.posawesome.api.posapp.get_customer_addresses',
+        args: { customer: vm.invoice_doc.customer },
+        async: true,
+        callback: function (r) {
+          if (!r.exc) {
+            vm.addresses = r.message;
+          } else {
+            vm.addresses = [];
+          }
+        },
+      });
+    },
+    addressFilter(item, queryText, itemText) {
+      const textOne = item.address_title
+        ? item.address_title.toLowerCase()
+        : '';
+      const textTwo = item.address_line1
+        ? item.address_line1.toLowerCase()
+        : '';
+      const textThree = item.address_line2
+        ? item.address_line2.toLowerCase()
+        : '';
+      const textFour = item.city ? item.city.toLowerCase() : '';
+      const textFifth = item.name.toLowerCase();
+      const searchText = queryText.toLowerCase();
+      return (
+        textOne.indexOf(searchText) > -1 ||
+        textTwo.indexOf(searchText) > -1 ||
+        textThree.indexOf(searchText) > -1 ||
+        textFour.indexOf(searchText) > -1 ||
+        textFifth.indexOf(searchText) > -1
+      );
+    },
+    new_address() {
+      evntBus.$emit('open_new_address', this.invoice_doc.customer);
+    },
   },
 
   computed: {
@@ -690,6 +872,20 @@ export default {
 
       return total;
     },
+    vaildatPayment() {
+      if (this.pos_profile.posa_allow_sales_order) {
+        if (
+          this.invoiceType == 'Order' &&
+          !this.invoice_doc.posa_delivery_date
+        ) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    },
   },
 
   created: function () {
@@ -704,9 +900,22 @@ export default {
           default_payment.amount = invoice_doc.grand_total.toFixed(2);
         }
         this.loyalty_amount = 0;
+        this.get_addresses();
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
+      });
+      evntBus.$on('add_the_new_address', (data) => {
+        this.addresses.push(data);
+        this.$forceUpdate();
+      });
+      evntBus.$on('update_invoice_type', (data) => {
+        this.invoiceType = data;
+        if (data != 'Order') {
+          this.invoice_doc.posa_delivery_date = null;
+          this.invoice_doc.posa_notes = null;
+          this.invoice_doc.shipping_address_name = null;
+        }
       });
     });
     evntBus.$on('update_customer', (customer) => {
