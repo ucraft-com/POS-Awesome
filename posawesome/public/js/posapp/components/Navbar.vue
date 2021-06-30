@@ -31,13 +31,21 @@
                   v-if="!pos_profile.posa_hide_closing_shift"
                 >
                   <v-list-item-icon>
-                    <v-icon>mdi-folder-open</v-icon>
+                    <v-icon>mdi-content-save-move-outline</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
                     <v-list-item-title>Close Shift</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
                 <v-divider class="my-0"></v-divider>
+                <v-list-item @click="logOut">
+                  <v-list-item-icon>
+                    <v-icon>mdi-logout</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title>Logut</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
                 <v-list-item @click="go_about">
                   <v-list-item-icon>
                     <v-icon>mdi-information-outline</v-icon>
@@ -143,6 +151,20 @@ export default {
       this.snack = true;
       this.snackColor = data.color;
       this.snackText = data.text;
+    },
+    logOut() {
+      var me = this;
+      me.logged_out = true;
+      return frappe.call({
+        method: 'logout',
+        callback: function (r) {
+          if (r.exc) {
+            return;
+          }
+          frappe.set_route('/login');
+          location.reload();
+        },
+      });
     },
   },
   created: function () {
