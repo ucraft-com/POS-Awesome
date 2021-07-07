@@ -103,6 +103,8 @@ export default {
   }),
   watch: {
     company(val) {
+      
+      console.log('company ', val); //HELKYDs 05-07-21
       this.pos_profiles = [];
       this.pos_profiles_data.forEach((element) => {
         if (element.company === val) {
@@ -138,6 +140,7 @@ export default {
         args: {},
         callback: function (r) {
           if (r.message) {
+            console.info('get opeinig dialog data ', r.message); //HELKYDs 05-07-21
             r.message.companys.forEach((element) => {
               vm.companys.push(element.name);
             });

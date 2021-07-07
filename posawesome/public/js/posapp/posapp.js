@@ -1,5 +1,7 @@
 import Home from './Home.vue';
 
+import { _t } from '../translate'; //HELKYDS 07-07-2021
+
 frappe.provide('frappe.PosApp');
 
 
