@@ -1,7 +1,7 @@
 //const frappe = require('frappejs');
 //Read from ../translations/pt.csv
-const frappelerficheiro = require('fs'); // require('frappejs/server/utils'); //HELKYD 26-03-2021
-const fs = require('fs');
+const frappelerficheiro = "../translations/pt.csv"; //require('fs'); // require('frappejs/server/utils'); //HELKYD 26-03-2021
+const fs = "../translations/pt.csv"; //require('fs');
 
 function __(txt, replace) {
   //Carregar o file das traducoes...

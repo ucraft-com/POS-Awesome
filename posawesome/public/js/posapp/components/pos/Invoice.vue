@@ -598,6 +598,9 @@
 <script>
 import { evntBus } from '../../bus';
 import Customer from './Customer.vue';
+
+import { _t } from '../../../translate'; //HELKYDS 07-07-2021
+
 export default {
   data() {
     return {
@@ -623,16 +626,16 @@ export default {
       singleExpand: true,
       items_headers: [
         {
-          text: 'Name',
+          text: frappe._('Name'),
           align: 'start',
           sortable: true,
           value: 'item_name',
         },
-        { text: 'QTY', value: 'qty', align: 'center' },
-        { text: 'UOM', value: 'uom', align: 'center' },
-        { text: 'Rate', value: 'rate', align: 'center' },
-        { text: 'Amount', value: 'amount', align: 'center' },
-        { text: 'is Offer', value: 'posa_is_offer', align: 'center' },
+        { text: __('QTY'), value: 'qty', align: 'center' },
+        { text: __('UOM'), value: 'uom', align: 'center' },
+        { text: __('Rate'), value: 'rate', align: 'center' },
+        { text: __('Amount'), value: 'amount', align: 'center' },
+        { text: __('is Offer'), value: 'posa_is_offer', align: 'center' },
       ],
     };
   },
@@ -832,6 +835,9 @@ export default {
     },
 
     new_invoice(data = {}) {
+      console.info('New Invoice...'); //HELKYD 07-07-2021
+      
+      console.info(frappe._('Name')); //HELKYD 07-07-2021
       evntBus.$emit('set_customer_readonly', false);
       this.expanded = [];
       this.posa_offers = [];

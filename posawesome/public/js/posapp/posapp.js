@@ -23,6 +23,6 @@ frappe.PosApp.posapp = class {
         });
     }
     setup_header () {
-
+        console.log('INICIO');
     }
 };
