@@ -1,6 +1,7 @@
 import Home from './Home.vue';
 
-import { _t } from '../translate'; //HELKYDS 07-07-2021
+//import pt from '../../node_modules/vuetify/src/locale/pt'; //HELKYD 08-07-2021
+//import { pt } from 'vuetify/src/locale/pt'; //HELKYD 08-07-2021
 
 frappe.provide('frappe.PosApp');
 
@@ -23,6 +24,17 @@ frappe.PosApp.posapp = class {
         });
     }
     setup_header () {
-        console.log('INICIO');
+
     }
+    
 };
+/*
+export default {
+    ...pt,
+    invoice: {
+        type:{
+            title: 'Tipo'
+        }
+    }
+}
+*/

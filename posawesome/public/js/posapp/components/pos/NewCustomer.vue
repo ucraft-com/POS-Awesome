@@ -3,7 +3,7 @@
     <v-dialog v-model="customerDialog" max-width="600px">
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">New Customer</span>
+          <span class="headline indigo--text">{{ __('New Customer')}}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -12,7 +12,7 @@
                 <v-text-field
                   dense
                   color="indigo"
-                  label="Customer Name"
+                  :label="frappe._('Customer Name')"
                   background-color="white"
                   hide-details
                   v-model="customer_name"
@@ -22,7 +22,7 @@
                 <v-text-field
                   dense
                   color="indigo"
-                  label="Tax ID"
+                  :label="frappe._('Tax ID')"
                   background-color="white"
                   hide-details
                   v-model="tax_id"
@@ -32,7 +32,7 @@
                 <v-text-field
                   dense
                   color="indigo"
-                  label="Mobile No"
+                  :label="frappe._('Mobile No')"
                   background-color="white"
                   hide-details
                   v-model="mobile_no"
@@ -42,7 +42,7 @@
                 <v-text-field
                   dense
                   color="indigo"
-                  label="Email Id"
+                  :label="frappe._('Email Id')"
                   background-color="white"
                   hide-details
                   v-model="email_id"
@@ -92,7 +92,7 @@ export default {
           callback: (r) => {
             if (!r.exc && r.message.name) {
               evntBus.$emit('show_mesage', {
-                text: 'Customer contact created successfully.',
+                text: __('Customer contact created successfully.'),
                 color: 'success',
               });
               args.name = r.message.name;

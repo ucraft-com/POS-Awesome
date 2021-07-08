@@ -17,7 +17,7 @@
             <v-text-field
               outlined
               color="indigo"
-              label="Paid Amount"
+              :label="frappe._('Paid Amount')"
               background-color="white"
               hide-details
               :value="formtCurrency(total_payments)"
@@ -30,7 +30,7 @@
             <v-text-field
               outlined
               color="indigo"
-              :label="diff_lable"
+              :label="frappe._(diff_lable)"
               background-color="white"
               hide-details
               :value="formtCurrency(diff_payment)"
@@ -44,7 +44,7 @@
             <v-text-field
               outlined
               color="indigo"
-              label="Paid Change"
+              :label="frappe._('Paid Change')"
               background-color="white"
               v-model="paid_change"
               @input="set_paid_change()"
@@ -59,7 +59,7 @@
             <v-text-field
               outlined
               color="indigo"
-              label="Credit Change"
+              :label="frappe._('Credit Change')"
               background-color="white"
               hide-details
               :value="formtCurrency(credit_change)"
@@ -82,7 +82,7 @@
                 dense
                 outlined
                 color="indigo"
-                :label="payment.mode_of_payment"
+                :label="frappe._(payment.mode_of_payment)"
                 background-color="white"
                 hide-details
                 v-model="payment.amount"
@@ -118,7 +118,7 @@
               dense
               outlined
               color="indigo"
-              label="Redeem Loyalty Points"
+              :label="frappe._('Redeem Loyalty Points')"
               background-color="white"
               hide-details
               v-model="loyalty_amount"
@@ -131,7 +131,7 @@
               dense
               outlined
               color="indigo"
-              label="You can redeem upto"
+              :label="frappe._('You can redeem upto')"
               background-color="white"
               hide-details
               :value="formtCurrency(available_pioints_amount)"
@@ -156,7 +156,7 @@
               outlined
               disabled
               color="indigo"
-              label="Redeemed Customer Credit"
+              :label="frappe._('Redeemed Customer Credit')"
               background-color="white"
               hide-details
               v-model="redeemed_customer_credit"
@@ -169,7 +169,7 @@
               dense
               outlined
               color="indigo"
-              label="You can redeem credit upto"
+              :label="frappe._('You can redeem credit upto')"
               background-color="white"
               hide-details
               :value="formtCurrency(available_customer_credit)"
@@ -186,7 +186,7 @@
               dense
               outlined
               color="indigo"
-              label="Net Total"
+              :label="frappe._('Net Total')"
               background-color="white"
               hide-details
               :value="formtCurrency(invoice_doc.net_total)"
@@ -199,7 +199,7 @@
               dense
               outlined
               color="indigo"
-              label="Tax and Charges"
+              :label="frappe._('Tax and Charges')"
               background-color="white"
               hide-details
               :value="formtCurrency(invoice_doc.total_taxes_and_charges)"
@@ -212,7 +212,7 @@
               dense
               outlined
               color="indigo"
-              label="Totoal Amount"
+              :label="frappe._('Totoal Amount')"
               background-color="white"
               hide-details
               :value="formtCurrency(invoice_doc.total)"
@@ -225,7 +225,7 @@
               dense
               outlined
               color="indigo"
-              label="Discount Amount"
+              :label="frappe._('Discount Amount')"
               background-color="white"
               hide-details
               :value="formtCurrency(invoice_doc.discount_amount)"
@@ -238,7 +238,7 @@
               dense
               outlined
               color="indigo"
-              label="Grand Amount"
+              :label="frappe._('Grand Amount')"
               background-color="white"
               hide-details
               :value="formtCurrency(invoice_doc.grand_total)"
@@ -261,7 +261,7 @@
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   v-model="invoice_doc.posa_delivery_date"
-                  label="Delivery Date"
+                  :label="frappe._('Delivery Date')"
                   readonly
                   outlined
                   dense
@@ -286,7 +286,7 @@
                   color="primary"
                   @click="order_delivery_date = false"
                 >
-                  Cancel
+                  {{__('Cancel')}}
                 </v-btn>
                 <v-btn
                   text
@@ -311,7 +311,7 @@
               auto-select-first
               outlined
               color="indigo"
-              label="Address"
+              :label="frappe._('Address')"
               v-model="invoice_doc.shipping_address_name"
               :items="addresses"
               item-text="address_title"
@@ -368,7 +368,7 @@
               color="indigo"
               auto-grow
               rows="2"
-              label="Additional Notes"
+              :label="frappe._('Additional Notes')"
               v-model="invoice_doc.posa_notes"
               :value="invoice_doc.posa_notes"
             ></v-textarea>
@@ -383,7 +383,7 @@
               "
               v-model="is_credit_sale"
               flat
-              label="Is Credit Sale"
+              :label="frappe._('Is Credit Sale')"
               class="my-0 py-0"
             ></v-switch>
 
@@ -391,7 +391,7 @@
               v-if="invoice_doc.is_return && pos_profile.use_cashback"
               v-model="is_cashback"
               flat
-              label="Is Cashback"
+              :label="frappe._('Is Cashback')"
               class="my-0 py-0"
             ></v-switch>
           </v-col>
@@ -407,7 +407,7 @@
               <template v-slot:activator="{ on1, attrs1 }">
                 <v-text-field
                   v-model="invoice_doc.due_date"
-                  label="Due Date"
+                  :label="frappe._('Due Date')"
                   readonly
                   outlined
                   dense
@@ -451,7 +451,7 @@
               v-if="!invoice_doc.is_return && pos_profile.use_customer_credit"
               v-model="redeem_customer_credit"
               flat
-              label="Use Customer Credit"
+              :label="frappe._('Use Customer Credit')"
               class="my-0 py-0"
               @change="get_available_credit($event)"
             ></v-switch>
@@ -475,7 +475,7 @@
                 dense
                 outlined
                 color="indigo"
-                label="Available Credit"
+                :label="frappe._('Available Credit')"
                 background-color="white"
                 hide-details
                 :value="formtCurrency(row.total_credit)"
@@ -488,7 +488,7 @@
                 dense
                 outlined
                 color="indigo"
-                label="Redeem Credit"
+                :label="frappe._('Redeem Credit')"
                 background-color="white"
                 hide-details
                 type="number"
@@ -511,7 +511,7 @@
             color="warning"
             dark
             @click="back_to_invoice"
-            >Back</v-btn
+            >{{__('Back')}}</v-btn
           >
         </v-col>
         <v-col cols="12">
@@ -523,7 +523,7 @@
             dark
             @click="submit"
             :disabled="vaildatPayment"
-            >Submit Payments</v-btn
+            >{{__('Submit Payments')}}</v-btn
           >
         </v-col>
       </v-row>
@@ -549,7 +549,7 @@ export default {
     is_cashback: true,
     redeem_customer_credit: false,
     customer_credit_dict: [],
-    invoiceType: 'Inovice',
+    invoiceType: 'Invoice',
   }),
 
   methods: {

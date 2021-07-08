@@ -143,3 +143,6 @@ apps/posawesome/posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shif
 DocType: POS Offer,Valid From,Valido Apartir
 DocType: POS Offer,Valid Upto,Valido Até
 DocType: POS Offer,Warehouse,Armazém
+apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,is Offer,é Oferta
+apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,Type,Tipo
+apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,Total Qty,Qtd Total

@@ -31,7 +31,7 @@
             color="indigo"
             background-color="white"
             :items="invoiceTypes"
-            label="Type"
+            :label="frappe._('Type')"
             v-model="invoiceType"
             :disabled="invoiceType == 'Return'"
           ></v-select>
@@ -108,7 +108,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Item Code"
+                      :label="frappe._('Item Code')"
                       background-color="white"
                       hide-details
                       v-model="item.item_code"
@@ -120,7 +120,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="QTY"
+                      :label="frappe._('QTY')"
                       background-color="white"
                       hide-details
                       v-model.number="item.qty"
@@ -133,7 +133,7 @@
                     <v-select
                       dense
                       background-color="white"
-                      label="UOM"
+                      :label="frappe._('UOM')"
                       v-model="item.uom"
                       :items="item.item_uoms"
                       outlined
@@ -154,7 +154,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Rate"
+                      :label="frappe._('Rate')"
                       background-color="white"
                       hide-details
                       v-model.number="item.rate"
@@ -178,7 +178,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Discount Percentage"
+                      :label="frappe._('Discount Percentage')"
                       background-color="white"
                       hide-details
                       v-model.number="item.discount_percentage"
@@ -201,7 +201,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Discount Amount"
+                      :label="frappe._('Discount Amount')"
                       background-color="white"
                       hide-details
                       v-model.number="item.discount_amount"
@@ -225,7 +225,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Price list Rate"
+                      :label="frappe._('Price list Rate')"
                       background-color="white"
                       hide-details
                       v-model="item.price_list_rate"
@@ -239,7 +239,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Available QTY"
+                      :label="frappe._('Available QTY')"
                       background-color="white"
                       hide-details
                       v-model="item.actual_qty"
@@ -252,7 +252,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Group"
+                      :label="frappe._('Group')"
                       background-color="white"
                       hide-details
                       v-model="item.item_group"
@@ -264,7 +264,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Stock QTY"
+                      :label="frappe._('Stock QTY')"
                       background-color="white"
                       hide-details
                       v-model="item.stock_qty"
@@ -277,7 +277,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Stock UOM"
+                      :label="frappe._('Stock UOM')"
                       background-color="white"
                       hide-details
                       v-model="item.stock_uom"
@@ -287,7 +287,7 @@
                   <v-col align="center" cols="4" v-if="item.posa_offer_applied">
                     <v-checkbox
                       dense
-                      label="Offer Applied"
+                      :label="frappe._('Offer Applied')"
                       v-model="item.posa_offer_applied"
                       readonly
                       hide-details
@@ -302,7 +302,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Serial No QTY"
+                      :label="frappe._('Serial No QTY')"
                       background-color="white"
                       hide-details
                       v-model="item.serial_no_selected_count"
@@ -323,7 +323,7 @@
                       chips
                       color="indigo"
                       small-chips
-                      label="Serial No"
+                      :label="frappe._('Serial No')"
                       multiple
                       @change="set_serial_no(item)"
                     ></v-autocomplete>
@@ -336,7 +336,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Batch No Available QTY"
+                      :label="frappe._('Batch No Available QTY')"
                       background-color="white"
                       hide-details
                       v-model="item.actual_batch_qty"
@@ -352,7 +352,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Batch No Expiry Date"
+                      :label="frappe._('Batch No Expiry Date')"
                       background-color="white"
                       hide-details
                       v-model="item.batch_no_expiry_date"
@@ -370,7 +370,7 @@
                       outlined
                       dense
                       color="indigo"
-                      label="Batch No"
+                      :label="frappe._('Batch No')"
                       @change="set_batch_qty(item, $event)"
                     >
                       <template v-slot:item="data">
@@ -407,7 +407,7 @@
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
                           v-model="item.posa_delivery_date"
-                          label="Delivery Date"
+                          :label="frappe._('Delivery Date')"
                           readonly
                           outlined
                           dense
@@ -465,7 +465,7 @@
                       color="indigo"
                       auto-grow
                       rows="1"
-                      label="Additional Notes"
+                      :label="frappe._('Additional Notes')"
                       v-model="item.posa_notes"
                       :value="item.posa_notes"
                     ></v-textarea>
@@ -484,7 +484,7 @@
             <v-col cols="6" class="pa-1">
               <v-text-field
                 :value="formtCurrency(total_qty)"
-                label="Total Qty"
+                :label="frappe._('Total Qty')"
                 outlined
                 dense
                 readonly
@@ -494,7 +494,7 @@
             <v-col cols="6" class="pa-1">
               <v-text-field
                 v-model="discount_amount"
-                label="Additional Discount"
+                :label="frappe._('Additional Discount')"
                 ref="discount"
                 outlined
                 dense
@@ -512,7 +512,7 @@
             <v-col cols="6" class="pa-1 mt-2">
               <v-text-field
                 :value="formtCurrency(total_items_discount_amount)"
-                label="Items Discounts"
+                :label="frappe._('Items Discounts')"
                 outlined
                 dense
                 readonly
@@ -524,7 +524,7 @@
             <v-col cols="6" class="pa-1 mt-2">
               <v-text-field
                 :value="formtCurrency(subtotal)"
-                label="Total"
+                :label="frappe._('Total')"
                 outlined
                 dense
                 readonly
@@ -544,7 +544,7 @@
                 color="warning"
                 dark
                 @click="get_draft_invoices"
-                >Hold</v-btn
+                >{{__('Hold')}}</v-btn
               >
             </v-col>
             <v-col cols="6" class="pa-1">
@@ -555,7 +555,7 @@
                 color="info"
                 dark
                 @click="open_returns"
-                >Return</v-btn
+                >{{__('Return')}}</v-btn
               >
             </v-col>
             <v-col cols="6" class="pa-1">
@@ -565,7 +565,7 @@
                 color="error"
                 dark
                 @click="cancel_invoice"
-                >Cancel</v-btn
+                >{{__('Cancel')}}</v-btn
               >
             </v-col>
             <v-col cols="6" class="pa-1">
@@ -575,7 +575,7 @@
                 color="success"
                 dark
                 @click="new_invoice"
-                >New</v-btn
+                >{{__('New')}}</v-btn
               >
             </v-col>
             <v-col cols="12" class="pa-1">
@@ -585,7 +585,7 @@
                 color="primary"
                 @click="show_payment"
                 dark
-                >PAY</v-btn
+                >{{__('PAY')}}</v-btn
               >
             </v-col>
           </v-row>
@@ -626,7 +626,7 @@ export default {
       singleExpand: true,
       items_headers: [
         {
-          text: frappe._('Name'),
+          text: __('Name'),
           align: 'start',
           sortable: true,
           value: 'item_name',
@@ -737,7 +737,7 @@ export default {
         if (item.has_serial_no && item.to_set_serial_no) {
           if (cur_item.serial_no_selected.includes(item.to_set_serial_no)) {
             evntBus.$emit('show_mesage', {
-              text: `This Serial Number ${item.to_set_serial_no} has already been added!`,
+              text: __(`This Serial Number ${item.to_set_serial_no} has already been added!`),
               color: 'warning',
             });
             item.to_set_serial_no = null;
@@ -1001,14 +1001,14 @@ export default {
     show_payment() {
       if (!this.customer) {
         evntBus.$emit('show_mesage', {
-          text: `There is no Customer !`,
+          text: __(`There is no Customer !`),
           color: 'error',
         });
         return;
       }
       if (!this.items.length) {
         evntBus.$emit('show_mesage', {
-          text: `There is no Items !`,
+          text: __(`There is no Items !`),
           color: 'error',
         });
         return;
@@ -1031,7 +1031,7 @@ export default {
         ) {
           if (item.is_stock_item && item.stock_qty > item.actual_qty) {
             evntBus.$emit('show_mesage', {
-              text: `The existing quantity of item ${item.item_name} is not enough`,
+              text: __(`The existing quantity of item ${item.item_name} is not enough`),
               color: 'error',
             });
             value = false;
@@ -1042,7 +1042,7 @@ export default {
           item.discount_percentage > item.max_discount
         ) {
           evntBus.$emit('show_mesage', {
-            text: `Maximum discount for Item ${item.item_name} is ${item.max_discount}%`,
+            text: __(`Maximum discount for Item ${item.item_name} is ${item.max_discount}%`),
             color: 'error',
           });
           value = false;
@@ -1053,7 +1053,7 @@ export default {
             item.stock_qty != item.serial_no_selected.length
           ) {
             evntBus.$emit('show_mesage', {
-              text: `Selcted serial numbers of item ${item.item_name} is incorrect`,
+              text: __(`Selcted serial numbers of item ${item.item_name} is incorrect`),
               color: 'error',
             });
             value = false;
@@ -1062,7 +1062,7 @@ export default {
         if (!this.pos_profile.posa_auto_set_batch && item.has_batch_no) {
           if (item.stock_qty > item.actual_batch_qty) {
             evntBus.$emit('show_mesage', {
-              text: `The existing batch quantity of item ${item.item_name} is not enough`,
+              text: __(`The existing batch quantity of item ${item.item_name} is not enough`),
               color: 'error',
             });
             value = false;
@@ -1072,7 +1072,7 @@ export default {
           const clac_percentage = (this.discount_amount / this.Total) * 100;
           if (clac_percentage > this.pos_profile.posa_max_discount_allowed) {
             evntBus.$emit('show_mesage', {
-              text: `The discount should not be higher than ${this.pos_profile.posa_max_discount_allowed}%`,
+              text: __(`The discount should not be higher than ${this.pos_profile.posa_max_discount_allowed}%`),
               color: 'error',
             });
             value = false;
@@ -1081,7 +1081,7 @@ export default {
         if (this.invoice_doc.is_return) {
           if (this.subtotal >= 0) {
             evntBus.$emit('show_mesage', {
-              text: `Return Invoice Total Not Correct`,
+              text: __(`Return Invoice Total Not Correct`),
               color: 'error',
             });
             value = false;
@@ -1089,7 +1089,7 @@ export default {
           }
           if (this.subtotal * -1 > this.return_doc.total) {
             evntBus.$emit('show_mesage', {
-              text: `Return Invoice Total should not be higher than ${this.return_doc.total}`,
+              text: __(`Return Invoice Total should not be higher than ${this.return_doc.total}`),
               color: 'error',
             });
             value = false;
@@ -1102,14 +1102,14 @@ export default {
 
             if (!return_item) {
               evntBus.$emit('show_mesage', {
-                text: `The item ${item.item_name} cannot be returned because it is not in the invoice ${this.return_doc.name}`,
+                text: __(`The item ${item.item_name} cannot be returned because it is not in the invoice ${this.return_doc.name}`),
                 color: 'error',
               });
               value = false;
               return value;
             } else if (item.qty * -1 > return_item.qty || item.qty >= 0) {
               evntBus.$emit('show_mesage', {
-                text: `The QTY of the item ${item.item_name} cannot be greater than ${return_item.qty}`,
+                text: __(`The QTY of the item ${item.item_name} cannot be greater than ${return_item.qty}`),
                 color: 'error',
               });
               value = false;
@@ -1398,7 +1398,7 @@ export default {
       item.serial_no_selected_count = item.serial_no_selected.length;
       if (item.serial_no_selected_count != item.stock_qty) {
         evntBus.$emit('show_mesage', {
-          text: `Selected Serial No QTY is ${item.serial_no_selected_count} it should be ${item.stock_qty}`,
+          text: __(`Selected Serial No QTY is ${item.serial_no_selected_count} it should be ${item.stock_qty}`),
           color: 'warning',
         });
       }
@@ -1942,7 +1942,7 @@ export default {
       }
       if (offer.offer === 'Loyalty Point') {
         evntBus.$emit('show_mesage', {
-          text: 'Loyalty Point Offer Applied',
+          text: __('Loyalty Point Offer Applied'),
           color: 'success',
         });
       }

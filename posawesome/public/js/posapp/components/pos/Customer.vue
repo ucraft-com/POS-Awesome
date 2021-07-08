@@ -6,7 +6,7 @@
       auto-select-first
       outlined
       color="indigo"
-      label="Customer"
+      :label="frappe._('Customer')"
       v-model="customer"
       :items="customers"
       item-text="customer_name"
