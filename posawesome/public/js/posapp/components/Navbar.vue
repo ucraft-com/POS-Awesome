@@ -28,7 +28,7 @@
                     <v-icon>mdi-folder-open</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title>Close Shift</v-list-item-title>
+                    <v-list-item-title>{{__('Close Shift')}}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
                 <v-divider class="my-0"></v-divider>
@@ -37,7 +37,7 @@
                     <v-icon>mdi-information-outline</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title>About</v-list-item-title>
+                    <v-list-item-title>{{__('About')}}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
               </v-list-item-group>
@@ -49,7 +49,7 @@
       <div class="text-center">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
-            <v-btn color="grey" dark text v-bind="attrs" v-on="on">Pages</v-btn>
+            <v-btn color="grey" dark text v-bind="attrs" v-on="on">{{__('Pages')}}</v-btn>
           </template>
           <v-card class="mx-auto" max-width="300" tile>
             <v-list dense>

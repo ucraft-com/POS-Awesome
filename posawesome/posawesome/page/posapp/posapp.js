@@ -88,7 +88,7 @@ $.extend(
 		"New Customer" : "Novo Cliente",
 		"Create POS Opening Shift" : "Criar Turno de Abertura POS",
 		"Select Return Invoice" : "Selecione a Factura para Devolução",
-		
-
+		"Close Shift" : "Fechar Turno",
+		"Pages" : "Paginas",
 
 	});	//HELKYD 08-07-2021
