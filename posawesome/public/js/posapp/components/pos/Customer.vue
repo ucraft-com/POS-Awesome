@@ -12,7 +12,7 @@
       item-text="customer_name"
       item-value="name"
       background-color="white"
-      no-data-text="Customer not found"
+      :no-data-text="__('Customer not found')"
       hide-details
       :filter="customFilter"
       :disabled="readonly"

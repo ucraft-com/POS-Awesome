@@ -737,7 +737,7 @@ export default {
         if (item.has_serial_no && item.to_set_serial_no) {
           if (cur_item.serial_no_selected.includes(item.to_set_serial_no)) {
             evntBus.$emit('show_mesage', {
-              text: __(`This Serial Number ${item.to_set_serial_no} has already been added!`),
+              text: __(`This Serial Number {0} has already been added!`,[item.to_set_serial_no]),
               color: 'warning',
             });
             item.to_set_serial_no = null;
@@ -1031,7 +1031,7 @@ export default {
         ) {
           if (item.is_stock_item && item.stock_qty > item.actual_qty) {
             evntBus.$emit('show_mesage', {
-              text: __(`The existing quantity of item ${item.item_name} is not enough`),
+              text: __(`The existing quantity of item {0} is not enough`,[item.item_name]),
               color: 'error',
             });
             value = false;
@@ -1042,7 +1042,7 @@ export default {
           item.discount_percentage > item.max_discount
         ) {
           evntBus.$emit('show_mesage', {
-            text: __(`Maximum discount for Item ${item.item_name} is ${item.max_discount}%`),
+            text: __(`Maximum discount for Item {0} is {1}%`,[item.item_name,item.max_discount]),
             color: 'error',
           });
           value = false;
@@ -1053,7 +1053,7 @@ export default {
             item.stock_qty != item.serial_no_selected.length
           ) {
             evntBus.$emit('show_mesage', {
-              text: __(`Selcted serial numbers of item ${item.item_name} is incorrect`),
+              text: __(`Selcted serial numbers of item {0} is incorrect`,[item.item_name]),
               color: 'error',
             });
             value = false;
@@ -1062,7 +1062,7 @@ export default {
         if (!this.pos_profile.posa_auto_set_batch && item.has_batch_no) {
           if (item.stock_qty > item.actual_batch_qty) {
             evntBus.$emit('show_mesage', {
-              text: __(`The existing batch quantity of item ${item.item_name} is not enough`),
+              text: __(`The existing batch quantity of item {0} is not enough`,[item.item_name]),
               color: 'error',
             });
             value = false;
@@ -1072,7 +1072,7 @@ export default {
           const clac_percentage = (this.discount_amount / this.Total) * 100;
           if (clac_percentage > this.pos_profile.posa_max_discount_allowed) {
             evntBus.$emit('show_mesage', {
-              text: __(`The discount should not be higher than ${this.pos_profile.posa_max_discount_allowed}%`),
+              text: __(`The discount should not be higher than {0}%`,[this.pos_profile.posa_max_discount_allowed]),
               color: 'error',
             });
             value = false;
@@ -1089,7 +1089,7 @@ export default {
           }
           if (this.subtotal * -1 > this.return_doc.total) {
             evntBus.$emit('show_mesage', {
-              text: __(`Return Invoice Total should not be higher than ${this.return_doc.total}`),
+              text: __(`Return Invoice Total should not be higher than {0}`,[this.return_doc.total]),
               color: 'error',
             });
             value = false;
@@ -1102,14 +1102,14 @@ export default {
 
             if (!return_item) {
               evntBus.$emit('show_mesage', {
-                text: __(`The item ${item.item_name} cannot be returned because it is not in the invoice ${this.return_doc.name}`),
+                text: __(`The item {0} cannot be returned because it is not in the invoice {1}`,[item.item_name,this.return_doc.name]),
                 color: 'error',
               });
               value = false;
               return value;
             } else if (item.qty * -1 > return_item.qty || item.qty >= 0) {
               evntBus.$emit('show_mesage', {
-                text: __(`The QTY of the item ${item.item_name} cannot be greater than ${return_item.qty}`),
+                text: __(`The QTY of the item {0} cannot be greater than {1}`,[item.item_name,return_item.qty]),
                 color: 'error',
               });
               value = false;
@@ -1398,7 +1398,7 @@ export default {
       item.serial_no_selected_count = item.serial_no_selected.length;
       if (item.serial_no_selected_count != item.stock_qty) {
         evntBus.$emit('show_mesage', {
-          text: __(`Selected Serial No QTY is ${item.serial_no_selected_count} it should be ${item.stock_qty}`),
+          text: __(`Selected Serial No QTY is {0} it should be {1}`,[item.serial_no_selected_count,item.stock_qty]),
           color: 'warning',
         });
       }
