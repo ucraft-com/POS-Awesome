@@ -103,7 +103,7 @@ export default {
           if (!r.exc) {
             vm.customer_info[field] = value;
             evntBus.$emit('show_mesage', {
-              text: 'Customer contact updated successfully.',
+              text: __('Customer contact updated successfully.'),
               color: 'success',
             });
             frappe.utils.play_sound('submit');
