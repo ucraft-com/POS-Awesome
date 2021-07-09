@@ -43,40 +43,15 @@
                     <v-icon>mdi-logout</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-<<<<<<< HEAD
-                    <v-list-item-title>{{__('About')}}</v-list-item-title>
-                  </v-list-item-content>
-                </v-list-item>
-              </v-list-item-group>
-            </v-list>
-          </v-card>
-        </v-menu>
-      </div>
-
-      <div class="text-center">
-        <v-menu offset-y>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn color="grey" dark text v-bind="attrs" v-on="on">{{__('Pages')}}</v-btn>
-          </template>
-          <v-card class="mx-auto" max-width="300" tile>
-            <v-list dense>
-              <v-list-item-group v-model="item" color="primary">
-                <v-list-item
-                  v-for="(item, index) in items"
-                  :key="item.text"
-                  @click="[changePage(item.text), (item = index)]"
-                >
-=======
-                    <v-list-item-title>Logut</v-list-item-title>
+                    <v-list-item-title>{{__('Logout')}}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
                 <v-list-item @click="go_about">
->>>>>>> cf7fba39a6d58e2117efe254bfd06b221d37b6eb
                   <v-list-item-icon>
                     <v-icon>mdi-information-outline</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title>About</v-list-item-title>
+                    <v-list-item-title>{{__('About')}}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
               </v-list-item-group>

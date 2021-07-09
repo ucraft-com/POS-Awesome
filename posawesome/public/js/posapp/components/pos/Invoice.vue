@@ -599,8 +599,6 @@
 import { evntBus } from '../../bus';
 import Customer from './Customer.vue';
 
-import { _t } from '../../../translate'; //HELKYDS 07-07-2021
-
 export default {
   data() {
     return {
@@ -1056,7 +1054,7 @@ export default {
             item.stock_qty != item.serial_no_selected.length
           ) {
             evntBus.$emit('show_mesage', {
-              text: __(`Selcted serial numbers of item {0} is incorrect`,[item.item_name]),
+              text: __(`Selected serial numbers of item {0} is incorrect`,[item.item_name]),
               color: 'error',
             });
             value = false;

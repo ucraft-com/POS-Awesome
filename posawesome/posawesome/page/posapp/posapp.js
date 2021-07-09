@@ -51,7 +51,7 @@ if (frappe.boot.lang == "pt"){
 			"There is no Items !" : "Não tem Itens !",
 			"The existing quantity of item {0} is not enough" : "A quantidade existente do item {0} não é suficiente",
 			"Maximum discount for Item {0} is {1}%" : "Desconto Maximo para o Item {0} é {1}%",
-			"Selcted serial numbers of item {0} is incorrect" : "Numeros de serie selecionado do item {0} é incorrecto",
+			"Selected serial numbers of item {0} is incorrect" : "Numeros de serie selecionado do item {0} é incorrecto",
 			"The existing batch quantity of item {0} is not enough" : "A quantidade existente do lote para o item {0} não é suficiente",
 			"The discount should not be higher than {0}%" : "O desconto não deve ser maior que {0}%",
 			"Return Invoice Total Not Correct" : "Total da Devolução da Factura não está Correcto",
