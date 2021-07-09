@@ -865,13 +865,16 @@ export default {
         }
         this.invoice_doc = data;
         this.items = data.items;
+        this.update_items_details(this.items);
         this.posa_offers = data.posa_offers || [];
         this.items.forEach((item) => {
           if (!item.posa_row_id) {
             item.posa_row_id = this.makeid(20);
           }
+          if (item.batch_no) {
+            this.set_batch_qty(item, item.batch_no);
+          }
         });
-        this.update_items_details(this.items);
         this.customer = data.customer;
         this.discount_amount = data.discount_amount;
         this.items.forEach((item) => {
@@ -1150,8 +1153,10 @@ export default {
         return;
       }
       const vm = this;
+      if (!vm.pos_profile) return;
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.get_items_details',
+        async: false,
         args: {
           pos_profile: vm.pos_profile,
           items_data: items,

@@ -603,8 +603,7 @@ export default {
         return;
       }
 
-      let total_change =
-        parseInt(this.paid_change) + parseInt(-this.credit_change);
+      let total_change = flt(flt(this.paid_change) + flt(-this.credit_change));
 
       if (this.is_cashback && total_change != -this.diff_payment) {
         evntBus.$emit('show_mesage', {
