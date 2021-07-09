@@ -110,9 +110,6 @@ def update_opening_shift_data(data, pos_profile):
 def get_items(pos_profile):
     pos_profile = json.loads(pos_profile)
     price_list = pos_profile.get("selling_price_list")
-    #HELKYds
-    print ('Pricelist ', price_list)
-    print (pos_profile.get("item_groups"))
 
     condition = ""
     condition += get_item_group_condition(pos_profile.get("name"))
@@ -152,9 +149,6 @@ def get_items(pos_profile):
         ),
         as_dict=1,
     )
-
-    #HELKYDs
-    print ('items_date ', items_data)
 
     if items_data:
         items = [d.item_code for d in items_data]
@@ -624,9 +618,9 @@ def get_draft_invoices(pos_opening_shift):
 @frappe.whitelist()
 def delete_invoice(invoice):
     if frappe.get_value("Sales Invoice", invoice, "posa_is_printed"):
-        frappe.throw(_("This invoice {0} cannot be deleted".format(invoice)))
+        frappe.throw(_("This invoice {0} cannot be deleted").format(invoice))
     frappe.delete_doc("Sales Invoice", invoice, force=1)
-    return "Inovice {0} Deleted".format(invoice)
+    return _("Invoice {0} Deleted").format(invoice)
 
 
 @frappe.whitelist()

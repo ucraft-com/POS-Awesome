@@ -132,6 +132,7 @@ apps/posawesome/posawesome/posawesome/api/status_updater.py,Status must be one o
 DocType: POS Closing Shift,System Manager,Gestor de Sistema
 DocType: POS Closing Shift,Taxes,Impostos
 apps/posawesome/posawesome/posawesome/api/posapp.py,This invoice {0} cannot be deleted,Esta factura {0} não pode ser apagada
+apps/posawesome/posawesome/posawesome/api/posapp.py,Invoice {0} Deleted,Factura {0} Apagada
 DocType: POS Offer,Title,Titulo
 DocType: POS Closing Shift,Total Quantity,Quantidade Total
 DocType: POS Offer,Transaction,Transação
