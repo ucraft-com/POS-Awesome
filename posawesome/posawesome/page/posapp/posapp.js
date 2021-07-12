@@ -100,8 +100,9 @@ if (frappe.boot.lang == "pt"){
 			"Batch No Available QTY" : "QTD Disponivel para o Lote",
 			"Batch No Expiry Date" : "Data de Expiração do Lote",
 			"Batch No" : "Num. do Lote",
-			"Use Customer Credit" : "Usar Crédito Cliente"
-	
+			"Use Customer Credit" : "Usar Crédito Cliente",
+			"Is Credit Sale" : "É Venda a Crédito",
+			"Due Date" : "Data de Expiração",
 	
 	
 		});
