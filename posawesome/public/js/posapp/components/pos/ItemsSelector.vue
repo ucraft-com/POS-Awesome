@@ -19,7 +19,7 @@
             autofocus
             outlined
             color="indigo"
-            label="Search Items"
+            :label="frappe._('Search Items')"
             hint="Search by item code, serial number, batch no or barcode"
             background-color="white"
             hide-details
@@ -95,7 +95,7 @@
         <v-col cols="12">
           <v-select
             :items="items_group"
-            label="Items Group"
+            :label="frappe._('Items Group')"
             dense
             outlined
             hide-details
@@ -104,13 +104,13 @@
         </v-col>
         <v-col cols="6" class="mt-1">
           <v-btn-toggle v-model="items_view" color="orange" group dense rounded>
-            <v-btn value="list">List</v-btn>
-            <v-btn value="card">Card</v-btn>
+            <v-btn value="list">{{__('List')}}</v-btn>
+            <v-btn value="card">{{__('Card')}}</v-btn>
           </v-btn-toggle>
         </v-col>
         <v-col cols="6" class="mt-2">
           <v-btn color="warning" text @click="show_offers"
-            >{{ offersCount }} Offers : {{ appliedOffersCount }} Applied</v-btn
+            >{{ offersCount }} {{__('Offers')}} : {{ appliedOffersCount }} {{__('Applied')}}</v-btn
           >
         </v-col>
       </v-row>
@@ -135,10 +135,10 @@ export default {
     first_search: '',
     itemsPerPage: 1000,
     items_headers: [
-      { text: 'Name', align: 'start', sortable: true, value: 'item_name' },
-      { text: 'Rate', value: 'rate', align: 'start' },
-      { text: 'Available QTY', value: 'actual_qty', align: 'start' },
-      { text: 'UOM', value: 'stock_uom', align: 'start' },
+      { text: __('Name'), align: 'start', sortable: true, value: 'item_name' },
+      { text: __('Rate'), value: 'rate', align: 'start' },
+      { text: __('Available QTY'), value: 'actual_qty', align: 'start' },
+      { text: __('UOM'), value: 'stock_uom', align: 'start' },
     ],
     offersCount: 0,
     appliedOffersCount: 0,

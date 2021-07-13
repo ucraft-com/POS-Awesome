@@ -1,0 +1,149 @@
+apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/closing_shift_details.html,Account,Contabilidade
+DocType: POS Closing Shift Taxes,Account Head,Chefe de Conta
+DocType: POS Offer,Accounts Manager,Gestor de Contas
+DocType: POS Offer,Accounts User,Usuário de Contas
+Custom Field - label: Sales Invoice-posa_additional_notes_section,Additional Notes,Notas adicionais
+DocType: POS Closing Shift,Administrator,Administrador
+Custom Field - label: POS Profile-posa_allow_sales_order,Allow Create Sales Order,Permitir Criar Ordem de Vendas
+Custom Field - label: POS Profile-posa_allow_credit_sale,Allow Credit Sale,Permitir Credito de Venda
+Custom Field - label: POS Profile-posa_allow_partial_payment,Allow Partial Payment,Permitir Pagamento Parcial
+Custom Field - label: POS Profile-posa_allow_return,Allow Return,Permitir Devolução
+Custom Field - label: POS Profile-posa_allow_submissions_in_background_job,Allow Submissions in background job,Permitir Submissões em trabalho de segundo plano
+Custom Field - label: POS Profile-posa_allow_user_to_edit_item_discount,Allow User to Edit Item Discount,Permitir Usuário Editar Desconto de Item
+Custom Field - label: POS Profile-posa_allow_user_to_edit_additional_discount,Allow user to edit Additional Discount,Permitir Usuário Editar Desconto Adicional
+Custom Field - label: POS Profile-posa_allow_user_to_edit_rate,Allow user to edit Rate,Permitir Usuário Editar Preço
+DocType: POS Closing Shift,Amended From,Corrigido Apartir
+DocType: POS Closing Shift Taxes,Amount,Valor
+Custom Field - label: POS Profile-posa_apply_customer_discount,Apply Customer Discount,Aplicar Desconto de Cliente
+DocType: POS Offer,Apply For,Aplicar Para
+DocType: POS Offer Detail,Apply On,Aplicar Em
+DocType: POS Offer,Apply Rule On Brand,Aplicar Regra na Marca
+DocType: POS Offer,Apply Rule On Item Code,Aplicar Regra no Codigo do Item
+DocType: POS Offer,Apply Rule On Item Group,Aplicar Regra no Grupo do Item
+DocType: POS Offer,Apply Type,Aplicar Tipo
+DocType: POS Offer,Auto Apply,Auto Aplicar
+Custom Field - label: POS Profile-posa_allow_delete,Auto Delete Draft Invoice,Auto Apagar Factura Rascunho
+Custom Field - label: POS Profile-posa_auto_set_batch,Auto Set Batch,Auto Definir Lote
+DocType: POS Offer,Brand,Marca
+DocType: POS Opening Shift,Cancelled,Cancelado
+Custom Field - label: POS Profile-posa_cash_mode_of_payment,Cash Mode of Payment,Modo de Pagamento em Dinheiro
+DocType: POS Closing Shift,Cashier,Caixa
+DocType: POS Opening Shift,Closed,Fechado
+DocType: POS Closing Shift Detail,Closing Amount,Valor de Fecho
+DocType: POS Closing Shift,Company,Empresa
+DocType: Sales Invoice Reference,Customer,Cliente
+DocType: Sales Invoice Reference,Date,Data
+DocType: POS Offer,Default Loyalty Program,Programa de Lealdade Padrão
+Custom Field - label: Sales Invoice-posa_delivery_date,Delivery Date,Data de Entrega
+DocType: POS Offer,Description,Descrição
+DocType: POS Closing Shift,Details,Detalhes
+DocType: POS Closing Shift Detail,Difference,Diferença
+DocType: POS Offer,Disable,Desactivado
+Custom Field - label: Customer-posa_discount,Discount %,% Desconto
+DocType: POS Offer,Discount Amount,Valor de Desconto
+DocType: POS Offer,Discount Percentage,Percentagem de Desconto
+DocType: POS Offer,Discount Type,Tipo de Desconto
+DocType: POS Opening Shift,Draft,Rascunho
+DocType: POS Closing Shift Detail,Expected Amount,Valor Esperado
+Custom Field - description: POS Profile-posa_cash_mode_of_payment,For POS Closing Shift Payment Reconciliation,Para Reconciliação de Pagamento de Fecho de Turno POS
+DocType: POS Offer Detail,Give Item,Item a Entregar
+DocType: POS Offer Detail,Give Item Row ID,Linha do ID do Item a Entregar
+DocType: POS Offer,Give Product,Producto a Entregar
+DocType: POS Offer,Given Quantity,Quantidade Entregue
+DocType: POS Closing Shift,Grand Total,Total Geral
+Custom Field - label: POS Profile-posa_hide_closing_shift,Hide Close Shift,Esconder o Fecho de turno
+Custom Field - label: POS Profile-posa_display_items_in_stock,Hide Unavailable Items,Esconder Itens não Disponiveis
+Custom Field - label: POS Profile-posa_hide_variants_items,Hide Variants Items,Esconder Variantes de Itens
+apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.py,Invalid Period,Periodo Invalido
+Custom Field - label: Sales Invoice Item-posa_is_offer,Is Offer,É uma Oferta
+Custom Field - label: Sales Invoice Item-posa_is_replace,Is Offer Replace For item Row ID,É uma Substituição de Oferta para o Linha do ID do Item
+Custom Field - description: POS Profile-posa_scale_barcode_start,It is best not to use more than four numbers,É aconselhavel não usar mais que quatro numeros
+DocType: POS Offer,Item Code,Codigo do Item
+DocType: POS Offer,Item Group,Grupo do Item
+DocType: POS Offer,Item Price,Preço do Item
+DocType: POS Offer,Item Rate Should Less Then,Preço do Item Deve Ser Menor Que
+DocType: POS Offer Detail,Items,Itens
+DocType: POS Closing Shift,Linked Invoices,Facturas Ligadas
+DocType: POS Offer,Loyalty Point,Ponto de Lealdade
+DocType: POS Offer,Loyalty Point Scheme,Esquema de Pontos de Lealdade
+DocType: POS Offer,Loyalty Points,Pontos de Lealdade
+DocType: POS Offer,Max Amount,Valor Maximo
+Custom Field - label: POS Profile-posa_max_discount_allowed,Max Discount Percentage Allowed ,Percentagem de Desconto Maximo Permitido
+DocType: POS Offer,Max Quantity,Quantidade Maxima
+DocType: POS Offer,Min Amount,Valor Minimo
+DocType: POS Offer,Min Quantity,Quantidade Minima
+DocType: POS Closing Shift Detail,Mode of Payment,Modo de Pagamento
+apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/closing_shift_details.html,Mode of Payments,Modo de Pagamentos
+DocType: POS Closing Shift,Modes of Payment,Modos de Pagamento
+DocType: POS Closing Shift,Net Total,Total Liquido
+DocType: POS Offer Detail,Offer,Oferta
+DocType: POS Offer Detail,Offer Applied,Oferta Aplicada
+DocType: POS Offer Detail,Offer Name,Nome da Oferta
+DocType: POS Opening Shift,Open,Aberto
+DocType: POS Closing Shift Detail,Opening Amount,Valor de Abertura
+DocType: POS Opening Shift,Opening Balance Details,Detalhes de Balanço de Abertura
+,POS Awesome,POS Awesome
+Custom Field - label: POS Profile-posa_pos_awesome_advance_settings,POS Awesome Advance Settings,Configurações Avançadas do POS Awesome
+Custom Field - label: POS Profile-posa_pos_awesome_settings,POS Awesome Settings,Configurações POS Awesome
+DocType: POS Closing Shift,POS Closing Shift,POS Fecho de Turno
+DocType: POS Closing Shift Detail,POS Closing Shift Detail,POS Detalhes de Fecho de Turno
+DocType: POS Closing Shift Taxes,POS Closing Shift Taxes,POS Impostos de Fecho de Turno
+apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.py,POS Closing Shift {} against {} between selected period,POS Fecho de Turno {} contra {} entre os periodos selecionados
+DocType: POS Offer,POS Offer,POS Oferta
+DocType: POS Offer Detail,POS Offer Detail,POS Detalhe de Oferta
+Custom Field - label: Sales Invoice Item-posa_offers,POS Offers,POS Ofertas
+Custom Field - label: Sales Invoice-posa_offers,POS Offers Detail,POS Detalhes de Ofertas
+DocType: POS Closing Shift,POS Opening Shift,POS Abertura de Turno
+DocType: POS Opening Shift Detail,POS Opening Shift Detail,POS Detalhes de Abertura de Turno
+DocType: POS Closing Shift,POS Profile,POS Perfil
+apps/posawesome/posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift.py,POS Profile {} does not belongs to company {},POS Perfil {} não pertence a empresa {}
+Custom Field - label: Sales Invoice-posa_pos_opening_shift,POS Shift,POS Turno
+DocType: POS Closing Shift,POS Transactions,POS Transções
+DocType: POS Closing Shift,POSAwesome,POSAwesome
+DocType: POS Closing Shift,Payment Reconciliation,Reconciliação de Pagamento
+DocType: POS Closing Shift,Period End Date,Data de Fim de Periodo
+DocType: POS Closing Shift,Period Start Date,Data de Inicio de Periodo
+DocType: POS Closing Shift,Posting Date,Data de Postagem
+Custom Field - label: Batch-posa_btach_price,Price,Preço
+DocType: POS Offer,Price Discount Scheme ,Esquema de Desconto de Preço
+Custom Field - label: Sales Invoice-posa_is_printed,Printed,Imprimido
+DocType: POS Offer,Product Discount Scheme,Esquema de Desconto de Produto
+DocType: POS Offer,Promo Type,Tipo de Promo
+DocType: POS Offer,Qualifying Transaction / Item,Qualificando Transação / Item
+DocType: POS Offer,Quantity and Amount Conditions,Condições de Quantidade e Valor
+DocType: POS Closing Shift Taxes,Rate,Preço
+DocType: POS Offer,Replace Cheapest Item,Substituir Item mais Barato
+DocType: POS Offer,Replace Same Item,Substituir pelo Mesmo Item
+DocType: POS Offer Detail,Row ID,ID da Linha
+DocType: Sales Invoice Reference,Sales Invoice,Factura de Venda
+DocType: Sales Invoice Reference,Sales Invoice Reference,Referencia da Factura de Venda
+DocType: POS Closing Shift,Sales Manager,Gestor de Vendas
+DocType: POS Offer,Sales Master Manager,Gerente Mestre de Vendas
+apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/closing_shift_details.html,Sales Summary,Resumo de Vendas
+DocType: POS Offer,Sales User,Usuário de Vendas
+Custom Field - label: POS Profile-posa_scale_barcode_start,Scale Barcode Start With,Codigo de Barras de Peso começa com 
+Custom Field - label: POS Profile-posa_search_serial_no,Search by Serial Number,Procurar por Numero de Serie
+apps/posawesome/posawesome/posawesome/doctype/pos_closing_shift/pos_closing_shift.py,Selected POS Opening Shift should be open.,Abertura de Turno do POS selecionado deve estar aberto.
+Custom Field - description: POS Profile-posa_allow_submissions_in_background_job,Send invoice to submit after printing,Enviar Factura para Submeter depois de Imprimir
+DocType: POS Opening Shift,Set Posting Date,Definir Data de Postagem
+Custom Field - label: POS Profile-posa_show_template_items,Show Template Items,Mostrar Modelo de Itens
+DocType: POS Opening Shift,Status,Status
+apps/posawesome/posawesome/posawesome/api/status_updater.py,Status must be one of {0},O Status deve ser um dos {0}
+DocType: POS Closing Shift,System Manager,Gestor de Sistema
+DocType: POS Closing Shift,Taxes,Impostos
+apps/posawesome/posawesome/posawesome/api/posapp.py,This invoice {0} cannot be deleted,Esta factura {0} não pode ser apagada
+apps/posawesome/posawesome/posawesome/api/posapp.py,Invoice {0} Deleted,Factura {0} Apagada
+DocType: POS Offer,Title,Titulo
+DocType: POS Closing Shift,Total Quantity,Quantidade Total
+DocType: POS Offer,Transaction,Transação
+Custom Field - label: Item Barcode-posa_uom,UOM,UDM
+Custom Field - label: POS Profile-posa_local_storage,Use Browser Local Storage,Use o armazenamento local do navegador
+Custom Field - label: POS Profile-use_cashback,Use Cashback,Use Cashback
+Custom Field - label: POS Profile-use_customer_credit,Use Customer Credit,Usar Credito de Cliente
+apps/posawesome/posawesome/posawesome/doctype/pos_opening_shift/pos_opening_shift.py,User {} has been disabled. Please select valid user/cashier,Usuário {} foi desactivado. Por favor selecione um usuário/caixa valido
+DocType: POS Offer,Valid From,Valido Apartir
+DocType: POS Offer,Valid Upto,Valido Até
+DocType: POS Offer,Warehouse,Armazém
+apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,is Offer,é Oferta
+apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,Type,Tipo
+apps/posawesome/posawesome/posawesome/page/posapp/posapp.js,Total Qty,Qtd Total

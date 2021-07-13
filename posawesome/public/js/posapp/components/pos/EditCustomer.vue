@@ -3,7 +3,7 @@
     <v-dialog v-model="customerDialog" max-width="600px">
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">Customer Info</span>
+          <span class="headline indigo--text">{{__('Customer Info')}}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -12,7 +12,7 @@
                 <v-text-field
                   dense
                   color="indigo"
-                  label="Customer Name"
+                  :label="frappe._('Customer Name')"
                   background-color="white"
                   hide-details
                   readonly
@@ -23,7 +23,7 @@
                 <v-text-field
                   dense
                   color="indigo"
-                  label="Email"
+                  :label="frappe._('Email')"
                   background-color="white"
                   hide-details
                   v-model="customer_info.email_id"
@@ -34,7 +34,7 @@
                 <v-text-field
                   dense
                   color="indigo"
-                  label="Mobile No"
+                  :label="frappe._('Mobile No')"
                   background-color="white"
                   hide-details
                   v-model="customer_info.mobile_no"
@@ -44,7 +44,7 @@
               <v-col cols="6">
                 <v-text-field
                   v-model="customer_info.loyalty_program"
-                  label="Loyalty Program"
+                  :label="frappe._('Loyalty Program')"
                   dense
                   readonly
                   hide-details
@@ -53,7 +53,7 @@
               <v-col cols="6">
                 <v-text-field
                   v-model="customer_info.loyalty_points"
-                  label="Loyalty Points"
+                  :label="frappe._('Loyalty Points')"
                   dense
                   readonly
                   hide-details
@@ -103,7 +103,7 @@ export default {
           if (!r.exc) {
             vm.customer_info[field] = value;
             evntBus.$emit('show_mesage', {
-              text: 'Customer contact updated successfully.',
+              text: __('Customer contact updated successfully.'),
               color: 'success',
             });
             frappe.utils.play_sound('submit');

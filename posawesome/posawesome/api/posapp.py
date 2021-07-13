@@ -618,9 +618,9 @@ def get_draft_invoices(pos_opening_shift):
 @frappe.whitelist()
 def delete_invoice(invoice):
     if frappe.get_value("Sales Invoice", invoice, "posa_is_printed"):
-        frappe.throw(_("This invoice {0} cannot be deleted".format(invoice)))
+        frappe.throw(_("This invoice {0} cannot be deleted").format(invoice))
     frappe.delete_doc("Sales Invoice", invoice, force=1)
-    return "Inovice {0} Deleted".format(invoice)
+    return _("Invoice {0} Deleted").format(invoice)
 
 
 @frappe.whitelist()
@@ -827,7 +827,7 @@ def search_invoices_for_return(invoice_name, company):
     invoices_list = frappe.get_list(
         "Sales Invoice",
         filters={
-            "name": ["like", f"%{invoice_name}%"],
+            "name": ["like", "%{invoice_name}%"],
             "company": company,
             "docstatus": 1,
             "is_return": 0,

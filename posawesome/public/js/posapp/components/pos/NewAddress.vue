@@ -3,7 +3,7 @@
     <v-dialog v-model="addressDialog" max-width="600px">
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">Add New Address</span>
+          <span class="headline indigo--text">{{__('Add New Address')}}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -12,7 +12,7 @@
                 <v-text-field
                   dense
                   color="indigo"
-                  label="Address Name"
+                  :label="frappe._('Address Name')"
                   background-color="white"
                   hide-details
                   v-model="address.name"
@@ -22,7 +22,7 @@
                 <v-text-field
                   dense
                   color="indigo"
-                  label="Address Line 1"
+                  :label="frappe._('Address Line 1')"
                   background-color="white"
                   hide-details
                   v-model="address.address_line1"
@@ -32,7 +32,7 @@
                 <v-text-field
                   dense
                   color="indigo"
-                  label="Address Line 2"
+                  :label="frappe._('Address Line 2')"
                   background-color="white"
                   hide-details
                   v-model="address.address_line2"
@@ -62,8 +62,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="error" dark @click="close_dialog">Close</v-btn>
-          <v-btn color="primary" dark @click="submit_dialog">Submit</v-btn>
+          <v-btn color="error" dark @click="close_dialog">{{__('Close')}}</v-btn>
+          <v-btn color="primary" dark @click="submit_dialog">{{__('Submit')}}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

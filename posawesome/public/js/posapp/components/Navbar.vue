@@ -34,7 +34,7 @@
                     <v-icon>mdi-content-save-move-outline</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title>Close Shift</v-list-item-title>
+                    <v-list-item-title>{{__('Close Shift')}}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
                 <v-divider class="my-0"></v-divider>
@@ -43,7 +43,7 @@
                     <v-icon>mdi-logout</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title>Logut</v-list-item-title>
+                    <v-list-item-title>{{__('Logout')}}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
                 <v-list-item @click="go_about">
@@ -51,7 +51,7 @@
                     <v-icon>mdi-information-outline</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title>About</v-list-item-title>
+                    <v-list-item-title>{{__('About')}}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
               </v-list-item-group>

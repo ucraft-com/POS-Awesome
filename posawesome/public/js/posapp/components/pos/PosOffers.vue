@@ -5,7 +5,7 @@
       style="max-height: 80vh; height: 80vh"
     >
       <v-card-title>
-        <span class="text-h6 warning--text">POS Offers</span>
+        <span class="text-h6 warning--text">{{__('POS Offers')}}</span>
       </v-card-title>
       <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh">
         <template @mouseover="style = 'cursor: pointer'">
@@ -51,7 +51,7 @@
                       outlined
                       dense
                       color="indigo"
-                      label="Give Item"
+                      :label="frappe._('Give Item')"
                       :disabled="
                         item.apply_type != 'Item Group' ||
                         item.replace_item ||
@@ -81,7 +81,7 @@
             color="warning"
             dark
             @click="back_to_invoice"
-            >Back</v-btn
+            >{{__('Back')}}</v-btn
           >
         </v-col>
       </v-row>
@@ -102,10 +102,10 @@ export default {
     expanded: [],
     singleExpand: true,
     items_headers: [
-      { text: 'Name', value: 'name', align: 'start' },
-      { text: 'Apply On', value: 'apply_on', align: 'start' },
-      { text: 'Offer', value: 'offer', align: 'start' },
-      { text: 'Applied', value: 'offer_applied', align: 'start' },
+      { text: __('Name'), value: 'name', align: 'start' },
+      { text: __('Apply On'), value: 'apply_on', align: 'start' },
+      { text: __('Offer'), value: 'offer', align: 'start' },
+      { text: __('Applied'), value: 'offer_applied', align: 'start' },
     ],
   }),
 
@@ -203,7 +203,7 @@ export default {
           }
           this.pos_offers.push(newOffer);
           evntBus.$emit('show_mesage', {
-            text: 'New Offer Available',
+            text: __('New Offer Available'),
             color: 'warning',
           });
         }
