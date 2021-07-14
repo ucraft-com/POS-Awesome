@@ -708,29 +708,6 @@ export default {
         },
       });
     },
-    update_invoice() {
-      let formData = this.invoice_doc;
-      formData['total_change'] = -this.diff_payment;
-      formData['paid_change'] = this.paid_change;
-      formData['credit_change'] = -this.credit_change;
-      formData['redeemed_customer_credit'] = this.redeemed_customer_credit;
-      formData['customer_credit_dict'] = this.customer_credit_dict;
-      formData['is_cashback'] = this.is_cashback;
-
-      const vm = this;
-      frappe.call({
-        method: 'posawesome.posawesome.api.posapp.update_invoice',
-        args: {
-          data: formData,
-        },
-        async: false,
-        callback: function (r) {
-          if (r.message) {
-            vm.invoice_doc = r.message;
-          }
-        },
-      });
-    },
     set_full_amount(idx) {
       this.invoice_doc.payments.forEach((payment) => {
         payment.amount = payment.idx == idx ? this.invoice_doc.grand_total : 0;
