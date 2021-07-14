@@ -77,7 +77,7 @@
             v-for="payment in invoice_doc.payments"
             :key="payment.name"
           >
-            <v-col cols="7">
+            <v-col cols="6">
               <v-text-field
                 dense
                 outlined
@@ -92,7 +92,15 @@
                 :readonly="invoice_doc.is_return ? true : false"
               ></v-text-field>
             </v-col>
-            <v-col cols="5">
+            <v-col
+              :cols="
+                6
+                  ? payment.type != 'Phone' ||
+                    payment.amount == 0 ||
+                    !request_payment_field
+                  : 3
+              "
+            >
               <v-btn
                 block
                 class=""
@@ -101,6 +109,26 @@
                 @click="set_full_amount(payment.idx)"
                 >{{ payment.mode_of_payment }}</v-btn
               >
+            </v-col>
+            <v-col
+              v-if="
+                payment.type == 'Phone' &&
+                payment.amount > 0 &&
+                request_payment_field
+              "
+              :cols="3"
+              class="pl-1"
+            >
+              <v-btn
+                block
+                class=""
+                color="success"
+                dark
+                :disabled="payment.amount == 0"
+                @click="request_payment"
+              >
+                {{ __('Request') }}
+              </v-btn>
             </v-col>
           </v-row>
         </div>
@@ -286,7 +314,7 @@
                   color="primary"
                   @click="order_delivery_date = false"
                 >
-                  {{__('Cancel')}}
+                  {{ __('Cancel') }}
                 </v-btn>
                 <v-btn
                   text
@@ -511,7 +539,7 @@
             color="warning"
             dark
             @click="back_to_invoice"
-            >{{__('Back')}}</v-btn
+            >{{ __('Back') }}</v-btn
           >
         </v-col>
         <v-col cols="12">
@@ -523,7 +551,7 @@
             dark
             @click="submit"
             :disabled="vaildatPayment"
-            >{{__('Submit Payments')}}</v-btn
+            >{{ __('Submit Payments') }}</v-btn
           >
         </v-col>
       </v-row>
@@ -550,6 +578,8 @@ export default {
     redeem_customer_credit: false,
     customer_credit_dict: [],
     invoiceType: 'Invoice',
+    pos_settings: '',
+    customer_info: '',
   }),
 
   methods: {
@@ -674,6 +704,29 @@ export default {
             });
             frappe.utils.play_sound('submit');
             this.addresses = [];
+          }
+        },
+      });
+    },
+    update_invoice() {
+      let formData = this.invoice_doc;
+      formData['total_change'] = -this.diff_payment;
+      formData['paid_change'] = this.paid_change;
+      formData['credit_change'] = -this.credit_change;
+      formData['redeemed_customer_credit'] = this.redeemed_customer_credit;
+      formData['customer_credit_dict'] = this.customer_credit_dict;
+      formData['is_cashback'] = this.is_cashback;
+
+      const vm = this;
+      frappe.call({
+        method: 'posawesome.posawesome.api.posapp.update_invoice',
+        args: {
+          data: formData,
+        },
+        async: false,
+        callback: function (r) {
+          if (r.message) {
+            vm.invoice_doc = r.message;
           }
         },
       });
@@ -814,6 +867,99 @@ export default {
     new_address() {
       evntBus.$emit('open_new_address', this.invoice_doc.customer);
     },
+    request_payment() {
+      console.info('Request Payment');
+      const vm = this;
+      if (!this.invoice_doc.contact_mobile) {
+        evntBus.$emit('show_mesage', {
+          text: __(`Pleas Set Customer Mobile Number`),
+          color: 'error',
+        });
+        evntBus.$emit('open_edit_customer');
+        this.back_to_invoice();
+        return;
+      }
+      evntBus.$emit('freeze', {
+        title: __(`Waiting for payment... `),
+      });
+
+      let formData = this.invoice_doc;
+      formData['total_change'] = -this.diff_payment;
+      formData['paid_change'] = this.paid_change;
+      formData['credit_change'] = -this.credit_change;
+      formData['redeemed_customer_credit'] = this.redeemed_customer_credit;
+      formData['customer_credit_dict'] = this.customer_credit_dict;
+      formData['is_cashback'] = this.is_cashback;
+
+      frappe
+        .call({
+          method: 'posawesome.posawesome.api.posapp.update_invoice',
+          args: {
+            data: formData,
+          },
+          async: false,
+          callback: function (r) {
+            if (r.message) {
+              vm.invoice_doc = r.message;
+            }
+          },
+        })
+        .then(() => {
+          frappe
+            .call({
+              method: 'posawesome.posawesome.api.posapp.create_payment_request',
+              args: {
+                doc: vm.invoice_doc,
+              },
+            })
+            .fail(() => {
+              evntBus.$emit('unfreeze');
+              evntBus.$emit('show_mesage', {
+                text: __(`Payment request failed`),
+                color: 'error',
+              });
+            })
+            .then(({ message }) => {
+              const payment_request_name = message.name;
+              setTimeout(() => {
+                frappe.db
+                  .get_value('Payment Request', payment_request_name, [
+                    'status',
+                    'grand_total',
+                  ])
+                  .then(({ message }) => {
+                    if (message.status != 'Paid') {
+                      evntBus.$emit('unfreeze');
+                      evntBus.$emit('show_mesage', {
+                        text: __(
+                          `Payment Request took too long to respond. Please try requesting for payment again`
+                        ),
+                        color: 'error',
+                      });
+                    } else {
+                      evntBus.$emit('unfreeze');
+                      evntBus.$emit('show_mesage', {
+                        text: __('Payment of {0} received successfully.', [
+                          format_currency(
+                            message.grand_total,
+                            vm.invoice_doc.currency,
+                            0
+                          ),
+                        ]),
+                        color: 'success',
+                      });
+                      frappe.db
+                        .get_doc('Sales Invoice', vm.invoice_doc.name)
+                        .then((doc) => {
+                          vm.invoice_doc = doc;
+                          vm.submit();
+                        });
+                    }
+                  });
+              }, 50000);
+            });
+        });
+    },
   },
 
   computed: {
@@ -847,10 +993,10 @@ export default {
     },
     available_pioints_amount() {
       let amount = 0;
-      if (this.invoice_doc.customer_info.loyalty_points) {
+      if (this.customer_info.loyalty_points) {
         amount =
-          this.invoice_doc.customer_info.loyalty_points *
-          this.invoice_doc.customer_info.conversion_factor;
+          this.customer_info.loyalty_points *
+          this.customer_info.conversion_factor;
       }
       return amount;
     },
@@ -884,6 +1030,22 @@ export default {
       } else {
         return false;
       }
+    },
+    request_payment_field() {
+      let res = false;
+      if (!this.pos_settings || this.pos_settings.invoice_fields.length == 0) {
+        res = false;
+      } else {
+        this.pos_settings.invoice_fields.forEach((el) => {
+          if (
+            el.fieldtype == 'Button' &&
+            el.fieldname == 'request_for_payment'
+          ) {
+            res = true;
+          }
+        });
+      }
+      return res;
     },
   },
 
@@ -924,6 +1086,12 @@ export default {
         this.is_cashback = true;
       }
     });
+    evntBus.$on('set_pos_settings', (data) => {
+      this.pos_settings = data;
+    });
+    evntBus.$on('set_customer_info_to_edit', (data) => {
+      this.customer_info = data;
+    });
     document.addEventListener('keydown', this.shortPay.bind(this));
   },
 
@@ -945,8 +1113,7 @@ export default {
         this.invoice_doc.loyalty_amount = flt(this.loyalty_amount);
         this.invoice_doc.redeem_loyalty_points = 1;
         this.invoice_doc.loyalty_points =
-          flt(this.loyalty_amount) *
-          this.invoice_doc.customer_info.conversion_factor;
+          flt(this.loyalty_amount) * this.customer_info.conversion_factor;
       }
     },
     is_credit_sale(value) {

@@ -34,7 +34,9 @@
                     <v-icon>mdi-content-save-move-outline</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title>{{__('Close Shift')}}</v-list-item-title>
+                    <v-list-item-title>{{
+                      __('Close Shift')
+                    }}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
                 <v-divider class="my-0"></v-divider>
@@ -43,7 +45,7 @@
                     <v-icon>mdi-logout</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title>{{__('Logout')}}</v-list-item-title>
+                    <v-list-item-title>{{ __('Logout') }}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
                 <v-list-item @click="go_about">
@@ -51,7 +53,7 @@
                     <v-icon>mdi-information-outline</v-icon>
                   </v-list-item-icon>
                   <v-list-item-content>
-                    <v-list-item-title>{{__('About')}}</v-list-item-title>
+                    <v-list-item-title>{{ __('About') }}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
               </v-list-item-group>
@@ -97,10 +99,15 @@
     </v-navigation-drawer>
     <v-snackbar v-model="snack" :timeout="5000" :color="snackColor" top right>
       {{ snackText }}
-      <!-- <template v-slot:action="{ attrs }"> -->
-      <!-- <v-btn v-bind="attrs" text @click="snack = false">Close</v-btn> -->
-      <!-- </template> -->
     </v-snackbar>
+    <v-dialog v-model="freeze" persistent max-width="290">
+      <v-card>
+        <v-card-title class="text-h5">
+          {{ freezeTitle }}
+        </v-card-title>
+        <v-card-text>{{ freezeMsg }}</v-card-text>
+      </v-card>
+    </v-dialog>
   </nav>
 </template>
 
@@ -127,6 +134,9 @@ export default {
       company: 'POS Awesome',
       company_img: '/assets/erpnext/images/erpnext-logo.svg',
       pos_profile: '',
+      freeze: false,
+      freezeTitle: '',
+      freezeMsg: '',
     };
   },
   methods: {
@@ -180,6 +190,16 @@ export default {
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
+      });
+      evntBus.$on('freeze', (data) => {
+        this.freeze = true;
+        this.freezeTitle = data.title;
+        this.freezeMsg = data.msg;
+      });
+      evntBus.$on('unfreeze', () => {
+        this.freeze = false;
+        this.freezTitle = '';
+        this.freezeMsg = '';
       });
     });
   },

@@ -162,11 +162,17 @@ export default {
           }
         });
     },
+    get_pos_setting() {
+      frappe.db.get_doc('POS Settings', undefined).then((doc) => {
+        evntBus.$emit('set_pos_settings', doc);
+      });
+    },
   },
 
   created: function () {
     this.$nextTick(function () {
       this.check_opening_entry();
+      this.get_pos_setting();
       evntBus.$on('close_opening_dialog', () => {
         this.dialog = false;
       });
