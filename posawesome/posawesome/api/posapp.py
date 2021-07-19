@@ -1162,7 +1162,6 @@ def make_payment_request(**args):
 def get_amount(ref_doc, payment_account=None):
     """get amount based on doctype"""
     grand_total = 0
-    frappe.msgprint(str(payment_account))
     for pay in ref_doc.payments:
         if pay.type == "Phone" and pay.account == payment_account:
             grand_total = pay.amount
