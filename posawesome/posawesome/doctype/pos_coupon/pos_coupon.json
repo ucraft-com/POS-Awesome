@@ -37,6 +37,7 @@
    "fieldname": "coupon_type",
    "fieldtype": "Select",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Coupon Type",
    "options": "Promotional\nGift Card",
    "reqd": 1
@@ -56,6 +57,7 @@
    "description": "unique e.g. SAVE20  To be used to get discount",
    "fieldname": "coupon_code",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Coupon Code",
    "no_copy": 1,
    "set_only_once": 1,
@@ -121,6 +123,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -128,7 +131,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-24 23:11:23.594519",
+ "modified": "2021-07-25 23:18:36.459776",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Coupon",

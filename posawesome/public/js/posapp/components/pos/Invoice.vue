@@ -1511,15 +1511,31 @@ export default {
     },
 
     handelOffers() {
-      const itemOffers = this.getItemOffers();
-      const groupOffers = this.getGroupOffers();
-      const brandOffers = this.getBrandOffers();
-      const transactionOffers = this.getTransactionOffers();
-      const offers = []
-        .concat(itemOffers)
-        .concat(groupOffers)
-        .concat(brandOffers)
-        .concat(transactionOffers);
+      const offers = [];
+      this.posOffers.forEach((offer) => {
+        if (offer.apply_on === 'Item Code') {
+          const itemOffer = this.getItemOffer(offer);
+          if (itemOffer) {
+            offers.push(itemOffer);
+          }
+        } else if (offer.apply_on === 'Item Group') {
+          const groupOffer = this.getGroupOffer(offer);
+          if (groupOffer) {
+            offers.push(groupOffer);
+          }
+        } else if (offer.apply_on === 'Brand') {
+          const brandOffer = this.getBrandOffer(offer);
+          if (brandOffer) {
+            offers.push(brandOffer);
+          }
+        } else if (offer.apply_on === 'Transaction') {
+          const transactionOffer = this.getTransactionOffer(offer);
+          if (transactionOffer) {
+            offers.push(transactionOffer);
+          }
+        }
+      });
+
       this.setItemGiveOffer(offers);
       this.updatePosOffers(offers);
     },
@@ -1634,148 +1650,140 @@ export default {
       }
     },
 
-    getItemOffers() {
-      const offers = [];
-      this.posOffers.forEach((offer) => {
-        if (offer.apply_on === 'Item Code') {
-          if (this.checkOfferCoupon(offer)) {
-            this.items.forEach((item) => {
-              if (!item.posa_is_offer && item.item_code === offer.item) {
-                const items = [];
-                if (
-                  offer.offer === 'Item Price' &&
-                  item.posa_offer_applied &&
-                  !this.checkOfferIsAppley(item, offer)
-                ) {
-                } else {
-                  const res = this.checkQtyAnountOffer(
-                    offer,
-                    item.stock_qty,
-                    item.stock_qty * item.price_list_rate
-                  );
-                  if (res.apply) {
-                    items.push(item.posa_row_id);
-                    offer.items = items;
-                    offers.push(offer);
-                  }
+    getItemOffer(offer) {
+      let apply_offer = null;
+      if (offer.apply_on === 'Item Code') {
+        if (this.checkOfferCoupon(offer)) {
+          this.items.forEach((item) => {
+            if (!item.posa_is_offer && item.item_code === offer.item) {
+              const items = [];
+              if (
+                offer.offer === 'Item Price' &&
+                item.posa_offer_applied &&
+                !this.checkOfferIsAppley(item, offer)
+              ) {
+              } else {
+                const res = this.checkQtyAnountOffer(
+                  offer,
+                  item.stock_qty,
+                  item.stock_qty * item.price_list_rate
+                );
+                if (res.apply) {
+                  items.push(item.posa_row_id);
+                  offer.items = items;
+                  apply_offer = offer;
                 }
               }
-            });
-          }
+            }
+          });
         }
-      });
-      return offers;
+      }
+      return apply_offer;
     },
 
-    getGroupOffers() {
-      const offers = [];
-      this.posOffers.forEach((offer) => {
-        if (offer.apply_on === 'Item Group') {
-          if (this.checkOfferCoupon(offer)) {
-            const items = [];
-            let total_count = 0;
-            let total_amount = 0;
-            this.items.forEach((item) => {
-              if (!item.posa_is_offer && item.item_group === offer.item_group) {
-                if (
-                  offer.offer === 'Item Price' &&
-                  item.posa_offer_applied &&
-                  !this.checkOfferIsAppley(item, offer)
-                ) {
-                } else {
-                  total_count += item.stock_qty;
-                  total_amount += item.stock_qty * item.price_list_rate;
-                  items.push(item.posa_row_id);
-                }
+    getGroupOffer(offer) {
+      let apply_offer = null;
+      if (offer.apply_on === 'Item Group') {
+        if (this.checkOfferCoupon(offer)) {
+          const items = [];
+          let total_count = 0;
+          let total_amount = 0;
+          this.items.forEach((item) => {
+            if (!item.posa_is_offer && item.item_group === offer.item_group) {
+              if (
+                offer.offer === 'Item Price' &&
+                item.posa_offer_applied &&
+                !this.checkOfferIsAppley(item, offer)
+              ) {
+              } else {
+                total_count += item.stock_qty;
+                total_amount += item.stock_qty * item.price_list_rate;
+                items.push(item.posa_row_id);
               }
-            });
-            if (total_count || total_amount) {
-              const res = this.checkQtyAnountOffer(
-                offer,
-                total_count,
-                total_amount
-              );
-              if (res.apply) {
-                offer.items = items;
-                offers.push(offer);
-              }
+            }
+          });
+          if (total_count || total_amount) {
+            const res = this.checkQtyAnountOffer(
+              offer,
+              total_count,
+              total_amount
+            );
+            if (res.apply) {
+              offer.items = items;
+              apply_offer = offer;
             }
           }
         }
-      });
-      return offers;
+      }
+      return apply_offer;
     },
 
-    getBrandOffers() {
-      const offers = [];
-      this.posOffers.forEach((offer) => {
-        if (offer.apply_on === 'Brand') {
-          if (this.checkOfferCoupon(offer)) {
-            const items = [];
-            let total_count = 0;
-            let total_amount = 0;
-            this.items.forEach((item) => {
-              if (!item.posa_is_offer && item.brand === offer.brand) {
-                if (
-                  offer.offer === 'Item Price' &&
-                  item.posa_offer_applied &&
-                  !this.checkOfferIsAppley(item, offer)
-                ) {
-                } else {
-                  total_count += item.stock_qty;
-                  total_amount += item.stock_qty * item.price_list_rate;
-                  items.push(item.posa_row_id);
-                }
+    getBrandOffer(offer) {
+      let apply_offer = null;
+      if (offer.apply_on === 'Brand') {
+        if (this.checkOfferCoupon(offer)) {
+          const items = [];
+          let total_count = 0;
+          let total_amount = 0;
+          this.items.forEach((item) => {
+            if (!item.posa_is_offer && item.brand === offer.brand) {
+              if (
+                offer.offer === 'Item Price' &&
+                item.posa_offer_applied &&
+                !this.checkOfferIsAppley(item, offer)
+              ) {
+              } else {
+                total_count += item.stock_qty;
+                total_amount += item.stock_qty * item.price_list_rate;
+                items.push(item.posa_row_id);
               }
-            });
-            if (total_count || total_amount) {
-              const res = this.checkQtyAnountOffer(
-                offer,
-                total_count,
-                total_amount
-              );
-              if (res.apply) {
-                offer.items = items;
-                offers.push(offer);
-              }
+            }
+          });
+          if (total_count || total_amount) {
+            const res = this.checkQtyAnountOffer(
+              offer,
+              total_count,
+              total_amount
+            );
+            if (res.apply) {
+              offer.items = items;
+              apply_offer = offer;
             }
           }
         }
-      });
-      return offers;
+      }
+      return apply_offer;
     },
-    getTransactionOffers() {
-      const offers = [];
-      this.posOffers.forEach((offer) => {
-        if (offer.apply_on === 'Transaction') {
-          if (this.checkOfferCoupon(offer)) {
-            let total_qty = 0;
-            this.items.forEach((item) => {
-              if (!item.posa_is_offer && !item.posa_is_replace) {
-                total_qty += item.stock_qty;
-              }
-            });
-            const items = [];
-            const total_count = total_qty;
-            const total_amount = this.Total;
-            if (total_count || total_amount) {
-              const res = this.checkQtyAnountOffer(
-                offer,
-                total_count,
-                total_amount
-              );
-              if (res.apply) {
-                this.items.forEach((item) => {
-                  items.push(item.posa_row_id);
-                });
-                offer.items = items;
-                offers.push(offer);
-              }
+    getTransactionOffer(offer) {
+      let apply_offer = null;
+      if (offer.apply_on === 'Transaction') {
+        if (this.checkOfferCoupon(offer)) {
+          let total_qty = 0;
+          this.items.forEach((item) => {
+            if (!item.posa_is_offer && !item.posa_is_replace) {
+              total_qty += item.stock_qty;
+            }
+          });
+          const items = [];
+          const total_count = total_qty;
+          const total_amount = this.Total;
+          if (total_count || total_amount) {
+            const res = this.checkQtyAnountOffer(
+              offer,
+              total_count,
+              total_amount
+            );
+            if (res.apply) {
+              this.items.forEach((item) => {
+                items.push(item.posa_row_id);
+              });
+              offer.items = items;
+              apply_offer = offer;
             }
           }
         }
-      });
-      return offers;
+      }
+      return apply_offer;
     },
 
     updatePosOffers(offers) {
