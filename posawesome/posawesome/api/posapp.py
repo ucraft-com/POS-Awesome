@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import exceptions
 from frappe.utils import nowdate, flt
 from frappe import _
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
