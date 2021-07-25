@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import exceptions
 from frappe.utils import nowdate, flt
 from frappe import _
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
@@ -21,6 +22,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
     get_existing_payment_request_amount,
 )
 import json
+from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
 
 # from posawesome import console
 
@@ -1174,3 +1176,9 @@ def get_amount(ref_doc, payment_account=None):
         frappe.throw(
             _("Payment Entry is already created or payment account is not matched")
         )
+
+
+@frappe.whitelist()
+def get_pos_coupon(coupon, customer, company):
+    res = check_coupon_code(coupon, customer, company)
+    return res

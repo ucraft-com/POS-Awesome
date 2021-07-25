@@ -5,7 +5,7 @@
       style="max-height: 80vh; height: 80vh"
     >
       <v-card-title>
-        <span class="text-h6 warning--text">{{__('POS Offers')}}</span>
+        <span class="text-h6 warning--text">{{ __('Offers') }}</span>
       </v-card-title>
       <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh">
         <template @mouseover="style = 'cursor: pointer'">
@@ -81,7 +81,7 @@
             color="warning"
             dark
             @click="back_to_invoice"
-            >{{__('Back')}}</v-btn
+            >{{ __('Back') }}</v-btn
           >
         </v-col>
       </v-row>
@@ -254,6 +254,12 @@ export default {
         appliedOffersCount: this.appliedOffersCount,
       });
     },
+    updatePosCoupuns() {
+      const applyedOffers = this.pos_offers.filter(
+        (offer) => offer.offer_applied && offer.coupon_based
+      );
+      evntBus.$emit('update_pos_coupons', applyedOffers);
+    },
   },
 
   watch: {
@@ -262,6 +268,7 @@ export default {
       handler(pos_offers) {
         this.handelOffers();
         this.updateCounters();
+        this.updatePosCoupuns();
       },
     },
   },

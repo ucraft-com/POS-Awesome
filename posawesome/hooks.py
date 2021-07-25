@@ -91,6 +91,7 @@ doctype_js = {"POS Profile": "posawesome/api/pos_profile.js"}
 doc_events = {
     "Sales Invoice": {
         "before_submit": "posawesome.posawesome.api.invoice.before_submit",
+        "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
     }
 }
 
@@ -172,6 +173,7 @@ fixtures = [
                     "Customer-posa_discount",
                     "POS Profile-posa_apply_customer_discount",
                     "Sales Invoice-posa_offers",
+                    "Sales Invoice-posa_coupons",
                     "Sales Invoice Item-posa_offers",
                     "Sales Invoice Item-posa_row_id",
                     "Sales Invoice Item-posa_offer_applied",

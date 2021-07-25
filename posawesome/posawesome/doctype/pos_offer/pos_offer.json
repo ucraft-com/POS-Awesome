@@ -24,7 +24,7 @@
   "brand",
   "valid_from",
   "valid_upto",
-  "coupon",
+  "coupon_based",
   "auto",
   "quantity_and_amount_section",
   "min_qty",
@@ -302,7 +302,7 @@
   },
   {
    "default": "0",
-   "fieldname": "coupon",
+   "fieldname": "coupon_based",
    "fieldtype": "Check",
    "label": "Coupon Code Based"
   }
@@ -314,7 +314,7 @@
    "link_fieldname": "pos_offer"
   }
  ],
- "modified": "2021-07-24 23:10:22.213295",
+ "modified": "2021-07-25 17:09:55.634113",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Offer",

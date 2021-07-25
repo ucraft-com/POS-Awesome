@@ -8,11 +8,17 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
+from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_code_count
 
 
 def before_submit(doc, method):
     add_loyalty_point(doc)
     create_sales_order(doc)
+    update_coupon(doc, "used")
+
+
+def before_cancel(doc, method):
+    update_coupon(doc, "cancelled")
 
 
 def add_loyalty_point(invoice_doc):
@@ -117,3 +123,10 @@ def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
     )
 
     return doclist
+
+
+def update_coupon(doc, transaction_type):
+    for coupon in doc.posa_coupons:
+        if not coupon.applied:
+            continue
+        update_coupon_code_count(coupon.coupon, transaction_type)

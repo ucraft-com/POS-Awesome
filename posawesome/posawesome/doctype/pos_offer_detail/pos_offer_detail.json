@@ -12,7 +12,9 @@
   "items",
   "give_item",
   "give_item_row_id",
-  "offer_applied"
+  "offer_applied",
+  "coupon_based",
+  "coupon"
  ],
  "fields": [
   {
@@ -72,12 +74,29 @@
    "fieldtype": "Data",
    "label": "Give Item Row ID",
    "read_only": 1
+  },
+  {
+   "fieldname": "coupon",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Coupon",
+   "options": "POS Coupon",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "offer_name.coupon_based",
+   "fetch_if_empty": 1,
+   "fieldname": "coupon_based",
+   "fieldtype": "Check",
+   "label": "Coupon Based",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-12 15:47:18.040876",
+ "modified": "2021-07-25 17:12:41.138596",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Offer Detail",

@@ -10,7 +10,7 @@
     <OpeningDialog v-if="dialog" :dialog="dialog"></OpeningDialog>
     <v-row v-show="!dialog">
       <v-col
-        v-show="!payment && !offers"
+        v-show="!payment && !offers && !coupons"
         xl="5"
         lg="5"
         md="5"
@@ -30,6 +30,17 @@
         class="pos pr-0"
       >
         <PosOffers></PosOffers>
+      </v-col>
+      <v-col
+        v-show="coupons"
+        xl="5"
+        lg="5"
+        md="5"
+        sm="5"
+        cols="12"
+        class="pos pr-0"
+      >
+        <PosCoupons></PosCoupons>
       </v-col>
       <v-col
         v-show="payment"
@@ -58,6 +69,7 @@ import Invoice from './Invoice.vue';
 import OpeningDialog from './OpeningDialog.vue';
 import Payments from './Payments.vue';
 import PosOffers from './PosOffers.vue';
+import PosCoupons from './PosCoupons.vue';
 import Drafts from './Drafts.vue';
 import ClosingDialog from './ClosingDialog.vue';
 import NewCustomer from './NewCustomer.vue';
@@ -74,6 +86,7 @@ export default {
       pos_opening_shift: '',
       payment: false,
       offers: false,
+      coupons: false,
     };
   },
 
@@ -87,6 +100,7 @@ export default {
     NewCustomer,
     Returns,
     PosOffers,
+    PosCoupons,
     EditCustomer,
     NewAddress,
     Variants,
@@ -186,9 +200,16 @@ export default {
       evntBus.$on('show_payment', (data) => {
         this.payment = true ? data === 'true' : false;
         this.offers = false ? data === 'true' : false;
+        this.coupons = false ? data === 'true' : false;
       });
       evntBus.$on('show_offers', (data) => {
         this.offers = true ? data === 'true' : false;
+        this.payment = false ? data === 'true' : false;
+        this.coupons = false ? data === 'true' : false;
+      });
+      evntBus.$on('show_coupons', (data) => {
+        this.coupons = true ? data === 'true' : false;
+        this.offers = false ? data === 'true' : false;
         this.payment = false ? data === 'true' : false;
       });
       evntBus.$on('open_closing_dialog', () => {

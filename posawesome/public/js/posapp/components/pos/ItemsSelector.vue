@@ -102,15 +102,21 @@
             v-model="item_group"
           ></v-select>
         </v-col>
-        <v-col cols="6" class="mt-1">
+        <v-col cols="3" class="mt-1">
           <v-btn-toggle v-model="items_view" color="orange" group dense rounded>
-            <v-btn value="list">{{__('List')}}</v-btn>
-            <v-btn value="card">{{__('Card')}}</v-btn>
+            <v-btn small value="list">{{ __('List') }}</v-btn>
+            <v-btn small value="card">{{ __('Card') }}</v-btn>
           </v-btn-toggle>
         </v-col>
-        <v-col cols="6" class="mt-2">
-          <v-btn color="warning" text @click="show_offers"
-            >{{ offersCount }} {{__('Offers')}} : {{ appliedOffersCount }} {{__('Applied')}}</v-btn
+        <v-col cols="4" class="mt-2">
+          <v-btn small block color="warning" text @click="show_coupons"
+            >{{ couponsCount }} {{ __('Coupons') }}</v-btn
+          >
+        </v-col>
+        <v-col cols="5" class="mt-2">
+          <v-btn small block color="warning" text @click="show_offers"
+            >{{ offersCount }} {{ __('Offers') }} : {{ appliedOffersCount }}
+            {{ __('Applied') }}</v-btn
           >
         </v-col>
       </v-row>
@@ -142,6 +148,8 @@ export default {
     ],
     offersCount: 0,
     appliedOffersCount: 0,
+    couponsCount: 0,
+    appliedCouponsCount: 0,
   }),
 
   watch: {
@@ -153,6 +161,9 @@ export default {
   methods: {
     show_offers() {
       evntBus.$emit('show_offers', 'true');
+    },
+    show_coupons() {
+      evntBus.$emit('show_coupons', 'true');
     },
     get_items() {
       if (!this.pos_profile) {
@@ -429,6 +440,10 @@ export default {
     evntBus.$on('update_offers_counters', (data) => {
       this.offersCount = data.offersCount;
       this.appliedOffersCount = data.appliedOffersCount;
+    });
+    evntBus.$on('update_coupons_counters', (data) => {
+      this.couponsCount = data.couponsCount;
+      this.appliedCouponsCount = data.appliedCouponsCount;
     });
   },
 
