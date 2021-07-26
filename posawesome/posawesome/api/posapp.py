@@ -339,13 +339,7 @@ def update_invoice(data):
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
-    invoice_doc.customer = data.get("customer")
-    invoice_doc.items = []
-    invoice_doc.discount_amount = data.get("discount_amount")
-    invoice_doc.update({"items": data.get("items")})
-    invoice_doc.posa_offers = []
-    invoice_doc.update({"posa_offers": data.get("posa_offers")})
-    invoice_doc.update({"payments": data.get("payments")})
+    invoice_doc.update(data)
     invoice_doc.set_missing_values()
 
     if invoice_doc.get("taxes"):
@@ -360,9 +354,7 @@ def update_invoice(data):
 def submit_invoice(data):
     data = json.loads(data)
     invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
-    invoice_doc.posa_delivery_date = data.get("posa_delivery_date")
-    invoice_doc.posa_notes = data.get("posa_notes")
-    invoice_doc.shipping_address_name = data.get("shipping_address_name")
+    invoice_doc.update(data)
     if data.get("posa_delivery_date"):
         invoice_doc.update_stock = 0
     mop_cash_list = [

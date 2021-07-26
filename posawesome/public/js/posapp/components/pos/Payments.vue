@@ -125,7 +125,7 @@
                 color="success"
                 dark
                 :disabled="payment.amount == 0"
-                @click="request_payment"
+                @click="phone_dialog = true"
               >
                 {{ __('Request') }}
               </v-btn>
@@ -556,6 +556,40 @@
         </v-col>
       </v-row>
     </v-card>
+    <div>
+      <v-dialog v-model="phone_dialog" max-width="400px">
+        <v-card>
+          <v-card-title>
+            <span class="headline indigo--text">{{
+              __('Confirm Mobile Number')
+            }}</span>
+          </v-card-title>
+          <v-card-text class="pa-0">
+            <v-container>
+              <v-text-field
+                dense
+                outlined
+                color="indigo"
+                :label="frappe._('Mobile Number')"
+                background-color="white"
+                hide-details
+                v-model="invoice_doc.contact_mobile"
+                type="number"
+              ></v-text-field>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="error" dark @click="phone_dialog = false">{{
+              __('Close')
+            }}</v-btn>
+            <v-btn color="primary" dark @click="request_payment">{{
+              __('Request')
+            }}</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </div>
   </div>
 </template>
 
@@ -577,6 +611,7 @@ export default {
     is_cashback: true,
     redeem_customer_credit: false,
     customer_credit_dict: [],
+    phone_dialog: false,
     invoiceType: 'Invoice',
     pos_settings: '',
     customer_info: '',
@@ -845,7 +880,7 @@ export default {
       evntBus.$emit('open_new_address', this.invoice_doc.customer);
     },
     request_payment() {
-      console.info('Request Payment');
+      this.phone_dialog = false;
       const vm = this;
       if (!this.invoice_doc.contact_mobile) {
         evntBus.$emit('show_mesage', {
@@ -933,7 +968,7 @@ export default {
                         });
                     }
                   });
-              }, 50000);
+              }, 30000);
             });
         });
     },
