@@ -84,6 +84,20 @@ def check_coupon_code(coupon_code, customer=None, company=None):
         res["msg"] = _("Sorry, this coupon code cannot be used by this company")
         return res
 
+    if customer and coupon.oneـuse:
+        count = frappe.db.count(
+            "POS Coupon Detail",
+            filters={
+                "parentfield": "posa_coupons",
+                "parenttype": "Sales Invoice",
+                "docstatus": 1,
+                "customer": customer,
+            },
+        )
+        if count > 0:
+            res["msg"] = _("Sorry, {0} have used this coupon before").format(customer)
+            return res
+
     res["coupon"] = coupon
     res["msg"] = "Apply"
     return res

@@ -12,6 +12,7 @@
   "coupon_type",
   "customer",
   "company",
+  "campaign",
   "column_break_4",
   "coupon_code",
   "pos_offer",
@@ -20,6 +21,7 @@
   "valid_upto",
   "maximum_use",
   "used",
+  "one\u0640use",
   "column_break_11",
   "description",
   "amended_from"
@@ -57,7 +59,7 @@
    "description": "unique e.g. SAVE20  To be used to get discount",
    "fieldname": "coupon_code",
    "fieldtype": "Data",
-   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Coupon Code",
    "no_copy": 1,
    "set_only_once": 1,
@@ -96,6 +98,7 @@
    "default": "0",
    "fieldname": "used",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "Used",
    "no_copy": 1,
    "read_only": 1
@@ -127,11 +130,24 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "campaign",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Campaign",
+   "options": "Campaign"
+  },
+  {
+   "default": "0",
+   "fieldname": "one\u0640use",
+   "fieldtype": "Check",
+   "label": "Only One Use Per Customer"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-25 23:18:36.459776",
+ "modified": "2021-07-29 03:47:03.407220",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Coupon",
@@ -189,6 +205,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "coupon_name",
+ "title_field": "coupon_code",
  "track_changes": 1
 }
