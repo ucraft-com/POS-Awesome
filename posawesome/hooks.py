@@ -35,7 +35,10 @@ app_include_js = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"POS Profile": "posawesome/api/pos_profile.js"}
+doctype_js = {
+    "POS Profile": "posawesome/api/pos_profile.js",
+    "Company": "posawesome/api/company.js",
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -92,7 +95,10 @@ doc_events = {
     "Sales Invoice": {
         "before_submit": "posawesome.posawesome.api.invoice.before_submit",
         "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
-    }
+    },
+    "Customer": {
+        "after_insert": "posawesome.posawesome.api.customer.after_insert",
+    },
 }
 
 # Scheduled Tasks
@@ -194,6 +200,16 @@ fixtures = [
                     "POS Profile-posa_column_break_112",
                     "POS Profile-posa_show_template_items",
                     "POS Profile-posa_hide_variants_items",
+                    "Customer-posa_referral_code",
+                    "POS Profile-posa_fetch_coupon",
+                    "Company-posa_referral_section",
+                    "Company-posa_auto_referral",
+                    "Company-posa_column_break_22",
+                    "Company-posa_customer_offer",
+                    "Company-posa_primary_offer",
+                    "Company-posa_referral_campaign",
+                    "Customer-posa_referral_company",
+                    "Customer-posa_referral_section",
                 ),
             ]
         ],

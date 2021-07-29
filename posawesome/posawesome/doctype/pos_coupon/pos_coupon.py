@@ -41,6 +41,45 @@ class POSCoupon(Document):
         if pos_offer.valid_upto and pos_offer.valid_upto < getdate(self.valid_upto):
             self.valid_upto = pos_offer.valid_upto
 
+    def create_coupon_from_referral(self):
+        if not self.customer:
+            frappe.throw(_("Customer is required"))
+        if not self.referral_code:
+            frappe.throw(_("Referral Code is required"))
+        ref_doc = None
+        ref_code_exist = frappe.db.exists("Referral Code", self.referral_code)
+        if not ref_code_exist:
+            ref_doc = frappe.get_doc(
+                "Referral Code", {"referral_code": self.referral_code}
+            )
+        else:
+            ref_doc = frappe.get_doc("Referral Code", self.referral_code)
+        if not ref_doc:
+            frappe.throw(
+                _("Referral Code {0} is not exists").format(self.referral_code)
+            )
+        if ref_doc.disabled:
+            frappe.throw(_("Referral Code {0} is disabled").format(self.referral_code))
+
+        self.coupon_name = frappe.generate_hash()[:10].upper()
+        self.coupon_type = "Gift Card"
+        self.company = ref_doc.company
+        self.pos_offer = ref_doc.customer_offer
+        self.campaign = ref_doc.campaign
+        self.referral_code = ref_doc.name
+        self.save(ignore_permissions=True)
+
+        if ref_doc.primary_offer:
+            doc = frappe.new_doc("POS Coupon")
+            doc.coupon_name = frappe.generate_hash()[:10].upper()
+            doc.coupon_type = "Gift Card"
+            doc.company = ref_doc.company
+            doc.customer = ref_doc.customer
+            doc.pos_offer = ref_doc.primary_offer
+            doc.campaign = ref_doc.campaign
+            doc.referral_code = ref_doc.name
+            doc.save(ignore_permissions=True)
+
 
 def check_coupon_code(coupon_code, customer=None, company=None):
     res = {"coupon": None}

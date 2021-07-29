@@ -11,7 +11,7 @@ class ReferralCode(Document):
     def autoname(self):
         if not self.referral_name:
             self.referral_name = (
-                strip(self.party) + "-" + frappe.generate_hash()[:5].upper()
+                strip(self.customer) + "-" + frappe.generate_hash()[:5].upper()
             )
             self.name = self.referral_name
         else:
@@ -21,18 +21,18 @@ class ReferralCode(Document):
         if not self.referral_code:
             self.referral_code = frappe.generate_hash()[:10].upper()
 
+    def validate(self):
+        pass
 
-@frappe.whitelist()
-def get_party_details(party_type, party):
 
-    if not frappe.db.exists(party_type, party):
-        frappe.throw(_("Invalid {0}: {1}").format(party_type, party))
-
-    _party_name = (
-        "title"
-        if party_type in ("Student", "Sales Partner")
-        else party_type.lower() + "_name"
-    )
-    party_name = frappe.db.get_value(party_type, party, _party_name)
-
-    return party_name
+def create_referral_code(
+    company, customer, customer_offer, primary_offer=None, campaign=None
+):
+    doc = frappe.new_doc("Referral Code")
+    doc.company = company
+    doc.customer = customer
+    doc.customer_offer = customer_offer
+    doc.primary_offer = primary_offer
+    doc.campaign = campaign
+    doc.save(ignore_permissions=True)
+    return doc

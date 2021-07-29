@@ -14,7 +14,7 @@
  "is_standard": 1,
  "label": "POS Awesome",
  "links": [],
- "modified": "2021-07-25 03:36:13.087138",
+ "modified": "2021-07-29 22:32:00.550981",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Awesome",
@@ -54,6 +54,12 @@
    "doc_view": "",
    "label": "POS Coupons",
    "link_to": "POS Coupon",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Referral Code",
+   "link_to": "Referral Code",
    "type": "DocType"
   }
  ]

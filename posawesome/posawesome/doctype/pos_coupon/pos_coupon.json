@@ -11,11 +11,15 @@
   "coupon_name",
   "coupon_type",
   "customer",
-  "company",
-  "campaign",
+  "customer_name",
+  "mobile_no",
+  "email_id",
   "column_break_4",
   "coupon_code",
+  "company",
+  "campaign",
   "pos_offer",
+  "referral_code",
   "uses",
   "valid_from",
   "valid_upto",
@@ -23,8 +27,7 @@
   "used",
   "one\u0640use",
   "column_break_11",
-  "description",
-  "amended_from"
+  "description"
  ],
  "fields": [
   {
@@ -48,6 +51,8 @@
    "depends_on": "eval: doc.coupon_type == \"Gift Card\"",
    "fieldname": "customer",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Customer",
    "options": "Customer"
   },
@@ -115,15 +120,6 @@
    "label": "Coupon Description"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Coupon Code",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -143,11 +139,44 @@
    "fieldname": "one\u0640use",
    "fieldtype": "Check",
    "label": "Only One Use Per Customer"
+  },
+  {
+   "depends_on": "customer",
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "depends_on": "customer",
+   "fetch_from": "customer.mobile_no",
+   "fetch_if_empty": 1,
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile NO",
+   "options": "Phone"
+  },
+  {
+   "depends_on": "customer",
+   "fetch_from": "customer.email_id",
+   "fetch_if_empty": 1,
+   "fieldname": "email_id",
+   "fieldtype": "Data",
+   "label": "Email ID",
+   "options": "Email"
+  },
+  {
+   "fieldname": "referral_code",
+   "fieldtype": "Link",
+   "label": "Referral Code",
+   "options": "Referral Code",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-29 03:47:03.407220",
+ "modified": "2021-07-30 00:17:17.711972",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Coupon",

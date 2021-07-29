@@ -6,33 +6,28 @@ frappe.ui.form.on('Referral Code', {
 		frm.set_query("party_type", function () {
 			return {
 				filters: {
-					"name": ["in", ["Customer", "Sales Partner", "Employee", "Supplier", "Student"]],
+					"name": ["in", ["Customer"]],
 				}
 			};
 		});
-	},
-	party_type: function (frm) {
-		frm.set_value("party", null);
-		frm.set_value("party_name", null);
-	},
-	party: function (frm) {
-		if (frm.doc.party_type && frm.doc.party) {
-			return frappe.call({
-				method: "posawesome.posawesome.doctype.referral_code.referral_code.get_party_details",
-				args: {
-					party_type: frm.doc.party_type,
-					party: frm.doc.party,
-				},
-				callback: function (r) {
-					if (r.message) {
-						frm.set_value("party_name", r.message);
-					}
-					else {
-						frm.set_value("party_name", null);
-					}
+		frm.set_query("customer_offer", function () {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"coupon_based": 1,
+					"disable": 0,
 				}
-			});
-		}
+			};
+		});
+		frm.set_query("primary_offer", function () {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"coupon_based": 1,
+					"disable": 0,
+				}
+			};
+		});
 	},
 	referral_name: function (frm) {
 		if (frm.doc.__islocal === 1) {

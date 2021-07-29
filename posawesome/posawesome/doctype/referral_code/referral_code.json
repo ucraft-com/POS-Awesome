@@ -8,38 +8,19 @@
  "field_order": [
   "disabled",
   "section_break_2",
-  "party_type",
-  "party",
-  "party_name",
+  "company",
+  "customer",
+  "customer_name",
+  "mobile_no",
+  "email_id",
   "campaign",
   "column_break_5",
   "referral_name",
-  "referral_code"
+  "referral_code",
+  "customer_offer",
+  "primary_offer"
  ],
  "fields": [
-  {
-   "fieldname": "party_type",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Party Type",
-   "options": "DocType",
-   "reqd": 1
-  },
-  {
-   "fieldname": "party",
-   "fieldtype": "Dynamic Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Party",
-   "options": "party_type",
-   "reqd": 1
-  },
-  {
-   "fieldname": "party_name",
-   "fieldtype": "Data",
-   "label": "Party Name"
-  },
   {
    "fieldname": "campaign",
    "fieldtype": "Link",
@@ -74,11 +55,61 @@
   {
    "fieldname": "section_break_2",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_offer",
+   "fieldtype": "Link",
+   "label": "Final Customer Offer",
+   "options": "POS Offer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "primary_offer",
+   "fieldtype": "Link",
+   "label": "Primary Customer Offer",
+   "options": "POS Offer"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.mobile_no",
+   "fetch_if_empty": 1,
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile NO",
+   "options": "Phone"
+  },
+  {
+   "fetch_from": "customer.email_id",
+   "fetch_if_empty": 1,
+   "fieldname": "email_id",
+   "fieldtype": "Data",
+   "label": "Email ID",
+   "options": "Email"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-29 04:20:57.549768",
+ "modified": "2021-07-29 22:28:54.158213",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Referral Code",
@@ -93,6 +124,42 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Website Manager",
    "share": 1,
    "write": 1
   }
