@@ -282,7 +282,6 @@
               ref="order_delivery_date"
               v-model="order_delivery_date"
               :close-on-content-click="false"
-              :return-value.sync="invoice_doc.posa_delivery_date"
               transition="scale-transition"
               dense
             >
@@ -307,28 +306,8 @@
                 scrollable
                 color="indigo"
                 :min="frappe.datetime.now_date()"
+                @input="order_delivery_date = false"
               >
-                <v-spacer></v-spacer>
-                <v-btn
-                  text
-                  color="primary"
-                  @click="order_delivery_date = false"
-                >
-                  {{ __('Cancel') }}
-                </v-btn>
-                <v-btn
-                  text
-                  color="primary"
-                  @click="
-                    [
-                      $refs.order_delivery_date.save(
-                        invoice_doc.posa_delivery_date
-                      ),
-                    ]
-                  "
-                >
-                  OK
-                </v-btn>
               </v-date-picker>
             </v-menu>
           </v-col>
@@ -429,10 +408,9 @@
               ref="date_menu"
               v-model="date_menu"
               :close-on-content-click="false"
-              :return-value.sync="invoice_doc.due_date"
               transition="scale-transition"
             >
-              <template v-slot:activator="{ on1, attrs1 }">
+              <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   v-model="invoice_doc.due_date"
                   :label="frappe._('Due Date')"
@@ -440,8 +418,8 @@
                   outlined
                   dense
                   hide-details
-                  v-bind="attrs1"
-                  v-on="on1"
+                  v-bind="attrs"
+                  v-on="on"
                   color="indigo"
                 ></v-text-field>
               </template>
@@ -451,23 +429,8 @@
                 scrollable
                 color="indigo"
                 :min="frappe.datetime.now_date()"
+                @input="date_menu = false"
               >
-                <v-spacer></v-spacer>
-                <v-btn text color="primary" @click="date_menu = false">
-                  Cancel
-                </v-btn>
-                <v-btn
-                  text
-                  color="primary"
-                  @click="
-                    [
-                      $refs.date_menu.save(invoice_doc.due_date),
-                      validate_due_date(),
-                    ]
-                  "
-                >
-                  OK
-                </v-btn>
               </v-date-picker>
             </v-menu>
           </v-col>

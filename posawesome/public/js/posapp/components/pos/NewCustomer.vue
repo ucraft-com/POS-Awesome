@@ -3,7 +3,7 @@
     <v-dialog v-model="customerDialog" max-width="600px">
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">{{ __('New Customer')}}</span>
+          <span class="headline indigo--text">{{ __('New Customer') }}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -48,13 +48,59 @@
                   v-model="email_id"
                 ></v-text-field>
               </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  dense
+                  color="indigo"
+                  :label="frappe._('Referral Code')"
+                  background-color="white"
+                  hide-details
+                  v-model="referral_code"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="6">
+                <v-menu
+                  ref="birthday_menu"
+                  v-model="birthday_menu"
+                  :close-on-content-click="false"
+                  transition="scale-transition"
+                  dense
+                >
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field
+                      v-model="birthday"
+                      :label="frappe._('Birthday')"
+                      readonly
+                      dense
+                      clearable
+                      hide-details
+                      v-bind="attrs"
+                      v-on="on"
+                      color="indigo"
+                    ></v-text-field>
+                  </template>
+                  <v-date-picker
+                    v-model="birthday"
+                    color="indigo"
+                    no-title
+                    scrollable
+                    :max="frappe.datetime.now_date()"
+                    @input="birthday_menu = false"
+                  >
+                  </v-date-picker>
+                </v-menu>
+              </v-col>
             </v-row>
           </v-container>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="error" dark @click="close_dialog">{{__('Close')}}</v-btn>
-          <v-btn color="primary" dark @click="submit_dialog">{{__('Submit')}}</v-btn>
+          <v-btn color="error" dark @click="close_dialog">{{
+            __('Close')
+          }}</v-btn>
+          <v-btn color="primary" dark @click="submit_dialog">{{
+            __('Submit')
+          }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -66,10 +112,14 @@ import { evntBus } from '../../bus';
 export default {
   data: () => ({
     customerDialog: false,
+    pos_profile: '',
     customer_name: '',
     tax_id: '',
     mobile_no: '',
     email_id: '',
+    referral_code: '',
+    birthday: null,
+    birthday_menu: false,
   }),
   watch: {},
   methods: {
@@ -82,9 +132,12 @@ export default {
         const vm = this;
         const args = {
           customer_name: this.customer_name,
+          company: this.pos_profile.company,
           tax_id: this.tax_id,
           mobile_no: this.mobile_no,
           email_id: this.email_id,
+          referral_code: this.referral_code,
+          birthday: this.birthday,
         };
         frappe.call({
           method: 'posawesome.posawesome.api.posapp.create_customer',
@@ -103,6 +156,8 @@ export default {
               this.tax_id = '';
               this.mobile_no = '';
               this.email_id = '';
+              this.referral_code = '';
+              this.birthday = '';
             }
           },
         });
@@ -113,6 +168,9 @@ export default {
   created: function () {
     evntBus.$on('open_new_customer', () => {
       this.customerDialog = true;
+    });
+    evntBus.$on('register_pos_profile', (data) => {
+      this.pos_profile = data.pos_profile;
     });
   },
 };

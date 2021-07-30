@@ -714,15 +714,20 @@ def get_stock_availability(item_code, warehouse):
 
 
 @frappe.whitelist()
-def create_customer(customer_name, tax_id, mobile_no, email_id):
+def create_customer(
+    customer_name, company,tax_id, mobile_no, email_id, referral_code=None, birthday=None
+):
     if not frappe.db.exists("Customer", {"customer_name": customer_name}):
         customer = frappe.get_doc(
             {
                 "doctype": "Customer",
                 "customer_name": customer_name,
+                "posa_referral_company":company,
                 "tax_id": tax_id,
                 "mobile_no": mobile_no,
                 "email_id": email_id,
+                "posa_referral_code": referral_code,
+                "posa_birthday": birthday,
             }
         ).insert(ignore_permissions=True)
         return customer
