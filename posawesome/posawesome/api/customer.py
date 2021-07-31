@@ -45,7 +45,7 @@ def validate_referral_code(doc):
     exist = None
     if referral_code:
         exist = frappe.db.exists("Referral Code", referral_code)
-    if not exist:
-        exist = frappe.db.exists("Referral Code", {"referral_code": referral_code})
-    if not exist:
-        frappe.throw(_("This Referral Code {0} not exists").format(referral_code))
+        if not exist:
+            exist = frappe.db.exists("Referral Code", {"referral_code": referral_code})
+        if not exist:
+            frappe.throw(_("This Referral Code {0} not exists").format(referral_code))
