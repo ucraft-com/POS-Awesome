@@ -152,12 +152,13 @@ export default {
               frappe.utils.play_sound('submit');
               evntBus.$emit('add_customer_to_list', args);
               evntBus.$emit('set_customer', r.message.name);
-              this.customer_name = '';
-              this.tax_id = '';
-              this.mobile_no = '';
-              this.email_id = '';
-              this.referral_code = '';
-              this.birthday = '';
+              vm.customer_name = '';
+              vm.tax_id = '';
+              vm.mobile_no = '';
+              vm.email_id = '';
+              vm.referral_code = '';
+              vm.birthday = '';
+              vm.customerDialog = false;
             }
           },
         });

@@ -14,6 +14,10 @@ def after_insert(doc, method):
     create_gift_coupon(doc)
 
 
+def validate(doc, method):
+    validate_referral_code(doc)
+
+
 def create_customer_referral_code(doc):
     if doc.posa_referral_company:
         company = frappe.get_cached_doc("Company", doc.posa_referral_company)
@@ -34,3 +38,14 @@ def create_gift_coupon(doc):
         coupon.customer = doc.name
         coupon.referral_code = doc.posa_referral_code
         coupon.create_coupon_from_referral()
+
+
+def validate_referral_code(doc):
+    referral_code = doc.posa_referral_code
+    exist = None
+    if referral_code:
+        exist = frappe.db.exists("Referral Code", referral_code)
+    if not exist:
+        exist = frappe.db.exists("Referral Code", {"referral_code": referral_code})
+    if not exist:
+        frappe.throw(_("This Referral Code {0} not exists").format(referral_code))
