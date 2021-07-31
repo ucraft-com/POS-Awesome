@@ -240,7 +240,7 @@
               dense
               outlined
               color="indigo"
-              :label="frappe._('Totoal Amount')"
+              :label="frappe._('Total Amount')"
               background-color="white"
               hide-details
               :value="formtCurrency(invoice_doc.total)"
@@ -266,7 +266,7 @@
               dense
               outlined
               color="indigo"
-              :label="frappe._('Grand Amount')"
+              :label="frappe._('Grand Total')"
               background-color="white"
               hide-details
               :value="formtCurrency(invoice_doc.grand_total)"

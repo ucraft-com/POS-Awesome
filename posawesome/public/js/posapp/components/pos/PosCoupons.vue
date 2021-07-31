@@ -105,10 +105,14 @@ export default {
     back_to_invoice() {
       evntBus.$emit('show_coupons', 'false');
     },
-    add_coupon() {
-      if (!this.new_coupon) return;
+    add_coupon(new_coupon) {
+      if (!this.customer) return;
+      if (!new_coupon) {
+        new_coupon = this.new_coupon;
+      }
+      if (!new_coupon) return;
       const exist = this.posa_coupons.find(
-        (el) => el.coupon_code == this.new_coupon
+        (el) => el.coupon_code == new_coupon
       );
       if (exist) {
         evntBus.$emit('show_mesage', {
@@ -121,7 +125,7 @@ export default {
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.get_pos_coupon',
         args: {
-          coupon: vm.new_coupon,
+          coupon: new_coupon,
           customer: vm.customer,
           company: vm.pos_profile.company,
         },
@@ -145,6 +149,25 @@ export default {
                 customer: coupon.customer || vm.customer,
               });
             }
+          }
+        },
+      });
+    },
+    setActiveGiftCoupons() {
+      if (!this.customer) return;
+      const vm = this;
+      frappe.call({
+        method: 'posawesome.posawesome.api.posapp.get_active_gift_coupons',
+        args: {
+          customer: vm.customer,
+          company: vm.pos_profile.company,
+        },
+        callback: function (r) {
+          if (r.message) {
+            const coupons = r.message;
+            coupons.forEach((coupon_code) => {
+              vm.add_coupon(coupon_code);
+            });
           }
         },
       });
@@ -202,7 +225,7 @@ export default {
           if (el.type == 'Promotional') {
             el.customer = customer;
           } else {
-            to_remove.push(el);
+            to_remove.push(el.coupon);
           }
         });
         this.customer = customer;
@@ -210,6 +233,7 @@ export default {
           this.removeCoupon(to_remove);
         }
       }
+      this.setActiveGiftCoupons();
     });
     evntBus.$on('update_pos_coupons', (data) => {
       this.updatePosCoupons(data);

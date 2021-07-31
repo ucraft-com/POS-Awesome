@@ -715,14 +715,20 @@ def get_stock_availability(item_code, warehouse):
 
 @frappe.whitelist()
 def create_customer(
-    customer_name, company,tax_id, mobile_no, email_id, referral_code=None, birthday=None
+    customer_name,
+    company,
+    tax_id,
+    mobile_no,
+    email_id,
+    referral_code=None,
+    birthday=None,
 ):
     if not frappe.db.exists("Customer", {"customer_name": customer_name}):
         customer = frappe.get_doc(
             {
                 "doctype": "Customer",
                 "customer_name": customer_name,
-                "posa_referral_company":company,
+                "posa_referral_company": company,
                 "tax_id": tax_id,
                 "mobile_no": mobile_no,
                 "email_id": email_id,
@@ -1178,3 +1184,21 @@ def get_amount(ref_doc, payment_account=None):
 def get_pos_coupon(coupon, customer, company):
     res = check_coupon_code(coupon, customer, company)
     return res
+
+
+@frappe.whitelist()
+def get_active_gift_coupons(customer, company):
+    coupons = []
+    coupons_data = frappe.get_all(
+        "POS Coupon",
+        filters={
+            "company": company,
+            "coupon_type": "Gift Card",
+            "customer": customer,
+            "used": 0,
+        },
+        fields=["coupon_code"],
+    )
+    if len(coupons_data):
+        coupons = [i.coupon_code for i in coupons_data]
+    return coupons
