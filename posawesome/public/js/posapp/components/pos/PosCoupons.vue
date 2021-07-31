@@ -22,9 +22,13 @@
             ></v-text-field>
           </v-col>
           <v-col cols="2">
-            <v-btn class="pa-1" color="primary" dark @click="add_coupon">{{
-              __('add')
-            }}</v-btn>
+            <v-btn
+              class="pa-1"
+              color="primary"
+              dark
+              @click="add_coupon(new_coupon)"
+              >{{ __('add') }}</v-btn
+            >
           </v-col>
         </v-row>
       </v-card-title>
@@ -106,11 +110,7 @@ export default {
       evntBus.$emit('show_coupons', 'false');
     },
     add_coupon(new_coupon) {
-      if (!this.customer) return;
-      if (!new_coupon) {
-        new_coupon = this.new_coupon;
-      }
-      if (!new_coupon) return;
+      if (!this.customer || !new_coupon) return;
       const exist = this.posa_coupons.find(
         (el) => el.coupon_code == new_coupon
       );
