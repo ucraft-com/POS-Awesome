@@ -722,6 +722,8 @@ def create_customer(
     email_id,
     referral_code=None,
     birthday=None,
+    customer_group=None,
+    territory=None,
 ):
     if not frappe.db.exists("Customer", {"customer_name": customer_name}):
         customer = frappe.get_doc(
@@ -735,7 +737,12 @@ def create_customer(
                 "posa_referral_code": referral_code,
                 "posa_birthday": birthday,
             }
-        ).insert(ignore_permissions=True)
+        )
+        if customer_group:
+            customer.customer_group = customer_group
+        if territory:
+            customer.territory = territory
+        customer.save(ignore_permissions=True)
         return customer
 
 

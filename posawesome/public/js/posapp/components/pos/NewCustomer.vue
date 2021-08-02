@@ -90,6 +90,36 @@
                   </v-date-picker>
                 </v-menu>
               </v-col>
+              <v-col cols="6">
+                <v-autocomplete
+                  clearable
+                  dense
+                  auto-select-first
+                  color="indigo"
+                  :label="frappe._('Customer Group')"
+                  v-model="group"
+                  :items="groups"
+                  background-color="white"
+                  :no-data-text="__('Group not found')"
+                  hide-details
+                >
+                </v-autocomplete>
+              </v-col>
+              <v-col cols="6">
+                <v-autocomplete
+                  clearable
+                  dense
+                  auto-select-first
+                  color="indigo"
+                  :label="frappe._('Territory')"
+                  v-model="territory"
+                  :items="territorys"
+                  background-color="white"
+                  :no-data-text="__('Territory not found')"
+                  hide-details
+                >
+                </v-autocomplete>
+              </v-col>
             </v-row>
           </v-container>
         </v-card-text>
@@ -120,13 +150,48 @@ export default {
     referral_code: '',
     birthday: null,
     birthday_menu: false,
+    group: '',
+    groups: [],
+    territory: '',
+    territorys: [],
   }),
   watch: {},
   methods: {
     close_dialog() {
       this.customerDialog = false;
     },
-
+    getCustomerGroups() {
+      if (this.groups.length > 0) return;
+      const vm = this;
+      frappe.db
+        .get_list('Customer Group', {
+          fields: ['name'],
+          page_length: 1000,
+        })
+        .then((data) => {
+          if (data.length > 0) {
+            data.forEach((el) => {
+              vm.groups.push(el.name);
+            });
+          }
+        });
+    },
+    getCustomerTerritorys() {
+      if (this.territorys.length > 0) return;
+      const vm = this;
+      frappe.db
+        .get_list('Territory', {
+          fields: ['name'],
+          page_length: 1000,
+        })
+        .then((data) => {
+          if (data.length > 0) {
+            data.forEach((el) => {
+              vm.territorys.push(el.name);
+            });
+          }
+        });
+    },
     submit_dialog() {
       if (this.customer_name) {
         const vm = this;
@@ -138,6 +203,8 @@ export default {
           email_id: this.email_id,
           referral_code: this.referral_code,
           birthday: this.birthday,
+          customer_group: this.group,
+          territory: this.territory,
         };
         frappe.call({
           method: 'posawesome.posawesome.api.posapp.create_customer',
@@ -158,6 +225,7 @@ export default {
               vm.email_id = '';
               vm.referral_code = '';
               vm.birthday = '';
+              vm.group = '';
               vm.customerDialog = false;
             }
           },
@@ -173,6 +241,8 @@ export default {
     evntBus.$on('register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
     });
+    this.getCustomerGroups();
+    this.getCustomerTerritorys();
   },
 };
 </script>
