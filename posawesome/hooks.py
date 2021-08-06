@@ -212,6 +212,8 @@ fixtures = [
                     "Customer-posa_referral_company",
                     "Customer-posa_referral_section",
                     "Customer-posa_birthday",
+                    "Sales Order-posa_offers",
+                    "Sales Order-posa_coupons",
                 ),
             ]
         ],
