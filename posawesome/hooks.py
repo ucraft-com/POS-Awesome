@@ -214,6 +214,7 @@ fixtures = [
                     "Customer-posa_birthday",
                     "Sales Order-posa_offers",
                     "Sales Order-posa_coupons",
+                    "Sales Order Item-posa_row_id",
                 ),
             ]
         ],
