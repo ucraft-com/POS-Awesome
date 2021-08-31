@@ -20,6 +20,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
     get_dummy_message,
     get_existing_payment_request_amount,
 )
+from erpnext.controllers.accounts_controller import add_taxes_from_tax_template
 import json
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
 
@@ -320,7 +321,8 @@ def save_draft_invoice(data):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.set_missing_values()
-
+    for item in invoice_doc.items:
+        add_taxes_from_tax_template(item, invoice_doc)
     if invoice_doc.is_return and get_version() == 12:
         for payment in invoice_doc.payments:
             if payment.default == 1:
@@ -341,6 +343,8 @@ def update_invoice(data):
     frappe.flags.ignore_account_permission = True
     invoice_doc.update(data)
     invoice_doc.set_missing_values()
+    for item in invoice_doc.items:
+        add_taxes_from_tax_template(item, invoice_doc)
 
     if invoice_doc.get("taxes"):
         for tax in invoice_doc.taxes:
