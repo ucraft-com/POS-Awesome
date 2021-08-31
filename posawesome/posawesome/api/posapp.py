@@ -697,7 +697,7 @@ def get_items_details(pos_profile, items_data):
 def get_item_detail(data, doc=None):
     item_code = json.loads(data).get("item_code")
     max_discount = frappe.get_value("Item", item_code, "max_discount")
-    res = get_item_details(data, doc)
+    res = get_item_details(data, doc, overwrite_warehouse=False)
     res["max_discount"] = max_discount
     return res
 
