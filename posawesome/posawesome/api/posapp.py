@@ -358,11 +358,12 @@ def update_invoice(data):
 
 
 @frappe.whitelist()
-def submit_invoice(data):
+def submit_invoice(invoice, data):
     data = json.loads(data)
-    invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
-    invoice_doc.update(data)
-    if data.get("posa_delivery_date"):
+    invoice = json.loads(invoice)
+    invoice_doc = frappe.get_doc("Sales Invoice", invoice.get("name"))
+    invoice_doc.update(invoice)
+    if invoice.get("posa_delivery_date"):
         invoice_doc.update_stock = 0
     mop_cash_list = [
         i.mode_of_payment
@@ -387,9 +388,10 @@ def submit_invoice(data):
                 "paid_to": cash_account["account"],
                 "payment_type": "Receive",
                 "party_type": "Customer",
-                "party": data.get("customer"),
-                "paid_amount": data.get("credit_change"),
-                "received_amount": data.get("credit_change"),
+                "party": invoice_doc.get("customer"),
+                "paid_amount": invoice_doc.get("credit_change"),
+                "received_amount": invoice_doc.get("credit_change"),
+                "company": invoice_doc.get("company"),
             }
         )
 
@@ -422,14 +424,9 @@ def submit_invoice(data):
                 is_payment_entry = 1
 
     payments = []
-    # redeeming customer loyalty
-    if data.get("loyalty_amount") > 0:
-        invoice_doc.loyalty_amount = data.get("loyalty_amount")
-        invoice_doc.redeem_loyalty_points = data.get("redeem_loyalty_points")
-        invoice_doc.loyalty_points = data.get("loyalty_points")
 
     if data.get("is_cashback") and not is_payment_entry:
-        for payment in data.get("payments"):
+        for payment in invoice.get("payments"):
             for i in invoice_doc.payments:
                 if i.mode_of_payment == payment["mode_of_payment"]:
                     i.amount = payment["amount"]
@@ -526,6 +523,7 @@ def redeeming_customer_credit(
                         "doctype": "Journal Entry",
                         "voucher_type": "Journal Entry",
                         "posting_date": nowdate(),
+                        "company": invoice_doc.company,
                     }
                 )
 
@@ -568,6 +566,7 @@ def redeeming_customer_credit(
                 "received_amount": total_cash,
                 "paid_from": invoice_doc.debit_to,
                 "paid_to": cash_account["account"],
+                "company": invoice_doc.company,
             }
         )
 
@@ -600,6 +599,57 @@ def submit_in_background_job(kwargs):
     redeeming_customer_credit(
         invoice_doc, data, is_payment_entry, total_cash, cash_account
     )
+
+
+@frappe.whitelist()
+def get_available_credit(customer, company):
+    total_credit = []
+
+    outstanding_invoices = frappe.get_all(
+        "Sales Invoice",
+        {
+            "outstanding_amount": ["<", 0],
+            "docstatus": 1,
+            "is_return": 0,
+            "customer": customer,
+            "company": company,
+        },
+        ["name", "outstanding_amount"],
+    )
+
+    for row in outstanding_invoices:
+        outstanding_amount = -(row.outstanding_amount)
+        row = {
+            "type": "Invoice",
+            "credit_origin": row.name,
+            "total_credit": outstanding_amount,
+            "credit_to_redeem": 0,
+        }
+
+        total_credit.append(row)
+
+    advances = frappe.get_all(
+        "Payment Entry",
+        {
+            "unallocated_amount": [">", 0],
+            "party_type": "Customer",
+            "party": customer,
+            "company": company,
+        },
+        ["name", "unallocated_amount"],
+    )
+
+    for row in advances:
+        row = {
+            "type": "Advance",
+            "credit_origin": row.name,
+            "total_credit": row.unallocated_amount,
+            "credit_to_redeem": 0,
+        }
+
+        total_credit.append(row)
+
+    return total_credit
 
 
 @frappe.whitelist()

@@ -678,19 +678,20 @@ export default {
       this.back_to_invoice();
     },
     submit_invoice() {
-      let formData = this.invoice_doc;
-      formData['total_change'] = -this.diff_payment;
-      formData['paid_change'] = this.paid_change;
-      formData['credit_change'] = -this.credit_change;
-      formData['redeemed_customer_credit'] = this.redeemed_customer_credit;
-      formData['customer_credit_dict'] = this.customer_credit_dict;
-      formData['is_cashback'] = this.is_cashback;
+      let data = {};
+      data['total_change'] = -this.diff_payment;
+      data['paid_change'] = this.paid_change;
+      data['credit_change'] = -this.credit_change;
+      data['redeemed_customer_credit'] = this.redeemed_customer_credit;
+      data['customer_credit_dict'] = this.customer_credit_dict;
+      data['is_cashback'] = this.is_cashback;
 
       const vm = this;
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.submit_invoice',
         args: {
-          data: formData,
+          data: data,
+          invoice: this.invoice_doc,
         },
         async: true,
         callback: function (r) {
@@ -782,12 +783,10 @@ export default {
     get_available_credit(e) {
       if (e) {
         frappe
-          .call(
-            'posawesome.posawesome.api.posapp_customization.get_available_credit',
-            {
-              customer: this.invoice_doc.customer,
-            }
-          )
+          .call('posawesome.posawesome.api.posapp.get_available_credit', {
+            customer: this.invoice_doc.customer,
+            company: this.pos_profile.company,
+          })
           .then((r) => {
             const data = r.message;
             if (data.length) {
