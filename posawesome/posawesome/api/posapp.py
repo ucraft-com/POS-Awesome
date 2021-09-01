@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+import json
 import frappe
 from frappe.utils import nowdate, flt
 from frappe import _
@@ -21,7 +22,9 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
     get_existing_payment_request_amount,
 )
 from erpnext.controllers.accounts_controller import add_taxes_from_tax_template
-import json
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+    get_loyalty_program_details_with_points,
+)
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
 
 # from posawesome import console
@@ -114,10 +117,10 @@ def update_opening_shift_data(data, pos_profile):
 
 
 @frappe.whitelist()
-def get_items(pos_profile):
+def get_items(pos_profile, price_list=None):
     pos_profile = json.loads(pos_profile)
-    price_list = pos_profile.get("selling_price_list")
-
+    if not price_list:
+        price_list = pos_profile.get("selling_price_list")
     condition = ""
     condition += get_item_group_condition(pos_profile.get("name"))
     if not pos_profile.get("posa_show_template_items"):
@@ -1213,3 +1216,32 @@ def get_active_gift_coupons(customer, company):
     if len(coupons_data):
         coupons = [i.coupon_code for i in coupons_data]
     return coupons
+
+
+@frappe.whitelist()
+def get_customer_info(customer):
+    customer = frappe.get_doc("Customer", customer)
+
+    res = {"loyalty_points": None, "conversion_factor": None}
+
+    res["email_id"] = customer.email_id
+    res["mobile_no"] = customer.mobile_no
+    res["image"] = customer.image
+    res["loyalty_program"] = customer.loyalty_program
+    res["customer_price_list"] = customer.default_price_list
+    res["customer_group"] = customer.customer_group
+    res["posa_discount"] = customer.posa_discount
+    res["name"] = customer.name
+    res["customer_name"] = customer.customer_name
+    res["customer_group_price_list"] = frappe.get_value(
+        "Customer Group", customer.customer_group, "default_price_list"
+    )
+
+    if customer.loyalty_program:
+        lp_details = get_loyalty_program_details_with_points(
+            customer.name, customer.loyalty_program, silent=True
+        )
+        res["loyalty_points"] = lp_details.get("loyalty_points")
+        res["conversion_factor"] = lp_details.get("conversion_factor")
+
+    return res

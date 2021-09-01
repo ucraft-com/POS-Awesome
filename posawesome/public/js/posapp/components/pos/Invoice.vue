@@ -609,7 +609,6 @@ export default {
       return_doc: '',
       customer: '',
       customer_info: '',
-      customer_doc: '',
       discount_amount: 0,
       total_tax: 0,
       items: [],
@@ -748,14 +747,14 @@ export default {
           item.to_set_serial_no = null;
         }
         if (!cur_item.has_batch_no) {
-          cur_item.qty += item.qty;
+          cur_item.qty += item.qty || 1;
           this.calc_sotck_gty(cur_item, cur_item.qty);
         } else {
           if (
             cur_item.stock_qty < cur_item.actual_batch_qty ||
             !cur_item.batch_no
           ) {
-            cur_item.qty += item.qty;
+            cur_item.qty += item.qty || 1;
             this.calc_sotck_gty(cur_item, cur_item.qty);
           } else {
             const new_item = this.get_new_item(cur_item);
@@ -1227,6 +1226,7 @@ export default {
             tax_category: '',
             transaction_type: 'selling',
             update_stock: this.pos_profile.update_stock,
+            price_list: this.get_price_list(),
           },
         },
         callback: function (r) {
@@ -1235,8 +1235,8 @@ export default {
             if (data.has_pricing_rule) {
             } else if (
               vm.pos_profile.posa_apply_customer_discount &&
-              vm.customer_doc.posa_discount > 0 &&
-              vm.customer_doc.posa_discount <= 100
+              vm.customer_info.posa_discount > 0 &&
+              vm.customer_info.posa_discount <= 100
             ) {
               if (
                 item.posa_is_offer == 0 &&
@@ -1245,11 +1245,11 @@ export default {
               ) {
                 if (item.max_discount > 0) {
                   item.discount_percentage =
-                    item.max_discount < vm.customer_doc.posa_discount
+                    item.max_discount < vm.customer_info.posa_discount
                       ? item.max_discount
-                      : vm.customer_doc.posa_discount;
+                      : vm.customer_info.posa_discount;
                 } else {
-                  item.discount_percentage = vm.customer_doc.posa_discount;
+                  item.discount_percentage = vm.customer_info.posa_discount;
                 }
               }
             }
@@ -1277,71 +1277,52 @@ export default {
       });
     },
 
-    fetch_customer_doc() {
+    fetch_customer_details() {
       const vm = this;
       if (this.customer) {
         frappe.call({
-          method: 'frappe.client.get',
+          method: 'posawesome.posawesome.api.posapp.get_customer_info',
           args: {
-            doctype: 'Customer',
-            name: vm.customer,
+            customer: vm.customer,
           },
-          callback(r) {
-            if (r.message) {
-              vm.customer_doc = r.message;
+          async: false,
+          callback: (r) => {
+            const message = r.message;
+            if (!r.exc) {
+              vm.customer_info = {
+                ...message,
+              };
             }
+            vm.update_price_list();
           },
         });
       }
     },
 
-    fetch_customer_details() {
-      const vm = this;
-      if (this.customer) {
-        return new Promise((resolve) => {
-          frappe.db
-            .get_value('Customer', vm.customer, [
-              'email_id',
-              'mobile_no',
-              'image',
-              'loyalty_program',
-            ])
-            .then(({ message }) => {
-              const { loyalty_program } = message;
-              if (loyalty_program) {
-                frappe.call({
-                  method:
-                    'erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points',
-                  args: {
-                    customer: vm.customer,
-                    loyalty_program,
-                    silent: true,
-                  },
-                  callback: (r) => {
-                    const { loyalty_points, conversion_factor } = r.message;
-                    if (!r.exc) {
-                      vm.customer_info = {
-                        ...message,
-                        customer: vm.customer,
-                        loyalty_points,
-                        conversion_factor,
-                      };
-                      resolve();
-                    }
-                  },
-                });
-              } else {
-                vm.customer_info = { ...message, customer: vm.customer };
-                resolve();
-              }
-            });
-        });
-      } else {
-        return new Promise((resolve) => {
-          vm.customer_info = {};
-          resolve();
-        });
+    get_price_list() {
+      let price_list = this.pos_profile.selling_price_list;
+      if (this.customer_info && this.pos_profile) {
+        const { customer_price_list, customer_group_price_list } =
+          this.customer_info;
+        const pos_price_list = this.pos_profile.selling_price_list;
+        if (customer_price_list && customer_price_list != pos_price_list) {
+          price_list = customer_price_list;
+        } else if (
+          customer_group_price_list &&
+          customer_group_price_list != pos_price_list
+        ) {
+          price_list = customer_group_price_list;
+        }
       }
+      return price_list;
+    },
+
+    update_price_list() {
+      let price_list = this.get_price_list();
+      if (price_list == this.pos_profile.selling_price_list) {
+        price_list = null;
+      }
+      evntBus.$emit('update_customer_price_list', price_list);
     },
 
     calc_prices(item, value, $event) {
@@ -2233,6 +2214,9 @@ export default {
     });
     evntBus.$on('set_all_items', (data) => {
       this.allItems = data;
+      this.items.forEach((item) => {
+        this.update_item_detail(item);
+      });
     });
     evntBus.$on('load_return_invoice', (data) => {
       this.new_invoice(data.invoice_doc);
@@ -2254,7 +2238,6 @@ export default {
     customer() {
       this.close_payments();
       evntBus.$emit('set_customer', this.customer);
-      this.fetch_customer_doc();
       this.fetch_customer_details();
     },
     customer_info() {

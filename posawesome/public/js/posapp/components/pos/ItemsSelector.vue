@@ -150,11 +150,15 @@ export default {
     appliedOffersCount: 0,
     couponsCount: 0,
     appliedCouponsCount: 0,
+    customer_price_list: null,
   }),
 
   watch: {
     filtred_items(data_value) {
       this.update_items_details(data_value);
+    },
+    customer_price_list() {
+      this.get_items();
     },
   },
 
@@ -179,7 +183,10 @@ export default {
       }
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.get_items',
-        args: { pos_profile: vm.pos_profile },
+        args: {
+          pos_profile: vm.pos_profile,
+          price_list: vm.customer_price_list,
+        },
         callback: function (r) {
           if (r.message) {
             vm.items = r.message;
@@ -444,6 +451,9 @@ export default {
     evntBus.$on('update_coupons_counters', (data) => {
       this.couponsCount = data.couponsCount;
       this.appliedCouponsCount = data.appliedCouponsCount;
+    });
+    evntBus.$on('update_customer_price_list', (data) => {
+      this.customer_price_list = data;
     });
   },
 
