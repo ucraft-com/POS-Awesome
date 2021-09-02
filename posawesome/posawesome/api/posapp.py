@@ -512,6 +512,19 @@ def redeeming_customer_credit(
 ):
     # redeeming customer credit with journal voucher
     if data.get("redeemed_customer_credit"):
+        cost_center = frappe.get_value(
+            "POS Profile", invoice_doc.pos_profile, "cost_center"
+        )
+        if not cost_center:
+            cost_center = frappe.get_value(
+                "Company", invoice_doc.company, "cost_center"
+            )
+        if not cost_center:
+            frappe.throw(
+                _("Cost Center is not set in pos profile {}").format(
+                    invoice_doc.pos_profile
+                )
+            )
         for row in data.get("customer_credit_dict"):
             if row["type"] == "Invoice" and row["credit_to_redeem"]:
                 outstanding_invoice = frappe.get_doc(
@@ -534,6 +547,7 @@ def redeeming_customer_credit(
                     "reference_type": "Sales Invoice",
                     "reference_name": outstanding_invoice.name,
                     "debit_in_account_currency": row["credit_to_redeem"],
+                    "cost_center": cost_center,
                 }
 
                 jv_credit_entry = {
@@ -543,6 +557,7 @@ def redeeming_customer_credit(
                     "reference_type": "Sales Invoice",
                     "reference_name": invoice_doc.name,
                     "credit_in_account_currency": row["credit_to_redeem"],
+                    "cost_center": cost_center,
                 }
 
                 jv_doc.append("accounts", jv_debit_entry)
