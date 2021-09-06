@@ -216,6 +216,7 @@ fixtures = [
                     "Sales Order-posa_offers",
                     "Sales Order-posa_coupons",
                     "Sales Order Item-posa_row_id",
+                    "POS Profile-posa_tax_inclusive",
                 ),
             ]
         ],

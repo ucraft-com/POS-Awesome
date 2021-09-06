@@ -318,40 +318,22 @@ def get_customer_names(pos_profile):
 
 
 @frappe.whitelist()
-def save_draft_invoice(data):
-    data = json.loads(data)
-    invoice_doc = frappe.get_doc(data)
-    invoice_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
-    invoice_doc.set_missing_values()
-    for item in invoice_doc.items:
-        add_taxes_from_tax_template(item, invoice_doc)
-    if invoice_doc.is_return and get_version() == 12:
-        for payment in invoice_doc.payments:
-            if payment.default == 1:
-                payment.amount = data.get("total")
-
-    if invoice_doc.get("taxes"):
-        for tax in invoice_doc.taxes:
-            tax.included_in_print_rate = 1
-    invoice_doc.save()
-    return invoice_doc
-
-
-@frappe.whitelist()
 def update_invoice(data):
     data = json.loads(data)
-    invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
+    if data.get("name"):
+        invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
+        invoice_doc.update(data)
+    else:
+        invoice_doc = frappe.get_doc(data)
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
-    invoice_doc.update(data)
     invoice_doc.set_missing_values()
     for item in invoice_doc.items:
         add_taxes_from_tax_template(item, invoice_doc)
-
-    if invoice_doc.get("taxes"):
-        for tax in invoice_doc.taxes:
-            tax.included_in_print_rate = 1
+    if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"):
+        if invoice_doc.get("taxes"):
+            for tax in invoice_doc.taxes:
+                tax.included_in_print_rate = 1
 
     invoice_doc.save()
     return invoice_doc

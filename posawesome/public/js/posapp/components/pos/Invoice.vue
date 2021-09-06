@@ -848,7 +848,7 @@ export default {
         this.update_invoice(doc);
       } else {
         if (doc.items.length) {
-          this.save_draft_invoice(doc);
+          this.update_invoice(doc);
         }
       }
       if (!data.name && !data.is_return) {
@@ -891,22 +891,6 @@ export default {
           }
         });
       }
-    },
-
-    save_draft_invoice() {
-      const vm = this;
-      const doc = this.get_invoice_doc();
-      frappe.call({
-        method: 'posawesome.posawesome.api.posapp.save_draft_invoice',
-        args: { data: doc },
-        async: false,
-        callback: function (r) {
-          if (r.message) {
-            vm.invoice_doc = r.message;
-          }
-        },
-      });
-      return this.invoice_doc;
     },
 
     get_invoice_doc() {
@@ -1000,7 +984,7 @@ export default {
       if (doc.name) {
         return this.update_invoice(doc);
       } else {
-        return this.save_draft_invoice(doc);
+        return this.update_invoice(doc);
       }
     },
 
