@@ -289,7 +289,7 @@ def get_child_nodes(group_type, root):
 
 
 def get_customer_group_condition(pos_profile):
-    cond = "1=1"
+    cond = "disabled = 0"
     customer_groups = get_customer_groups(pos_profile)
     if customer_groups:
         cond = " customer_group in (%s)" % (", ".join(["%s"] * len(customer_groups)))
