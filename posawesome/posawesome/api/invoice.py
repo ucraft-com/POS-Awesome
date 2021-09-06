@@ -9,6 +9,12 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_code_count
+from posawesome.posawesome.api.posapp import get_company_domain
+from sqlparse import filters
+
+
+def validate(doc, method):
+    set_patient(doc)
 
 
 def before_submit(doc, method):
@@ -130,3 +136,14 @@ def update_coupon(doc, transaction_type):
         if not coupon.applied:
             continue
         update_coupon_code_count(coupon.coupon, transaction_type)
+
+
+def set_patient(doc):
+    domain = get_company_domain(doc.company)
+    if domain != "Healthcare":
+        return
+    patient_list = frappe.get_all(
+        "Patient", filters={"customer": doc.customer}, page_length=1
+    )
+    if len(patient_list) > 0:
+        doc.patient = patient_list[0].name

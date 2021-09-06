@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import json
 import frappe
-from frappe.utils import nowdate, flt
+from frappe.utils import nowdate, flt, cstr
 from frappe import _
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.stock.get_item_details import get_item_details
@@ -1310,3 +1310,7 @@ def get_customer_info(customer):
         res["conversion_factor"] = lp_details.get("conversion_factor")
 
     return res
+
+
+def get_company_domain(company):
+    return frappe.get_cached_value("Company", cstr(company), "domain")
