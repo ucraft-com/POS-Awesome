@@ -308,12 +308,6 @@
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [
-  {
-   "link_doctype": "POS Coupon",
-   "link_fieldname": "pos_offer"
-  }
- ],
  "modified": "2021-07-25 17:09:55.634113",
  "modified_by": "Administrator",
  "module": "POSAwesome",
