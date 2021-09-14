@@ -19,7 +19,7 @@
             autofocus
             outlined
             color="indigo"
-            label="Search Items"
+            :label="frappe._('Search Items')"
             hint="Search by item code, serial number, batch no or barcode"
             background-color="white"
             hide-details
@@ -95,22 +95,28 @@
         <v-col cols="12">
           <v-select
             :items="items_group"
-            label="Items Group"
+            :label="frappe._('Items Group')"
             dense
             outlined
             hide-details
             v-model="item_group"
           ></v-select>
         </v-col>
-        <v-col cols="6" class="mt-1">
+        <v-col cols="3" class="mt-1">
           <v-btn-toggle v-model="items_view" color="orange" group dense rounded>
-            <v-btn value="list">List</v-btn>
-            <v-btn value="card">Card</v-btn>
+            <v-btn small value="list">{{ __('List') }}</v-btn>
+            <v-btn small value="card">{{ __('Card') }}</v-btn>
           </v-btn-toggle>
         </v-col>
-        <v-col cols="6" class="mt-2">
-          <v-btn color="warning" text @click="show_offers"
-            >{{ offersCount }} Offers : {{ appliedOffersCount }} Applied</v-btn
+        <v-col cols="4" class="mt-2">
+          <v-btn small block color="warning" text @click="show_coupons"
+            >{{ couponsCount }} {{ __('Coupons') }}</v-btn
+          >
+        </v-col>
+        <v-col cols="5" class="mt-2">
+          <v-btn small block color="warning" text @click="show_offers"
+            >{{ offersCount }} {{ __('Offers') }} : {{ appliedOffersCount }}
+            {{ __('Applied') }}</v-btn
           >
         </v-col>
       </v-row>
@@ -135,24 +141,33 @@ export default {
     first_search: '',
     itemsPerPage: 1000,
     items_headers: [
-      { text: 'Name', align: 'start', sortable: true, value: 'item_name' },
-      { text: 'Rate', value: 'rate', align: 'start' },
-      { text: 'Available QTY', value: 'actual_qty', align: 'start' },
-      { text: 'UOM', value: 'stock_uom', align: 'start' },
+      { text: __('Name'), align: 'start', sortable: true, value: 'item_name' },
+      { text: __('Rate'), value: 'rate', align: 'start' },
+      { text: __('Available QTY'), value: 'actual_qty', align: 'start' },
+      { text: __('UOM'), value: 'stock_uom', align: 'start' },
     ],
     offersCount: 0,
     appliedOffersCount: 0,
+    couponsCount: 0,
+    appliedCouponsCount: 0,
+    customer_price_list: null,
   }),
 
   watch: {
     filtred_items(data_value) {
       this.update_items_details(data_value);
     },
+    customer_price_list() {
+      this.get_items();
+    },
   },
 
   methods: {
     show_offers() {
       evntBus.$emit('show_offers', 'true');
+    },
+    show_coupons() {
+      evntBus.$emit('show_coupons', 'true');
     },
     get_items() {
       if (!this.pos_profile) {
@@ -168,7 +183,10 @@ export default {
       }
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.get_items',
-        args: { pos_profile: vm.pos_profile },
+        args: {
+          pos_profile: vm.pos_profile,
+          price_list: vm.customer_price_list,
+        },
         callback: function (r) {
           if (r.message) {
             vm.items = r.message;
@@ -429,6 +447,13 @@ export default {
     evntBus.$on('update_offers_counters', (data) => {
       this.offersCount = data.offersCount;
       this.appliedOffersCount = data.appliedOffersCount;
+    });
+    evntBus.$on('update_coupons_counters', (data) => {
+      this.couponsCount = data.couponsCount;
+      this.appliedCouponsCount = data.appliedCouponsCount;
+    });
+    evntBus.$on('update_customer_price_list', (data) => {
+      this.customer_price_list = data;
     });
   },
 

@@ -6,13 +6,13 @@
       auto-select-first
       outlined
       color="indigo"
-      label="Customer"
+      :label="frappe._('Customer')"
       v-model="customer"
       :items="customers"
       item-text="customer_name"
       item-value="name"
       background-color="white"
-      no-data-text="Customer not found"
+      :no-data-text="__('Customer not found')"
       hide-details
       :filter="customFilter"
       :disabled="readonly"

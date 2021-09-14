@@ -3,19 +3,29 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+import json
 import frappe
-from frappe.model.document import Document
-from frappe.utils import getdate, nowdate, flt
+from frappe.utils import nowdate, flt, cstr
 from frappe import _
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.stock.get_item_details import get_item_details
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 from frappe.utils.background_jobs import enqueue
+from erpnext.accounts.party import get_party_bank_account
 from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
 from erpnext.portal.product_configurator.item_variants_cache import (
     ItemVariantsCacheManager,
 )
-import json
+from erpnext.accounts.doctype.payment_request.payment_request import (
+    get_gateway_details,
+    get_dummy_message,
+    get_existing_payment_request_amount,
+)
+from erpnext.controllers.accounts_controller import add_taxes_from_tax_template
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+    get_loyalty_program_details_with_points,
+)
+from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
 
 # from posawesome import console
 
@@ -107,10 +117,10 @@ def update_opening_shift_data(data, pos_profile):
 
 
 @frappe.whitelist()
-def get_items(pos_profile):
+def get_items(pos_profile, price_list=None):
     pos_profile = json.loads(pos_profile)
-    price_list = pos_profile.get("selling_price_list")
-
+    if not price_list:
+        price_list = pos_profile.get("selling_price_list")
     condition = ""
     condition += get_item_group_condition(pos_profile.get("name"))
     if not pos_profile.get("posa_show_template_items"):
@@ -279,7 +289,7 @@ def get_child_nodes(group_type, root):
 
 
 def get_customer_group_condition(pos_profile):
-    cond = "1=1"
+    cond = "disabled = 0"
     customer_groups = get_customer_groups(pos_profile)
     if customer_groups:
         cond = " customer_group in (%s)" % (", ".join(["%s"] * len(customer_groups)))
@@ -308,55 +318,34 @@ def get_customer_names(pos_profile):
 
 
 @frappe.whitelist()
-def save_draft_invoice(data):
-    data = json.loads(data)
-    invoice_doc = frappe.get_doc(data)
-    invoice_doc.flags.ignore_permissions = True
-    frappe.flags.ignore_account_permission = True
-    invoice_doc.set_missing_values()
-
-    if invoice_doc.is_return and get_version() == 12:
-        for payment in invoice_doc.payments:
-            if payment.default == 1:
-                payment.amount = data.get("total")
-
-    if invoice_doc.get("taxes"):
-        for tax in invoice_doc.taxes:
-            tax.included_in_print_rate = 1
-    invoice_doc.save()
-    return invoice_doc
-
-
-@frappe.whitelist()
 def update_invoice(data):
     data = json.loads(data)
-    invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
+    if data.get("name"):
+        invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
+        invoice_doc.update(data)
+    else:
+        invoice_doc = frappe.get_doc(data)
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
-    invoice_doc.customer = data.get("customer")
-    invoice_doc.items = []
-    invoice_doc.discount_amount = data.get("discount_amount")
-    invoice_doc.update({"items": data.get("items")})
-    invoice_doc.posa_offers = []
-    invoice_doc.update({"posa_offers": data.get("posa_offers")})
     invoice_doc.set_missing_values()
-
-    if invoice_doc.get("taxes"):
-        for tax in invoice_doc.taxes:
-            tax.included_in_print_rate = 1
+    for item in invoice_doc.items:
+        add_taxes_from_tax_template(item, invoice_doc)
+    if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"):
+        if invoice_doc.get("taxes"):
+            for tax in invoice_doc.taxes:
+                tax.included_in_print_rate = 1
 
     invoice_doc.save()
     return invoice_doc
 
 
 @frappe.whitelist()
-def submit_invoice(data):
+def submit_invoice(invoice, data):
     data = json.loads(data)
-    invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
-    invoice_doc.posa_delivery_date = data.get("posa_delivery_date")
-    invoice_doc.posa_notes = data.get("posa_notes")
-    invoice_doc.shipping_address_name = data.get("shipping_address_name")
-    if data.get("posa_delivery_date"):
+    invoice = json.loads(invoice)
+    invoice_doc = frappe.get_doc("Sales Invoice", invoice.get("name"))
+    invoice_doc.update(invoice)
+    if invoice.get("posa_delivery_date"):
         invoice_doc.update_stock = 0
     mop_cash_list = [
         i.mode_of_payment
@@ -381,9 +370,10 @@ def submit_invoice(data):
                 "paid_to": cash_account["account"],
                 "payment_type": "Receive",
                 "party_type": "Customer",
-                "party": data.get("customer"),
-                "paid_amount": data.get("credit_change"),
-                "received_amount": data.get("credit_change"),
+                "party": invoice_doc.get("customer"),
+                "paid_amount": invoice_doc.get("credit_change"),
+                "received_amount": invoice_doc.get("credit_change"),
+                "company": invoice_doc.get("company"),
             }
         )
 
@@ -416,14 +406,9 @@ def submit_invoice(data):
                 is_payment_entry = 1
 
     payments = []
-    # redeeming customer loyalty
-    if data.get("loyalty_amount") > 0:
-        invoice_doc.loyalty_amount = data.get("loyalty_amount")
-        invoice_doc.redeem_loyalty_points = data.get("redeem_loyalty_points")
-        invoice_doc.loyalty_points = data.get("loyalty_points")
 
     if data.get("is_cashback") and not is_payment_entry:
-        for payment in data.get("payments"):
+        for payment in invoice.get("payments"):
             for i in invoice_doc.payments:
                 if i.mode_of_payment == payment["mode_of_payment"]:
                     i.amount = payment["amount"]
@@ -509,6 +494,19 @@ def redeeming_customer_credit(
 ):
     # redeeming customer credit with journal voucher
     if data.get("redeemed_customer_credit"):
+        cost_center = frappe.get_value(
+            "POS Profile", invoice_doc.pos_profile, "cost_center"
+        )
+        if not cost_center:
+            cost_center = frappe.get_value(
+                "Company", invoice_doc.company, "cost_center"
+            )
+        if not cost_center:
+            frappe.throw(
+                _("Cost Center is not set in pos profile {}").format(
+                    invoice_doc.pos_profile
+                )
+            )
         for row in data.get("customer_credit_dict"):
             if row["type"] == "Invoice" and row["credit_to_redeem"]:
                 outstanding_invoice = frappe.get_doc(
@@ -520,6 +518,7 @@ def redeeming_customer_credit(
                         "doctype": "Journal Entry",
                         "voucher_type": "Journal Entry",
                         "posting_date": nowdate(),
+                        "company": invoice_doc.company,
                     }
                 )
 
@@ -530,6 +529,7 @@ def redeeming_customer_credit(
                     "reference_type": "Sales Invoice",
                     "reference_name": outstanding_invoice.name,
                     "debit_in_account_currency": row["credit_to_redeem"],
+                    "cost_center": cost_center,
                 }
 
                 jv_credit_entry = {
@@ -539,6 +539,7 @@ def redeeming_customer_credit(
                     "reference_type": "Sales Invoice",
                     "reference_name": invoice_doc.name,
                     "credit_in_account_currency": row["credit_to_redeem"],
+                    "cost_center": cost_center,
                 }
 
                 jv_doc.append("accounts", jv_debit_entry)
@@ -562,6 +563,7 @@ def redeeming_customer_credit(
                 "received_amount": total_cash,
                 "paid_from": invoice_doc.debit_to,
                 "paid_to": cash_account["account"],
+                "company": invoice_doc.company,
             }
         )
 
@@ -597,6 +599,57 @@ def submit_in_background_job(kwargs):
 
 
 @frappe.whitelist()
+def get_available_credit(customer, company):
+    total_credit = []
+
+    outstanding_invoices = frappe.get_all(
+        "Sales Invoice",
+        {
+            "outstanding_amount": ["<", 0],
+            "docstatus": 1,
+            "is_return": 0,
+            "customer": customer,
+            "company": company,
+        },
+        ["name", "outstanding_amount"],
+    )
+
+    for row in outstanding_invoices:
+        outstanding_amount = -(row.outstanding_amount)
+        row = {
+            "type": "Invoice",
+            "credit_origin": row.name,
+            "total_credit": outstanding_amount,
+            "credit_to_redeem": 0,
+        }
+
+        total_credit.append(row)
+
+    advances = frappe.get_all(
+        "Payment Entry",
+        {
+            "unallocated_amount": [">", 0],
+            "party_type": "Customer",
+            "party": customer,
+            "company": company,
+        },
+        ["name", "unallocated_amount"],
+    )
+
+    for row in advances:
+        row = {
+            "type": "Advance",
+            "credit_origin": row.name,
+            "total_credit": row.unallocated_amount,
+            "credit_to_redeem": 0,
+        }
+
+        total_credit.append(row)
+
+    return total_credit
+
+
+@frappe.whitelist()
 def get_draft_invoices(pos_opening_shift):
     invoices_list = frappe.get_list(
         "Sales Invoice",
@@ -618,9 +671,9 @@ def get_draft_invoices(pos_opening_shift):
 @frappe.whitelist()
 def delete_invoice(invoice):
     if frappe.get_value("Sales Invoice", invoice, "posa_is_printed"):
-        frappe.throw(_("This invoice {0} cannot be deleted".format(invoice)))
+        frappe.throw(_("This invoice {0} cannot be deleted").format(invoice))
     frappe.delete_doc("Sales Invoice", invoice, force=1)
-    return "Inovice {0} Deleted".format(invoice)
+    return _("Invoice {0} Deleted").format(invoice)
 
 
 @frappe.whitelist()
@@ -694,7 +747,7 @@ def get_items_details(pos_profile, items_data):
 def get_item_detail(data, doc=None):
     item_code = json.loads(data).get("item_code")
     max_discount = frappe.get_value("Item", item_code, "max_discount")
-    res = get_item_details(data, doc)
+    res = get_item_details(data, doc, overwrite_warehouse=False)
     res["max_discount"] = max_discount
     return res
 
@@ -715,17 +768,35 @@ def get_stock_availability(item_code, warehouse):
 
 
 @frappe.whitelist()
-def create_customer(customer_name, tax_id, mobile_no, email_id):
+def create_customer(
+    customer_name,
+    company,
+    tax_id,
+    mobile_no,
+    email_id,
+    referral_code=None,
+    birthday=None,
+    customer_group=None,
+    territory=None,
+):
     if not frappe.db.exists("Customer", {"customer_name": customer_name}):
         customer = frappe.get_doc(
             {
                 "doctype": "Customer",
                 "customer_name": customer_name,
+                "posa_referral_company": company,
                 "tax_id": tax_id,
                 "mobile_no": mobile_no,
                 "email_id": email_id,
+                "posa_referral_code": referral_code,
+                "posa_birthday": birthday,
             }
-        ).insert(ignore_permissions=True)
+        )
+        if customer_group:
+            customer.customer_group = customer_group
+        if territory:
+            customer.territory = territory
+        customer.save(ignore_permissions=True)
         return customer
 
 
@@ -980,3 +1051,248 @@ def get_item_attributes(item_code):
             a.optional = True
 
     return attributes
+
+
+@frappe.whitelist()
+def create_payment_request(doc):
+    doc = json.loads(doc)
+    for pay in doc.get("payments"):
+        if pay.get("type") == "Phone":
+            if pay.get("amount") <= 0:
+                frappe.throw(_("Payment amount cannot be less than or equal to 0"))
+
+            if not doc.get("contact_mobile"):
+                frappe.throw(_("Please enter the phone number first"))
+
+            pay_req = get_existing_payment_request(doc, pay)
+            if not pay_req:
+                pay_req = get_new_payment_request(doc, pay)
+                pay_req.submit()
+            else:
+                pay_req.request_phone_payment()
+
+            return pay_req
+
+
+def get_new_payment_request(doc, mop):
+    payment_gateway_account = frappe.db.get_value(
+        "Payment Gateway Account",
+        {
+            "payment_account": mop.get("account"),
+        },
+        ["name"],
+    )
+
+    args = {
+        "dt": "Sales Invoice",
+        "dn": doc.get("name"),
+        "recipient_id": doc.get("contact_mobile"),
+        "mode_of_payment": mop.get("mode_of_payment"),
+        "payment_gateway_account": payment_gateway_account,
+        "payment_request_type": "Inward",
+        "party_type": "Customer",
+        "party": doc.get("customer"),
+        "return_doc": True,
+    }
+    return make_payment_request(**args)
+
+
+def get_existing_payment_request(doc, pay):
+    payment_gateway_account = frappe.db.get_value(
+        "Payment Gateway Account",
+        {
+            "payment_account": pay.get("account"),
+        },
+        ["name"],
+    )
+
+    args = {
+        "doctype": "Payment Request",
+        "reference_doctype": "Sales Invoice",
+        "reference_name": doc.get("name"),
+        "payment_gateway_account": payment_gateway_account,
+        "email_to": doc.get("contact_mobile"),
+    }
+    pr = frappe.db.exists(args)
+    if pr:
+        return frappe.get_doc("Payment Request", pr[0][0])
+
+
+def make_payment_request(**args):
+    """Make payment request"""
+
+    args = frappe._dict(args)
+
+    ref_doc = frappe.get_doc(args.dt, args.dn)
+    gateway_account = get_gateway_details(args) or frappe._dict()
+
+    grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
+    if args.loyalty_points and args.dt == "Sales Order":
+        from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+            validate_loyalty_points,
+        )
+
+        loyalty_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))
+        frappe.db.set_value(
+            "Sales Order",
+            args.dn,
+            "loyalty_points",
+            int(args.loyalty_points),
+            update_modified=False,
+        )
+        frappe.db.set_value(
+            "Sales Order",
+            args.dn,
+            "loyalty_amount",
+            loyalty_amount,
+            update_modified=False,
+        )
+        grand_total = grand_total - loyalty_amount
+
+    bank_account = (
+        get_party_bank_account(args.get("party_type"), args.get("party"))
+        if args.get("party_type")
+        else ""
+    )
+
+    existing_payment_request = None
+    if args.order_type == "Shopping Cart":
+        existing_payment_request = frappe.db.get_value(
+            "Payment Request",
+            {
+                "reference_doctype": args.dt,
+                "reference_name": args.dn,
+                "docstatus": ("!=", 2),
+            },
+        )
+
+    if existing_payment_request:
+        frappe.db.set_value(
+            "Payment Request",
+            existing_payment_request,
+            "grand_total",
+            grand_total,
+            update_modified=False,
+        )
+        pr = frappe.get_doc("Payment Request", existing_payment_request)
+    else:
+        if args.order_type != "Shopping Cart":
+            existing_payment_request_amount = get_existing_payment_request_amount(
+                args.dt, args.dn
+            )
+
+            if existing_payment_request_amount:
+                grand_total -= existing_payment_request_amount
+
+        pr = frappe.new_doc("Payment Request")
+        pr.update(
+            {
+                "payment_gateway_account": gateway_account.get("name"),
+                "payment_gateway": gateway_account.get("payment_gateway"),
+                "payment_account": gateway_account.get("payment_account"),
+                "payment_channel": gateway_account.get("payment_channel"),
+                "payment_request_type": args.get("payment_request_type"),
+                "currency": ref_doc.currency,
+                "grand_total": grand_total,
+                "mode_of_payment": args.mode_of_payment,
+                "email_to": args.recipient_id or ref_doc.owner,
+                "subject": _("Payment Request for {0}").format(args.dn),
+                "message": gateway_account.get("message") or get_dummy_message(ref_doc),
+                "reference_doctype": args.dt,
+                "reference_name": args.dn,
+                "party_type": args.get("party_type") or "Customer",
+                "party": args.get("party") or ref_doc.get("customer"),
+                "bank_account": bank_account,
+            }
+        )
+
+        if args.order_type == "Shopping Cart" or args.mute_email:
+            pr.flags.mute_email = True
+
+        pr.insert(ignore_permissions=True)
+        if args.submit_doc:
+            pr.submit()
+
+    if args.order_type == "Shopping Cart":
+        frappe.db.commit()
+        frappe.local.response["type"] = "redirect"
+        frappe.local.response["location"] = pr.get_payment_url()
+
+    if args.return_doc:
+        return pr
+
+    return pr.as_dict()
+
+
+def get_amount(ref_doc, payment_account=None):
+    """get amount based on doctype"""
+    grand_total = 0
+    for pay in ref_doc.payments:
+        if pay.type == "Phone" and pay.account == payment_account:
+            grand_total = pay.amount
+            break
+
+    if grand_total > 0:
+        return grand_total
+
+    else:
+        frappe.throw(
+            _("Payment Entry is already created or payment account is not matched")
+        )
+
+
+@frappe.whitelist()
+def get_pos_coupon(coupon, customer, company):
+    res = check_coupon_code(coupon, customer, company)
+    return res
+
+
+@frappe.whitelist()
+def get_active_gift_coupons(customer, company):
+    coupons = []
+    coupons_data = frappe.get_all(
+        "POS Coupon",
+        filters={
+            "company": company,
+            "coupon_type": "Gift Card",
+            "customer": customer,
+            "used": 0,
+        },
+        fields=["coupon_code"],
+    )
+    if len(coupons_data):
+        coupons = [i.coupon_code for i in coupons_data]
+    return coupons
+
+
+@frappe.whitelist()
+def get_customer_info(customer):
+    customer = frappe.get_doc("Customer", customer)
+
+    res = {"loyalty_points": None, "conversion_factor": None}
+
+    res["email_id"] = customer.email_id
+    res["mobile_no"] = customer.mobile_no
+    res["image"] = customer.image
+    res["loyalty_program"] = customer.loyalty_program
+    res["customer_price_list"] = customer.default_price_list
+    res["customer_group"] = customer.customer_group
+    res["posa_discount"] = customer.posa_discount
+    res["name"] = customer.name
+    res["customer_name"] = customer.customer_name
+    res["customer_group_price_list"] = frappe.get_value(
+        "Customer Group", customer.customer_group, "default_price_list"
+    )
+
+    if customer.loyalty_program:
+        lp_details = get_loyalty_program_details_with_points(
+            customer.name, customer.loyalty_program, silent=True
+        )
+        res["loyalty_points"] = lp_details.get("loyalty_points")
+        res["conversion_factor"] = lp_details.get("conversion_factor")
+
+    return res
+
+
+def get_company_domain(company):
+    return frappe.get_cached_value("Company", cstr(company), "domain")

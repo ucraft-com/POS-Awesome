@@ -6,7 +6,7 @@
       </template>-->
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">Select Hold Invoice</span>
+          <span class="headline indigo--text">{{__('Select Hold Invoice')}}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -49,25 +49,25 @@ export default {
     dialog_data: {},
     headers: [
       {
-        text: "Customer",
+        text: __("Customer"),
         value: "customer",
         align: "start",
         sortable: true,
       },
       {
-        text: "Date",
+        text: __("Date"),
         align: "start",
         sortable: true,
         value: "posting_date",
       },
       {
-        text: "Invoice",
+        text: __("Invoice"),
         value: "name",
         align: "start",
         sortable: true,
       },
       {
-        text: "Amount",
+        text: __("Amount"),
         value: "grand_total",
         align: "start",
         sortable: false,

@@ -31,7 +31,7 @@
             color="indigo"
             background-color="white"
             :items="invoiceTypes"
-            label="Type"
+            :label="frappe._('Type')"
             v-model="invoiceType"
             :disabled="invoiceType == 'Return'"
           ></v-select>
@@ -108,7 +108,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Item Code"
+                      :label="frappe._('Item Code')"
                       background-color="white"
                       hide-details
                       v-model="item.item_code"
@@ -120,7 +120,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="QTY"
+                      :label="frappe._('QTY')"
                       background-color="white"
                       hide-details
                       v-model.number="item.qty"
@@ -133,7 +133,7 @@
                     <v-select
                       dense
                       background-color="white"
-                      label="UOM"
+                      :label="frappe._('UOM')"
                       v-model="item.uom"
                       :items="item.item_uoms"
                       outlined
@@ -154,7 +154,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Rate"
+                      :label="frappe._('Rate')"
                       background-color="white"
                       hide-details
                       v-model.number="item.rate"
@@ -178,7 +178,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Discount Percentage"
+                      :label="frappe._('Discount Percentage')"
                       background-color="white"
                       hide-details
                       v-model.number="item.discount_percentage"
@@ -201,7 +201,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Discount Amount"
+                      :label="frappe._('Discount Amount')"
                       background-color="white"
                       hide-details
                       v-model.number="item.discount_amount"
@@ -225,7 +225,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Price list Rate"
+                      :label="frappe._('Price list Rate')"
                       background-color="white"
                       hide-details
                       v-model="item.price_list_rate"
@@ -239,7 +239,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Available QTY"
+                      :label="frappe._('Available QTY')"
                       background-color="white"
                       hide-details
                       v-model="item.actual_qty"
@@ -252,7 +252,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Group"
+                      :label="frappe._('Group')"
                       background-color="white"
                       hide-details
                       v-model="item.item_group"
@@ -264,7 +264,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Stock QTY"
+                      :label="frappe._('Stock QTY')"
                       background-color="white"
                       hide-details
                       v-model="item.stock_qty"
@@ -277,7 +277,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Stock UOM"
+                      :label="frappe._('Stock UOM')"
                       background-color="white"
                       hide-details
                       v-model="item.stock_uom"
@@ -287,7 +287,7 @@
                   <v-col align="center" cols="4" v-if="item.posa_offer_applied">
                     <v-checkbox
                       dense
-                      label="Offer Applied"
+                      :label="frappe._('Offer Applied')"
                       v-model="item.posa_offer_applied"
                       readonly
                       hide-details
@@ -302,7 +302,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Serial No QTY"
+                      :label="frappe._('Serial No QTY')"
                       background-color="white"
                       hide-details
                       v-model="item.serial_no_selected_count"
@@ -323,7 +323,7 @@
                       chips
                       color="indigo"
                       small-chips
-                      label="Serial No"
+                      :label="frappe._('Serial No')"
                       multiple
                       @change="set_serial_no(item)"
                     ></v-autocomplete>
@@ -336,7 +336,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Batch No Available QTY"
+                      :label="frappe._('Batch No Available QTY')"
                       background-color="white"
                       hide-details
                       v-model="item.actual_batch_qty"
@@ -352,7 +352,7 @@
                       dense
                       outlined
                       color="indigo"
-                      label="Batch No Expiry Date"
+                      :label="frappe._('Batch No Expiry Date')"
                       background-color="white"
                       hide-details
                       v-model="item.batch_no_expiry_date"
@@ -370,7 +370,7 @@
                       outlined
                       dense
                       color="indigo"
-                      label="Batch No"
+                      :label="frappe._('Batch No')"
                       @change="set_batch_qty(item, $event)"
                     >
                       <template v-slot:item="data">
@@ -407,7 +407,7 @@
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field
                           v-model="item.posa_delivery_date"
-                          label="Delivery Date"
+                          :label="frappe._('Delivery Date')"
                           readonly
                           outlined
                           dense
@@ -465,7 +465,7 @@
                       color="indigo"
                       auto-grow
                       rows="1"
-                      label="Additional Notes"
+                      :label="frappe._('Additional Notes')"
                       v-model="item.posa_notes"
                       :value="item.posa_notes"
                     ></v-textarea>
@@ -484,7 +484,7 @@
             <v-col cols="6" class="pa-1">
               <v-text-field
                 :value="formtCurrency(total_qty)"
-                label="Total Qty"
+                :label="frappe._('Total Qty')"
                 outlined
                 dense
                 readonly
@@ -494,7 +494,7 @@
             <v-col cols="6" class="pa-1">
               <v-text-field
                 v-model="discount_amount"
-                label="Additional Discount"
+                :label="frappe._('Additional Discount')"
                 ref="discount"
                 outlined
                 dense
@@ -512,7 +512,7 @@
             <v-col cols="6" class="pa-1 mt-2">
               <v-text-field
                 :value="formtCurrency(total_items_discount_amount)"
-                label="Items Discounts"
+                :label="frappe._('Items Discounts')"
                 outlined
                 dense
                 readonly
@@ -524,7 +524,7 @@
             <v-col cols="6" class="pa-1 mt-2">
               <v-text-field
                 :value="formtCurrency(subtotal)"
-                label="Total"
+                :label="frappe._('Total')"
                 outlined
                 dense
                 readonly
@@ -544,7 +544,7 @@
                 color="warning"
                 dark
                 @click="get_draft_invoices"
-                >Hold</v-btn
+                >{{ __('Hold') }}</v-btn
               >
             </v-col>
             <v-col cols="6" class="pa-1">
@@ -555,7 +555,7 @@
                 color="info"
                 dark
                 @click="open_returns"
-                >Return</v-btn
+                >{{ __('Return') }}</v-btn
               >
             </v-col>
             <v-col cols="6" class="pa-1">
@@ -565,7 +565,7 @@
                 color="error"
                 dark
                 @click="cancel_invoice"
-                >Cancel</v-btn
+                >{{ __('Cancel') }}</v-btn
               >
             </v-col>
             <v-col cols="6" class="pa-1">
@@ -575,7 +575,7 @@
                 color="success"
                 dark
                 @click="new_invoice"
-                >New</v-btn
+                >{{ __('New') }}</v-btn
               >
             </v-col>
             <v-col cols="12" class="pa-1">
@@ -585,7 +585,7 @@
                 color="primary"
                 @click="show_payment"
                 dark
-                >PAY</v-btn
+                >{{ __('PAY') }}</v-btn
               >
             </v-col>
           </v-row>
@@ -598,6 +598,7 @@
 <script>
 import { evntBus } from '../../bus';
 import Customer from './Customer.vue';
+
 export default {
   data() {
     return {
@@ -608,12 +609,12 @@ export default {
       return_doc: '',
       customer: '',
       customer_info: '',
-      customer_doc: '',
       discount_amount: 0,
       total_tax: 0,
       items: [],
       posOffers: [],
       posa_offers: [],
+      posa_coupons: [],
       allItems: [],
       discount_percentage_offer_name: null,
       invoiceTypes: ['Invoice', 'Order'],
@@ -623,16 +624,16 @@ export default {
       singleExpand: true,
       items_headers: [
         {
-          text: 'Name',
+          text: __('Name'),
           align: 'start',
           sortable: true,
           value: 'item_name',
         },
-        { text: 'QTY', value: 'qty', align: 'center' },
-        { text: 'UOM', value: 'uom', align: 'center' },
-        { text: 'Rate', value: 'rate', align: 'center' },
-        { text: 'Amount', value: 'amount', align: 'center' },
-        { text: 'is Offer', value: 'posa_is_offer', align: 'center' },
+        { text: __('QTY'), value: 'qty', align: 'center' },
+        { text: __('UOM'), value: 'uom', align: 'center' },
+        { text: __('Rate'), value: 'rate', align: 'center' },
+        { text: __('Amount'), value: 'amount', align: 'center' },
+        { text: __('is Offer'), value: 'posa_is_offer', align: 'center' },
       ],
     };
   },
@@ -734,7 +735,9 @@ export default {
         if (item.has_serial_no && item.to_set_serial_no) {
           if (cur_item.serial_no_selected.includes(item.to_set_serial_no)) {
             evntBus.$emit('show_mesage', {
-              text: `This Serial Number ${item.to_set_serial_no} has already been added!`,
+              text: __(`This Serial Number {0} has already been added!`, [
+                item.to_set_serial_no,
+              ]),
               color: 'warning',
             });
             item.to_set_serial_no = null;
@@ -744,14 +747,14 @@ export default {
           item.to_set_serial_no = null;
         }
         if (!cur_item.has_batch_no) {
-          cur_item.qty += item.qty;
+          cur_item.qty += item.qty || 1;
           this.calc_sotck_gty(cur_item, cur_item.qty);
         } else {
           if (
             cur_item.stock_qty < cur_item.actual_batch_qty ||
             !cur_item.batch_no
           ) {
-            cur_item.qty += item.qty;
+            cur_item.qty += item.qty || 1;
             this.calc_sotck_gty(cur_item, cur_item.qty);
           } else {
             const new_item = this.get_new_item(cur_item);
@@ -824,6 +827,8 @@ export default {
       }
       this.items = [];
       this.posa_offers = [];
+      evntBus.$emit('set_pos_coupons', []);
+      this.posa_coupons = [];
       this.customer = this.pos_profile.customer;
       this.invoice_doc = '';
       this.return_doc = '';
@@ -835,13 +840,15 @@ export default {
       evntBus.$emit('set_customer_readonly', false);
       this.expanded = [];
       this.posa_offers = [];
+      evntBus.$emit('set_pos_coupons', []);
+      this.posa_coupons = [];
       this.return_doc = '';
       const doc = this.get_invoice_doc();
       if (doc.name) {
         this.update_invoice(doc);
       } else {
         if (doc.items.length) {
-          this.save_draft_invoice(doc);
+          this.update_invoice(doc);
         }
       }
       if (!data.name && !data.is_return) {
@@ -886,22 +893,6 @@ export default {
       }
     },
 
-    save_draft_invoice() {
-      const vm = this;
-      const doc = this.get_invoice_doc();
-      frappe.call({
-        method: 'posawesome.posawesome.api.posapp.save_draft_invoice',
-        args: { data: doc },
-        async: false,
-        callback: function (r) {
-          if (r.message) {
-            vm.invoice_doc = r.message;
-          }
-        },
-      });
-      return this.invoice_doc;
-    },
-
     get_invoice_doc() {
       let doc = {};
       if (this.invoice_doc.name) {
@@ -909,6 +900,7 @@ export default {
       }
       doc.doctype = 'Sales Invoice';
       doc.is_pos = 1;
+      doc.ignore_pricing_rule = 1;
       doc.company = doc.company || this.pos_profile.company;
       doc.pos_profile = doc.pos_profile || this.pos_profile.name;
       doc.currency = doc.currency || this.pos_profile.currency;
@@ -923,6 +915,7 @@ export default {
       doc.is_return = this.invoice_doc.is_return;
       doc.return_against = this.invoice_doc.return_against;
       doc.posa_offers = this.posa_offers;
+      doc.posa_coupons = this.posa_coupons;
       return doc;
     },
 
@@ -991,21 +984,21 @@ export default {
       if (doc.name) {
         return this.update_invoice(doc);
       } else {
-        return this.save_draft_invoice(doc);
+        return this.update_invoice(doc);
       }
     },
 
     show_payment() {
       if (!this.customer) {
         evntBus.$emit('show_mesage', {
-          text: `There is no Customer !`,
+          text: __(`There is no Customer !`),
           color: 'error',
         });
         return;
       }
       if (!this.items.length) {
         evntBus.$emit('show_mesage', {
-          text: `There is no Items !`,
+          text: __(`There is no Items !`),
           color: 'error',
         });
         return;
@@ -1015,7 +1008,6 @@ export default {
       }
       evntBus.$emit('show_payment', 'true');
       const invoice_doc = this.proces_invoice();
-      invoice_doc.customer_info = this.customer_info;
       evntBus.$emit('send_invoice_doc_payment', invoice_doc);
     },
 
@@ -1028,7 +1020,9 @@ export default {
         ) {
           if (item.is_stock_item && item.stock_qty > item.actual_qty) {
             evntBus.$emit('show_mesage', {
-              text: `The existing quantity of item ${item.item_name} is not enough`,
+              text: __(`The existing quantity of item {0} is not enough`, [
+                item.item_name,
+              ]),
               color: 'error',
             });
             value = false;
@@ -1039,7 +1033,10 @@ export default {
           item.discount_percentage > item.max_discount
         ) {
           evntBus.$emit('show_mesage', {
-            text: `Maximum discount for Item ${item.item_name} is ${item.max_discount}%`,
+            text: __(`Maximum discount for Item {0} is {1}%`, [
+              item.item_name,
+              item.max_discount,
+            ]),
             color: 'error',
           });
           value = false;
@@ -1050,7 +1047,9 @@ export default {
             item.stock_qty != item.serial_no_selected.length
           ) {
             evntBus.$emit('show_mesage', {
-              text: `Selcted serial numbers of item ${item.item_name} is incorrect`,
+              text: __(`Selected serial numbers of item {0} is incorrect`, [
+                item.item_name,
+              ]),
               color: 'error',
             });
             value = false;
@@ -1059,7 +1058,10 @@ export default {
         if (!this.pos_profile.posa_auto_set_batch && item.has_batch_no) {
           if (item.stock_qty > item.actual_batch_qty) {
             evntBus.$emit('show_mesage', {
-              text: `The existing batch quantity of item ${item.item_name} is not enough`,
+              text: __(
+                `The existing batch quantity of item {0} is not enough`,
+                [item.item_name]
+              ),
               color: 'error',
             });
             value = false;
@@ -1069,7 +1071,9 @@ export default {
           const clac_percentage = (this.discount_amount / this.Total) * 100;
           if (clac_percentage > this.pos_profile.posa_max_discount_allowed) {
             evntBus.$emit('show_mesage', {
-              text: `The discount should not be higher than ${this.pos_profile.posa_max_discount_allowed}%`,
+              text: __(`The discount should not be higher than {0}%`, [
+                this.pos_profile.posa_max_discount_allowed,
+              ]),
               color: 'error',
             });
             value = false;
@@ -1078,7 +1082,7 @@ export default {
         if (this.invoice_doc.is_return) {
           if (this.subtotal >= 0) {
             evntBus.$emit('show_mesage', {
-              text: `Return Invoice Total Not Correct`,
+              text: __(`Return Invoice Total Not Correct`),
               color: 'error',
             });
             value = false;
@@ -1086,7 +1090,9 @@ export default {
           }
           if (this.subtotal * -1 > this.return_doc.total) {
             evntBus.$emit('show_mesage', {
-              text: `Return Invoice Total should not be higher than ${this.return_doc.total}`,
+              text: __(`Return Invoice Total should not be higher than {0}`, [
+                this.return_doc.total,
+              ]),
               color: 'error',
             });
             value = false;
@@ -1099,14 +1105,20 @@ export default {
 
             if (!return_item) {
               evntBus.$emit('show_mesage', {
-                text: `The item ${item.item_name} cannot be returned because it is not in the invoice ${this.return_doc.name}`,
+                text: __(
+                  `The item {0} cannot be returned because it is not in the invoice {1}`,
+                  [item.item_name, this.return_doc.name]
+                ),
                 color: 'error',
               });
               value = false;
               return value;
             } else if (item.qty * -1 > return_item.qty || item.qty >= 0) {
               evntBus.$emit('show_mesage', {
-                text: `The QTY of the item ${item.item_name} cannot be greater than ${return_item.qty}`,
+                text: __(`The QTY of the item {0} cannot be greater than {1}`, [
+                  item.item_name,
+                  return_item.qty,
+                ]),
                 color: 'error',
               });
               value = false;
@@ -1198,6 +1210,7 @@ export default {
             tax_category: '',
             transaction_type: 'selling',
             update_stock: this.pos_profile.update_stock,
+            price_list: this.get_price_list(),
           },
         },
         callback: function (r) {
@@ -1206,8 +1219,8 @@ export default {
             if (data.has_pricing_rule) {
             } else if (
               vm.pos_profile.posa_apply_customer_discount &&
-              vm.customer_doc.posa_discount > 0 &&
-              vm.customer_doc.posa_discount <= 100
+              vm.customer_info.posa_discount > 0 &&
+              vm.customer_info.posa_discount <= 100
             ) {
               if (
                 item.posa_is_offer == 0 &&
@@ -1216,11 +1229,11 @@ export default {
               ) {
                 if (item.max_discount > 0) {
                   item.discount_percentage =
-                    item.max_discount < vm.customer_doc.posa_discount
+                    item.max_discount < vm.customer_info.posa_discount
                       ? item.max_discount
-                      : vm.customer_doc.posa_discount;
+                      : vm.customer_info.posa_discount;
                 } else {
-                  item.discount_percentage = vm.customer_doc.posa_discount;
+                  item.discount_percentage = vm.customer_info.posa_discount;
                 }
               }
             }
@@ -1248,71 +1261,52 @@ export default {
       });
     },
 
-    fetch_customer_doc() {
+    fetch_customer_details() {
       const vm = this;
       if (this.customer) {
         frappe.call({
-          method: 'frappe.client.get',
+          method: 'posawesome.posawesome.api.posapp.get_customer_info',
           args: {
-            doctype: 'Customer',
-            name: vm.customer,
+            customer: vm.customer,
           },
-          callback(r) {
-            if (r.message) {
-              vm.customer_doc = r.message;
+          async: false,
+          callback: (r) => {
+            const message = r.message;
+            if (!r.exc) {
+              vm.customer_info = {
+                ...message,
+              };
             }
+            vm.update_price_list();
           },
         });
       }
     },
 
-    fetch_customer_details() {
-      const vm = this;
-      if (this.customer) {
-        return new Promise((resolve) => {
-          frappe.db
-            .get_value('Customer', vm.customer, [
-              'email_id',
-              'mobile_no',
-              'image',
-              'loyalty_program',
-            ])
-            .then(({ message }) => {
-              const { loyalty_program } = message;
-              if (loyalty_program) {
-                frappe.call({
-                  method:
-                    'erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points',
-                  args: {
-                    customer: vm.customer,
-                    loyalty_program,
-                    silent: true,
-                  },
-                  callback: (r) => {
-                    const { loyalty_points, conversion_factor } = r.message;
-                    if (!r.exc) {
-                      vm.customer_info = {
-                        ...message,
-                        customer: vm.customer,
-                        loyalty_points,
-                        conversion_factor,
-                      };
-                      resolve();
-                    }
-                  },
-                });
-              } else {
-                vm.customer_info = { ...message, customer: vm.customer };
-                resolve();
-              }
-            });
-        });
-      } else {
-        return new Promise((resolve) => {
-          vm.customer_info = {};
-          resolve();
-        });
+    get_price_list() {
+      let price_list = this.pos_profile.selling_price_list;
+      if (this.customer_info && this.pos_profile) {
+        const { customer_price_list, customer_group_price_list } =
+          this.customer_info;
+        const pos_price_list = this.pos_profile.selling_price_list;
+        if (customer_price_list && customer_price_list != pos_price_list) {
+          price_list = customer_price_list;
+        } else if (
+          customer_group_price_list &&
+          customer_group_price_list != pos_price_list
+        ) {
+          price_list = customer_group_price_list;
+        }
       }
+      return price_list;
+    },
+
+    update_price_list() {
+      let price_list = this.get_price_list();
+      if (price_list == this.pos_profile.selling_price_list) {
+        price_list = null;
+      }
+      evntBus.$emit('update_customer_price_list', price_list);
     },
 
     calc_prices(item, value, $event) {
@@ -1397,7 +1391,10 @@ export default {
       item.serial_no_selected_count = item.serial_no_selected.length;
       if (item.serial_no_selected_count != item.stock_qty) {
         evntBus.$emit('show_mesage', {
-          text: `Selected Serial No QTY is ${item.serial_no_selected_count} it should be ${item.stock_qty}`,
+          text: __(`Selected Serial No QTY is {0} it should be {1}`, [
+            item.serial_no_selected_count,
+            item.stock_qty,
+          ]),
           color: 'warning',
         });
       }
@@ -1479,15 +1476,31 @@ export default {
     },
 
     handelOffers() {
-      const itemOffers = this.getItemOffers();
-      const groupOffers = this.getGroupOffers();
-      const brandOffers = this.getBrandOffers();
-      const transactionOffers = this.getTransactionOffers();
-      const offers = []
-        .concat(itemOffers)
-        .concat(groupOffers)
-        .concat(brandOffers)
-        .concat(transactionOffers);
+      const offers = [];
+      this.posOffers.forEach((offer) => {
+        if (offer.apply_on === 'Item Code') {
+          const itemOffer = this.getItemOffer(offer);
+          if (itemOffer) {
+            offers.push(itemOffer);
+          }
+        } else if (offer.apply_on === 'Item Group') {
+          const groupOffer = this.getGroupOffer(offer);
+          if (groupOffer) {
+            offers.push(groupOffer);
+          }
+        } else if (offer.apply_on === 'Brand') {
+          const brandOffer = this.getBrandOffer(offer);
+          if (brandOffer) {
+            offers.push(brandOffer);
+          }
+        } else if (offer.apply_on === 'Transaction') {
+          const transactionOffer = this.getTransactionOffer(offer);
+          if (transactionOffer) {
+            offers.push(transactionOffer);
+          }
+        }
+      });
+
       this.setItemGiveOffer(offers);
       this.updatePosOffers(offers);
     },
@@ -1585,10 +1598,27 @@ export default {
       return res;
     },
 
-    getItemOffers() {
-      const offers = [];
-      this.posOffers.forEach((offer) => {
-        if (offer.apply_on === 'Item Code') {
+    checkOfferCoupon(offer) {
+      if (offer.coupon_based) {
+        const coupon = this.posa_coupons.find(
+          (el) => offer.name == el.pos_offer
+        );
+        if (coupon) {
+          offer.coupon = coupon.coupon;
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        offer.coupon = null;
+        return true;
+      }
+    },
+
+    getItemOffer(offer) {
+      let apply_offer = null;
+      if (offer.apply_on === 'Item Code') {
+        if (this.checkOfferCoupon(offer)) {
           this.items.forEach((item) => {
             if (!item.posa_is_offer && item.item_code === offer.item) {
               const items = [];
@@ -1606,20 +1636,20 @@ export default {
                 if (res.apply) {
                   items.push(item.posa_row_id);
                   offer.items = items;
-                  offers.push(offer);
+                  apply_offer = offer;
                 }
               }
             }
           });
         }
-      });
-      return offers;
+      }
+      return apply_offer;
     },
 
-    getGroupOffers() {
-      const offers = [];
-      this.posOffers.forEach((offer) => {
-        if (offer.apply_on === 'Item Group') {
+    getGroupOffer(offer) {
+      let apply_offer = null;
+      if (offer.apply_on === 'Item Group') {
+        if (this.checkOfferCoupon(offer)) {
           const items = [];
           let total_count = 0;
           let total_amount = 0;
@@ -1645,18 +1675,18 @@ export default {
             );
             if (res.apply) {
               offer.items = items;
-              offers.push(offer);
+              apply_offer = offer;
             }
           }
         }
-      });
-      return offers;
+      }
+      return apply_offer;
     },
 
-    getBrandOffers() {
-      const offers = [];
-      this.posOffers.forEach((offer) => {
-        if (offer.apply_on === 'Brand') {
+    getBrandOffer(offer) {
+      let apply_offer = null;
+      if (offer.apply_on === 'Brand') {
+        if (this.checkOfferCoupon(offer)) {
           const items = [];
           let total_count = 0;
           let total_amount = 0;
@@ -1682,17 +1712,17 @@ export default {
             );
             if (res.apply) {
               offer.items = items;
-              offers.push(offer);
+              apply_offer = offer;
             }
           }
         }
-      });
-      return offers;
+      }
+      return apply_offer;
     },
-    getTransactionOffers() {
-      const offers = [];
-      this.posOffers.forEach((offer) => {
-        if (offer.apply_on === 'Transaction') {
+    getTransactionOffer(offer) {
+      let apply_offer = null;
+      if (offer.apply_on === 'Transaction') {
+        if (this.checkOfferCoupon(offer)) {
           let total_qty = 0;
           this.items.forEach((item) => {
             if (!item.posa_is_offer && !item.posa_is_replace) {
@@ -1713,12 +1743,12 @@ export default {
                 items.push(item.posa_row_id);
               });
               offer.items = items;
-              offers.push(offer);
+              apply_offer = offer;
             }
           }
         }
-      });
-      return offers;
+      }
+      return apply_offer;
     },
 
     updatePosOffers(offers) {
@@ -1941,7 +1971,7 @@ export default {
       }
       if (offer.offer === 'Loyalty Point') {
         evntBus.$emit('show_mesage', {
-          text: 'Loyalty Point Offer Applied',
+          text: __('Loyalty Point Offer Applied'),
           color: 'success',
         });
       }
@@ -1955,6 +1985,8 @@ export default {
         give_item: offer.give_item,
         give_item_row_id: offer.give_item_row_id,
         offer_applied: offer.offer_applied,
+        coupon_based: offer.coupon_based,
+        coupon: offer.coupon,
       };
       this.posa_offers.push(newOffer);
       this.addOfferToItems(newOffer);
@@ -2152,6 +2184,7 @@ export default {
     });
     evntBus.$on('load_invoice', (data) => {
       this.new_invoice(data);
+      evntBus.$emit('set_pos_coupons', data.posa_coupons);
     });
     evntBus.$on('set_offers', (data) => {
       this.posOffers = data;
@@ -2159,8 +2192,15 @@ export default {
     evntBus.$on('update_invoice_offers', (data) => {
       this.updateInvoiceOffers(data);
     });
+    evntBus.$on('update_invoice_coupons', (data) => {
+      this.posa_coupons = data;
+      this.handelOffers();
+    });
     evntBus.$on('set_all_items', (data) => {
       this.allItems = data;
+      this.items.forEach((item) => {
+        this.update_item_detail(item);
+      });
     });
     evntBus.$on('load_return_invoice', (data) => {
       this.new_invoice(data.invoice_doc);
@@ -2182,7 +2222,6 @@ export default {
     customer() {
       this.close_payments();
       evntBus.$emit('set_customer', this.customer);
-      this.fetch_customer_doc();
       this.fetch_customer_details();
     },
     customer_info() {

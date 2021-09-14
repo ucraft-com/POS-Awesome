@@ -6,7 +6,9 @@
       </template>-->
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">Create POS Opening Shift</span>
+          <span class="headline indigo--text">{{
+            __('Create POS Opening Shift')
+          }}</span>
         </v-card-title>
         <v-card-text>
           <v-container>
@@ -14,7 +16,7 @@
               <v-col cols="12">
                 <v-autocomplete
                   :items="companys"
-                  label="Company"
+                  :label="frappe._('Company')"
                   v-model="company"
                   required
                 ></v-autocomplete>
@@ -22,7 +24,7 @@
               <v-col cols="12">
                 <v-autocomplete
                   :items="pos_profiles"
-                  label="POS Profile"
+                  :label="frappe._('POS Profile')"
                   v-model="pos_profile"
                   required
                 ></v-autocomplete>
@@ -44,7 +46,7 @@
                           <v-text-field
                             v-model="props.item.amount"
                             :rules="[max25chars]"
-                            label="Edit"
+                            :label="frappe._('Edit')"
                             single-line
                             counter
                             type="number"
@@ -82,13 +84,13 @@ export default {
     payments_methods: [],
     payments_methods_headers: [
       {
-        text: 'Mode of Payment',
+        text: __('Mode of Payment'),
         align: 'start',
         sortable: false,
         value: 'mode_of_payment',
       },
       {
-        text: 'Opening Amount',
+        text: __('Opening Amount'),
         value: 'amount',
         align: 'center',
         sortable: false,

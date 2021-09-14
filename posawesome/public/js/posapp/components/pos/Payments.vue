@@ -17,7 +17,7 @@
             <v-text-field
               outlined
               color="indigo"
-              label="Paid Amount"
+              :label="frappe._('Paid Amount')"
               background-color="white"
               hide-details
               :value="formtCurrency(total_payments)"
@@ -30,7 +30,7 @@
             <v-text-field
               outlined
               color="indigo"
-              :label="diff_lable"
+              :label="frappe._(diff_lable)"
               background-color="white"
               hide-details
               :value="formtCurrency(diff_payment)"
@@ -44,7 +44,7 @@
             <v-text-field
               outlined
               color="indigo"
-              label="Paid Change"
+              :label="frappe._('Paid Change')"
               background-color="white"
               v-model="paid_change"
               @input="set_paid_change()"
@@ -59,7 +59,7 @@
             <v-text-field
               outlined
               color="indigo"
-              label="Credit Change"
+              :label="frappe._('Credit Change')"
               background-color="white"
               hide-details
               :value="formtCurrency(credit_change)"
@@ -77,12 +77,12 @@
             v-for="payment in invoice_doc.payments"
             :key="payment.name"
           >
-            <v-col cols="7">
+            <v-col cols="6">
               <v-text-field
                 dense
                 outlined
                 color="indigo"
-                :label="payment.mode_of_payment"
+                :label="frappe._(payment.mode_of_payment)"
                 background-color="white"
                 hide-details
                 v-model="payment.amount"
@@ -92,7 +92,15 @@
                 :readonly="invoice_doc.is_return ? true : false"
               ></v-text-field>
             </v-col>
-            <v-col cols="5">
+            <v-col
+              :cols="
+                6
+                  ? payment.type != 'Phone' ||
+                    payment.amount == 0 ||
+                    !request_payment_field
+                  : 3
+              "
+            >
               <v-btn
                 block
                 class=""
@@ -101,6 +109,26 @@
                 @click="set_full_amount(payment.idx)"
                 >{{ payment.mode_of_payment }}</v-btn
               >
+            </v-col>
+            <v-col
+              v-if="
+                payment.type == 'Phone' &&
+                payment.amount > 0 &&
+                request_payment_field
+              "
+              :cols="3"
+              class="pl-1"
+            >
+              <v-btn
+                block
+                class=""
+                color="success"
+                dark
+                :disabled="payment.amount == 0"
+                @click="phone_dialog = true"
+              >
+                {{ __('Request') }}
+              </v-btn>
             </v-col>
           </v-row>
         </div>
@@ -118,7 +146,7 @@
               dense
               outlined
               color="indigo"
-              label="Redeem Loyalty Points"
+              :label="frappe._('Redeem Loyalty Points')"
               background-color="white"
               hide-details
               v-model="loyalty_amount"
@@ -131,7 +159,7 @@
               dense
               outlined
               color="indigo"
-              label="You can redeem upto"
+              :label="frappe._('You can redeem upto')"
               background-color="white"
               hide-details
               :value="formtCurrency(available_pioints_amount)"
@@ -156,7 +184,7 @@
               outlined
               disabled
               color="indigo"
-              label="Redeemed Customer Credit"
+              :label="frappe._('Redeemed Customer Credit')"
               background-color="white"
               hide-details
               v-model="redeemed_customer_credit"
@@ -169,7 +197,7 @@
               dense
               outlined
               color="indigo"
-              label="You can redeem credit upto"
+              :label="frappe._('You can redeem credit upto')"
               background-color="white"
               hide-details
               :value="formtCurrency(available_customer_credit)"
@@ -186,7 +214,7 @@
               dense
               outlined
               color="indigo"
-              label="Net Total"
+              :label="frappe._('Net Total')"
               background-color="white"
               hide-details
               :value="formtCurrency(invoice_doc.net_total)"
@@ -199,7 +227,7 @@
               dense
               outlined
               color="indigo"
-              label="Tax and Charges"
+              :label="frappe._('Tax and Charges')"
               background-color="white"
               hide-details
               :value="formtCurrency(invoice_doc.total_taxes_and_charges)"
@@ -212,7 +240,7 @@
               dense
               outlined
               color="indigo"
-              label="Totoal Amount"
+              :label="frappe._('Total Amount')"
               background-color="white"
               hide-details
               :value="formtCurrency(invoice_doc.total)"
@@ -225,7 +253,7 @@
               dense
               outlined
               color="indigo"
-              label="Discount Amount"
+              :label="frappe._('Discount Amount')"
               background-color="white"
               hide-details
               :value="formtCurrency(invoice_doc.discount_amount)"
@@ -238,7 +266,7 @@
               dense
               outlined
               color="indigo"
-              label="Grand Amount"
+              :label="frappe._('Grand Total')"
               background-color="white"
               hide-details
               :value="formtCurrency(invoice_doc.grand_total)"
@@ -254,14 +282,13 @@
               ref="order_delivery_date"
               v-model="order_delivery_date"
               :close-on-content-click="false"
-              :return-value.sync="invoice_doc.posa_delivery_date"
               transition="scale-transition"
               dense
             >
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   v-model="invoice_doc.posa_delivery_date"
-                  label="Delivery Date"
+                  :label="frappe._('Delivery Date')"
                   readonly
                   outlined
                   dense
@@ -279,28 +306,8 @@
                 scrollable
                 color="indigo"
                 :min="frappe.datetime.now_date()"
+                @input="order_delivery_date = false"
               >
-                <v-spacer></v-spacer>
-                <v-btn
-                  text
-                  color="primary"
-                  @click="order_delivery_date = false"
-                >
-                  Cancel
-                </v-btn>
-                <v-btn
-                  text
-                  color="primary"
-                  @click="
-                    [
-                      $refs.order_delivery_date.save(
-                        invoice_doc.posa_delivery_date
-                      ),
-                    ]
-                  "
-                >
-                  OK
-                </v-btn>
               </v-date-picker>
             </v-menu>
           </v-col>
@@ -311,7 +318,7 @@
               auto-select-first
               outlined
               color="indigo"
-              label="Address"
+              :label="frappe._('Address')"
               v-model="invoice_doc.shipping_address_name"
               :items="addresses"
               item-text="address_title"
@@ -368,7 +375,7 @@
               color="indigo"
               auto-grow
               rows="2"
-              label="Additional Notes"
+              :label="frappe._('Additional Notes')"
               v-model="invoice_doc.posa_notes"
               :value="invoice_doc.posa_notes"
             ></v-textarea>
@@ -383,7 +390,7 @@
               "
               v-model="is_credit_sale"
               flat
-              label="Is Credit Sale"
+              :label="frappe._('Is Credit Sale')"
               class="my-0 py-0"
             ></v-switch>
 
@@ -391,7 +398,7 @@
               v-if="invoice_doc.is_return && pos_profile.use_cashback"
               v-model="is_cashback"
               flat
-              label="Is Cashback"
+              :label="frappe._('Is Cashback')"
               class="my-0 py-0"
             ></v-switch>
           </v-col>
@@ -401,19 +408,18 @@
               ref="date_menu"
               v-model="date_menu"
               :close-on-content-click="false"
-              :return-value.sync="invoice_doc.due_date"
               transition="scale-transition"
             >
-              <template v-slot:activator="{ on1, attrs1 }">
+              <template v-slot:activator="{ on, attrs }">
                 <v-text-field
                   v-model="invoice_doc.due_date"
-                  label="Due Date"
+                  :label="frappe._('Due Date')"
                   readonly
                   outlined
                   dense
                   hide-details
-                  v-bind="attrs1"
-                  v-on="on1"
+                  v-bind="attrs"
+                  v-on="on"
                   color="indigo"
                 ></v-text-field>
               </template>
@@ -423,23 +429,8 @@
                 scrollable
                 color="indigo"
                 :min="frappe.datetime.now_date()"
+                @input="date_menu = false"
               >
-                <v-spacer></v-spacer>
-                <v-btn text color="primary" @click="date_menu = false">
-                  Cancel
-                </v-btn>
-                <v-btn
-                  text
-                  color="primary"
-                  @click="
-                    [
-                      $refs.date_menu.save(invoice_doc.due_date),
-                      validate_due_date(),
-                    ]
-                  "
-                >
-                  OK
-                </v-btn>
               </v-date-picker>
             </v-menu>
           </v-col>
@@ -451,7 +442,7 @@
               v-if="!invoice_doc.is_return && pos_profile.use_customer_credit"
               v-model="redeem_customer_credit"
               flat
-              label="Use Customer Credit"
+              :label="frappe._('Use Customer Credit')"
               class="my-0 py-0"
               @change="get_available_credit($event)"
             ></v-switch>
@@ -475,7 +466,7 @@
                 dense
                 outlined
                 color="indigo"
-                label="Available Credit"
+                :label="frappe._('Available Credit')"
                 background-color="white"
                 hide-details
                 :value="formtCurrency(row.total_credit)"
@@ -488,7 +479,7 @@
                 dense
                 outlined
                 color="indigo"
-                label="Redeem Credit"
+                :label="frappe._('Redeem Credit')"
                 background-color="white"
                 hide-details
                 type="number"
@@ -511,7 +502,7 @@
             color="warning"
             dark
             @click="back_to_invoice"
-            >Back</v-btn
+            >{{ __('Back') }}</v-btn
           >
         </v-col>
         <v-col cols="12">
@@ -523,11 +514,45 @@
             dark
             @click="submit"
             :disabled="vaildatPayment"
-            >Submit Payments</v-btn
+            >{{ __('Submit Payments') }}</v-btn
           >
         </v-col>
       </v-row>
     </v-card>
+    <div>
+      <v-dialog v-model="phone_dialog" max-width="400px">
+        <v-card>
+          <v-card-title>
+            <span class="headline indigo--text">{{
+              __('Confirm Mobile Number')
+            }}</span>
+          </v-card-title>
+          <v-card-text class="pa-0">
+            <v-container>
+              <v-text-field
+                dense
+                outlined
+                color="indigo"
+                :label="frappe._('Mobile Number')"
+                background-color="white"
+                hide-details
+                v-model="invoice_doc.contact_mobile"
+                type="number"
+              ></v-text-field>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="error" dark @click="phone_dialog = false">{{
+              __('Close')
+            }}</v-btn>
+            <v-btn color="primary" dark @click="request_payment">{{
+              __('Request')
+            }}</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </div>
   </div>
 </template>
 
@@ -549,7 +574,10 @@ export default {
     is_cashback: true,
     redeem_customer_credit: false,
     customer_credit_dict: [],
-    invoiceType: 'Inovice',
+    phone_dialog: false,
+    invoiceType: 'Invoice',
+    pos_settings: '',
+    customer_info: '',
   }),
 
   methods: {
@@ -650,19 +678,20 @@ export default {
       this.back_to_invoice();
     },
     submit_invoice() {
-      let formData = this.invoice_doc;
-      formData['total_change'] = -this.diff_payment;
-      formData['paid_change'] = this.paid_change;
-      formData['credit_change'] = -this.credit_change;
-      formData['redeemed_customer_credit'] = this.redeemed_customer_credit;
-      formData['customer_credit_dict'] = this.customer_credit_dict;
-      formData['is_cashback'] = this.is_cashback;
+      let data = {};
+      data['total_change'] = -this.diff_payment;
+      data['paid_change'] = this.paid_change;
+      data['credit_change'] = -this.credit_change;
+      data['redeemed_customer_credit'] = this.redeemed_customer_credit;
+      data['customer_credit_dict'] = this.customer_credit_dict;
+      data['is_cashback'] = this.is_cashback;
 
       const vm = this;
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.submit_invoice',
         args: {
-          data: formData,
+          data: data,
+          invoice: this.invoice_doc,
         },
         async: true,
         callback: function (r) {
@@ -754,12 +783,10 @@ export default {
     get_available_credit(e) {
       if (e) {
         frappe
-          .call(
-            'posawesome.posawesome.api.posapp_customization.get_available_credit',
-            {
-              customer: this.invoice_doc.customer,
-            }
-          )
+          .call('posawesome.posawesome.api.posapp.get_available_credit', {
+            customer: this.invoice_doc.customer,
+            company: this.pos_profile.company,
+          })
           .then((r) => {
             const data = r.message;
             if (data.length) {
@@ -814,6 +841,99 @@ export default {
     new_address() {
       evntBus.$emit('open_new_address', this.invoice_doc.customer);
     },
+    request_payment() {
+      this.phone_dialog = false;
+      const vm = this;
+      if (!this.invoice_doc.contact_mobile) {
+        evntBus.$emit('show_mesage', {
+          text: __(`Pleas Set Customer Mobile Number`),
+          color: 'error',
+        });
+        evntBus.$emit('open_edit_customer');
+        this.back_to_invoice();
+        return;
+      }
+      evntBus.$emit('freeze', {
+        title: __(`Waiting for payment... `),
+      });
+
+      let formData = this.invoice_doc;
+      formData['total_change'] = -this.diff_payment;
+      formData['paid_change'] = this.paid_change;
+      formData['credit_change'] = -this.credit_change;
+      formData['redeemed_customer_credit'] = this.redeemed_customer_credit;
+      formData['customer_credit_dict'] = this.customer_credit_dict;
+      formData['is_cashback'] = this.is_cashback;
+
+      frappe
+        .call({
+          method: 'posawesome.posawesome.api.posapp.update_invoice',
+          args: {
+            data: formData,
+          },
+          async: false,
+          callback: function (r) {
+            if (r.message) {
+              vm.invoice_doc = r.message;
+            }
+          },
+        })
+        .then(() => {
+          frappe
+            .call({
+              method: 'posawesome.posawesome.api.posapp.create_payment_request',
+              args: {
+                doc: vm.invoice_doc,
+              },
+            })
+            .fail(() => {
+              evntBus.$emit('unfreeze');
+              evntBus.$emit('show_mesage', {
+                text: __(`Payment request failed`),
+                color: 'error',
+              });
+            })
+            .then(({ message }) => {
+              const payment_request_name = message.name;
+              setTimeout(() => {
+                frappe.db
+                  .get_value('Payment Request', payment_request_name, [
+                    'status',
+                    'grand_total',
+                  ])
+                  .then(({ message }) => {
+                    if (message.status != 'Paid') {
+                      evntBus.$emit('unfreeze');
+                      evntBus.$emit('show_mesage', {
+                        text: __(
+                          `Payment Request took too long to respond. Please try requesting for payment again`
+                        ),
+                        color: 'error',
+                      });
+                    } else {
+                      evntBus.$emit('unfreeze');
+                      evntBus.$emit('show_mesage', {
+                        text: __('Payment of {0} received successfully.', [
+                          format_currency(
+                            message.grand_total,
+                            vm.invoice_doc.currency,
+                            0
+                          ),
+                        ]),
+                        color: 'success',
+                      });
+                      frappe.db
+                        .get_doc('Sales Invoice', vm.invoice_doc.name)
+                        .then((doc) => {
+                          vm.invoice_doc = doc;
+                          vm.submit();
+                        });
+                    }
+                  });
+              }, 30000);
+            });
+        });
+    },
   },
 
   computed: {
@@ -847,10 +967,10 @@ export default {
     },
     available_pioints_amount() {
       let amount = 0;
-      if (this.invoice_doc.customer_info.loyalty_points) {
+      if (this.customer_info.loyalty_points) {
         amount =
-          this.invoice_doc.customer_info.loyalty_points *
-          this.invoice_doc.customer_info.conversion_factor;
+          this.customer_info.loyalty_points *
+          this.customer_info.conversion_factor;
       }
       return amount;
     },
@@ -884,6 +1004,22 @@ export default {
       } else {
         return false;
       }
+    },
+    request_payment_field() {
+      let res = false;
+      if (!this.pos_settings || this.pos_settings.invoice_fields.length == 0) {
+        res = false;
+      } else {
+        this.pos_settings.invoice_fields.forEach((el) => {
+          if (
+            el.fieldtype == 'Button' &&
+            el.fieldname == 'request_for_payment'
+          ) {
+            res = true;
+          }
+        });
+      }
+      return res;
     },
   },
 
@@ -924,6 +1060,12 @@ export default {
         this.is_cashback = true;
       }
     });
+    evntBus.$on('set_pos_settings', (data) => {
+      this.pos_settings = data;
+    });
+    evntBus.$on('set_customer_info_to_edit', (data) => {
+      this.customer_info = data;
+    });
     document.addEventListener('keydown', this.shortPay.bind(this));
   },
 
@@ -945,8 +1087,7 @@ export default {
         this.invoice_doc.loyalty_amount = flt(this.loyalty_amount);
         this.invoice_doc.redeem_loyalty_points = 1;
         this.invoice_doc.loyalty_points =
-          flt(this.loyalty_amount) *
-          this.invoice_doc.customer_info.conversion_factor;
+          flt(this.loyalty_amount) * this.customer_info.conversion_factor;
       }
     },
     is_credit_sale(value) {

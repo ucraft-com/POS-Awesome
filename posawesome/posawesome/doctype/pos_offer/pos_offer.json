@@ -24,6 +24,7 @@
   "brand",
   "valid_from",
   "valid_upto",
+  "coupon_based",
   "auto",
   "quantity_and_amount_section",
   "min_qty",
@@ -267,7 +268,7 @@
    "fieldtype": "Section Break"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "auto",
    "fieldtype": "Check",
    "label": "Auto Apply"
@@ -298,11 +299,16 @@
    "fieldname": "less_then",
    "fieldtype": "Float",
    "label": "Item Rate Should Less Then"
+  },
+  {
+   "default": "0",
+   "fieldname": "coupon_based",
+   "fieldtype": "Check",
+   "label": "Coupon Code Based"
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2021-06-19 00:34:44.060189",
+ "modified": "2021-07-25 17:09:55.634113",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Offer",

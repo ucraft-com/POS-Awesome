@@ -35,7 +35,10 @@ app_include_js = [
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-doctype_js = {"POS Profile": "posawesome/api/pos_profile.js"}
+doctype_js = {
+    "POS Profile": "posawesome/api/pos_profile.js",
+    "Company": "posawesome/api/company.js",
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -90,8 +93,14 @@ doctype_js = {"POS Profile": "posawesome/api/pos_profile.js"}
 
 doc_events = {
     "Sales Invoice": {
+        "validate": "posawesome.posawesome.api.invoice.validate",
         "before_submit": "posawesome.posawesome.api.invoice.before_submit",
-    }
+        "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
+    },
+    "Customer": {
+        "validate": "posawesome.posawesome.api.customer.validate",
+        "after_insert": "posawesome.posawesome.api.customer.after_insert",
+    },
 }
 
 # Scheduled Tasks
@@ -172,6 +181,7 @@ fixtures = [
                     "Customer-posa_discount",
                     "POS Profile-posa_apply_customer_discount",
                     "Sales Invoice-posa_offers",
+                    "Sales Invoice-posa_coupons",
                     "Sales Invoice Item-posa_offers",
                     "Sales Invoice Item-posa_row_id",
                     "Sales Invoice Item-posa_offer_applied",
@@ -192,6 +202,21 @@ fixtures = [
                     "POS Profile-posa_column_break_112",
                     "POS Profile-posa_show_template_items",
                     "POS Profile-posa_hide_variants_items",
+                    "Customer-posa_referral_code",
+                    "POS Profile-posa_fetch_coupon",
+                    "Company-posa_referral_section",
+                    "Company-posa_auto_referral",
+                    "Company-posa_column_break_22",
+                    "Company-posa_customer_offer",
+                    "Company-posa_primary_offer",
+                    "Company-posa_referral_campaign",
+                    "Customer-posa_referral_company",
+                    "Customer-posa_referral_section",
+                    "Customer-posa_birthday",
+                    "Sales Order-posa_offers",
+                    "Sales Order-posa_coupons",
+                    "Sales Order Item-posa_row_id",
+                    "POS Profile-posa_tax_inclusive",
                 ),
             ]
         ],

@@ -3,7 +3,7 @@
     <v-dialog v-model="closingDialog" max-width="900px">
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">Closing POS Shift</span>
+          <span class="headline indigo--text">{{__('Closing POS Shift')}}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -27,7 +27,7 @@
                           <v-text-field
                             v-model="props.item.closing_amount"
                             :rules="[max25chars]"
-                            label="Edit"
+                            :label="frappe._('Edit')"
                             single-line
                             counter
                             type="number"
@@ -54,8 +54,8 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="error" dark @click="close_dialog">Close</v-btn>
-          <v-btn color="primary" dark @click="submit_dialog">Submit</v-btn>
+          <v-btn color="error" dark @click="close_dialog">{{__('Close')}}</v-btn>
+          <v-btn color="primary" dark @click="submit_dialog">{{__('Submit')}}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -71,31 +71,31 @@ export default {
     dialog_data: {},
     headers: [
       {
-        text: 'Mode of Payment',
+        text: __('Mode of Payment'),
         value: 'mode_of_payment',
         align: 'start',
         sortable: true,
       },
       {
-        text: 'Opening Amount',
+        text: __('Opening Amount'),
         align: 'end',
         sortable: true,
         value: 'opening_amount',
       },
       {
-        text: 'Closing Amount',
+        text: __('Closing Amount'),
         value: 'closing_amount',
         align: 'end',
         sortable: true,
       },
       {
-        text: 'Expected Amount',
+        text: __('Expected Amount'),
         value: 'expected_amount',
         align: 'end',
         sortable: false,
       },
       {
-        text: 'Difference',
+        text: __('Difference'),
         value: 'difference',
         align: 'end',
         sortable: false,
