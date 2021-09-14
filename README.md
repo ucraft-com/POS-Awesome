@@ -27,6 +27,11 @@
 19. Search and add items by Serial Number
 20. Create Sales Order from POS directly
 21. Supports template items with variants
+22. Supports multiple languages
+23. Supports Mpesa mobile payment
+24. POS Coupons
+25. Supports Referral Code
+26. Supports Customer and Customer Group price list
 
 ---
 
