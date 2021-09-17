@@ -13,9 +13,6 @@ from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 from frappe.utils.background_jobs import enqueue
 from erpnext.accounts.party import get_party_bank_account
 from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
-from erpnext.portal.product_configurator.item_variants_cache import (
-    ItemVariantsCacheManager,
-)
 from erpnext.accounts.doctype.payment_request.payment_request import (
     get_gateway_details,
     get_dummy_message,
