@@ -1026,7 +1026,7 @@ def make_address(args):
 
 
 
-def build_cache(item_code):
+def build_item_cache(item_code):
 		parent_item_code = item_code
 
 		attributes = [a.attribute for a in frappe.db.get_all('Item Variant Attribute',
@@ -1064,11 +1064,11 @@ def build_cache(item_code):
 		frappe.cache().hset('optional_attributes', parent_item_code, optional_attributes)
 
 
-def get_optional_attributes(item_code):
+def get_item_optional_attributes(item_code):
 		val = frappe.cache().hget('optional_attributes', item_code)
 
 		if not val:
-			build_cache(item_code)
+			build_item_cache(item_code)
 
 		return frappe.cache().hget('optional_attributes', item_code)
 
@@ -1082,7 +1082,7 @@ def get_item_attributes(item_code):
         order_by="idx asc",
     )
 
-    optional_attributes = get_optional_attributes(item_code)
+    optional_attributes = get_item_optional_attributes(item_code)
 
     for a in attributes:
         values = frappe.db.get_all(
