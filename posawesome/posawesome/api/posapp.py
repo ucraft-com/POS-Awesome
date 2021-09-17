@@ -13,9 +13,6 @@ from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 from frappe.utils.background_jobs import enqueue
 from erpnext.accounts.party import get_party_bank_account
 from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
-from erpnext.portal.product_configurator.item_variants_cache import (
-    ItemVariantsCacheManager,
-)
 from erpnext.accounts.doctype.payment_request.payment_request import (
     get_gateway_details,
     get_dummy_message,
@@ -1028,6 +1025,54 @@ def make_address(args):
     return address
 
 
+
+def build_item_cache(item_code):
+		parent_item_code = item_code
+
+		attributes = [a.attribute for a in frappe.db.get_all('Item Variant Attribute',
+			{'parent': parent_item_code}, ['attribute'], order_by='idx asc')
+		]
+
+		item_variants_data = frappe.db.get_all('Item Variant Attribute',
+			{'variant_of': parent_item_code}, ['parent', 'attribute', 'attribute_value'],
+			order_by='name',
+			as_list=1
+		)
+
+		disabled_items = set([i.name for i in frappe.db.get_all('Item', {'disabled': 1})])
+
+		attribute_value_item_map = frappe._dict({})
+		item_attribute_value_map = frappe._dict({})
+
+		item_variants_data = [r for r in item_variants_data if r[0] not in disabled_items]
+		for row in item_variants_data:
+			item_code, attribute, attribute_value = row
+			# (attr, value) => [item1, item2]
+			attribute_value_item_map.setdefault((attribute, attribute_value), []).append(item_code)
+			# item => {attr1: value1, attr2: value2}
+			item_attribute_value_map.setdefault(item_code, {})[attribute] = attribute_value
+
+		optional_attributes = set()
+		for item_code, attr_dict in item_attribute_value_map.items():
+			for attribute in attributes:
+				if attribute not in attr_dict:
+					optional_attributes.add(attribute)
+
+		frappe.cache().hset('attribute_value_item_map', parent_item_code, attribute_value_item_map)
+		frappe.cache().hset('item_attribute_value_map', parent_item_code, item_attribute_value_map)
+		frappe.cache().hset('item_variants_data', parent_item_code, item_variants_data)
+		frappe.cache().hset('optional_attributes', parent_item_code, optional_attributes)
+
+
+def get_item_optional_attributes(item_code):
+		val = frappe.cache().hget('optional_attributes', item_code)
+
+		if not val:
+			build_item_cache(item_code)
+
+		return frappe.cache().hget('optional_attributes', item_code)
+
+
 @frappe.whitelist()
 def get_item_attributes(item_code):
     attributes = frappe.db.get_all(
@@ -1037,7 +1082,7 @@ def get_item_attributes(item_code):
         order_by="idx asc",
     )
 
-    optional_attributes = ItemVariantsCacheManager(item_code).get_optional_attributes()
+    optional_attributes = get_item_optional_attributes(item_code)
 
     for a in attributes:
         values = frappe.db.get_all(
