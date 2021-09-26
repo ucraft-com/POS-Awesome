@@ -491,7 +491,11 @@
                 hide-details
               ></v-text-field>
             </v-col>
-            <v-col cols="6" class="pa-1">
+            <v-col
+              v-if="!pos_profile.posa_use_percentage_discount"
+              cols="6"
+              class="pa-1"
+            >
               <v-text-field
                 v-model="discount_amount"
                 :label="frappe._('Additional Discount')"
@@ -507,6 +511,28 @@
                     ? true
                     : false
                 "
+              ></v-text-field>
+            </v-col>
+            <v-col
+              v-if="pos_profile.posa_use_percentage_discount"
+              cols="6"
+              class="pa-1"
+            >
+              <v-text-field
+                v-model="additional_discount_percentage"
+                :label="frappe._('Additional Discount %')"
+                ref="percentage_discount"
+                outlined
+                dense
+                hide-details
+                type="number"
+                :disabled="
+                  !pos_profile.posa_allow_user_to_edit_additional_discount ||
+                  discount_percentage_offer_name
+                    ? true
+                    : false
+                "
+                @change="update_discount_umount"
               ></v-text-field>
             </v-col>
             <v-col cols="6" class="pa-1 mt-2">
@@ -610,6 +636,7 @@ export default {
       customer: '',
       customer_info: '',
       discount_amount: 0,
+      additional_discount_percentage: 0,
       total_tax: 0,
       items: [],
       posOffers: [],
@@ -833,6 +860,7 @@ export default {
       this.invoice_doc = '';
       this.return_doc = '';
       this.discount_amount = 0;
+      this.additional_discount_percentage = 0;
       evntBus.$emit('set_customer_readonly', false);
     },
 
@@ -856,6 +884,7 @@ export default {
         this.customer = this.pos_profile.customer;
         this.invoice_doc = '';
         this.discount_amount = 0;
+        this.additional_discount_percentage = 0;
         this.invoiceType = 'Invoice';
         this.invoiceTypes = ['Invoice', 'Order'];
       } else {
@@ -878,6 +907,8 @@ export default {
         });
         this.customer = data.customer;
         this.discount_amount = data.discount_amount;
+        this.additional_discount_percentage =
+          data.additional_discount_percentage;
         this.items.forEach((item) => {
           if (item.serial_no) {
             item.serial_no_selected = [];
@@ -909,6 +940,9 @@ export default {
       doc.items = this.get_invoice_items();
       doc.total = this.subtotal;
       doc.discount_amount = flt(this.discount_amount);
+      doc.additional_discount_percentage = flt(
+        this.additional_discount_percentage
+      );
       doc.posa_pos_opening_shift = this.pos_opening_shift.name;
       doc.payments = this.get_payments();
       doc.taxes = [];
@@ -1307,6 +1341,15 @@ export default {
         price_list = null;
       }
       evntBus.$emit('update_customer_price_list', price_list);
+    },
+    update_discount_umount() {
+      const value = flt(this.additional_discount_percentage);
+      if (value >= -100 && value <= 100) {
+        this.discount_amount = (this.Total * value) / 100;
+      } else {
+        this.additional_discount_percentage = 0;
+        this.discount_amount = 0;
+      }
     },
 
     calc_prices(item, value, $event) {
@@ -2205,6 +2248,8 @@ export default {
     evntBus.$on('load_return_invoice', (data) => {
       this.new_invoice(data.invoice_doc);
       this.discount_amount = -data.return_doc.discount_amount;
+      this.additional_discount_percentage =
+        -data.return_doc.additional_discount_percentage;
       this.return_doc = data.return_doc;
     });
     document.addEventListener('keydown', this.shortOpenPayment.bind(this));
@@ -2247,6 +2292,16 @@ export default {
     },
     invoiceType() {
       evntBus.$emit('update_invoice_type', this.invoiceType);
+    },
+    discount_amount() {
+      if (!this.discount_amount || this.discount_amount == 0) {
+        this.additional_discount_percentage = 0;
+      } else if (this.pos_profile.posa_use_percentage_discount) {
+        this.additional_discount_percentage =
+          (this.discount_amount / this.Total) * 100;
+      } else {
+        this.additional_discount_percentage = 0;
+      }
     },
   },
 };
