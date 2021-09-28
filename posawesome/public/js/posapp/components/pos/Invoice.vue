@@ -1224,8 +1224,9 @@ export default {
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.get_item_detail',
         args: {
+          warehouse: this.pos_profile.warehouse,
           doc: this.get_invoice_doc(),
-          data: {
+          item: {
             item_code: item.item_code,
             customer: this.customer,
             doctype: 'Sales Invoice',
@@ -1245,11 +1246,23 @@ export default {
             transaction_type: 'selling',
             update_stock: this.pos_profile.update_stock,
             price_list: this.get_price_list(),
+            has_batch_no: item.has_batch_no,
+            serial_no: item.serial_no,
+            batch_no: item.batch_no,
           },
         },
         callback: function (r) {
           if (r.message) {
             const data = r.message;
+            if (
+              item.has_batch_no &&
+              vm.pos_profile.posa_auto_set_batch &&
+              !item.batch_no &&
+              data.batch_no
+            ) {
+              item.batch_no = data.batch_no;
+              vm.set_batch_qty(item, item.batch_no, false);
+            }
             if (data.has_pricing_rule) {
             } else if (
               vm.pos_profile.posa_apply_customer_discount &&
@@ -1443,7 +1456,7 @@ export default {
       }
     },
 
-    set_batch_qty(item, value) {
+    set_batch_qty(item, value, update = true) {
       const batch_no = item.batch_no_data.find(
         (element) => element.batch_no == value
       );
@@ -1453,7 +1466,7 @@ export default {
         item.btach_price = batch_no.btach_price;
         item.price_list_rate = batch_no.btach_price;
         item.rate = batch_no.btach_price;
-      } else {
+      } else if (update) {
         item.btach_price = null;
         this.update_item_detail(item);
       }
