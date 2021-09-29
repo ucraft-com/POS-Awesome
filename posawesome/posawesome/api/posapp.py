@@ -741,10 +741,10 @@ def get_items_details(pos_profile, items_data):
 
 
 @frappe.whitelist()
-def get_item_detail(item, doc, warehouse):
+def get_item_detail(item, doc=None, warehouse=None):
     item = json.loads(item)
     item_code = item.get("item_code")
-    if item.get("has_batch_no") and not item.get("batch_no"):
+    if warehouse and item.get("has_batch_no") and not item.get("batch_no"):
         item["batch_no"] = get_batch_no(
             item_code, warehouse, item.get("qty"), False, item.get("d")
         )
