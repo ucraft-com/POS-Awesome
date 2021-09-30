@@ -1048,10 +1048,7 @@ export default {
     validate() {
       let value = true;
       this.items.forEach((item) => {
-        if (
-          this.pos_profile.update_stock &&
-          this.stock_settings.allow_negative_stock != 1
-        ) {
+        if (this.stock_settings.allow_negative_stock != 1) {
           if (item.is_stock_item && item.stock_qty > item.actual_qty) {
             evntBus.$emit('show_mesage', {
               text: __(`The existing quantity of item {0} is not enough`, [
@@ -1249,6 +1246,7 @@ export default {
             has_batch_no: item.has_batch_no,
             serial_no: item.serial_no,
             batch_no: item.batch_no,
+            is_stock_item: item.is_stock_item
           },
         },
         callback: function (r) {

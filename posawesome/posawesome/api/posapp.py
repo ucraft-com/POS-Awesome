@@ -750,6 +750,8 @@ def get_item_detail(item, doc=None, warehouse=None):
         )
     max_discount = frappe.get_value("Item", item_code, "max_discount")
     res = get_item_details(item, doc, overwrite_warehouse=False)
+    if item.get("is_stock_item") and warehouse and not res.get("actual_qty"):
+        res["actual_qty"] = get_stock_availability(item_code, warehouse)
     res["max_discount"] = max_discount
     return res
 
