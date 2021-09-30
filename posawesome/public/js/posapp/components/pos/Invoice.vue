@@ -1049,11 +1049,15 @@ export default {
       let value = true;
       this.items.forEach((item) => {
         if (this.stock_settings.allow_negative_stock != 1) {
-          if (item.is_stock_item && item.stock_qty > item.actual_qty) {
+          if (
+            (item.is_stock_item && item.stock_qty && !item.actual_qty) ||
+            (item.is_stock_item && item.stock_qty > item.actual_qty)
+          ) {
             evntBus.$emit('show_mesage', {
-              text: __(`The existing quantity of item {0} is not enough`, [
-                item.item_name,
-              ]),
+              text: __(
+                `The existing quantity '{0}' for item '{1}' is not enough`,
+                [item.actual_qty, item.item_name]
+              ),
               color: 'error',
             });
             value = false;
@@ -1086,7 +1090,7 @@ export default {
             value = false;
           }
         }
-        if (!this.pos_profile.posa_auto_set_batch && item.has_batch_no) {
+        if (item.has_batch_no) {
           if (item.stock_qty > item.actual_batch_qty) {
             evntBus.$emit('show_mesage', {
               text: __(
@@ -1246,7 +1250,7 @@ export default {
             has_batch_no: item.has_batch_no,
             serial_no: item.serial_no,
             batch_no: item.batch_no,
-            is_stock_item: item.is_stock_item
+            is_stock_item: item.is_stock_item,
           },
         },
         callback: function (r) {
