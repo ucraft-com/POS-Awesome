@@ -1354,7 +1354,7 @@ def get_customer_info(customer):
             customer.name,
             customer.loyalty_program,
             silent=True,
-            include_expired_entry=True,
+            include_expired_entry=False,
         )
         res["loyalty_points"] = lp_details.get("loyalty_points")
         res["conversion_factor"] = lp_details.get("conversion_factor")
