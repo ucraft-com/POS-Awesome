@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:mpesa_settings",
+ "creation": "2021-11-10 03:59:38.274817",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "mpesa_settings",
+  "till_number",
+  "register_satus"
+ ],
+ "fields": [
+  {
+   "fieldname": "mpesa_settings",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Mpesa Settings",
+   "options": "Mpesa Settings",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "register_satus",
+   "fieldtype": "Select",
+   "label": "Register Satus",
+   "options": "Pending\nSuccess\nFailed"
+  },
+  {
+   "fetch_from": "mpesa_settings.till_number",
+   "fieldname": "till_number",
+   "fieldtype": "Data",
+   "label": "Till Number",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-11-11 02:34:11.361399",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "Mpesa C2B Register URL",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
