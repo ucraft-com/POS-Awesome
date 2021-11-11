@@ -1,0 +1,168 @@
+{
+ "actions": [],
+ "autoname": "MPRE.-.YY.-.MM.-.######",
+ "creation": "2021-11-10 03:47:20.144127",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "transactiontype",
+  "transid",
+  "transtime",
+  "transamount",
+  "businessshortcode",
+  "billrefnumber",
+  "invoicenumber",
+  "orgaccountbalance",
+  "thirdpartytransid",
+  "msisdn",
+  "firstname",
+  "middlename",
+  "lastname",
+  "column_break_14",
+  "company",
+  "customer",
+  "posting_date",
+  "payment_entry"
+ ],
+ "fields": [
+  {
+   "fieldname": "transactiontype",
+   "fieldtype": "Data",
+   "label": "Transaction Type"
+  },
+  {
+   "fieldname": "transid",
+   "fieldtype": "Data",
+   "label": "Trans ID"
+  },
+  {
+   "fieldname": "transtime",
+   "fieldtype": "Data",
+   "label": "Trans Time"
+  },
+  {
+   "fieldname": "transamount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Trans Amount"
+  },
+  {
+   "fieldname": "businessshortcode",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Business Short Code"
+  },
+  {
+   "fieldname": "billrefnumber",
+   "fieldtype": "Data",
+   "label": "Bill Ref Number"
+  },
+  {
+   "fieldname": "invoicenumber",
+   "fieldtype": "Data",
+   "label": "Invoice Number"
+  },
+  {
+   "fieldname": "orgaccountbalance",
+   "fieldtype": "Data",
+   "label": "Org Account Balance"
+  },
+  {
+   "fieldname": "thirdpartytransid",
+   "fieldtype": "Data",
+   "label": "Third Party Trans ID"
+  },
+  {
+   "fieldname": "msisdn",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "MSISDN"
+  },
+  {
+   "fieldname": "firstname",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "First Name"
+  },
+  {
+   "fieldname": "middlename",
+   "fieldtype": "Data",
+   "label": "Middle Name"
+  },
+  {
+   "fieldname": "lastname",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Last Name"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "default": "Now",
+   "fieldname": "posting_date",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Posting Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_entry",
+   "fieldtype": "Link",
+   "label": "Payment Entry",
+   "options": "Payment Entry"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-11-10 16:07:08.150781",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "Mpesa Payment Register",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
