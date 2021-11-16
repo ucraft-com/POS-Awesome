@@ -21,18 +21,24 @@ def create_payment_entry(
     mode_of_payment,
     reference_date=None,
     reference_no=None,
+    posting_date=None,
 ):
-
+    # TODO : need to have a better way to handle currency
+    date = nowdate() if not posting_date else posting_date
     party_type = "Customer"
     party_account = get_party_account(party_type, customer, company)
     party_account_currency = get_account_currency(party_account)
+    if party_account_currency != currency:
+        frappe.throw(
+            _(
+                "Currency is not correct, party account currency is {party_account_currency} and transaction currency is {currency}"
+            ).format(party_account_currency=party_account_currency, currency=currency)
+        )
     payment_type = "Receive"
 
     bank = get_bank_cash_account(company, mode_of_payment)
     company_currency = frappe.get_value("Company", company, "default_currency")
-    conversion_rate = get_exchange_rate(
-        currency, company_currency, nowdate(), "for_selling"
-    )
+    conversion_rate = get_exchange_rate(currency, company_currency, date, "for_selling")
     paid_amount, received_amount = set_paid_amount_and_received_amount(
         party_account_currency, bank, amount, payment_type, None, conversion_rate
     )
@@ -41,7 +47,7 @@ def create_payment_entry(
     pe.payment_type = payment_type
     pe.company = company
     pe.cost_center = erpnext.get_default_cost_center(company)
-    pe.posting_date = nowdate()
+    pe.posting_date = date
     pe.mode_of_payment = mode_of_payment
     pe.party_type = party_type
     pe.party = customer

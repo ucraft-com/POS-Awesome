@@ -8,6 +8,23 @@ from posawesome.posawesome.api.payment_entry import create_payment_entry
 
 
 class MpesaPaymentRegister(Document):
+    def before_insert(self):
+        self.set_missing_values()
+
+    def set_missing_values(self):
+        self.currency = "KES"
+        register_url_list = frappe.get_all(
+            "Mpesa C2B Register URL",
+            filters={
+                "business_shortcode": self.businessshortcode,
+                "register_status": "Success",
+            },
+            fields=["company", "mode_of_payment"],
+        )
+        if len(register_url_list) > 0:
+            self.company = register_url_list[0].company
+            self.mode_of_payment = register_url_list[0].mode_of_payment
+
     def before_submit(self):
         if not self.transamount:
             frappe.throw(_("Trans Amount is required"))
@@ -28,5 +45,6 @@ class MpesaPaymentRegister(Document):
             self.mode_of_payment,
             self.posting_date,
             self.transid,
+            self.posting_date,
         )
         return payment_entry.name

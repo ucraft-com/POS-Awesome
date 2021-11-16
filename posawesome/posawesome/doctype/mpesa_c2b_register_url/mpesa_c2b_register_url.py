@@ -49,7 +49,7 @@ class MpesaC2BRegisterURL(Document):
         r = requests.post(register_url, headers=headers, json=payload)
         res = r.json()
         if res.get("ResponseDescription") == "Success":
-            self.register_satus = "Success"
+            self.register_status = "Success"
         else:
-            self.register_satus = "Failed"
+            self.register_status = "Failed"
             frappe.msgprint(str(res))
