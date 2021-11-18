@@ -7,6 +7,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "full_name",
   "transactiontype",
   "transid",
   "transtime",
@@ -113,7 +114,6 @@
   {
    "fieldname": "firstname",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "First Name",
@@ -130,7 +130,6 @@
   {
    "fieldname": "lastname",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Last Name",
@@ -203,19 +202,29 @@
    "label": "Currency",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "full_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Full Name",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-16 16:17:32.591994",
+ "modified": "2021-11-17 16:56:20.554489",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Mpesa Payment Register",
  "owner": "Administrator",
  "permissions": [
   {
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,

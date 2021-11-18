@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from numpy import full
 from posawesome.posawesome.api.payment_entry import create_payment_entry
 
 
@@ -13,6 +14,14 @@ class MpesaPaymentRegister(Document):
 
     def set_missing_values(self):
         self.currency = "KES"
+        self.full_name = ""
+        if self.firstname:
+            self.full_name = self.firstname
+        if self.middlename:
+            self.full_name += " " + self.middlename
+        if self.lastname:
+            self.full_name += " " + self.lastname
+
         register_url_list = frappe.get_all(
             "Mpesa C2B Register URL",
             filters={

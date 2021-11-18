@@ -6,6 +6,7 @@
     <NewCustomer></NewCustomer>
     <EditCustomer></EditCustomer>
     <NewAddress></NewAddress>
+    <MpesaPayments></MpesaPayments>
     <Variants></Variants>
     <OpeningDialog v-if="dialog" :dialog="dialog"></OpeningDialog>
     <v-row v-show="!dialog">
@@ -77,6 +78,7 @@ import EditCustomer from './EditCustomer.vue';
 import NewAddress from './NewAddress.vue';
 import Variants from './Variants.vue';
 import Returns from './Returns.vue';
+import MpesaPayments from './Mpesa-Payments.vue';
 
 export default {
   data: function () {
@@ -104,6 +106,7 @@ export default {
     EditCustomer,
     NewAddress,
     Variants,
+    MpesaPayments,
   },
 
   methods: {

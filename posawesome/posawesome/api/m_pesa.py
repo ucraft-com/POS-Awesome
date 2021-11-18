@@ -51,3 +51,51 @@ def validation(**kwargs):
     frappe.log_error("validation" + "  " + str(args), "validation")
     context = {"ResultCode": 0, "ResultDesc": "Accepted"}
     return dict(context)
+
+
+@frappe.whitelist()
+def get_mpesa_mode_of_payment(company):
+    modes = frappe.get_all(
+        "Mpesa C2B Register URL",
+        filters={"company": company, "register_status": "Success"},
+        fields=["mode_of_payment"],
+    )
+    modes_of_payment = []
+    for mode in modes:
+        if not mode.mode_of_payment in modes_of_payment:
+            modes_of_payment.append(mode.mode_of_payment)
+    return modes_of_payment
+
+
+@frappe.whitelist()
+def get_mpesa_draft_payments(company, mode_of_payment, mobile_no=None, full_name=None):
+    filters = {"company": company, "mode_of_payment": mode_of_payment, "docstatus": 0}
+    if mobile_no:
+        filters["msisdn"] = ["like", f"%{mobile_no}%"]
+    if full_name:
+        filters["full_name"] = ["like", f"%{full_name}%"]
+
+    payments = frappe.get_all(
+        "Mpesa Payment Register",
+        filters=filters,
+        fields=[
+            "name",
+            "msisdn as mobile_no",
+            "full_name",
+            "posting_date",
+            "transamount as amount",
+            "currency",
+            "mode_of_payment",
+            "company",
+        ],
+    )
+    return payments
+
+
+@frappe.whitelist()
+def submit_mpesa_payment(mpesa_payment, customer):
+    doc = frappe.get_doc("Mpesa Payment Register", mpesa_payment)
+    doc.customer = customer
+    doc.submit()
+    doc.reload()
+    return frappe.get_doc("Payment Entry", doc.payment_entry)

@@ -77,7 +77,7 @@
             v-for="payment in invoice_doc.payments"
             :key="payment.name"
           >
-            <v-col cols="6">
+            <v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
               <v-text-field
                 dense
                 outlined
@@ -93,11 +93,13 @@
               ></v-text-field>
             </v-col>
             <v-col
+              v-if="!is_mpesa_c2b_payment(payment)"
               :cols="
                 6
-                  ? payment.type != 'Phone' ||
-                    payment.amount == 0 ||
-                    !request_payment_field
+                  ? (payment.type != 'Phone' ||
+                      payment.amount == 0 ||
+                      !request_payment_field) &&
+                    !is_mpesa_c2b_payment(payment)
                   : 3
               "
             >
@@ -109,6 +111,17 @@
                 @click="set_full_amount(payment.idx)"
                 >{{ payment.mode_of_payment }}</v-btn
               >
+            </v-col>
+            <v-col v-if="is_mpesa_c2b_payment(payment)" :cols="12" class="pl-3">
+              <v-btn
+                block
+                class=""
+                color="success"
+                dark
+                @click="mpesa_c2b_dialg(payment)"
+              >
+                {{ __(`Get Payments ${payment.mode_of_payment}`) }}
+              </v-btn>
             </v-col>
             <v-col
               v-if="
@@ -578,6 +591,7 @@ export default {
     invoiceType: 'Invoice',
     pos_settings: '',
     customer_info: '',
+    mpesa_modes: [],
   }),
 
   methods: {
@@ -723,6 +737,11 @@ export default {
         }
       });
     },
+    clear_all_amounts() {
+      this.invoice_doc.payments.forEach((payment) => {
+        payment.amount = 0;
+      });
+    },
     load_print_page() {
       const print_format =
         this.pos_profile.print_format_for_online ||
@@ -781,6 +800,7 @@ export default {
       }
     },
     get_available_credit(e) {
+      this.clear_all_amounts();
       if (e) {
         frappe
           .call('posawesome.posawesome.api.posapp.get_available_credit', {
@@ -934,6 +954,93 @@ export default {
             });
         });
     },
+    get_mpesa_modes() {
+      const vm = this;
+      frappe.call({
+        method: 'posawesome.posawesome.api.m_pesa.get_mpesa_mode_of_payment',
+        args: { company: vm.pos_profile.company },
+        async: true,
+        callback: function (r) {
+          if (!r.exc) {
+            vm.mpesa_modes = r.message;
+          } else {
+            vm.mpesa_modes = [];
+          }
+        },
+      });
+    },
+    get_mpesa_draft_payments(
+      mode_of_payment,
+      mobile_no = null,
+      full_name = null
+    ) {
+      const vm = this;
+      let data = [];
+      frappe.call({
+        method: 'posawesome.posawesome.api.m_pesa.get_mpesa_draft_payments',
+        args: {
+          company: vm.pos_profile.company,
+          mode_of_payment: mode_of_payment,
+          mobile_no: mobile_no,
+          full_name: full_name,
+        },
+        async: false,
+        callback: function (r) {
+          if (!r.exc) {
+            data = r.message;
+          }
+        },
+      });
+      return data;
+    },
+    submit_mpesa_payment(mpesa_payment, customer) {
+      let payment_doc = null;
+      frappe.call({
+        method: 'posawesome.posawesome.api.m_pesa.submit_mpesa_payment',
+        args: {
+          mpesa_payment: mpesa_payment,
+          customer: customer,
+        },
+        async: false,
+        callback: function (r) {
+          if (!r.exc) {
+            payment_doc = r.message;
+          }
+        },
+      });
+      return payment_doc;
+    },
+    is_mpesa_c2b_payment(payment) {
+      if (
+        this.mpesa_modes.includes(payment.mode_of_payment) &&
+        payment.type == 'Bank'
+      ) {
+        payment.amount = 0;
+        return true;
+      } else {
+        return false;
+      }
+    },
+    mpesa_c2b_dialg(payment) {
+      const data = {
+        company: this.pos_profile.company,
+        mode_of_payment: payment.mode_of_payment,
+        customer: this.invoice_doc.customer,
+      };
+      evntBus.$emit('open_mpesa_payments', data);
+    },
+    set_mpesa_payment(payment) {
+      this.pos_profile.use_customer_credit = 1;
+      this.redeem_customer_credit = true;
+      const advance = {
+        type: 'Advance',
+        credit_origin: payment.name,
+        total_credit: payment.unallocated_amount,
+        credit_to_redeem: payment.unallocated_amount,
+      };
+      this.clear_all_amounts();
+      this.customer_credit_dict.push(advance);
+    },
   },
 
   computed: {
@@ -1039,6 +1146,7 @@ export default {
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
+        this.get_mpesa_modes();
       });
       evntBus.$on('add_the_new_address', (data) => {
         this.addresses.push(data);
@@ -1065,6 +1173,9 @@ export default {
     });
     evntBus.$on('set_customer_info_to_edit', (data) => {
       this.customer_info = data;
+    });
+    evntBus.$on('set_mpesa_payment', (data) => {
+      this.set_mpesa_payment(data);
     });
     document.addEventListener('keydown', this.shortPay.bind(this));
   },

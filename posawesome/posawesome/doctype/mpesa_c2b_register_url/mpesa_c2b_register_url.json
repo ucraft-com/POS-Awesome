@@ -58,7 +58,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Register Status",
-   "options": "Pending\nSuccess\nFailed"
+   "options": "Pending\nSuccess\nFailed",
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -72,7 +73,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-16 16:18:23.644685",
+ "modified": "2021-11-18 05:08:03.509002",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Mpesa C2B Register URL",
