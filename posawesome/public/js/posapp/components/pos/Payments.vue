@@ -969,47 +969,6 @@ export default {
         },
       });
     },
-    get_mpesa_draft_payments(
-      mode_of_payment,
-      mobile_no = null,
-      full_name = null
-    ) {
-      const vm = this;
-      let data = [];
-      frappe.call({
-        method: 'posawesome.posawesome.api.m_pesa.get_mpesa_draft_payments',
-        args: {
-          company: vm.pos_profile.company,
-          mode_of_payment: mode_of_payment,
-          mobile_no: mobile_no,
-          full_name: full_name,
-        },
-        async: false,
-        callback: function (r) {
-          if (!r.exc) {
-            data = r.message;
-          }
-        },
-      });
-      return data;
-    },
-    submit_mpesa_payment(mpesa_payment, customer) {
-      let payment_doc = null;
-      frappe.call({
-        method: 'posawesome.posawesome.api.m_pesa.submit_mpesa_payment',
-        args: {
-          mpesa_payment: mpesa_payment,
-          customer: customer,
-        },
-        async: false,
-        callback: function (r) {
-          if (!r.exc) {
-            payment_doc = r.message;
-          }
-        },
-      });
-      return payment_doc;
-    },
     is_mpesa_c2b_payment(payment) {
       if (
         this.mpesa_modes.includes(payment.mode_of_payment) &&
