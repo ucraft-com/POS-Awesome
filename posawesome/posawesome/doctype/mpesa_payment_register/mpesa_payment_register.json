@@ -28,6 +28,7 @@
   "customer",
   "mode_of_payment",
   "currency",
+  "submit_payment",
   "payment_entry",
   "amended_from"
  ],
@@ -211,13 +212,19 @@
    "label": "Full Name",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "submit_payment",
+   "fieldtype": "Check",
+   "label": "Submit Payment "
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-17 16:56:20.554489",
+ "modified": "2021-11-19 23:05:24.242365",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Mpesa Payment Register",

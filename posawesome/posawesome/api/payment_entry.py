@@ -22,6 +22,7 @@ def create_payment_entry(
     reference_date=None,
     reference_no=None,
     posting_date=None,
+    submit=0,
 ):
     # TODO : need to have a better way to handle currency
     date = nowdate() if not posting_date else posting_date
@@ -75,8 +76,8 @@ def create_payment_entry(
 
     if party_account and bank:
         pe.set_amounts()
-
-    pe.docstatus = 1
+    if submit:
+        pe.docstatus = 1
     pe.insert(ignore_permissions=True)
     return pe
 

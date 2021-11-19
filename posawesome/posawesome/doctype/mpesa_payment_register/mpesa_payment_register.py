@@ -55,5 +55,6 @@ class MpesaPaymentRegister(Document):
             self.posting_date,
             self.transid,
             self.posting_date,
+            self.submit_payment,
         )
         return payment_entry.name

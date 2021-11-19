@@ -96,6 +96,7 @@ def get_mpesa_draft_payments(company, mode_of_payment, mobile_no=None, full_name
 def submit_mpesa_payment(mpesa_payment, customer):
     doc = frappe.get_doc("Mpesa Payment Register", mpesa_payment)
     doc.customer = customer
+    doc.submit_payment = 1
     doc.submit()
     doc.reload()
     return frappe.get_doc("Payment Entry", doc.payment_entry)
