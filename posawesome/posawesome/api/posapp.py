@@ -490,10 +490,11 @@ def redeeming_customer_credit(
     invoice_doc, data, is_payment_entry, total_cash, cash_account
 ):
     # redeeming customer credit with journal voucher
-    if data.get("redeemed_customer_credit"):
+    if data.get("redeemed_customer_credit"):        
         cost_center = frappe.get_value(
             "POS Profile", invoice_doc.pos_profile, "cost_center"
         )
+
         if not cost_center:
             cost_center = frappe.get_value(
                 "Company", invoice_doc.company, "cost_center"
@@ -675,11 +676,18 @@ def delete_invoice(invoice):
 
 @frappe.whitelist()
 def get_items_details(pos_profile, items_data):
-    pos_profile = json.loads(pos_profile)
+    pos_profile = json.loads(pos_profile)    
     items_data = json.loads(items_data)
     warehouse = pos_profile.get("warehouse")
     result = []
 
+    cost_centers = frappe.get_all(
+            "Cost Center",
+            filters={"is_group": 0},
+            fields=["name as cost_center"],
+            )
+
+   
     if len(items_data) > 0:
         for item in items_data:
             item_code = item.get("item_code")
@@ -693,6 +701,7 @@ def get_items_details(pos_profile, items_data):
                 filters={"parent": item_code},
                 fields=["uom", "conversion_factor"],
             )
+            
 
             serial_no_data = frappe.get_all(
                 "Serial No",
@@ -732,6 +741,7 @@ def get_items_details(pos_profile, items_data):
                     "actual_qty": item_stock_qty or 0,
                     "has_batch_no": has_batch_no,
                     "has_serial_no": has_serial_no,
+                    "cost_centers": cost_centers or [],
                 }
             )
 

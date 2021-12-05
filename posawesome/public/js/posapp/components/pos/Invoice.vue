@@ -284,6 +284,23 @@
                       disabled
                     ></v-text-field>
                   </v-col>
+
+                   <v-col cols="4">
+                    <v-select
+                      dense
+                      background-color="white"
+                      :label="frappe._('Cost Center')"
+                      v-model="item.cost_center"
+                      :items="item.cost_centers"
+                      outlined
+                      item-text="cost_center"
+                      item-value="cost_center"
+                      hide-details
+                    >
+                    </v-select>
+                      </v-col>
+
+                
                   <v-col align="center" cols="4" v-if="item.posa_offer_applied">
                     <v-checkbox
                       dense
@@ -942,6 +959,7 @@ export default {
           posa_notes: item.posa_notes,
           posa_delivery_date: item.posa_delivery_date,
           price_list_rate: item.price_list_rate,
+          cost_center: item.cost_center,
         };
         items_list.push(new_item);
       });
@@ -1179,6 +1197,7 @@ export default {
               item.item_uoms = updated_item.item_uoms;
               item.has_batch_no = updated_item.has_batch_no;
               item.has_serial_no = updated_item.has_serial_no;
+              item.cost_centers = updated_item.cost_centers;
             });
           }
         },
@@ -1201,7 +1220,8 @@ export default {
             qty: item.qty,
             price_list_rate: item.price_list_rate,
             child_docname: 'New Sales Invoice Item 1',
-            cost_center: this.pos_profile.cost_center,
+            // cost_center: this.pos_profile.cost_center,
+            cost_center: item.cost_center,
             currency: this.pos_profile.currency,
             // plc_conversion_rate: 1,
             pos_profile: this.pos_profile.name,
@@ -1253,6 +1273,9 @@ export default {
             item.stock_qty = data.stock_qty;
             item.actual_qty = data.actual_qty;
             item.stock_uom = data.stock_uom;
+
+             item.cost_center = data.cost_center;
+
             (item.has_serial_no = data.has_serial_no),
               (item.has_batch_no = data.has_batch_no),
               vm.calc_item_price(item);
