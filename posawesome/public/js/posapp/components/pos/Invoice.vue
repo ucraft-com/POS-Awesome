@@ -1,4 +1,3 @@
-
 <template>
   <div>
     <v-card
@@ -625,6 +624,7 @@
 <script>
 import { evntBus } from '../../bus';
 import Customer from './Customer.vue';
+
 export default {
   data() {
     return {
@@ -664,9 +664,11 @@ export default {
       ],
     };
   },
+
   components: {
     Customer,
   },
+
   computed: {
     total_qty() {
       this.close_payments();
@@ -700,6 +702,7 @@ export default {
       return flt(sum).toFixed(2);
     },
   },
+
   methods: {
     remove_item(item) {
       const index = this.items.findIndex(
@@ -715,6 +718,7 @@ export default {
         this.expanded.splice(idx, 1);
       }
     },
+
     add_one(item) {
       item.qty++;
       if (item.qty == 0) {
@@ -731,6 +735,7 @@ export default {
       this.calc_sotck_gty(item, item.qty);
       this.$forceUpdate();
     },
+
     add_item(item) {
       if (!item.uom) {
         item.uom = item.stock_uom;
@@ -790,6 +795,7 @@ export default {
       }
       this.$forceUpdate();
     },
+
     get_new_item(item) {
       const new_item = { ...item };
       if (!item.qty) {
@@ -826,6 +832,7 @@ export default {
       }
       return new_item;
     },
+
     cancel_invoice() {
       const doc = this.get_invoice_doc();
       this.invoiceType = 'Invoice';
@@ -856,6 +863,7 @@ export default {
       this.additional_discount_percentage = 0;
       evntBus.$emit('set_customer_readonly', false);
     },
+
     new_invoice(data = {}) {
       evntBus.$emit('set_customer_readonly', false);
       this.expanded = [];
@@ -915,6 +923,7 @@ export default {
         });
       }
     },
+
     get_invoice_doc() {
       let doc = {};
       if (this.invoice_doc.name) {
@@ -943,6 +952,7 @@ export default {
       doc.posa_coupons = this.posa_coupons;
       return doc;
     },
+
     get_invoice_items() {
       const items_list = [];
       this.items.forEach((item) => {
@@ -969,8 +979,10 @@ export default {
         };
         items_list.push(new_item);
       });
+
       return items_list;
     },
+
     get_payments() {
       const payments = [];
       this.pos_profile.payments.forEach((payment) => {
@@ -983,6 +995,7 @@ export default {
       });
       return payments;
     },
+
     update_invoice(doc) {
       const vm = this;
       frappe.call({
@@ -999,6 +1012,7 @@ export default {
       });
       return this.invoice_doc;
     },
+
     proces_invoice() {
       const doc = this.get_invoice_doc();
       if (doc.name) {
@@ -1007,6 +1021,7 @@ export default {
         return this.update_invoice(doc);
       }
     },
+
     show_payment() {
       if (!this.customer) {
         evntBus.$emit('show_mesage', {
@@ -1029,19 +1044,20 @@ export default {
       const invoice_doc = this.proces_invoice();
       evntBus.$emit('send_invoice_doc_payment', invoice_doc);
     },
+
     validate() {
       let value = true;
       this.items.forEach((item) => {
         if (this.stock_settings.allow_negative_stock != 1) {
           if (
-             (item.is_stock_item && item.stock_qty && !item.actual_qty) ||
-             (item.is_stock_item && item.stock_qty > item.actual_qty)
-           ) {
-              evntBus.$emit('show_mesage', {
+            (item.is_stock_item && item.stock_qty && !item.actual_qty) ||
+            (item.is_stock_item && item.stock_qty > item.actual_qty)
+          ) {
+            evntBus.$emit('show_mesage', {
               text: __(
-                 `The existing quantity '{0}' for item '{1}' is not enough`,
-                 [item.actual_qty, item.item_name]
-               ),
+                `The existing quantity '{0}' for item '{1}' is not enough`,
+                [item.actual_qty, item.item_name]
+              ),
               color: 'error',
             });
             value = false;
@@ -1121,6 +1137,7 @@ export default {
             const return_item = this.return_doc.items.find(
               (element) => element.item_code == item.item_code
             );
+
             if (!return_item) {
               evntBus.$emit('show_mesage', {
                 text: __(
@@ -1147,6 +1164,7 @@ export default {
       });
       return value;
     },
+
     get_draft_invoices() {
       const vm = this;
       frappe.call({
@@ -1162,12 +1180,15 @@ export default {
         },
       });
     },
+
     open_returns() {
       evntBus.$emit('open_returns', this.pos_profile.company);
     },
+
     close_payments() {
       evntBus.$emit('show_payment', 'false');
     },
+
     update_items_details(items) {
       if (!items.length > 0) {
         return;
@@ -1198,6 +1219,7 @@ export default {
         },
       });
     },
+
     update_item_detail(item) {
       const vm = this;
       frappe.call({
@@ -1287,6 +1309,7 @@ export default {
         },
       });
     },
+
     fetch_customer_details() {
       const vm = this;
       if (this.customer) {
@@ -1308,6 +1331,7 @@ export default {
         });
       }
     },
+
     get_price_list() {
       let price_list = this.pos_profile.selling_price_list;
       if (this.customer_info && this.pos_profile) {
@@ -1325,6 +1349,7 @@ export default {
       }
       return price_list;
     },
+
     update_price_list() {
       let price_list = this.get_price_list();
       if (price_list == this.pos_profile.selling_price_list) {
@@ -1341,6 +1366,7 @@ export default {
         this.discount_amount = 0;
       }
     },
+
     calc_prices(item, value, $event) {
       if (event.target.id === 'rate') {
         item.discount_percentage = 0;
@@ -1377,6 +1403,7 @@ export default {
         }
       }
     },
+
     calc_item_price(item) {
       if (!item.posa_offer_applied) {
         if (item.price_list_rate) {
@@ -1396,6 +1423,7 @@ export default {
         ).toFixed(2);
       }
     },
+
     calc_uom(item, value) {
       const new_uom = item.item_uoms.find((element) => element.uom == value);
       item.conversion_factor = new_uom.conversion_factor;
@@ -1408,9 +1436,11 @@ export default {
       }
       this.update_item_detail(item);
     },
+
     calc_sotck_gty(item, value) {
       item.stock_qty = item.conversion_factor * value;
     },
+
     set_serial_no(item) {
       item.serial_no = '';
       item.serial_no_selected.forEach((element) => {
@@ -1427,6 +1457,7 @@ export default {
         });
       }
     },
+
     set_batch_qty(item, value, update = true) {
       const batch_no = item.batch_no_data.find(
         (element) => element.batch_no == value
@@ -1442,22 +1473,26 @@ export default {
         this.update_item_detail(item);
       }
     },
+
     formtCurrency(value) {
       value = parseFloat(value);
       return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
+
     shortOpenPayment(e) {
       if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         this.show_payment();
       }
     },
+
     shortDeleteFirstItem(e) {
       if (e.key === 'd' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         this.remove_item(this.items[0]);
       }
     },
+
     shortOpenFirstItem(e) {
       if (e.key === 'a' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
@@ -1465,12 +1500,14 @@ export default {
         this.expanded.push(this.items[0]);
       }
     },
+
     shortSelectDiscount(e) {
       if (e.key === 'z' && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         this.$refs.discount.focus();
       }
     },
+
     makeid(length) {
       let result = '';
       const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -1482,6 +1519,7 @@ export default {
       }
       return result;
     },
+
     checkOfferIsAppley(item, offer) {
       let applied = false;
       const item_offers = JSON.parse(item.posa_offers);
@@ -1494,6 +1532,7 @@ export default {
       }
       return applied;
     },
+
     handelOffers() {
       const offers = [];
       this.posOffers.forEach((offer) => {
@@ -1519,9 +1558,11 @@ export default {
           }
         }
       });
+
       this.setItemGiveOffer(offers);
       this.updatePosOffers(offers);
     },
+
     setItemGiveOffer(offers) {
       // Set item give offer for replace
       offers.forEach((offer) => {
@@ -1543,6 +1584,7 @@ export default {
         }
       });
     },
+
     getCheapestItem(offer) {
       let itemsRowID;
       if (typeof offer.items === 'string') {
@@ -1563,34 +1605,40 @@ export default {
       });
       return result;
     },
+
     getItemFromRowID(row_id) {
       const item = this.items.find((el) => el.posa_row_id == row_id);
       return item;
     },
+
     checkQtyAnountOffer(offer, qty, amount) {
       let min_qty = false;
       let max_qty = false;
       let min_amt = false;
       let max_amt = false;
       const applys = [];
+
       if (offer.min_qty || offer.min_qty == 0) {
         if (qty >= offer.min_qty) {
           min_qty = true;
         }
         applys.push(min_qty);
       }
+
       if (offer.max_qty > 0) {
         if (qty <= offer.max_qty) {
           max_qty = true;
         }
         applys.push(max_qty);
       }
+
       if (offer.min_amt > 0) {
         if (amount >= offer.min_amt) {
           min_amt = true;
         }
         applys.push(min_amt);
       }
+
       if (offer.max_amt > 0) {
         if (amount <= offer.max_amt) {
           max_amt = true;
@@ -1607,6 +1655,7 @@ export default {
       };
       return res;
     },
+
     checkOfferCoupon(offer) {
       if (offer.coupon_based) {
         const coupon = this.posa_coupons.find(
@@ -1623,6 +1672,7 @@ export default {
         return true;
       }
     },
+
     getItemOffer(offer) {
       let apply_offer = null;
       if (offer.apply_on === 'Item Code') {
@@ -1653,6 +1703,7 @@ export default {
       }
       return apply_offer;
     },
+
     getGroupOffer(offer) {
       let apply_offer = null;
       if (offer.apply_on === 'Item Group') {
@@ -1689,6 +1740,7 @@ export default {
       }
       return apply_offer;
     },
+
     getBrandOffer(offer) {
       let apply_offer = null;
       if (offer.apply_on === 'Brand') {
@@ -1756,9 +1808,11 @@ export default {
       }
       return apply_offer;
     },
+
     updatePosOffers(offers) {
       evntBus.$emit('update_pos_offers', offers);
     },
+
     updateInvoiceOffers(offers) {
       this.posa_offers.forEach((invoiceOffer) => {
         const existOffer = offers.find(
@@ -1870,6 +1924,7 @@ export default {
         }
       });
     },
+
     removeApplyOffer(invoiceOffer) {
       if (invoiceOffer.offer === 'Item Price') {
         this.RemoveOnPrice(invoiceOffer);
@@ -1903,6 +1958,7 @@ export default {
       }
       this.deleteOfferFromItems(invoiceOffer);
     },
+
     applyNewOffer(offer) {
       if (offer.offer === 'Item Price') {
         this.ApplyOnPrice(offer);
@@ -1977,6 +2033,7 @@ export default {
           color: 'success',
         });
       }
+
       const newOffer = {
         offer_name: offer.name,
         row_id: offer.row_id,
@@ -1992,6 +2049,7 @@ export default {
       this.posa_offers.push(newOffer);
       this.addOfferToItems(newOffer);
     },
+
     ApplyOnGiveProduct(offer, item_code) {
       if (!item_code) {
         item_code = offer.give_item;
@@ -2043,6 +2101,7 @@ export default {
       this.update_item_detail(new_item);
       return new_item;
     },
+
     ApplyOnPrice(offer) {
       this.items.forEach((item) => {
         if (offer.items.includes(item.posa_row_id)) {
@@ -2061,6 +2120,7 @@ export default {
         }
       });
     },
+
     RemoveOnPrice(offer) {
       this.items.forEach((item) => {
         const item_offers = JSON.parse(item.posa_offers);
@@ -2086,6 +2146,7 @@ export default {
         }
       });
     },
+
     ApplyOnTotal(offer) {
       if (!offer.name) {
         offer = this.posOffers.find((el) => el.name == offer.offer_name);
@@ -2103,6 +2164,7 @@ export default {
         this.discount_percentage_offer_name = offer.name;
       }
     },
+
     RemoveOnTotal(offer) {
       if (
         this.discount_percentage_offer_name &&
@@ -2112,6 +2174,7 @@ export default {
         this.discount_percentage_offer_name = null;
       }
     },
+
     addOfferToItems(offer) {
       const offer_items = JSON.parse(offer.items);
       offer_items.forEach((el) => {
@@ -2129,6 +2192,7 @@ export default {
         });
       });
     },
+
     deleteOfferFromItems(offer) {
       const offer_items = JSON.parse(offer.items);
       offer_items.forEach((el) => {
@@ -2146,6 +2210,7 @@ export default {
         });
       });
     },
+
     validate_due_date(item) {
       const today = frappe.datetime.now_date();
       const parse_today = Date.parse(today);
@@ -2157,6 +2222,7 @@ export default {
       }
     },
   },
+
   created() {
     evntBus.$on('register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
