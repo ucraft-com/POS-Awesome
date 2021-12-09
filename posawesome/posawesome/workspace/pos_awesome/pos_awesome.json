@@ -61,6 +61,12 @@
    "label": "Referral Code",
    "link_to": "Referral Code",
    "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "POS Invoice",
+   "link_to": "POS Invoice",
+   "type": "DocType"
   }
  ]
 }
