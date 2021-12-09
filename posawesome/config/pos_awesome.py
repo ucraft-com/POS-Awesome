@@ -34,6 +34,11 @@ def get_data():
 				   "description": "POS Offers", 
 				   "name": "POS Offer", 
 				  },
+				{
+				   "type": "doctype", 
+				   "description": "POS Invoice", 
+				   "name": "POS Invoice", 
+				  }
             ]
 
         }
