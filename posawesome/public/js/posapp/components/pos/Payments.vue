@@ -394,6 +394,54 @@
             ></v-textarea>
           </v-col>
         </v-row>
+
+        <div v-if="pos_profile.posa_allow_customer_purchase_order">
+          <v-divider></v-divider>
+          <v-row class="px-1 py-0" justify="center" align="start">
+            <v-col cols="6">
+              <v-text-field
+                v-model="invoice_doc.po_no"
+                :label="frappe._('Purchase Order')"
+                outlined
+                dense
+                background-color="white"
+                clearable
+                color="indigo"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-menu
+                ref="po_date_menu"
+                v-model="po_date_menu"
+                :close-on-content-click="false"
+                transition="scale-transition"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="invoice_doc.po_date"
+                    :label="frappe._('Purchase Order Date')"
+                    readonly
+                    outlined
+                    dense
+                    hide-details
+                    v-bind="attrs"
+                    v-on="on"
+                    color="indigo"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="invoice_doc.po_date"
+                  no-title
+                  scrollable
+                  color="indigo"
+                  @input="po_date_menu = false"
+                >
+                </v-date-picker>
+              </v-menu>
+            </v-col>
+          </v-row>
+        </div>
         <v-divider></v-divider>
         <v-row class="px-1 py-0" justify="center" align="start">
           <v-col cols="6">
@@ -448,7 +496,6 @@
             </v-menu>
           </v-col>
         </v-row>
-
         <v-row>
           <v-col cols="12" md="6">
             <v-switch
@@ -461,7 +508,6 @@
             ></v-switch>
           </v-col>
         </v-row>
-
         <div
           v-if="
             invoice_doc &&
@@ -579,6 +625,7 @@ export default {
     loyalty_amount: 0,
     is_credit_sale: 0,
     date_menu: false,
+    po_date_menu: false,
     addresses: [],
     paid_change: 0,
     order_delivery_date: false,
