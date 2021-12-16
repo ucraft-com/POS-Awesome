@@ -758,6 +758,7 @@ export default {
         callback: function (r) {
           if (r.message) {
             vm.load_print_page();
+            evntBus.$emit('set_last_invoice', vm.invoice_doc.name);
             evntBus.$emit('show_mesage', {
               text: `Invoice ${r.message.name} is Submited`,
               color: 'success',

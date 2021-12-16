@@ -39,6 +39,22 @@
                     }}</v-list-item-title>
                   </v-list-item-content>
                 </v-list-item>
+                <v-list-item
+                  @click="print_last_invoice"
+                  v-if="
+                    pos_profile.posa_allow_print_last_invoice &&
+                    this.last_invoice
+                  "
+                >
+                  <v-list-item-icon>
+                    <v-icon>mdi-printer</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title>{{
+                      __('Print Last Invoice')
+                    }}</v-list-item-title>
+                  </v-list-item-content>
+                </v-list-item>
                 <v-divider class="my-0"></v-divider>
                 <v-list-item @click="logOut">
                   <v-list-item-icon>
@@ -137,6 +153,7 @@ export default {
       freeze: false,
       freezeTitle: '',
       freezeMsg: '',
+      last_invoice: '',
     };
   },
   methods: {
@@ -176,6 +193,30 @@ export default {
         },
       });
     },
+    print_last_invoice() {
+      if (!this.last_invoice) return;
+      const print_format =
+        this.pos_profile.print_format_for_online ||
+        this.pos_profile.print_format;
+      const letter_head = this.pos_profile.letter_head || 0;
+      const url =
+        frappe.urllib.get_base_url() +
+        '/printview?doctype=Sales%20Invoice&name=' +
+        this.last_invoice +
+        '&trigger_print=1' +
+        '&format=' +
+        print_format +
+        '&no_letterhead=' +
+        letter_head;
+      const printWindow = window.open(url, 'Print');
+      printWindow.addEventListener(
+        'load',
+        function () {
+          printWindow.print();
+        },
+        true
+      );
+    },
   },
   created: function () {
     this.$nextTick(function () {
@@ -190,6 +231,9 @@ export default {
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
+      });
+      evntBus.$on('set_last_invoice', (data) => {
+        this.last_invoice = data;
       });
       evntBus.$on('freeze', (data) => {
         this.freeze = true;
