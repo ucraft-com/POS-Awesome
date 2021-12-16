@@ -44,6 +44,10 @@
               v-if="data.item.mobile_no"
               v-html="`Mobile No: ${data.item.mobile_no}`"
             ></v-list-item-subtitle>
+            <v-list-item-subtitle
+              v-if="data.item.primary_address"
+              v-html="`Primary Address: ${data.item.primary_address}`"
+            ></v-list-item-subtitle>
           </v-list-item-content>
         </template>
       </template>
