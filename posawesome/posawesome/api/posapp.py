@@ -161,17 +161,29 @@ def get_items(pos_profile, price_list=None):
         items = [d.item_code for d in items_data]
         item_prices_data = frappe.get_all(
             "Item Price",
-            fields=["item_code", "price_list_rate", "currency"],
-            filters={"price_list": price_list, "item_code": ["in", items]},
+            fields=["item_code", "price_list_rate", "currency", "uom"],
+            filters={
+                "price_list": price_list,
+                "item_code": ["in", items],
+                "currency": pos_profile.get("currency"),
+                "selling": 1,
+            },
         )
 
         item_prices = {}
         for d in item_prices_data:
-            item_prices[d.item_code] = d
+            item_prices.setdefault(d.item_code, {})
+            item_prices[d.item_code][d.get("uom") or "None"] = d
 
         for item in items_data:
             item_code = item.item_code
-            item_price = item_prices.get(item_code) or {}
+            item_price = {}
+            if item_prices.get(item_code):
+                item_price = (
+                    item_prices.get(item_code).get(item.stock_uom)
+                    or item_prices.get(item_code).get("None")
+                    or {}
+                )
             item_barcode = frappe.get_all(
                 "Item Barcode",
                 filters={"parent": item_code},
@@ -748,15 +760,20 @@ def get_items_details(pos_profile, items_data):
 
 
 @frappe.whitelist()
-def get_item_detail(item, doc=None, warehouse=None):
+def get_item_detail(item, doc=None, warehouse=None, price_list=None):
     item = json.loads(item)
     item_code = item.get("item_code")
     if warehouse and item.get("has_batch_no") and not item.get("batch_no"):
         item["batch_no"] = get_batch_no(
             item_code, warehouse, item.get("qty"), False, item.get("d")
         )
+    item["selling_price_list"] = price_list
     max_discount = frappe.get_value("Item", item_code, "max_discount")
-    res = get_item_details(item, doc, overwrite_warehouse=False)
+    res = get_item_details(
+        item,
+        doc,
+        overwrite_warehouse=False,
+    )
     if item.get("is_stock_item") and warehouse:
         res["actual_qty"] = get_stock_availability(item_code, warehouse)
     res["max_discount"] = max_discount
@@ -841,10 +858,25 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
 
     if item_list[0]:
         item = item_list[0]
+        filters = {"price_list": selling_price_list, "item_code": item_code}
+        prices_with_uom = frappe.db.count(
+            "Item Price",
+            filters={
+                "price_list": selling_price_list,
+                "item_code": item_code,
+                "uom": item.stock_uom,
+            },
+        )
+
+        if prices_with_uom > 0:
+            filters["uom"] = item.stock_uom
+        else:
+            filters["uom"] = ["in", ["", None, item.stock_uom]]
+
         item_prices_data = frappe.get_all(
             "Item Price",
             fields=["item_code", "price_list_rate", "currency"],
-            filters={"price_list": selling_price_list, "item_code": item_code},
+            filters=filters,
         )
 
         item_price = 0

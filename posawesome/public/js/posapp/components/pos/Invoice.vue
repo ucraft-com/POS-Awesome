@@ -1228,6 +1228,7 @@ export default {
         args: {
           warehouse: this.pos_profile.warehouse,
           doc: this.get_invoice_doc(),
+          price_list: this.pos_profile.price_list,
           item: {
             item_code: item.item_code,
             customer: this.customer,
