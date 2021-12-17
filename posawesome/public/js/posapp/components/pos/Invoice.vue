@@ -491,7 +491,11 @@
                 hide-details
               ></v-text-field>
             </v-col>
-            <v-col cols="6" class="pa-1">
+            <v-col
+              v-if="!pos_profile.posa_use_percentage_discount"
+              cols="6"
+              class="pa-1"
+            >
               <v-text-field
                 v-model="discount_amount"
                 :label="frappe._('Additional Discount')"
@@ -507,6 +511,28 @@
                     ? true
                     : false
                 "
+              ></v-text-field>
+            </v-col>
+            <v-col
+              v-if="pos_profile.posa_use_percentage_discount"
+              cols="6"
+              class="pa-1"
+            >
+              <v-text-field
+                v-model="additional_discount_percentage"
+                :label="frappe._('Additional Discount %')"
+                ref="percentage_discount"
+                outlined
+                dense
+                hide-details
+                type="number"
+                :disabled="
+                  !pos_profile.posa_allow_user_to_edit_additional_discount ||
+                  discount_percentage_offer_name
+                    ? true
+                    : false
+                "
+                @change="update_discount_umount"
               ></v-text-field>
             </v-col>
             <v-col cols="6" class="pa-1 mt-2">
@@ -610,6 +636,7 @@ export default {
       customer: '',
       customer_info: '',
       discount_amount: 0,
+      additional_discount_percentage: 0,
       total_tax: 0,
       items: [],
       posOffers: [],
@@ -833,6 +860,7 @@ export default {
       this.invoice_doc = '';
       this.return_doc = '';
       this.discount_amount = 0;
+      this.additional_discount_percentage = 0;
       evntBus.$emit('set_customer_readonly', false);
     },
 
@@ -856,6 +884,7 @@ export default {
         this.customer = this.pos_profile.customer;
         this.invoice_doc = '';
         this.discount_amount = 0;
+        this.additional_discount_percentage = 0;
         this.invoiceType = 'Invoice';
         this.invoiceTypes = ['Invoice', 'Order'];
       } else {
@@ -878,6 +907,8 @@ export default {
         });
         this.customer = data.customer;
         this.discount_amount = data.discount_amount;
+        this.additional_discount_percentage =
+          data.additional_discount_percentage;
         this.items.forEach((item) => {
           if (item.serial_no) {
             item.serial_no_selected = [];
@@ -909,6 +940,9 @@ export default {
       doc.items = this.get_invoice_items();
       doc.total = this.subtotal;
       doc.discount_amount = flt(this.discount_amount);
+      doc.additional_discount_percentage = flt(
+        this.additional_discount_percentage
+      );
       doc.posa_pos_opening_shift = this.pos_opening_shift.name;
       doc.payments = this.get_payments();
       doc.taxes = [];
@@ -1014,15 +1048,16 @@ export default {
     validate() {
       let value = true;
       this.items.forEach((item) => {
-        if (
-          this.pos_profile.update_stock &&
-          this.stock_settings.allow_negative_stock != 1
-        ) {
-          if (item.is_stock_item && item.stock_qty > item.actual_qty) {
+        if (this.stock_settings.allow_negative_stock != 1) {
+          if (
+            (item.is_stock_item && item.stock_qty && !item.actual_qty) ||
+            (item.is_stock_item && item.stock_qty > item.actual_qty)
+          ) {
             evntBus.$emit('show_mesage', {
-              text: __(`The existing quantity of item {0} is not enough`, [
-                item.item_name,
-              ]),
+              text: __(
+                `The existing quantity '{0}' for item '{1}' is not enough`,
+                [item.actual_qty, item.item_name]
+              ),
               color: 'error',
             });
             value = false;
@@ -1043,8 +1078,9 @@ export default {
         }
         if (item.has_serial_no) {
           if (
-            !item.serial_no_selected ||
-            item.stock_qty != item.serial_no_selected.length
+            !this.invoice_doc.is_return &&
+            (!item.serial_no_selected ||
+              item.stock_qty != item.serial_no_selected.length)
           ) {
             evntBus.$emit('show_mesage', {
               text: __(`Selected serial numbers of item {0} is incorrect`, [
@@ -1055,7 +1091,7 @@ export default {
             value = false;
           }
         }
-        if (!this.pos_profile.posa_auto_set_batch && item.has_batch_no) {
+        if (item.has_batch_no) {
           if (item.stock_qty > item.actual_batch_qty) {
             evntBus.$emit('show_mesage', {
               text: __(
@@ -1190,8 +1226,10 @@ export default {
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.get_item_detail',
         args: {
+          warehouse: this.pos_profile.warehouse,
           doc: this.get_invoice_doc(),
-          data: {
+          price_list: this.pos_profile.price_list,
+          item: {
             item_code: item.item_code,
             customer: this.customer,
             doctype: 'Sales Invoice',
@@ -1211,11 +1249,24 @@ export default {
             transaction_type: 'selling',
             update_stock: this.pos_profile.update_stock,
             price_list: this.get_price_list(),
+            has_batch_no: item.has_batch_no,
+            serial_no: item.serial_no,
+            batch_no: item.batch_no,
+            is_stock_item: item.is_stock_item,
           },
         },
         callback: function (r) {
           if (r.message) {
             const data = r.message;
+            if (
+              item.has_batch_no &&
+              vm.pos_profile.posa_auto_set_batch &&
+              !item.batch_no &&
+              data.batch_no
+            ) {
+              item.batch_no = data.batch_no;
+              vm.set_batch_qty(item, item.batch_no, false);
+            }
             if (data.has_pricing_rule) {
             } else if (
               vm.pos_profile.posa_apply_customer_discount &&
@@ -1307,6 +1358,15 @@ export default {
         price_list = null;
       }
       evntBus.$emit('update_customer_price_list', price_list);
+    },
+    update_discount_umount() {
+      const value = flt(this.additional_discount_percentage);
+      if (value >= -100 && value <= 100) {
+        this.discount_amount = (this.Total * value) / 100;
+      } else {
+        this.additional_discount_percentage = 0;
+        this.discount_amount = 0;
+      }
     },
 
     calc_prices(item, value, $event) {
@@ -1400,7 +1460,7 @@ export default {
       }
     },
 
-    set_batch_qty(item, value) {
+    set_batch_qty(item, value, update = true) {
       const batch_no = item.batch_no_data.find(
         (element) => element.batch_no == value
       );
@@ -1410,7 +1470,7 @@ export default {
         item.btach_price = batch_no.btach_price;
         item.price_list_rate = batch_no.btach_price;
         item.rate = batch_no.btach_price;
-      } else {
+      } else if (update) {
         item.btach_price = null;
         this.update_item_detail(item);
       }
@@ -2205,6 +2265,8 @@ export default {
     evntBus.$on('load_return_invoice', (data) => {
       this.new_invoice(data.invoice_doc);
       this.discount_amount = -data.return_doc.discount_amount;
+      this.additional_discount_percentage =
+        -data.return_doc.additional_discount_percentage;
       this.return_doc = data.return_doc;
     });
     document.addEventListener('keydown', this.shortOpenPayment.bind(this));
@@ -2247,6 +2309,16 @@ export default {
     },
     invoiceType() {
       evntBus.$emit('update_invoice_type', this.invoiceType);
+    },
+    discount_amount() {
+      if (!this.discount_amount || this.discount_amount == 0) {
+        this.additional_discount_percentage = 0;
+      } else if (this.pos_profile.posa_use_percentage_discount) {
+        this.additional_discount_percentage =
+          (this.discount_amount / this.Total) * 100;
+      } else {
+        this.additional_discount_percentage = 0;
+      }
     },
   },
 };

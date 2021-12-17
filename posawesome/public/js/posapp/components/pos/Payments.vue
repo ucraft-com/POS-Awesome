@@ -77,7 +77,7 @@
             v-for="payment in invoice_doc.payments"
             :key="payment.name"
           >
-            <v-col cols="6">
+            <v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
               <v-text-field
                 dense
                 outlined
@@ -93,11 +93,13 @@
               ></v-text-field>
             </v-col>
             <v-col
+              v-if="!is_mpesa_c2b_payment(payment)"
               :cols="
                 6
-                  ? payment.type != 'Phone' ||
-                    payment.amount == 0 ||
-                    !request_payment_field
+                  ? (payment.type != 'Phone' ||
+                      payment.amount == 0 ||
+                      !request_payment_field) &&
+                    !is_mpesa_c2b_payment(payment)
                   : 3
               "
             >
@@ -109,6 +111,17 @@
                 @click="set_full_amount(payment.idx)"
                 >{{ payment.mode_of_payment }}</v-btn
               >
+            </v-col>
+            <v-col v-if="is_mpesa_c2b_payment(payment)" :cols="12" class="pl-3">
+              <v-btn
+                block
+                class=""
+                color="success"
+                dark
+                @click="mpesa_c2b_dialg(payment)"
+              >
+                {{ __(`Get Payments ${payment.mode_of_payment}`) }}
+              </v-btn>
             </v-col>
             <v-col
               v-if="
@@ -381,6 +394,54 @@
             ></v-textarea>
           </v-col>
         </v-row>
+
+        <div v-if="pos_profile.posa_allow_customer_purchase_order">
+          <v-divider></v-divider>
+          <v-row class="px-1 py-0" justify="center" align="start">
+            <v-col cols="6">
+              <v-text-field
+                v-model="invoice_doc.po_no"
+                :label="frappe._('Purchase Order')"
+                outlined
+                dense
+                background-color="white"
+                clearable
+                color="indigo"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-menu
+                ref="po_date_menu"
+                v-model="po_date_menu"
+                :close-on-content-click="false"
+                transition="scale-transition"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="invoice_doc.po_date"
+                    :label="frappe._('Purchase Order Date')"
+                    readonly
+                    outlined
+                    dense
+                    hide-details
+                    v-bind="attrs"
+                    v-on="on"
+                    color="indigo"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="invoice_doc.po_date"
+                  no-title
+                  scrollable
+                  color="indigo"
+                  @input="po_date_menu = false"
+                >
+                </v-date-picker>
+              </v-menu>
+            </v-col>
+          </v-row>
+        </div>
         <v-divider></v-divider>
         <v-row class="px-1 py-0" justify="center" align="start">
           <v-col cols="6">
@@ -435,7 +496,6 @@
             </v-menu>
           </v-col>
         </v-row>
-
         <v-row>
           <v-col cols="12" md="6">
             <v-switch
@@ -448,7 +508,6 @@
             ></v-switch>
           </v-col>
         </v-row>
-
         <div
           v-if="
             invoice_doc &&
@@ -566,6 +625,7 @@ export default {
     loyalty_amount: 0,
     is_credit_sale: 0,
     date_menu: false,
+    po_date_menu: false,
     addresses: [],
     paid_change: 0,
     order_delivery_date: false,
@@ -578,6 +638,7 @@ export default {
     invoiceType: 'Invoice',
     pos_settings: '',
     customer_info: '',
+    mpesa_modes: [],
   }),
 
   methods: {
@@ -697,6 +758,7 @@ export default {
         callback: function (r) {
           if (r.message) {
             vm.load_print_page();
+            evntBus.$emit('set_last_invoice', vm.invoice_doc.name);
             evntBus.$emit('show_mesage', {
               text: `Invoice ${r.message.name} is Submited`,
               color: 'success',
@@ -721,6 +783,11 @@ export default {
         ) {
           payment.amount = this.diff_payment;
         }
+      });
+    },
+    clear_all_amounts() {
+      this.invoice_doc.payments.forEach((payment) => {
+        payment.amount = 0;
       });
     },
     load_print_page() {
@@ -781,6 +848,7 @@ export default {
       }
     },
     get_available_credit(e) {
+      this.clear_all_amounts();
       if (e) {
         frappe
           .call('posawesome.posawesome.api.posapp.get_available_credit', {
@@ -934,6 +1002,52 @@ export default {
             });
         });
     },
+    get_mpesa_modes() {
+      const vm = this;
+      frappe.call({
+        method: 'posawesome.posawesome.api.m_pesa.get_mpesa_mode_of_payment',
+        args: { company: vm.pos_profile.company },
+        async: true,
+        callback: function (r) {
+          if (!r.exc) {
+            vm.mpesa_modes = r.message;
+          } else {
+            vm.mpesa_modes = [];
+          }
+        },
+      });
+    },
+    is_mpesa_c2b_payment(payment) {
+      if (
+        this.mpesa_modes.includes(payment.mode_of_payment) &&
+        payment.type == 'Bank'
+      ) {
+        payment.amount = 0;
+        return true;
+      } else {
+        return false;
+      }
+    },
+    mpesa_c2b_dialg(payment) {
+      const data = {
+        company: this.pos_profile.company,
+        mode_of_payment: payment.mode_of_payment,
+        customer: this.invoice_doc.customer,
+      };
+      evntBus.$emit('open_mpesa_payments', data);
+    },
+    set_mpesa_payment(payment) {
+      this.pos_profile.use_customer_credit = 1;
+      this.redeem_customer_credit = true;
+      const advance = {
+        type: 'Advance',
+        credit_origin: payment.name,
+        total_credit: payment.unallocated_amount,
+        credit_to_redeem: payment.unallocated_amount,
+      };
+      this.clear_all_amounts();
+      this.customer_credit_dict.push(advance);
+    },
   },
 
   computed: {
@@ -1039,6 +1153,7 @@ export default {
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
+        this.get_mpesa_modes();
       });
       evntBus.$on('add_the_new_address', (data) => {
         this.addresses.push(data);
@@ -1046,7 +1161,7 @@ export default {
       });
       evntBus.$on('update_invoice_type', (data) => {
         this.invoiceType = data;
-        if (data != 'Order') {
+        if (this.invoice_doc && data != 'Order') {
           this.invoice_doc.posa_delivery_date = null;
           this.invoice_doc.posa_notes = null;
           this.invoice_doc.shipping_address_name = null;
@@ -1065,6 +1180,9 @@ export default {
     });
     evntBus.$on('set_customer_info_to_edit', (data) => {
       this.customer_info = data;
+    });
+    evntBus.$on('set_mpesa_payment', (data) => {
+      this.set_mpesa_payment(data);
     });
     document.addEventListener('keydown', this.shortPay.bind(this));
   },

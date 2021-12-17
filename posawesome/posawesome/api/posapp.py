@@ -161,17 +161,29 @@ def get_items(pos_profile, price_list=None):
         items = [d.item_code for d in items_data]
         item_prices_data = frappe.get_all(
             "Item Price",
-            fields=["item_code", "price_list_rate", "currency"],
-            filters={"price_list": price_list, "item_code": ["in", items]},
+            fields=["item_code", "price_list_rate", "currency", "uom"],
+            filters={
+                "price_list": price_list,
+                "item_code": ["in", items],
+                "currency": pos_profile.get("currency"),
+                "selling": 1,
+            },
         )
 
         item_prices = {}
         for d in item_prices_data:
-            item_prices[d.item_code] = d
+            item_prices.setdefault(d.item_code, {})
+            item_prices[d.item_code][d.get("uom") or "None"] = d
 
         for item in items_data:
             item_code = item.item_code
-            item_price = item_prices.get(item_code) or {}
+            item_price = {}
+            if item_prices.get(item_code):
+                item_price = (
+                    item_prices.get(item_code).get(item.stock_uom)
+                    or item_prices.get(item_code).get("None")
+                    or {}
+                )
             item_barcode = frappe.get_all(
                 "Item Barcode",
                 filters={"parent": item_code},
@@ -301,7 +313,7 @@ def get_customer_names(pos_profile):
     condition += get_customer_group_condition(pos_profile)
     customers = frappe.db.sql(
         """
-        SELECT name, mobile_no, email_id, tax_id, customer_name
+        SELECT name, mobile_no, email_id, tax_id, customer_name, primary_address
         FROM `tabCustomer`
         WHERE {0}
         ORDER by name
@@ -322,9 +334,16 @@ def update_invoice(data):
         invoice_doc.update(data)
     else:
         invoice_doc = frappe.get_doc(data)
+
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.set_missing_values()
+
+    if invoice_doc.is_return and invoice_doc.return_against:
+        ref_doc = frappe.get_doc(invoice_doc.doctype, invoice_doc.return_against)
+        if not ref_doc.update_stock:
+            invoice_doc.update_stock = 0
+
     for item in invoice_doc.items:
         add_taxes_from_tax_template(item, invoice_doc)
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"):
@@ -741,10 +760,22 @@ def get_items_details(pos_profile, items_data):
 
 
 @frappe.whitelist()
-def get_item_detail(data, doc=None):
-    item_code = json.loads(data).get("item_code")
+def get_item_detail(item, doc=None, warehouse=None, price_list=None):
+    item = json.loads(item)
+    item_code = item.get("item_code")
+    if warehouse and item.get("has_batch_no") and not item.get("batch_no"):
+        item["batch_no"] = get_batch_no(
+            item_code, warehouse, item.get("qty"), False, item.get("d")
+        )
+    item["selling_price_list"] = price_list
     max_discount = frappe.get_value("Item", item_code, "max_discount")
-    res = get_item_details(data, doc, overwrite_warehouse=False)
+    res = get_item_details(
+        item,
+        doc,
+        overwrite_warehouse=False,
+    )
+    if item.get("is_stock_item") and warehouse:
+        res["actual_qty"] = get_stock_availability(item_code, warehouse)
     res["max_discount"] = max_discount
     return res
 
@@ -827,10 +858,25 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
 
     if item_list[0]:
         item = item_list[0]
+        filters = {"price_list": selling_price_list, "item_code": item_code}
+        prices_with_uom = frappe.db.count(
+            "Item Price",
+            filters={
+                "price_list": selling_price_list,
+                "item_code": item_code,
+                "uom": item.stock_uom,
+            },
+        )
+
+        if prices_with_uom > 0:
+            filters["uom"] = item.stock_uom
+        else:
+            filters["uom"] = ["in", ["", None, item.stock_uom]]
+
         item_prices_data = frappe.get_all(
             "Item Price",
             fields=["item_code", "price_list_rate", "currency"],
-            filters={"price_list": selling_price_list, "item_code": item_code},
+            filters=filters,
         )
 
         item_price = 0
@@ -1025,52 +1071,65 @@ def make_address(args):
     return address
 
 
-
 def build_item_cache(item_code):
-		parent_item_code = item_code
+    parent_item_code = item_code
 
-		attributes = [a.attribute for a in frappe.db.get_all('Item Variant Attribute',
-			{'parent': parent_item_code}, ['attribute'], order_by='idx asc')
-		]
+    attributes = [
+        a.attribute
+        for a in frappe.db.get_all(
+            "Item Variant Attribute",
+            {"parent": parent_item_code},
+            ["attribute"],
+            order_by="idx asc",
+        )
+    ]
 
-		item_variants_data = frappe.db.get_all('Item Variant Attribute',
-			{'variant_of': parent_item_code}, ['parent', 'attribute', 'attribute_value'],
-			order_by='name',
-			as_list=1
-		)
+    item_variants_data = frappe.db.get_all(
+        "Item Variant Attribute",
+        {"variant_of": parent_item_code},
+        ["parent", "attribute", "attribute_value"],
+        order_by="name",
+        as_list=1,
+    )
 
-		disabled_items = set([i.name for i in frappe.db.get_all('Item', {'disabled': 1})])
+    disabled_items = set([i.name for i in frappe.db.get_all("Item", {"disabled": 1})])
 
-		attribute_value_item_map = frappe._dict({})
-		item_attribute_value_map = frappe._dict({})
+    attribute_value_item_map = frappe._dict({})
+    item_attribute_value_map = frappe._dict({})
 
-		item_variants_data = [r for r in item_variants_data if r[0] not in disabled_items]
-		for row in item_variants_data:
-			item_code, attribute, attribute_value = row
-			# (attr, value) => [item1, item2]
-			attribute_value_item_map.setdefault((attribute, attribute_value), []).append(item_code)
-			# item => {attr1: value1, attr2: value2}
-			item_attribute_value_map.setdefault(item_code, {})[attribute] = attribute_value
+    item_variants_data = [r for r in item_variants_data if r[0] not in disabled_items]
+    for row in item_variants_data:
+        item_code, attribute, attribute_value = row
+        # (attr, value) => [item1, item2]
+        attribute_value_item_map.setdefault((attribute, attribute_value), []).append(
+            item_code
+        )
+        # item => {attr1: value1, attr2: value2}
+        item_attribute_value_map.setdefault(item_code, {})[attribute] = attribute_value
 
-		optional_attributes = set()
-		for item_code, attr_dict in item_attribute_value_map.items():
-			for attribute in attributes:
-				if attribute not in attr_dict:
-					optional_attributes.add(attribute)
+    optional_attributes = set()
+    for item_code, attr_dict in item_attribute_value_map.items():
+        for attribute in attributes:
+            if attribute not in attr_dict:
+                optional_attributes.add(attribute)
 
-		frappe.cache().hset('attribute_value_item_map', parent_item_code, attribute_value_item_map)
-		frappe.cache().hset('item_attribute_value_map', parent_item_code, item_attribute_value_map)
-		frappe.cache().hset('item_variants_data', parent_item_code, item_variants_data)
-		frappe.cache().hset('optional_attributes', parent_item_code, optional_attributes)
+    frappe.cache().hset(
+        "attribute_value_item_map", parent_item_code, attribute_value_item_map
+    )
+    frappe.cache().hset(
+        "item_attribute_value_map", parent_item_code, item_attribute_value_map
+    )
+    frappe.cache().hset("item_variants_data", parent_item_code, item_variants_data)
+    frappe.cache().hset("optional_attributes", parent_item_code, optional_attributes)
 
 
 def get_item_optional_attributes(item_code):
-		val = frappe.cache().hget('optional_attributes', item_code)
+    val = frappe.cache().hget("optional_attributes", item_code)
 
-		if not val:
-			build_item_cache(item_code)
+    if not val:
+        build_item_cache(item_code)
 
-		return frappe.cache().hget('optional_attributes', item_code)
+    return frappe.cache().hget("optional_attributes", item_code)
 
 
 @frappe.whitelist()
@@ -1331,7 +1390,10 @@ def get_customer_info(customer):
 
     if customer.loyalty_program:
         lp_details = get_loyalty_program_details_with_points(
-            customer.name, customer.loyalty_program, silent=True
+            customer.name,
+            customer.loyalty_program,
+            silent=True,
+            include_expired_entry=False,
         )
         res["loyalty_points"] = lp_details.get("loyalty_points")
         res["conversion_factor"] = lp_details.get("conversion_factor")

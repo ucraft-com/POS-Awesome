@@ -7,10 +7,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt
+from frappe.utils import flt, add_days
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_code_count
 from posawesome.posawesome.api.posapp import get_company_domain
-from sqlparse import filters
 
 
 def validate(doc, method):
@@ -46,7 +45,7 @@ def add_loyalty_point(invoice_doc):
                         "invoice_type": "Sales Invoice",
                         "invoice": invoice_doc.name,
                         "loyalty_points": original_offer.loyalty_points,
-                        "expiry_date": invoice_doc.posting_date,
+                        "expiry_date": add_days(invoice_doc.posting_date, 10000),
                         "posting_date": invoice_doc.posting_date,
                         "company": invoice_doc.company,
                     }
