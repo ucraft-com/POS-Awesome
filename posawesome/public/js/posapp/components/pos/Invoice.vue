@@ -1078,8 +1078,9 @@ export default {
         }
         if (item.has_serial_no) {
           if (
-            !item.serial_no_selected ||
-            item.stock_qty != item.serial_no_selected.length
+            !this.invoice_doc.is_return &&
+            (!item.serial_no_selected ||
+              item.stock_qty != item.serial_no_selected.length)
           ) {
             evntBus.$emit('show_mesage', {
               text: __(`Selected serial numbers of item {0} is incorrect`, [
