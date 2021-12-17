@@ -322,9 +322,16 @@ def update_invoice(data):
         invoice_doc.update(data)
     else:
         invoice_doc = frappe.get_doc(data)
+
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.set_missing_values()
+
+    if invoice_doc.is_return and invoice_doc.return_against:
+        ref_doc = frappe.get_doc(invoice_doc.doctype, invoice_doc.return_against)
+        if not ref_doc.update_stock:
+            invoice_doc.update_stock = 0
+
     for item in invoice_doc.items:
         add_taxes_from_tax_template(item, invoice_doc)
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"):
