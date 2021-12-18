@@ -792,6 +792,7 @@ export default {
             this.items.unshift(new_item);
           }
         }
+        this.set_serial_no(cur_item)
       }
       this.$forceUpdate();
     },
@@ -1444,6 +1445,7 @@ export default {
     },
 
     set_serial_no(item) {
+      if (!item.has_serial_no) return;
       item.serial_no = '';
       item.serial_no_selected.forEach((element) => {
         item.serial_no += element + '\n';
