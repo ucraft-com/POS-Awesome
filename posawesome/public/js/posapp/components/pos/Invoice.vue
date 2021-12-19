@@ -452,10 +452,7 @@
                   </v-col>
                   <v-col
                     cols="8"
-                    v-if="
-                      pos_profile.posa_allow_sales_order &&
-                      invoiceType == 'Order'
-                    "
+                    v-if="pos_profile.posa_display_additional_notes"
                   >
                     <v-textarea
                       class="pa-0"
@@ -792,6 +789,7 @@ export default {
             this.items.unshift(new_item);
           }
         }
+        this.set_serial_no(cur_item)
       }
       this.$forceUpdate();
     },
@@ -1444,6 +1442,7 @@ export default {
     },
 
     set_serial_no(item) {
+      if (!item.has_serial_no) return;
       item.serial_no = '';
       item.serial_no_selected.forEach((element) => {
         item.serial_no += element + '\n';

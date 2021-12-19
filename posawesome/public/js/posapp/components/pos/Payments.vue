@@ -378,7 +378,7 @@
               </template>
             </v-autocomplete>
           </v-col>
-          <v-col cols="12" v-if="invoice_doc.posa_delivery_date">
+          <v-col cols="12" v-if="pos_profile.posa_display_additional_notes">
             <v-textarea
               class="pa-0"
               outlined
@@ -1052,12 +1052,12 @@ export default {
 
   computed: {
     total_payments() {
-      let total = flt(this.invoice_doc.loyalty_amount);
+      let total = parseFloat(this.invoice_doc.loyalty_amount);
       this.invoice_doc.payments.forEach((payment) => {
-        total += flt(payment.amount);
+        total += parseFloat(payment.amount);
       });
 
-      total += flt(this.redeemed_customer_credit);
+      total += parseFloat(this.redeemed_customer_credit);
 
       if (!this.is_cashback) total = 0;
 
