@@ -219,6 +219,7 @@ fixtures = [
                     "POS Profile-posa_tax_inclusive",
                     "POS Profile-posa_use_percentage_discount",
                     "POS Profile-posa_allow_customer_purchase_order",
+                    "POS Profile-posa_allow_print_last_invoice"
                 ),
             ]
         ],
