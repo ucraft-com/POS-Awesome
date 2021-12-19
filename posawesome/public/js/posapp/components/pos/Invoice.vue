@@ -452,10 +452,7 @@
                   </v-col>
                   <v-col
                     cols="8"
-                    v-if="
-                      pos_profile.posa_allow_sales_order &&
-                      invoiceType == 'Order'
-                    "
+                    v-if="pos_profile.posa_display_additional_notes"
                   >
                     <v-textarea
                       class="pa-0"

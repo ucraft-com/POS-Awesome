@@ -378,7 +378,7 @@
               </template>
             </v-autocomplete>
           </v-col>
-          <v-col cols="12" v-if="invoice_doc.posa_delivery_date">
+          <v-col cols="12" v-if="pos_profile.posa_display_additional_notes">
             <v-textarea
               class="pa-0"
               outlined
