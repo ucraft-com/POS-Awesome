@@ -1052,12 +1052,12 @@ export default {
 
   computed: {
     total_payments() {
-      let total = flt(this.invoice_doc.loyalty_amount);
+      let total = parseFloat(this.invoice_doc.loyalty_amount);
       this.invoice_doc.payments.forEach((payment) => {
-        total += flt(payment.amount);
+        total += parseFloat(payment.amount);
       });
 
-      total += flt(this.redeemed_customer_credit);
+      total += parseFloat(this.redeemed_customer_credit);
 
       if (!this.is_cashback) total = 0;
 
