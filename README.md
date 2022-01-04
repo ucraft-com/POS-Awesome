@@ -35,9 +35,9 @@
 
 ---
 
-### How to Install
+### How to Install (For my version use dev-XX as branch name)
 
-1. `bench get-app https://github.com/yrestom/POS-Awesome.git`
+1. 'bench get-app https://github.com/omiejung/POS-Awesome.git --branch dev-01' 
 2. `bench setup requirements`
 3. `bench build --app posawesome`
 4. `bench restart`
