@@ -19,8 +19,9 @@
 					background-color="white"
 					hide-details
 					class="mx-4"
-					v-model.number="item.qty"
+					v-model.number="qty"
 					type="number"
+					@focus="$event.target.select()"
 					@keydown.enter="search_by_enter"
 			></v-text-field>
           </v-row>
@@ -28,7 +29,7 @@
 		<v-card-actions class="mt-4">
           <v-spacer></v-spacer>
 		  <v-btn color="error" dark @click="close_dialog">Close</v-btn>
-          <v-btn color="success mx-2" dark @click="add_item(item)">{{__('Continue')}}</v-btn>
+          <v-btn color="success mx-2" dark @click="add_item(clickedItem)">{{__('Continue')}}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -40,28 +41,31 @@ import { evntBus } from '../../bus';
 export default {
   data: () => ({
     quantityDialog: false,
-    item: null
+    qty: 1,
+	clickedItem: null
   }),
   methods: {
     close_dialog() {
+	  this.clickedItem = null
       this.quantityDialog = false;
     },
 	search_by_enter(e) {
       if (e.keyCode === 13) {
-        evntBus.$emit('add_item', this.item);
+		this.clickedItem.qty = this.qty
+        evntBus.$emit('add_item', this.clickedItem);
 		this.close_dialog();
       }
     },
-    add_item(item) {
-      evntBus.$emit('add_item', item);
+    add_item(clickedItem) {
+      evntBus.$emit('add_item', clickedItem);
       this.close_dialog();
     },
   },
   created: function () {
     evntBus.$on('open_quantity_model', (item) => {
-		console.log('<><><><><><', item)
       this.quantityDialog = true;
-      this.item = item || null;
+	  this.clickedItem = item;
+      this.qty = item.qty || 1;
     });
   },
 };
