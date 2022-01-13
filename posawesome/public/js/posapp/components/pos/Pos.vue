@@ -9,6 +9,7 @@
     <MpesaPayments></MpesaPayments>
     <Variants></Variants>
     <OpeningDialog v-if="dialog" :dialog="dialog"></OpeningDialog>
+	<QuantityModal></QuantityModal>
     <v-row v-show="!dialog">
       <v-col
         v-show="!payment && !offers && !coupons"
@@ -79,6 +80,7 @@ import NewAddress from './NewAddress.vue';
 import Variants from './Variants.vue';
 import Returns from './Returns.vue';
 import MpesaPayments from './Mpesa-Payments.vue';
+import QuantityModal from './QuantityModal.vue';
 
 export default {
   data: function () {
@@ -107,6 +109,7 @@ export default {
     NewAddress,
     Variants,
     MpesaPayments,
+	QuantityModal
   },
 
   methods: {

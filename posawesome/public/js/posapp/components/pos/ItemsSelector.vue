@@ -231,7 +231,7 @@ export default {
       if (item.has_variants) {
         evntBus.$emit('open_variants_model', item, this.items);
       } else {
-        evntBus.$emit('add_item', item);
+		evntBus.$emit('open_quantity_model', item);
       }
     },
     enter_event() {
