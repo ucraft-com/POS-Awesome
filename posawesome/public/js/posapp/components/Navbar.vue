@@ -16,7 +16,7 @@
 
       <v-spacer></v-spacer>
       <v-btn style="cursor: unset" text color="grey">
-        <span right>Location: {{ pos_profile.name }}</span>
+        <span right>POS Location: {{ pos_profile.name }}</span>
       </v-btn>
       <div class="text-center">
         <v-menu offset-y>
