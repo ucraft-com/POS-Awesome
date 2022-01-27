@@ -249,7 +249,8 @@ export default {
       if (this.flags.serial_no) {
         new_item.to_set_serial_no = this.flags.serial_no;
       }
-      this.add_item(new_item);
+    //   this.add_item(new_item);
+	  evntBus.$emit('add_item', new_item)
       this.search = null;
       this.first_search = null;
       this.debounce_search = null;
@@ -258,7 +259,7 @@ export default {
     get_item_qty(first_search) {
       let scal_qty = 1;
       if (first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
-        let pesokg1 = first_search.substr(7, 5);
+        let pesokg1 = first_search.substr(7, 6);
         let pesokg;
         if (pesokg1.startsWith('0000')) {
           pesokg = '0.00' + pesokg1.substr(4);
