@@ -16,7 +16,7 @@
               dense
               clearable
               class="mx-4"
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
             <v-btn
               text
               class="ml-2"

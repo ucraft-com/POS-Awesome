@@ -16,7 +16,7 @@
                   background-color="white"
                   hide-details
                   v-model="address.name"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="12">
                 <v-text-field
@@ -26,7 +26,7 @@
                   background-color="white"
                   hide-details
                   v-model="address.address_line1"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="12">
                 <v-text-field
@@ -36,7 +36,7 @@
                   background-color="white"
                   hide-details
                   v-model="address.address_line2"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
@@ -46,7 +46,7 @@
                   background-color="white"
                   hide-details
                   v-model="address.city"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
@@ -55,7 +55,7 @@
                   background-color="white"
                   hide-details
                   v-model="address.state"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
             </v-row>
           </v-container>

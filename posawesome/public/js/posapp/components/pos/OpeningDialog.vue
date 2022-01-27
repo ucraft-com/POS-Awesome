@@ -50,7 +50,7 @@
                             single-line
                             counter
                             type="number"
-                          ></v-text-field>
+                          @focus="$event.target.select()"></v-text-field>
                         </template>
                       </v-edit-dialog>
                     </template>

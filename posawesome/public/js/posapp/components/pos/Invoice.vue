@@ -113,7 +113,7 @@
                       hide-details
                       v-model="item.item_code"
                       disabled
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-text-field
@@ -127,7 +127,7 @@
                       type="number"
                       @change="calc_sotck_gty(item, $event)"
                       :disabled="!!item.posa_is_offer || !!item.posa_is_replace"
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-select
@@ -171,7 +171,7 @@
                           ? true
                           : false
                       "
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-text-field
@@ -194,7 +194,7 @@
                           ? true
                           : false
                       "
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-text-field
@@ -218,7 +218,7 @@
                           ? true
                           : false
                       "
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-text-field
@@ -232,7 +232,7 @@
                       type="number"
                       disabled
                       :prefix="invoice_doc.currency"
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-text-field
@@ -245,7 +245,7 @@
                       v-model="item.actual_qty"
                       type="number"
                       disabled
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-text-field
@@ -257,7 +257,7 @@
                       hide-details
                       v-model="item.item_group"
                       disabled
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-text-field
@@ -270,7 +270,7 @@
                       v-model="item.stock_qty"
                       type="number"
                       disabled
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-text-field
@@ -282,7 +282,7 @@
                       hide-details
                       v-model="item.stock_uom"
                       disabled
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col align="center" cols="4" v-if="item.posa_offer_applied">
                     <v-checkbox
@@ -308,7 +308,7 @@
                       v-model="item.serial_no_selected_count"
                       type="number"
                       disabled
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col
                     cols="12"
@@ -342,7 +342,7 @@
                       v-model="item.actual_batch_qty"
                       type="number"
                       disabled
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col
                     cols="4"
@@ -357,7 +357,7 @@
                       hide-details
                       v-model="item.batch_no_expiry_date"
                       disabled
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col
                     cols="8"
@@ -416,7 +416,7 @@
                           hide-details
                           v-bind="attrs"
                           v-on="on"
-                        ></v-text-field>
+                        @focus="$event.target.select()"></v-text-field>
                       </template>
                       <v-date-picker
                         v-model="item.posa_delivery_date"
@@ -486,7 +486,7 @@
                 dense
                 readonly
                 hide-details
-              ></v-text-field>
+              @focus="$event.target.select()"></v-text-field>
             </v-col>
             <v-col
               v-if="!pos_profile.posa_use_percentage_discount"
@@ -508,7 +508,7 @@
                     ? true
                     : false
                 "
-              ></v-text-field>
+              @focus="$event.target.select()"></v-text-field>
             </v-col>
             <v-col
               v-if="pos_profile.posa_use_percentage_discount"
@@ -530,7 +530,7 @@
                     : false
                 "
                 @change="update_discount_umount"
-              ></v-text-field>
+              @focus="$event.target.select()"></v-text-field>
             </v-col>
             <v-col cols="6" class="pa-1 mt-2">
               <v-text-field
@@ -541,7 +541,7 @@
                 readonly
                 hide-details
                 :prefix="pos_profile.currency"
-              ></v-text-field>
+              @focus="$event.target.select()"></v-text-field>
             </v-col>
 
             <v-col cols="6" class="pa-1 mt-2">
@@ -554,7 +554,7 @@
                 hide-details
                 class="text--red"
                 :prefix="pos_profile.currency"
-              ></v-text-field>
+              @focus="$event.target.select()"></v-text-field>
             </v-col>
           </v-row>
         </v-col>

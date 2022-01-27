@@ -16,7 +16,7 @@
                   background-color="white"
                   hide-details
                   v-model="customer_name"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
@@ -26,7 +26,7 @@
                   background-color="white"
                   hide-details
                   v-model="tax_id"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
@@ -36,7 +36,7 @@
                   background-color="white"
                   hide-details
                   v-model="mobile_no"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
@@ -46,7 +46,7 @@
                   background-color="white"
                   hide-details
                   v-model="email_id"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
@@ -56,7 +56,7 @@
                   background-color="white"
                   hide-details
                   v-model="referral_code"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-menu
@@ -77,7 +77,7 @@
                       v-bind="attrs"
                       v-on="on"
                       color="indigo"
-                    ></v-text-field>
+                    @focus="$event.target.select()"></v-text-field>
                   </template>
                   <v-date-picker
                     v-model="birthday"

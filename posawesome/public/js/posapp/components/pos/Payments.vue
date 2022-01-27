@@ -24,7 +24,7 @@
               readonly
               :prefix="invoice_doc.currency"
               dense
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
           <v-col cols="5">
             <v-text-field
@@ -37,7 +37,7 @@
               disabled
               :prefix="invoice_doc.currency"
               dense
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
 
           <v-col cols="7" v-if="diff_payment < 0 && !invoice_doc.is_return">
@@ -52,7 +52,7 @@
               :rules="paid_change_rules"
               dense
               type="number"
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
 
           <v-col cols="5" v-if="diff_payment < 0 && !invoice_doc.is_return">
@@ -66,7 +66,7 @@
               disabled
               :prefix="invoice_doc.currency"
               dense
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
         </v-row>
         <v-divider></v-divider>
@@ -90,7 +90,7 @@
                 :prefix="invoice_doc.currency"
                 @focus="set_rest_amount(payment.idx)"
                 :readonly="invoice_doc.is_return ? true : false"
-              ></v-text-field>
+				></v-text-field>
             </v-col>
             <v-col
               v-if="!is_mpesa_c2b_payment(payment)"
@@ -165,7 +165,7 @@
               v-model="loyalty_amount"
               type="number"
               :prefix="invoice_doc.currency"
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
           <v-col cols="5">
             <v-text-field
@@ -178,7 +178,7 @@
               :value="formtCurrency(available_pioints_amount)"
               :prefix="invoice_doc.currency"
               disabled
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
         </v-row>
 
@@ -203,7 +203,7 @@
               v-model="redeemed_customer_credit"
               type="number"
               :prefix="invoice_doc.currency"
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
           <v-col cols="5">
             <v-text-field
@@ -216,7 +216,7 @@
               :value="formtCurrency(available_customer_credit)"
               :prefix="invoice_doc.currency"
               disabled
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
         </v-row>
         <v-divider></v-divider>
@@ -233,7 +233,7 @@
               :value="formtCurrency(invoice_doc.net_total)"
               disabled
               :prefix="invoice_doc.currency"
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
           <v-col cols="6">
             <v-text-field
@@ -246,7 +246,7 @@
               :value="formtCurrency(invoice_doc.total_taxes_and_charges)"
               disabled
               :prefix="invoice_doc.currency"
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
           <v-col cols="6">
             <v-text-field
@@ -259,7 +259,7 @@
               :value="formtCurrency(invoice_doc.total)"
               disabled
               :prefix="invoice_doc.currency"
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
           <v-col cols="6">
             <v-text-field
@@ -272,7 +272,7 @@
               :value="formtCurrency(invoice_doc.discount_amount)"
               disabled
               :prefix="invoice_doc.currency"
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
           <v-col cols="6">
             <v-text-field
@@ -285,7 +285,7 @@
               :value="formtCurrency(invoice_doc.grand_total)"
               disabled
               :prefix="invoice_doc.currency"
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
           <v-col
             cols="6"
@@ -311,7 +311,7 @@
                   hide-details
                   v-bind="attrs"
                   v-on="on"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </template>
               <v-date-picker
                 v-model="invoice_doc.posa_delivery_date"
@@ -408,7 +408,7 @@
                 clearable
                 color="indigo"
                 hide-details
-              ></v-text-field>
+              @focus="$event.target.select()"></v-text-field>
             </v-col>
             <v-col cols="6">
               <v-menu
@@ -428,7 +428,7 @@
                     v-bind="attrs"
                     v-on="on"
                     color="indigo"
-                  ></v-text-field>
+                  @focus="$event.target.select()"></v-text-field>
                 </template>
                 <v-date-picker
                   v-model="invoice_doc.po_date"
@@ -482,7 +482,7 @@
                   v-bind="attrs"
                   v-on="on"
                   color="indigo"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </template>
               <v-date-picker
                 v-model="invoice_doc.due_date"
@@ -531,7 +531,7 @@
                 :value="formtCurrency(row.total_credit)"
                 disabled
                 :prefix="invoice_doc.currency"
-              ></v-text-field>
+              @focus="$event.target.select()"></v-text-field>
             </v-col>
             <v-col cols="4">
               <v-text-field
@@ -544,7 +544,7 @@
                 type="number"
                 v-model="row.credit_to_redeem"
                 :prefix="invoice_doc.currency"
-              ></v-text-field>
+              @focus="$event.target.select()"></v-text-field>
             </v-col>
           </v-row>
         </div>
@@ -597,7 +597,7 @@
                 hide-details
                 v-model="invoice_doc.contact_mobile"
                 type="number"
-              ></v-text-field>
+              @focus="$event.target.select()"></v-text-field>
             </v-container>
           </v-card-text>
           <v-card-actions>

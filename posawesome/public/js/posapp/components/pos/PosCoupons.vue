@@ -19,7 +19,7 @@
               hide-details
               v-model="new_coupon"
               class="mr-4"
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
           </v-col>
           <v-col cols="2">
             <v-btn

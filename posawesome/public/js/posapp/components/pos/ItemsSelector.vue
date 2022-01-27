@@ -26,7 +26,7 @@
             v-model="debounce_search"
             @keydown.esc="esc_event"
             @keydown.enter="enter_event"
-          ></v-text-field>
+          @focus="$event.target.select()"></v-text-field>
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">

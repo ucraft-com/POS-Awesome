@@ -17,7 +17,7 @@
                   hide-details
                   readonly
                   v-model="customer_info.customer"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
@@ -28,7 +28,7 @@
                   hide-details
                   v-model="customer_info.email_id"
                   @change="set_customer_info('email_id', $event)"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
@@ -39,7 +39,7 @@
                   hide-details
                   v-model="customer_info.mobile_no"
                   @change="set_customer_info('mobile_no', $event)"
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
@@ -48,7 +48,7 @@
                   dense
                   readonly
                   hide-details
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
               <v-col cols="6">
                 <v-text-field
@@ -57,7 +57,7 @@
                   dense
                   readonly
                   hide-details
-                ></v-text-field>
+                @focus="$event.target.select()"></v-text-field>
               </v-col>
             </v-row>
           </v-container>

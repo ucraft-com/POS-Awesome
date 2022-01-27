@@ -16,7 +16,7 @@
               dense
               clearable
               class="mx-4"
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
             <v-text-field
               color="indigo"
               :label="frappe._('Mobile No')"
@@ -26,7 +26,7 @@
               dense
               clearable
               class="mx-4"
-            ></v-text-field>
+            @focus="$event.target.select()"></v-text-field>
             <v-btn text class="ml-2" color="primary" dark @click="search">{{
               __('Search')
             }}</v-btn>
