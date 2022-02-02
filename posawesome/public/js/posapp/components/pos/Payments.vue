@@ -40,6 +40,15 @@
             ></v-text-field>
           </v-col>
 
+          <v-col cols="7" v-if="diff_payment > 0 && !invoice_doc.is_return">
+            <v-switch
+              class="my-0 py-0"
+              v-model="is_write_off_change"
+              flat
+              :label="frappe._('Write Off Difference Amount')"
+            ></v-switch>
+          </v-col>
+
           <v-col cols="7" v-if="diff_payment < 0 && !invoice_doc.is_return">
             <v-text-field
               outlined
@@ -624,6 +633,7 @@ export default {
     invoice_doc: '',
     loyalty_amount: 0,
     is_credit_sale: 0,
+    is_write_off_change: 0,
     date_menu: false,
     po_date_menu: false,
     addresses: [],
@@ -1145,6 +1155,7 @@ export default {
           (payment) => payment.default == 1
         );
         this.is_credit_sale = 0;
+        this.is_write_off_change = 0;
         if (default_payment) {
           default_payment.amount = invoice_doc.grand_total.toFixed(2);
         }
@@ -1214,6 +1225,15 @@ export default {
           payment.amount = 0;
           payment.base_amount = 0;
         });
+      }
+    },
+    is_write_off_change(value) {
+      if(value == 1) {
+        this.invoice_doc.write_off_amount = this.diff_payment;
+        this.invoice_doc.write_off_outstanding_amount_automatically = 1;
+      } else {
+        this.invoice_doc.write_off_amount = 0;
+        this.invoice_doc.write_off_outstanding_amount_automatically = 0;
       }
     },
     redeemed_customer_credit(value) {
