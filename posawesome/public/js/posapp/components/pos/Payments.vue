@@ -1071,9 +1071,11 @@ export default {
   computed: {
     total_payments() {
       let total = parseFloat(this.invoice_doc.loyalty_amount);
-      this.invoice_doc.payments.forEach((payment) => {
-        total += parseFloat(payment.amount);
-      });
+      if (this.invoice_doc && this.invoice_doc.payments) {
+        this.invoice_doc.payments.forEach((payment) => {
+          total += parseFloat(payment.amount);
+        });
+      }
 
       total += parseFloat(this.redeemed_customer_credit);
 
