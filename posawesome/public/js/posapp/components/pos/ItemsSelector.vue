@@ -389,11 +389,11 @@ export default {
         });
         if (filtred_list.length == 0) {
           filtred_list = filtred_group_list.filter((item) =>
-            item.item_name.toLowerCase().includes(this.search.toLowerCase())
+            item.item_code.toLowerCase().includes(this.search.toLowerCase())
           );
           if (filtred_list.length == 0) {
             filtred_list = filtred_group_list.filter((item) =>
-              item.item_code.toLowerCase().includes(this.search.toLowerCase())
+              item.item_name.toLowerCase().includes(this.search.toLowerCase())
             );
           }
           if (

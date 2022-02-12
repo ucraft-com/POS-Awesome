@@ -1,5 +1,21 @@
 <template>
   <div>
+    <v-dialog v-model="cancel_dialog" max-width="330">
+      <v-card>
+        <v-card-title class="text-h5">
+          {{ __('Cancel Current Invoice ?') }}
+        </v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="error" @click="cancel_invoice">
+            {{ __('Cancel') }}
+          </v-btn>
+          <v-btn color="primary" @click="cancel_dialog = false">
+            {{ __('Back') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-card
       style="max-height: 70vh; height: 70vh"
       class="cards my-0 py-0 grey lighten-5"
@@ -587,7 +603,7 @@
                 class="pa-0"
                 color="error"
                 dark
-                @click="cancel_invoice"
+                @click="cancel_dialog = true"
                 >{{ __('Cancel') }}</v-btn
               >
             </v-col>
@@ -646,6 +662,7 @@ export default {
       itemsPerPage: 1000,
       expanded: [],
       singleExpand: true,
+      cancel_dialog: false,
       items_headers: [
         {
           text: __('Name'),
@@ -789,7 +806,7 @@ export default {
             this.items.unshift(new_item);
           }
         }
-        this.set_serial_no(cur_item)
+        this.set_serial_no(cur_item);
       }
       this.$forceUpdate();
     },
@@ -860,6 +877,7 @@ export default {
       this.discount_amount = 0;
       this.additional_discount_percentage = 0;
       evntBus.$emit('set_customer_readonly', false);
+      this.cancel_dialog = false;
     },
 
     new_invoice(data = {}) {
@@ -932,6 +950,7 @@ export default {
       doc.ignore_pricing_rule = 1;
       doc.company = doc.company || this.pos_profile.company;
       doc.pos_profile = doc.pos_profile || this.pos_profile.name;
+      doc.campaign = doc.campaign || this.pos_profile.campaign;
       doc.currency = doc.currency || this.pos_profile.currency;
       doc.naming_series = doc.naming_series || this.pos_profile.naming_series;
       doc.customer = this.customer;
@@ -1048,8 +1067,9 @@ export default {
       this.items.forEach((item) => {
         if (this.stock_settings.allow_negative_stock != 1) {
           if (
-            (item.is_stock_item && item.stock_qty && !item.actual_qty) ||
-            (item.is_stock_item && item.stock_qty > item.actual_qty)
+            this.invoiceType == 'Invoice' &&
+            ((item.is_stock_item && item.stock_qty && !item.actual_qty) ||
+              (item.is_stock_item && item.stock_qty > item.actual_qty))
           ) {
             evntBus.$emit('show_mesage', {
               text: __(
