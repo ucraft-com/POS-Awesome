@@ -1067,8 +1067,9 @@ export default {
       this.items.forEach((item) => {
         if (this.stock_settings.allow_negative_stock != 1) {
           if (
-            (item.is_stock_item && item.stock_qty && !item.actual_qty) ||
-            (item.is_stock_item && item.stock_qty > item.actual_qty)
+            this.invoiceType == 'Invoice' &&
+            ((item.is_stock_item && item.stock_qty && !item.actual_qty) ||
+              (item.is_stock_item && item.stock_qty > item.actual_qty))
           ) {
             evntBus.$emit('show_mesage', {
               text: __(
