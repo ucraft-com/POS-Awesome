@@ -3,7 +3,7 @@
     <v-dialog v-model="customerDialog" max-width="600px">
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">{{__('Customer Info')}}</span>
+          <span class="headline indigo--text">{{ __('Customer Info') }}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -16,7 +16,7 @@
                   background-color="white"
                   hide-details
                   readonly
-                  v-model="customer_info.customer"
+                  v-model="customer_info.name"
                 ></v-text-field>
               </v-col>
               <v-col cols="6">
