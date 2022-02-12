@@ -40,15 +40,6 @@
             ></v-text-field>
           </v-col>
 
-          <v-col cols="7" v-if="diff_payment > 0 && !invoice_doc.is_return">
-            <v-switch
-              class="my-0 py-0"
-              v-model="is_write_off_change"
-              flat
-              :label="frappe._('Write Off Difference Amount')"
-            ></v-switch>
-          </v-col>
-
           <v-col cols="7" v-if="diff_payment < 0 && !invoice_doc.is_return">
             <v-text-field
               outlined
@@ -452,29 +443,46 @@
           </v-row>
         </div>
         <v-divider></v-divider>
-        <v-row class="px-1 py-0" justify="center" align="start">
-          <v-col cols="6">
+        <v-row class="px-1 py-0" align="start" no-gutters>
+          <v-col
+            cols="6"
+            v-if="
+              pos_profile.posa_allow_write_off_change &&
+              diff_payment > 0 &&
+              !invoice_doc.is_return
+            "
+          >
             <v-switch
-              v-if="
-                pos_profile.posa_allow_credit_sale && !invoice_doc.is_return
-              "
+              class="my-0 py-0"
+              v-model="is_write_off_change"
+              flat
+              :label="frappe._('Write Off Difference Amount')"
+            ></v-switch>
+          </v-col>
+          <v-col
+            cols="6"
+            v-if="pos_profile.posa_allow_credit_sale && !invoice_doc.is_return"
+          >
+            <v-switch
               v-model="is_credit_sale"
               flat
               :label="frappe._('Is Credit Sale')"
               class="my-0 py-0"
             ></v-switch>
-
+          </v-col>
+          <v-col
+            cols="6"
+            v-if="invoice_doc.is_return && pos_profile.use_cashback"
+          >
             <v-switch
-              v-if="invoice_doc.is_return && pos_profile.use_cashback"
               v-model="is_cashback"
               flat
               :label="frappe._('Is Cashback')"
               class="my-0 py-0"
             ></v-switch>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="6" v-if="is_credit_sale">
             <v-menu
-              v-if="is_credit_sale"
               ref="date_menu"
               v-model="date_menu"
               :close-on-content-click="false"
@@ -504,11 +512,11 @@
               </v-date-picker>
             </v-menu>
           </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12" md="6">
+          <v-col
+            cols="6"
+            v-if="!invoice_doc.is_return && pos_profile.use_customer_credit"
+          >
             <v-switch
-              v-if="!invoice_doc.is_return && pos_profile.use_customer_credit"
               v-model="redeem_customer_credit"
               flat
               :label="frappe._('Use Customer Credit')"
@@ -1228,7 +1236,7 @@ export default {
       }
     },
     is_write_off_change(value) {
-      if(value == 1) {
+      if (value == 1) {
         this.invoice_doc.write_off_amount = this.diff_payment;
         this.invoice_doc.write_off_outstanding_amount_automatically = 1;
       } else {
