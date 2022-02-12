@@ -1,5 +1,21 @@
 <template>
   <div>
+    <v-dialog v-model="cancel_dialog" max-width="330">
+      <v-card>
+        <v-card-title class="text-h5">
+          {{ __('Cancel Current Invoice ?') }}
+        </v-card-title>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="error" @click="cancel_invoice">
+            {{ __('Cancel') }}
+          </v-btn>
+          <v-btn color="primary" @click="cancel_dialog = false">
+            {{ __('Back') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-card
       style="max-height: 70vh; height: 70vh"
       class="cards my-0 py-0 grey lighten-5"
@@ -587,7 +603,7 @@
                 class="pa-0"
                 color="error"
                 dark
-                @click="cancel_invoice"
+                @click="cancel_dialog = true"
                 >{{ __('Cancel') }}</v-btn
               >
             </v-col>
@@ -646,6 +662,7 @@ export default {
       itemsPerPage: 1000,
       expanded: [],
       singleExpand: true,
+      cancel_dialog: false,
       items_headers: [
         {
           text: __('Name'),
@@ -789,7 +806,7 @@ export default {
             this.items.unshift(new_item);
           }
         }
-        this.set_serial_no(cur_item)
+        this.set_serial_no(cur_item);
       }
       this.$forceUpdate();
     },
@@ -860,6 +877,7 @@ export default {
       this.discount_amount = 0;
       this.additional_discount_percentage = 0;
       evntBus.$emit('set_customer_readonly', false);
+      this.cancel_dialog = false;
     },
 
     new_invoice(data = {}) {
