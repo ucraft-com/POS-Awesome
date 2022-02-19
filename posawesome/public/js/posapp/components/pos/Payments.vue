@@ -443,29 +443,46 @@
           </v-row>
         </div>
         <v-divider></v-divider>
-        <v-row class="px-1 py-0" justify="center" align="start">
-          <v-col cols="6">
+        <v-row class="px-1 py-0" align="start" no-gutters>
+          <v-col
+            cols="6"
+            v-if="
+              pos_profile.posa_allow_write_off_change &&
+              diff_payment > 0 &&
+              !invoice_doc.is_return
+            "
+          >
             <v-switch
-              v-if="
-                pos_profile.posa_allow_credit_sale && !invoice_doc.is_return
-              "
+              class="my-0 py-0"
+              v-model="is_write_off_change"
+              flat
+              :label="frappe._('Write Off Difference Amount')"
+            ></v-switch>
+          </v-col>
+          <v-col
+            cols="6"
+            v-if="pos_profile.posa_allow_credit_sale && !invoice_doc.is_return"
+          >
+            <v-switch
               v-model="is_credit_sale"
               flat
               :label="frappe._('Is Credit Sale')"
               class="my-0 py-0"
             ></v-switch>
-
+          </v-col>
+          <v-col
+            cols="6"
+            v-if="invoice_doc.is_return && pos_profile.use_cashback"
+          >
             <v-switch
-              v-if="invoice_doc.is_return && pos_profile.use_cashback"
               v-model="is_cashback"
               flat
               :label="frappe._('Is Cashback')"
               class="my-0 py-0"
             ></v-switch>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="6" v-if="is_credit_sale">
             <v-menu
-              v-if="is_credit_sale"
               ref="date_menu"
               v-model="date_menu"
               :close-on-content-click="false"
@@ -495,11 +512,11 @@
               </v-date-picker>
             </v-menu>
           </v-col>
-        </v-row>
-        <v-row>
-          <v-col cols="12" md="6">
+          <v-col
+            cols="6"
+            v-if="!invoice_doc.is_return && pos_profile.use_customer_credit"
+          >
             <v-switch
-              v-if="!invoice_doc.is_return && pos_profile.use_customer_credit"
               v-model="redeem_customer_credit"
               flat
               :label="frappe._('Use Customer Credit')"
@@ -624,6 +641,7 @@ export default {
     invoice_doc: '',
     loyalty_amount: 0,
     is_credit_sale: 0,
+    is_write_off_change: 0,
     date_menu: false,
     po_date_menu: false,
     addresses: [],
@@ -1053,9 +1071,11 @@ export default {
   computed: {
     total_payments() {
       let total = parseFloat(this.invoice_doc.loyalty_amount);
-      this.invoice_doc.payments.forEach((payment) => {
-        total += parseFloat(payment.amount);
-      });
+      if (this.invoice_doc && this.invoice_doc.payments) {
+        this.invoice_doc.payments.forEach((payment) => {
+          total += parseFloat(payment.amount);
+        });
+      }
 
       total += parseFloat(this.redeemed_customer_credit);
 
@@ -1145,6 +1165,7 @@ export default {
           (payment) => payment.default == 1
         );
         this.is_credit_sale = 0;
+        this.is_write_off_change = 0;
         if (default_payment) {
           default_payment.amount = invoice_doc.grand_total.toFixed(2);
         }
@@ -1214,6 +1235,15 @@ export default {
           payment.amount = 0;
           payment.base_amount = 0;
         });
+      }
+    },
+    is_write_off_change(value) {
+      if (value == 1) {
+        this.invoice_doc.write_off_amount = this.diff_payment;
+        this.invoice_doc.write_off_outstanding_amount_automatically = 1;
+      } else {
+        this.invoice_doc.write_off_amount = 0;
+        this.invoice_doc.write_off_outstanding_amount_automatically = 0;
       }
     },
     redeemed_customer_credit(value) {
