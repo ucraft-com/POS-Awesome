@@ -4,7 +4,7 @@
       <v-card min-height="200px">
         <v-card-title>
           <!-- <span class="headline indigo--text">Add Quantity</span> -->
-		  <span class="headline indigo--text">{{__('Select Return Invoice')}}</span>
+		  <span class="headline indigo--text">{{__('Enter Quantity')}}</span>
           <v-spacer></v-spacer>
         </v-card-title>
 		<v-container>
