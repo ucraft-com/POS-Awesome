@@ -565,6 +565,43 @@
             </v-col>
           </v-row>
         </div>
+        <v-divider></v-divider>
+        <v-row class="pb-0 mb-2" align="start">
+          <v-col cols="12">
+            <v-autocomplete
+              dense
+              clearable
+              auto-select-first
+              outlined
+              color="indigo"
+              :label="frappe._('Sales Person')"
+              v-model="sales_person"
+              :items="sales_persons"
+              item-text="sales_person_name"
+              item-value="name"
+              background-color="white"
+              :no-data-text="__('Sales Person not found')"
+              hide-details
+              :filter="salesPersonFilter"
+              :disabled="readonly"
+            >
+              <template v-slot:item="data">
+                <template>
+                  <v-list-item-content>
+                    <v-list-item-title
+                      class="indigo--text subtitle-1"
+                      v-html="data.item.sales_person_name"
+                    ></v-list-item-title>
+                    <v-list-item-subtitle
+                      v-if="data.item.sales_person_name != data.item.name"
+                      v-html="`ID: ${data.item.name}`"
+                    ></v-list-item-subtitle>
+                  </v-list-item-content>
+                </template>
+              </template>
+            </v-autocomplete>
+          </v-col>
+        </v-row>
       </div>
     </v-card>
 
@@ -645,6 +682,8 @@ export default {
     date_menu: false,
     po_date_menu: false,
     addresses: [],
+    sales_persons: [],
+    sales_person: '',
     paid_change: 0,
     order_delivery_date: false,
     paid_change_rules: [],
@@ -927,6 +966,40 @@ export default {
     new_address() {
       evntBus.$emit('open_new_address', this.invoice_doc.customer);
     },
+    get_sales_person_names() {
+      const vm = this;      
+      if (vm.pos_profile.posa_local_storage && localStorage.sales_persons_storage) {
+        vm.sales_persons = JSON.parse(localStorage.getItem('sales_persons_storage'));
+      }
+      frappe.call({
+        method: 'posawesome.posawesome.api.posapp.get_sales_person_names',
+        callback: function (r) {
+          if (r.message) {
+            vm.sales_persons = r.message;
+            console.log(r.message);
+            if (vm.pos_profile.posa_local_storage) {
+              localStorage.setItem('sales_persons_storage', '');
+              localStorage.setItem(
+                'sales_persons_storage',
+                JSON.stringify(r.message)
+              );
+            }
+          }
+        },
+      });
+    },
+    salesPersonFilter(item, queryText, itemText) {
+      const textOne = item.sales_person_name
+        ? item.sales_person_name.toLowerCase()
+        : '';
+      const textTwo = item.name.toLowerCase();
+      const searchText = queryText.toLowerCase();
+
+      return (
+        textOne.indexOf(searchText) > -1 ||
+        textTwo.indexOf(searchText) > -1
+      );
+    },
     request_payment() {
       this.phone_dialog = false;
       const vm = this;
@@ -1171,6 +1244,7 @@ export default {
         }
         this.loyalty_amount = 0;
         this.get_addresses();
+        this.get_sales_person_names();
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
@@ -1252,6 +1326,16 @@ export default {
           text: `You can redeem customer credit upto ${this.available_customer_credit}`,
           color: 'error',
         });
+      }
+    },
+    sales_person() {
+      if(this.sales_person) {
+        this.invoice_doc.sales_team = [{
+          sales_person : this.sales_person,
+          allocated_percentage : 100
+        }];
+      } else {
+        this.invoice_doc.sales_team = [];
       }
     },
   },

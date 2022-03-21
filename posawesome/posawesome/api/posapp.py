@@ -325,6 +325,18 @@ def get_customer_names(pos_profile):
     )
     return customers
 
+@frappe.whitelist()
+def get_sales_person_names():    
+    sales_persons = frappe.db.sql(
+        """
+        SELECT name, sales_person_name
+        FROM `tabSales Person`        
+        ORDER by name
+        LIMIT 0, 10000
+        """,
+        as_dict=1,
+    )
+    return sales_persons
 
 @frappe.whitelist()
 def update_invoice(data):
