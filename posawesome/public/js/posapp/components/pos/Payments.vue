@@ -748,6 +748,7 @@ export default {
         return;
       }
 
+      this.reset_sales_team();
       this.submit_invoice();
       this.customer_credit_dict = [];
       this.redeem_customer_credit = false;
@@ -1065,6 +1066,9 @@ export default {
       };
       this.clear_all_amounts();
       this.customer_credit_dict.push(advance);
+    },
+    reset_sales_team(){
+      evntBus.$emit('reset_sales_team');
     },
   },
 
