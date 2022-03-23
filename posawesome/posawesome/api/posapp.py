@@ -24,6 +24,11 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 )
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
 
+try:
+    from hnl10n.api import update_widgets
+except:
+    pass
+
 # from posawesome import console
 
 
@@ -352,6 +357,13 @@ def update_invoice(data):
                 tax.included_in_print_rate = 1
 
     invoice_doc.save()
+
+    try:
+        update_widgets(invoice_doc.name, "Sales Invoice", "Sales Invoice Item")
+        invoice_doc = frappe.get_doc("Sales Invoice", invoice_doc.name)
+    except:
+        pass
+        
     return invoice_doc
 
 
@@ -713,11 +725,18 @@ def get_items_details(pos_profile, items_data):
                 fields=["uom", "conversion_factor"],
             )
 
-            serial_no_data = frappe.get_all(
-                "Serial No",
-                filters={"item_code": item_code, "status": "Active"},
-                fields=["name as serial_no"],
-            )
+            if warehouse == "":
+                serial_no_data = frappe.get_all(
+                    "Serial No",
+                    filters={"item_code": item_code, "status": "Active"},
+                    fields=["name as serial_no"],
+                )
+            else:
+                serial_no_data = frappe.get_all(
+                    "Serial No",
+                    filters={"item_code": item_code, "status": "Active", "warehouse": warehouse},
+                    fields=["name as serial_no"],
+                )
 
             batch_no_data = []
             from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -1403,3 +1422,38 @@ def get_customer_info(customer):
 
 def get_company_domain(company):
     return frappe.get_cached_value("Company", cstr(company), "domain")
+
+@frappe.whitelist()
+def get_sales_person():
+    result = {}
+    conditions = ""
+
+    permission_for_user = frappe.get_all("User Permission", filters={"user": frappe.session.user, "allow": "Sales Person"})
+    if len(permission_for_user) > 0:
+        conditions = "and up.user = '{}' ".format(frappe.session.user)
+
+    sales_person_data = frappe.db.sql(
+        """
+        SELECT
+            sp.name,
+            sp.sales_person_name
+        FROM
+            `tabSales Person` sp
+        INNER JOIN 
+            `tabUser Permission` up
+        ON
+            sp.sales_person_name = up.for_value
+        WHERE
+            sp.enabled = 1 
+            {}
+        ORDER BY
+            name asc
+            """.format(conditions),
+        as_dict=1,
+    )
+
+    if sales_person_data:
+        for sp in sales_person_data:
+            result[sp['name']] = sp
+
+    return result

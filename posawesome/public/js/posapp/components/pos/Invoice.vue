@@ -27,6 +27,8 @@
           class="pb-0 mb-2 pr-0"
         >
           <Customer></Customer>
+          <br>
+          <SalesPerson></SalesPerson>
         </v-col>
         <v-col
           v-if="!pos_profile.posa_allow_sales_order"
@@ -34,6 +36,8 @@
           class="pb-0 mb-2"
         >
           <Customer></Customer>
+          <br>
+          <SalesPerson></SalesPerson>
         </v-col>
         <v-col
           v-if="pos_profile.posa_allow_sales_order"
@@ -637,6 +641,7 @@
 <script>
 import { evntBus } from '../../bus';
 import Customer from './Customer.vue';
+import SalesPerson from './SalesPerson.vue';
 
 export default {
   data() {
@@ -676,11 +681,13 @@ export default {
         { text: __('Amount'), value: 'amount', align: 'center' },
         { text: __('is Offer'), value: 'posa_is_offer', align: 'center' },
       ],
+      sales_team: []
     };
   },
 
   components: {
     Customer,
+    SalesPerson,
   },
 
   computed: {
@@ -877,6 +884,7 @@ export default {
       this.discount_amount = 0;
       this.additional_discount_percentage = 0;
       evntBus.$emit('set_customer_readonly', false);
+      evntBus.$emit('reset_sales_team');
       this.cancel_dialog = false;
     },
 
@@ -967,6 +975,7 @@ export default {
       doc.return_against = this.invoice_doc.return_against;
       doc.posa_offers = this.posa_offers;
       doc.posa_coupons = this.posa_coupons;
+      doc.sales_team = this.sales_team;
       return doc;
     },
 
@@ -2287,6 +2296,9 @@ export default {
       this.additional_discount_percentage =
         -data.return_doc.additional_discount_percentage;
       this.return_doc = data.return_doc;
+    });
+    evntBus.$on('set_sales_team', (sales_team) => {
+      this.sales_team = sales_team;
     });
     document.addEventListener('keydown', this.shortOpenPayment.bind(this));
     document.addEventListener('keydown', this.shortDeleteFirstItem.bind(this));

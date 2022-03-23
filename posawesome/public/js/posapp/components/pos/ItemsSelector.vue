@@ -77,6 +77,9 @@
                   hide-default-footer
                   @click:row="add_item"
                 >
+                  <template v-slot:item_code="{ item }">
+                    {{ formtCurrency(item_code) }}
+                  </template>
                   <template v-slot:item.rate="{ item }">
                     {{ formtCurrency(item.rate) }}
                   </template>
@@ -141,6 +144,7 @@ export default {
     first_search: '',
     itemsPerPage: 1000,
     items_headers: [
+      { text: __('Item Code'), align: 'code', sortable: true, value: 'item_code' },
       { text: __('Name'), align: 'start', sortable: true, value: 'item_name' },
       { text: __('Rate'), value: 'rate', align: 'start' },
       { text: __('Available QTY'), value: 'actual_qty', align: 'start' },
