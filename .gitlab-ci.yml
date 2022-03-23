@@ -1,0 +1,11 @@
+# Global Settings
+variables:
+  GIT_CLEAN_FLAGS: -ffdx
+efactura_gt:
+  variables:
+    UPSTREAM_APP: posawesome
+    UPSTREAM_BRANCH: $CI_COMMIT_REF_NAME
+  trigger:
+    project: erpnext/ERPNext-13-ready
+    branch: master
+    strategy: depend
