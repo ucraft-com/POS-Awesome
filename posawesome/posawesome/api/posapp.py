@@ -317,7 +317,6 @@ def get_customer_names(pos_profile):
         FROM `tabCustomer`
         WHERE {0}
         ORDER by name
-        LIMIT 0, 10000 
         """.format(
             condition
         ),
