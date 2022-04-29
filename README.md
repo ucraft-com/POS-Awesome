@@ -1,4 +1,4 @@
-## POS AWESOME - MAN Version
+## POS AWESOME
 
 ### An open-source Point of Sale for [Erpnext](https://github.com/frappe/erpnext) using [Vue.js](https://github.com/vuejs/vue) and [Vuetify](https://github.com/vuetifyjs/vuetify)
 
