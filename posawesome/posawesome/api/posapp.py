@@ -322,7 +322,6 @@ def get_customer_names(pos_profile):
         FROM `tabCustomer`
         WHERE {0}
         ORDER by name
-        LIMIT 0, 10000 
         """.format(
             condition
         ),
@@ -800,18 +799,20 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None):
 
 
 def get_stock_availability(item_code, warehouse):
-    latest_sle = frappe.db.sql(
-        """select qty_after_transaction
-		from `tabStock Ledger Entry`
-		where item_code = %s and warehouse = %s
-		order by posting_date desc, posting_time desc
-		limit 1""",
-        (item_code, warehouse),
-        as_dict=1,
+    actual_qty = (
+        frappe.db.get_value(
+            "Stock Ledger Entry",
+            filters={
+                "item_code": item_code,
+                "warehouse": warehouse,
+                "is_cancelled": 0,
+            },
+            fieldname="qty_after_transaction",
+            order_by="posting_date desc, posting_time desc, creation desc",
+        )
+        or 0.0
     )
-
-    sle_qty = latest_sle[0].qty_after_transaction or 0 if latest_sle else 0
-    return sle_qty
+    return actual_qty
 
 
 @frappe.whitelist()

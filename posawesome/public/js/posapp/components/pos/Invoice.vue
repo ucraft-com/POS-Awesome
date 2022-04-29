@@ -587,7 +587,7 @@
                 color="warning"
                 dark
                 @click="get_draft_invoices"
-                >{{ __('Hold') }}</v-btn
+                >{{ __('Held') }}</v-btn
               >
             </v-col>
             <v-col cols="6" class="pa-1">
@@ -618,7 +618,7 @@
                 color="success"
                 dark
                 @click="new_invoice"
-                >{{ __('New') }}</v-btn
+                >{{ __('Save/New') }}</v-btn
               >
             </v-col>
             <v-col cols="12" class="pa-1">
