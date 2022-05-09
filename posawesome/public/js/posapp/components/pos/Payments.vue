@@ -793,6 +793,7 @@ export default {
       this.customer_credit_dict = [];
       this.redeem_customer_credit = false;
       this.is_cashback = true;
+      this.sales_person = '';
 
       evntBus.$emit('new_invoice', 'false');
       this.back_to_invoice();
