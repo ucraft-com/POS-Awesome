@@ -24,7 +24,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 )
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
 
-# from posawesome import console
+from posawesome import console
 
 
 @frappe.whitelist()
@@ -345,7 +345,13 @@ def update_invoice(data):
             invoice_doc.update_stock = 0
 
     for item in invoice_doc.items:
+        if not item.rate or item.rate == 0:
+            item.price_list_rate = 0.00
+            item.is_free_item = 1
+        else:
+            item.is_free_item = 0
         add_taxes_from_tax_template(item, invoice_doc)
+
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"):
         if invoice_doc.get("taxes"):
             for tax in invoice_doc.taxes:
