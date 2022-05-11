@@ -175,7 +175,7 @@
               :label="frappe._('You can redeem upto')"
               background-color="white"
               hide-details
-              :value="formtCurrency(available_pioints_amount)"
+              :value="formtFloat(available_pioints_amount)"
               :prefix="invoice_doc.currency"
               disabled
             ></v-text-field>
@@ -657,6 +657,8 @@ export default {
     pos_settings: '',
     customer_info: '',
     mpesa_modes: [],
+    float_precision: 2,
+    currency_precision: 2,
   }),
 
   methods: {
@@ -845,7 +847,15 @@ export default {
     },
     formtCurrency(value) {
       value = parseFloat(value);
-      return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+      return value
+        .toFixed(this.currency_precision)
+        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    },
+    formtFloat(value) {
+      value = parseFloat(value);
+      return value
+        .toFixed(this.float_precision)
+        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
     shortPay(e) {
       if (e.key === 'x' && (e.ctrlKey || e.metaKey)) {
@@ -1000,7 +1010,7 @@ export default {
                       evntBus.$emit('unfreeze');
                       evntBus.$emit('show_mesage', {
                         text: __('Payment of {0} received successfully.', [
-                          format_currency(
+                          formtCurrency(
                             message.grand_total,
                             vm.invoice_doc.currency,
                             0
@@ -1081,19 +1091,19 @@ export default {
 
       if (!this.is_cashback) total = 0;
 
-      return total.toFixed(2);
+      return total.toFixed(this.currency_precision);
     },
     diff_payment() {
       let diff_payment = (
         this.invoice_doc.grand_total - this.total_payments
-      ).toFixed(2);
+      ).toFixed(this.currency_precision);
       this.paid_change = -diff_payment;
       return diff_payment;
     },
     credit_change() {
       let change = -this.diff_payment;
       if (this.paid_change > change) return 0;
-      return (this.paid_change - change).toFixed(2);
+      return (this.paid_change - change).toFixed(this.currency_precision);
     },
     diff_lable() {
       let lable = this.diff_payment < 0 ? 'Change' : 'To Be Paid';
@@ -1167,7 +1177,9 @@ export default {
         this.is_credit_sale = 0;
         this.is_write_off_change = 0;
         if (default_payment) {
-          default_payment.amount = invoice_doc.grand_total.toFixed(2);
+          default_payment.amount = invoice_doc.grand_total.toFixed(
+            this.currency_precision
+          );
         }
         this.loyalty_amount = 0;
         this.get_addresses();
@@ -1175,6 +1187,10 @@ export default {
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
         this.get_mpesa_modes();
+        this.float_precision =
+          frappe.defaults.get_default('float_precision') || 2;
+        this.currency_precision =
+          frappe.defaults.get_default('currency_precision') || 2;
       });
       evntBus.$on('add_the_new_address', (data) => {
         this.addresses.push(data);

@@ -81,7 +81,7 @@
                     {{ formtCurrency(item.rate) }}
                   </template>
                   <template v-slot:item.actual_qty="{ item }">
-                    {{ formtCurrency(item.actual_qty) }}
+                    {{ formtFloat(item.actual_qty) }}
                   </template>
                 </v-data-table>
               </template>
@@ -151,6 +151,8 @@ export default {
     couponsCount: 0,
     appliedCouponsCount: 0,
     customer_price_list: null,
+    float_precision: 2,
+    currency_precision: 2,
   }),
 
   watch: {
@@ -349,7 +351,15 @@ export default {
     },
     formtCurrency(value) {
       value = parseFloat(value);
-      return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+      return value
+        .toFixed(this.currency_precision)
+        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    },
+    formtFloat(value) {
+      value = parseFloat(value);
+      return value
+        .toFixed(this.float_precision)
+        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
   },
 
@@ -440,6 +450,10 @@ export default {
       this.pos_profile = data.pos_profile;
       this.get_items();
       this.get_items_groups();
+      this.float_precision =
+        frappe.defaults.get_default('float_precision') || 2;
+      this.currency_precision =
+        frappe.defaults.get_default('currency_precision') || 2;
     });
     evntBus.$on('update_cur_items_details', () => {
       this.update_cur_items_details();
