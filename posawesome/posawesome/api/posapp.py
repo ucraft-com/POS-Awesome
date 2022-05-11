@@ -69,10 +69,11 @@ def create_opening_voucher(pos_profile, company, balance_details):
             "user": frappe.session.user,
             "pos_profile": pos_profile,
             "company": company,
+            "docstatus": 1,
         }
     )
     new_pos_opening.set("balance_details", balance_details)
-    new_pos_opening.submit()
+    new_pos_opening.insert(ignore_permissions=True)
 
     data = {}
     data["pos_opening_shift"] = new_pos_opening.as_dict()
