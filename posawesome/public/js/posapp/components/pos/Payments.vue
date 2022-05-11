@@ -793,6 +793,7 @@ export default {
       this.customer_credit_dict = [];
       this.redeem_customer_credit = false;
       this.is_cashback = true;
+      this.sales_person = '';
 
       evntBus.$emit('new_invoice', 'false');
       this.back_to_invoice();
@@ -977,16 +978,20 @@ export default {
       evntBus.$emit('open_new_address', this.invoice_doc.customer);
     },
     get_sales_person_names() {
-      const vm = this;      
-      if (vm.pos_profile.posa_local_storage && localStorage.sales_persons_storage) {
-        vm.sales_persons = JSON.parse(localStorage.getItem('sales_persons_storage'));
+      const vm = this;
+      if (
+        vm.pos_profile.posa_local_storage &&
+        localStorage.sales_persons_storage
+      ) {
+        vm.sales_persons = JSON.parse(
+          localStorage.getItem('sales_persons_storage')
+        );
       }
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.get_sales_person_names',
         callback: function (r) {
           if (r.message) {
             vm.sales_persons = r.message;
-            console.log(r.message);
             if (vm.pos_profile.posa_local_storage) {
               localStorage.setItem('sales_persons_storage', '');
               localStorage.setItem(
@@ -1006,8 +1011,7 @@ export default {
       const searchText = queryText.toLowerCase();
 
       return (
-        textOne.indexOf(searchText) > -1 ||
-        textTwo.indexOf(searchText) > -1
+        textOne.indexOf(searchText) > -1 || textTwo.indexOf(searchText) > -1
       );
     },
     request_payment() {
@@ -1345,11 +1349,13 @@ export default {
       }
     },
     sales_person() {
-      if(this.sales_person) {
-        this.invoice_doc.sales_team = [{
-          sales_person : this.sales_person,
-          allocated_percentage : 100
-        }];
+      if (this.sales_person) {
+        this.invoice_doc.sales_team = [
+          {
+            sales_person: this.sales_person,
+            allocated_percentage: 100,
+          },
+        ];
       } else {
         this.invoice_doc.sales_team = [];
       }
