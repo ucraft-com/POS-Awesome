@@ -12,7 +12,7 @@
         color="deep-purple accent-4"
       ></v-progress-linear>
       <v-row class="items px-2 py-1">
-        <v-col cols="8" class="pb-0 mb-2">
+        <v-col class="pb-0 mb-2">
           <v-text-field
             dense
             clearable
@@ -26,9 +26,24 @@
             v-model="debounce_search"
             @keydown.esc="esc_event"
             @keydown.enter="enter_event"
+            ref="debounce_search"
           ></v-text-field>
         </v-col>
-        <v-col cols="1" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
+        <v-col cols="3" class="pb-0 mb-2" v-if="pos_profile.posa_input_qty">
+          <v-text-field
+            dense
+            outlined
+            color="indigo"
+            :label="frappe._('QTY')"
+            background-color="white"
+            hide-details
+            v-model.number="qty"
+            type="number"
+            @keydown.enter="enter_event"
+            @keydown.esc="esc_event"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="2" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
           <v-checkbox
             v-model="new_line"
             color="orange"
@@ -164,6 +179,7 @@ export default {
     float_precision: 2,
     currency_precision: 2,
     new_line: false,
+    qty: 1,
   }),
 
   watch: {
@@ -270,9 +286,11 @@ export default {
       this.first_search = null;
       this.debounce_search = null;
       this.flags.serial_no = null;
+      this.qty = 1;
+      this.$refs.debounce_search.focus();
     },
     get_item_qty(first_search) {
-      let scal_qty = 1;
+      let scal_qty = Math.abs(this.qty);
       if (first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
         let pesokg1 = first_search.substr(7, 5);
         let pesokg;
@@ -308,6 +326,8 @@ export default {
     esc_event() {
       this.search = null;
       this.first_search = null;
+      this.qty = 1;
+      this.$refs.debounce_search.focus();
     },
     update_items_details(items) {
       const vm = this;
