@@ -665,6 +665,7 @@ export default {
       cancel_dialog: false,
       float_precision: 2,
       currency_precision: 2,
+      new_line: false,
       items_headers: [
         {
           text: __('Name'),
@@ -756,14 +757,17 @@ export default {
       if (!item.uom) {
         item.uom = item.stock_uom;
       }
-      const index = this.items.findIndex(
-        (el) =>
-          el.item_code === item.item_code &&
-          el.uom === item.uom &&
-          !el.posa_is_offer &&
-          !el.posa_is_replace
-      );
-      if (index === -1) {
+      let index = -1;
+      if (!this.new_item) {
+        index = this.items.findIndex(
+          (el) =>
+            el.item_code === item.item_code &&
+            el.uom === item.uom &&
+            !el.posa_is_offer &&
+            !el.posa_is_replace
+        );
+      }
+      if (index === -1 || this.new_line) {
         const new_item = this.get_new_item(item);
         if (item.has_serial_no && item.to_set_serial_no) {
           new_item.serial_no_selected = [];
@@ -2302,6 +2306,9 @@ export default {
       this.additional_discount_percentage =
         -data.return_doc.additional_discount_percentage;
       this.return_doc = data.return_doc;
+    });
+    evntBus.$on('set_new_line', (data) => {
+      this.new_line = data;
     });
     document.addEventListener('keydown', this.shortOpenPayment.bind(this));
     document.addEventListener('keydown', this.shortDeleteFirstItem.bind(this));

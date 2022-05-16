@@ -12,7 +12,7 @@
         color="deep-purple accent-4"
       ></v-progress-linear>
       <v-row class="items px-2 py-1">
-        <v-col cols="12" class="pb-0 mb-2">
+        <v-col cols="8" class="pb-0 mb-2">
           <v-text-field
             dense
             clearable
@@ -27,6 +27,16 @@
             @keydown.esc="esc_event"
             @keydown.enter="enter_event"
           ></v-text-field>
+        </v-col>
+        <v-col cols="1" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
+          <v-checkbox
+            v-model="new_line"
+            color="orange"
+            value="true"
+            label="NLine"
+            dense
+            hide-details
+          ></v-checkbox>
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">
@@ -153,6 +163,7 @@ export default {
     customer_price_list: null,
     float_precision: 2,
     currency_precision: 2,
+    new_line: false,
   }),
 
   watch: {
@@ -161,6 +172,9 @@ export default {
     },
     customer_price_list() {
       this.get_items();
+    },
+    new_line() {
+      evntBus.$emit('set_new_line', this.new_line);
     },
   },
 
