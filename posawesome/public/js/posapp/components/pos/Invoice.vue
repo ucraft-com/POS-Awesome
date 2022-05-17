@@ -68,7 +68,7 @@
             hide-default-footer
           >
             <template v-slot:item.qty="{ item }">{{
-              formtCurrency(item.qty)
+              formtFloat(item.qty)
             }}</template>
             <template v-slot:item.rate="{ item }">{{
               formtCurrency(item.rate)
@@ -496,7 +496,7 @@
           <v-row no-gutters class="pa-1 pt-9 pr-1">
             <v-col cols="6" class="pa-1">
               <v-text-field
-                :value="formtCurrency(total_qty)"
+                :value="formtFloat(total_qty)"
                 :label="frappe._('Total Qty')"
                 outlined
                 dense
@@ -663,6 +663,9 @@ export default {
       expanded: [],
       singleExpand: true,
       cancel_dialog: false,
+      float_precision: 2,
+      currency_precision: 2,
+      new_line: false,
       items_headers: [
         {
           text: __('Name'),
@@ -690,14 +693,14 @@ export default {
       this.items.forEach((item) => {
         qty += item.qty;
       });
-      return flt(qty).toFixed(2);
+      return flt(qty).toFixed(this.float_precision);
     },
     Total() {
       let sum = 0;
       this.items.forEach((item) => {
         sum += item.qty * item.rate;
       });
-      return flt(sum).toFixed(2);
+      return flt(sum).toFixed(this.currency_precision);
     },
     subtotal() {
       this.close_payments();
@@ -706,14 +709,14 @@ export default {
         sum += item.qty * item.rate;
       });
       sum -= flt(this.discount_amount);
-      return flt(sum).toFixed(2);
+      return flt(sum).toFixed(this.currency_precision);
     },
     total_items_discount_amount() {
       let sum = 0;
       this.items.forEach((item) => {
         sum += item.qty * item.discount_amount;
       });
-      return flt(sum).toFixed(2);
+      return flt(sum).toFixed(this.float_precision);
     },
   },
 
@@ -754,14 +757,17 @@ export default {
       if (!item.uom) {
         item.uom = item.stock_uom;
       }
-      const index = this.items.findIndex(
-        (el) =>
-          el.item_code === item.item_code &&
-          el.uom === item.uom &&
-          !el.posa_is_offer &&
-          !el.posa_is_replace
-      );
-      if (index === -1) {
+      let index = -1;
+      if (!this.new_item) {
+        index = this.items.findIndex(
+          (el) =>
+            el.item_code === item.item_code &&
+            el.uom === item.uom &&
+            !el.posa_is_offer &&
+            !el.posa_is_replace
+        );
+      }
+      if (index === -1 || this.new_line) {
         const new_item = this.get_new_item(item);
         if (item.has_serial_no && item.to_set_serial_no) {
           new_item.serial_no_selected = [];
@@ -1393,7 +1399,7 @@ export default {
         if (value < item.price_list_rate) {
           item.discount_amount = (
             flt(item.price_list_rate) - flt(value)
-          ).toFixed(2);
+          ).toFixed(this.currency_precision);
         } else if (value < 0) {
           item.rate = item.price_list_rate;
           item.discount_amount = 0;
@@ -1416,10 +1422,10 @@ export default {
           item.rate = (
             flt(item.price_list_rate) -
             (flt(item.price_list_rate) * flt(value)) / 100
-          ).toFixed(2);
+          ).toFixed(this.currency_precision);
           item.discount_amount = (
             flt(item.price_list_rate) - flt(item.rate)
-          ).toFixed(2);
+          ).toFixed(this.currency_precision);
         }
       }
     },
@@ -1436,11 +1442,11 @@ export default {
           (flt(item.price_list_rate) * flt(item.discount_percentage)) / 100;
         item.discount_amount = (
           flt(item.price_list_rate) - flt(item.rate)
-        ).toFixed(2);
+        ).toFixed(this.currency_precision);
       } else if (item.discount_amount) {
         item.rate = (
           flt(item.price_list_rate) - flt(item.discount_amount)
-        ).toFixed(2);
+        ).toFixed(this.currency_precision);
       }
     },
 
@@ -1497,7 +1503,16 @@ export default {
 
     formtCurrency(value) {
       value = parseFloat(value);
-      return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+      return value
+        .toFixed(this.currency_precision)
+        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    },
+
+    formtFloat(value) {
+      value = parseFloat(value);
+      return value
+        .toFixed(this.float_precision)
+        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
 
     shortOpenPayment(e) {
@@ -2181,7 +2196,7 @@ export default {
         this.discount_amount = (
           (flt(this.Total) * flt(offer.discount_percentage)) /
           100
-        ).toFixed(2);
+        ).toFixed(this.currency_precision);
         this.discount_percentage_offer_name = offer.name;
       }
     },
@@ -2250,6 +2265,10 @@ export default {
       this.customer = data.pos_profile.customer;
       this.pos_opening_shift = data.pos_opening_shift;
       this.stock_settings = data.stock_settings;
+      this.float_precision =
+        frappe.defaults.get_default('float_precision') || 2;
+      this.currency_precision =
+        frappe.defaults.get_default('currency_precision') || 2;
     });
     evntBus.$on('add_item', (item) => {
       this.add_item(item);
@@ -2287,6 +2306,9 @@ export default {
       this.additional_discount_percentage =
         -data.return_doc.additional_discount_percentage;
       this.return_doc = data.return_doc;
+    });
+    evntBus.$on('set_new_line', (data) => {
+      this.new_line = data;
     });
     document.addEventListener('keydown', this.shortOpenPayment.bind(this));
     document.addEventListener('keydown', this.shortDeleteFirstItem.bind(this));

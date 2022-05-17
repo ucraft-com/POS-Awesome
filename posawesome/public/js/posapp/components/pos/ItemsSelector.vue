@@ -12,7 +12,7 @@
         color="deep-purple accent-4"
       ></v-progress-linear>
       <v-row class="items px-2 py-1">
-        <v-col cols="12" class="pb-0 mb-2">
+        <v-col class="pb-0 mb-2">
           <v-text-field
             dense
             clearable
@@ -26,7 +26,32 @@
             v-model="debounce_search"
             @keydown.esc="esc_event"
             @keydown.enter="enter_event"
+            ref="debounce_search"
           ></v-text-field>
+        </v-col>
+        <v-col cols="3" class="pb-0 mb-2" v-if="pos_profile.posa_input_qty">
+          <v-text-field
+            dense
+            outlined
+            color="indigo"
+            :label="frappe._('QTY')"
+            background-color="white"
+            hide-details
+            v-model.number="qty"
+            type="number"
+            @keydown.enter="enter_event"
+            @keydown.esc="esc_event"
+          ></v-text-field>
+        </v-col>
+        <v-col cols="2" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
+          <v-checkbox
+            v-model="new_line"
+            color="orange"
+            value="true"
+            label="NLine"
+            dense
+            hide-details
+          ></v-checkbox>
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">
@@ -69,7 +94,7 @@
             <div class="my-0 py-0 overflow-y-auto" style="max-height: 65vh">
               <template>
                 <v-data-table
-                  :headers="items_headers"
+                  :headers="getItmesHeaders()"
                   :items="filtred_items"
                   item-key="item_code"
                   class="elevation-1"
@@ -81,7 +106,7 @@
                     {{ formtCurrency(item.rate) }}
                   </template>
                   <template v-slot:item.actual_qty="{ item }">
-                    {{ formtCurrency(item.actual_qty) }}
+                    {{ formtFloat(item.actual_qty) }}
                   </template>
                 </v-data-table>
               </template>
@@ -140,17 +165,15 @@ export default {
     search: '',
     first_search: '',
     itemsPerPage: 1000,
-    items_headers: [
-      { text: __('Name'), align: 'start', sortable: true, value: 'item_name' },
-      { text: __('Rate'), value: 'rate', align: 'start' },
-      { text: __('Available QTY'), value: 'actual_qty', align: 'start' },
-      { text: __('UOM'), value: 'stock_uom', align: 'start' },
-    ],
     offersCount: 0,
     appliedOffersCount: 0,
     couponsCount: 0,
     appliedCouponsCount: 0,
     customer_price_list: null,
+    float_precision: 2,
+    currency_precision: 2,
+    new_line: false,
+    qty: 1,
   }),
 
   watch: {
@@ -159,6 +182,9 @@ export default {
     },
     customer_price_list() {
       this.get_items();
+    },
+    new_line() {
+      evntBus.$emit('set_new_line', this.new_line);
     },
   },
 
@@ -227,11 +253,39 @@ export default {
         });
       }
     },
+    getItmesHeaders() {
+      const items_headers = [
+        {
+          text: __('Name'),
+          align: 'start',
+          sortable: true,
+          value: 'item_name',
+        },
+        {
+          text: __('Code'),
+          align: 'start',
+          sortable: true,
+          value: 'item_code',
+        },
+        { text: __('Rate'), value: 'rate', align: 'start' },
+        { text: __('Available QTY'), value: 'actual_qty', align: 'start' },
+        { text: __('UOM'), value: 'stock_uom', align: 'start' },
+      ];
+      if (!this.pos_profile.posa_display_item_code) {
+        items_headers.splice(1, 1);
+      }
+
+      return items_headers;
+    },
     add_item(item) {
       if (item.has_variants) {
         evntBus.$emit('open_variants_model', item, this.items);
       } else {
+        if (!item.qty || item.qty === 1) {
+          item.qty = Math.abs(this.qty);
+        }
         evntBus.$emit('add_item', item);
+        this.qty = 1;
       }
     },
     enter_event() {
@@ -254,9 +308,11 @@ export default {
       this.first_search = null;
       this.debounce_search = null;
       this.flags.serial_no = null;
+      this.qty = 1;
+      this.$refs.debounce_search.focus();
     },
     get_item_qty(first_search) {
-      let scal_qty = 1;
+      let scal_qty = Math.abs(this.qty);
       if (first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
         let pesokg1 = first_search.substr(7, 5);
         let pesokg;
@@ -292,6 +348,8 @@ export default {
     esc_event() {
       this.search = null;
       this.first_search = null;
+      this.qty = 1;
+      this.$refs.debounce_search.focus();
     },
     update_items_details(items) {
       const vm = this;
@@ -349,7 +407,15 @@ export default {
     },
     formtCurrency(value) {
       value = parseFloat(value);
-      return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+      return value
+        .toFixed(this.currency_precision)
+        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    },
+    formtFloat(value) {
+      value = parseFloat(value);
+      return value
+        .toFixed(this.float_precision)
+        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
   },
 
@@ -440,6 +506,10 @@ export default {
       this.pos_profile = data.pos_profile;
       this.get_items();
       this.get_items_groups();
+      this.float_precision =
+        frappe.defaults.get_default('float_precision') || 2;
+      this.currency_precision =
+        frappe.defaults.get_default('currency_precision') || 2;
     });
     evntBus.$on('update_cur_items_details', () => {
       this.update_cur_items_details();

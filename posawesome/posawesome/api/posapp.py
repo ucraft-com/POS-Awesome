@@ -24,7 +24,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 )
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
 
-# from posawesome import console
+from posawesome import console
 
 
 @frappe.whitelist()
@@ -69,10 +69,11 @@ def create_opening_voucher(pos_profile, company, balance_details):
             "user": frappe.session.user,
             "pos_profile": pos_profile,
             "company": company,
+            "docstatus": 1,
         }
     )
     new_pos_opening.set("balance_details", balance_details)
-    new_pos_opening.submit()
+    new_pos_opening.insert(ignore_permissions=True)
 
     data = {}
     data["pos_opening_shift"] = new_pos_opening.as_dict()
@@ -324,6 +325,18 @@ def get_customer_names(pos_profile):
     )
     return customers
 
+@frappe.whitelist()
+def get_sales_person_names():    
+    sales_persons = frappe.db.sql(
+        """
+        SELECT name, sales_person_name
+        FROM `tabSales Person`        
+        ORDER by name
+        LIMIT 0, 10000
+        """,
+        as_dict=1,
+    )
+    return sales_persons
 
 @frappe.whitelist()
 def update_invoice(data):
@@ -344,7 +357,13 @@ def update_invoice(data):
             invoice_doc.update_stock = 0
 
     for item in invoice_doc.items:
+        if not item.rate or item.rate == 0:
+            item.price_list_rate = 0.00
+            item.is_free_item = 1
+        else:
+            item.is_free_item = 0
         add_taxes_from_tax_template(item, invoice_doc)
+
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"):
         if invoice_doc.get("taxes"):
             for tax in invoice_doc.taxes:
