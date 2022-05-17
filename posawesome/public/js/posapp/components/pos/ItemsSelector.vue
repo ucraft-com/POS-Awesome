@@ -281,7 +281,11 @@ export default {
       if (item.has_variants) {
         evntBus.$emit('open_variants_model', item, this.items);
       } else {
+        if (!item.qty || item.qty === 1) {
+          item.qty = Math.abs(this.qty);
+        }
         evntBus.$emit('add_item', item);
+        this.qty = 1;
       }
     },
     enter_event() {
