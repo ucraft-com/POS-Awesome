@@ -94,7 +94,7 @@
             <div class="my-0 py-0 overflow-y-auto" style="max-height: 65vh">
               <template>
                 <v-data-table
-                  :headers="items_headers"
+                  :headers="getItmesHeaders()"
                   :items="filtred_items"
                   item-key="item_code"
                   class="elevation-1"
@@ -165,12 +165,6 @@ export default {
     search: '',
     first_search: '',
     itemsPerPage: 1000,
-    items_headers: [
-      { text: __('Name'), align: 'start', sortable: true, value: 'item_name' },
-      { text: __('Rate'), value: 'rate', align: 'start' },
-      { text: __('Available QTY'), value: 'actual_qty', align: 'start' },
-      { text: __('UOM'), value: 'stock_uom', align: 'start' },
-    ],
     offersCount: 0,
     appliedOffersCount: 0,
     couponsCount: 0,
@@ -258,6 +252,30 @@ export default {
           },
         });
       }
+    },
+    getItmesHeaders() {
+      const items_headers = [
+        {
+          text: __('Name'),
+          align: 'start',
+          sortable: true,
+          value: 'item_name',
+        },
+        {
+          text: __('Code'),
+          align: 'start',
+          sortable: true,
+          value: 'item_code',
+        },
+        { text: __('Rate'), value: 'rate', align: 'start' },
+        { text: __('Available QTY'), value: 'actual_qty', align: 'start' },
+        { text: __('UOM'), value: 'stock_uom', align: 'start' },
+      ];
+      if (!this.pos_profile.posa_display_item_code) {
+        items_headers.splice(1, 1);
+      }
+
+      return items_headers;
     },
     add_item(item) {
       if (item.has_variants) {
