@@ -1,0 +1,35 @@
+{
+ "content": null,
+ "creation": "2020-09-13 03:04:25.020107",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2020-09-23 14:53:30.009891",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "posapp",
+ "owner": "Administrator",
+ "page_name": "posapp",
+ "roles": [
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "POS Awesome"
+}

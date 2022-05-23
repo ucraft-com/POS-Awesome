@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include posawesome *.css
+recursive-include posawesome *.csv
+recursive-include posawesome *.html
+recursive-include posawesome *.ico
+recursive-include posawesome *.js
+recursive-include posawesome *.json
+recursive-include posawesome *.md
+recursive-include posawesome *.png
+recursive-include posawesome *.py
+recursive-include posawesome *.svg
+recursive-include posawesome *.txt
+recursive-exclude posawesome *.pyc

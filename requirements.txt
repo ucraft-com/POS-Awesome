@@ -1,0 +1,2 @@
+# frappe   # https://github.com/frappe/frappe is installed during bench-init
+# erpnext   # https://github.com/frappe/erpnext it should be installed manually

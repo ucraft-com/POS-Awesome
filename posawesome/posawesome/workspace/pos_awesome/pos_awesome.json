@@ -1,0 +1,66 @@
+{
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-10-21 01:32:40.829028",
+ "developer_mode_only": 0,
+ "disable_user_customization": 1,
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "extends_another_page": 0,
+ "hide_custom": 0,
+ "icon": "retail",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "label": "POS Awesome",
+ "links": [],
+ "modified": "2021-07-29 22:32:00.550981",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "POS Awesome",
+ "onboarding": "",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": [
+  {
+   "label": "POS Awesome",
+   "link_to": "posapp",
+   "type": "Page"
+  },
+  {
+   "label": "POS Profile",
+   "link_to": "POS Profile",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "POS Opening Shift",
+   "link_to": "POS Opening Shift",
+   "type": "DocType"
+  },
+  {
+   "label": "POS Closing Shift",
+   "link_to": "POS Closing Shift",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "POS Offers",
+   "link_to": "POS Offer",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "POS Coupons",
+   "link_to": "POS Coupon",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Referral Code",
+   "link_to": "Referral Code",
+   "type": "DocType"
+  }
+ ]
+}
