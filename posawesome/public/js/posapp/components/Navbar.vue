@@ -1,4 +1,5 @@
 <template>
+
   <nav>
     <v-app-bar app height="40" class="elevation-2">
       <v-app-bar-nav-icon
@@ -11,7 +12,7 @@
         class="text-uppercase indigo--text"
       >
         <span class="font-weight-light">pos</span>
-        <span>awesome</span>
+        <span>ASSM</span>
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
@@ -147,7 +148,7 @@ export default {
       snack: false,
       snackColor: '',
       snackText: '',
-      company: 'POS Awesome',
+      company: 'POS anas',
       company_img: '/assets/erpnext/images/erpnext-logo.svg',
       pos_profile: '',
       freeze: false,
@@ -249,7 +250,6 @@ export default {
   },
 };
 </script>
-
 <style scoped>
 .margen-top {
   margin-top: 0px;
