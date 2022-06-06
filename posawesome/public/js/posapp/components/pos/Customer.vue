@@ -92,7 +92,8 @@ export default {
       });
     },
     new_customer() {
-      evntBus.$emit('open_new_customer');
+      //evntBus.$emit('open_new_customer');
+      evntBus.$emit('open_validacion_nit');
     },
     edit_customer() {
       evntBus.$emit('open_edit_customer');
