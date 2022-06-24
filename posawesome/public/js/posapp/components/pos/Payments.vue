@@ -602,6 +602,43 @@
             </v-autocomplete>
           </v-col>
         </v-row>
+
+        <v-row class="pb-0 mb-2" align="start">
+          <v-col cols="12">
+            <v-autocomplete
+              dense
+              clearable
+              auto-select-first
+              outlined
+              color="indigo"
+              :label="frappe._('Sales Partner')"
+              v-model="sales_partner"
+              :items="sales_partners"
+              item-text="partner_name"
+              item-value="name"
+              background-color="white"
+              :no-data-text="__('Sales Partner not found')"
+              hide-details
+              :filter="salesPartnerFilter"
+              :disabled="readonly"
+            >
+              <template v-slot:item="data">
+                <template>
+                  <v-list-item-content>
+                    <v-list-item-title
+                      class="indigo--text subtitle-1"
+                      v-html="data.item.partner_name"
+                    ></v-list-item-title>
+                    <v-list-item-subtitle
+                      v-if="data.item.partner_name != data.item.name"
+                      v-html="`ID: ${data.item.name}`"
+                    ></v-list-item-subtitle>
+                  </v-list-item-content>
+                </template>
+              </template>
+            </v-autocomplete>
+          </v-col>
+        </v-row>
       </div>
     </v-card>
 
@@ -684,6 +721,7 @@ export default {
     addresses: [],
     sales_persons: [],
     sales_person: '',
+    sales_partner:'',
     paid_change: 0,
     order_delivery_date: false,
     paid_change_rules: [],
@@ -794,7 +832,7 @@ export default {
       this.redeem_customer_credit = false;
       this.is_cashback = true;
       this.sales_person = '';
-
+      this.sales_partner = '';
       evntBus.$emit('new_invoice', 'false');
       this.back_to_invoice();
     },
@@ -1014,6 +1052,45 @@ export default {
         textOne.indexOf(searchText) > -1 || textTwo.indexOf(searchText) > -1
       );
     },
+
+    get_sales_partner_names() {
+      const vm = this;
+      if (
+        vm.pos_profile.posa_local_storage &&
+        localStorage.sales_partners_storage
+      ) {
+        vm.sales_persons = JSON.parse(
+          localStorage.getItem('sales_partners_storage')
+        );
+      }
+      frappe.call({
+        method: 'posawesome.posawesome.api.posapp.get_sales_partner_names',
+        callback: function (r) {
+          if (r.message) {
+            vm.sales_partners = r.message;
+            if (vm.pos_profile.posa_local_storage) {
+              localStorage.setItem('sales_partner_storage', '');
+              localStorage.setItem(
+                'sales_partners_storage',
+                JSON.stringify(r.message)
+              );
+            }
+          }
+        },
+      });
+    },
+    salesPartnerFilter(item, queryText, itemText) {
+      const textOne = item.partner_name
+        ? item.partner_name.toLowerCase()
+        : '';
+      const textTwo = item.name.toLowerCase();
+      const searchText = queryText.toLowerCase();
+
+      return (
+        textOne.indexOf(searchText) > -1 || textTwo.indexOf(searchText) > -1
+      );
+    },
+
     request_payment() {
       this.phone_dialog = false;
       const vm = this;
@@ -1261,6 +1338,7 @@ export default {
         this.loyalty_amount = 0;
         this.get_addresses();
         this.get_sales_person_names();
+        this.get_sales_partner_names();
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
@@ -1358,6 +1436,14 @@ export default {
         ];
       } else {
         this.invoice_doc.sales_team = [];
+      }
+    },
+
+    sales_partner() {
+      if (this.sales_partner) {
+        this.invoice_doc.sales_partner = this.sales_partner
+      } else {
+        this.invoice_doc.sales_partner = '';
       }
     },
   },
