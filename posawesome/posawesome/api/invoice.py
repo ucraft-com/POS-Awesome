@@ -27,9 +27,10 @@ def before_cancel(doc, method):
     update_coupon(doc, "cancelled")
 
 def sales_partner(doc):
-    sales_partner = frappe.get_doc("Sales Partner",doc.sales_partner)
-    doc.commission_rate = sales_partner.commission_rate
-    doc.total_commission = (doc.amount_eligible_for_commission * (sales_partner.commission_rate * .01)) 
+    if doc.sales_partner:
+        sales_partner = frappe.get_doc("Sales Partner",doc.sales_partner)
+        doc.commission_rate = sales_partner.commission_rate
+        doc.total_commission = (doc.amount_eligible_for_commission * (sales_partner.commission_rate * .01)) 
 
 
 def add_loyalty_point(invoice_doc):
