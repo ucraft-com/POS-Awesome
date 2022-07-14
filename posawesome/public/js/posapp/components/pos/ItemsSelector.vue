@@ -117,15 +117,43 @@
     </v-card>
     <v-card class="cards mb-0 mt-3 pa-2 grey lighten-5">
       <v-row no-gutters align="center" justify="center">
-        <v-col cols="12">
-          <v-select
+        <v-col cols="12" style="
+        display: -webkit-inline-box;
+        overflow-x: scroll;
+        ">
+          <!-- <v-select id="xususi"
             :items="items_group"
             :label="frappe._('Items Group')"
             dense
             outlined
             hide-details
             v-model="item_group"
-          ></v-select>
+          ></v-select> -->
+          <div style="
+          cursor:pointer;
+          background: #4caf50;
+          color:white;
+          display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100px;
+      border: 1px solid black;
+      inline-size: 134px;
+       overflow-wrap: break-word;
+      overflow: hidden;
+          margin-right: 8px;
+          "
+      v-for='(item, index) in items_group' :key='index' @click="filtirle(item)"
+          >
+  <div style="
+          margin: 0;
+    padding: 13px;
+    text-align: center;
+    font-size: 17px;">
+{{ item }}
+  </div>
+          </div>
+
         </v-col>
         <v-col cols="3" class="mt-1">
           <v-btn-toggle v-model="items_view" color="orange" group dense rounded>
@@ -189,6 +217,9 @@ export default {
   },
 
   methods: {
+    filtirle(item) {
+      this.item_group = item;
+    },
     show_offers() {
       evntBus.$emit('show_offers', 'true');
     },
@@ -233,9 +264,11 @@ export default {
         return;
       }
       if (this.pos_profile.item_groups.length > 0) {
+        const localGroups = [];
         this.pos_profile.item_groups.forEach((element) => {
           if (element.item_group !== 'All Item Groups') {
             this.items_group.push(element.item_group);
+            console.log(element, "(this.pos_profile.item_groups.length > 0)");
           }
         });
       } else {
@@ -245,9 +278,14 @@ export default {
           args: {},
           callback: function (r) {
             if (r.message) {
+              const viewGroupList = document.createElement("div");
+              let li = "";
               r.message.forEach((element) => {
                 vm.items_group.push(element.name);
+                li += `<li>${element.name}</li>`
+                console.log(element,"element")
               });
+              viewGroupList.innerHTML = `<ul>${li}</ul>`;
             }
           },
         });
@@ -531,6 +569,7 @@ export default {
     this.scan_barcoud();
   },
 };
+
 </script>
 
 <style scoped>

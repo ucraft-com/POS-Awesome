@@ -177,8 +177,10 @@ export default {
         });
     },
     getCustomerTerritorys() {
+      console.log(this,"bu thisdir 1")
       if (this.territorys.length > 0) return;
       const vm = this;
+      console.log(vm,"bu vmdir 2")
       frappe.db
         .get_list('Territory', {
           fields: ['name'],

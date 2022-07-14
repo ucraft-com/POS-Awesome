@@ -1054,7 +1054,7 @@ def get_customer_addresses(customer):
             address.state,
             address.country,
             address.address_type
-        FROM `tabAddress` as address
+        FROM `tabAddress` as address 
         INNER JOIN `tabDynamic Link` AS link
 				ON address.name = link.parent
         WHERE link.link_doctype = 'Customer'
@@ -1066,6 +1066,19 @@ def get_customer_addresses(customer):
         ),
         as_dict=1,
     )
+@frappe.whitelist()
+def get_territory():    
+    territorys = frappe.db.sql(
+        """
+        SELECT territory_name
+        FROM `tabTerritory`        
+        ORDER by name
+        LIMIT 0, 10000
+        """,
+        as_dict=1,
+    )
+    return territorys
+   
 
 
 @frappe.whitelist()

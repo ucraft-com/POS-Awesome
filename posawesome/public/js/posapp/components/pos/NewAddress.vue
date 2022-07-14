@@ -18,6 +18,16 @@
                   v-model="address.name"
                 ></v-text-field>
               </v-col>
+               <v-col cols="12">
+                <v-text-field
+                  dense
+                  color="indigo"
+                  :label="frappe._('Territory')"
+                  background-color="white"
+                  hide-details
+                  v-model="address.territory"
+                ></v-text-field>
+              </v-col>
               <v-col cols="12">
                 <v-text-field
                   dense

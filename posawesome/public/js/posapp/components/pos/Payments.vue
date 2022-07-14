@@ -1,397 +1,172 @@
 <template>
   <div>
-    <v-card
-      class="selection mx-auto grey lighten-5 pa-1"
-      style="max-height: 76vh; height: 76vh"
-    >
-      <v-progress-linear
-        :active="loading"
-        :indeterminate="loading"
-        absolute
-        top
-        color="deep-purple accent-4"
-      ></v-progress-linear>
+    <v-card class="selection mx-auto grey lighten-5 pa-1" style="max-height: 76vh; height: 76vh">
+      <v-progress-linear :active="loading" :indeterminate="loading" absolute top color="deep-purple accent-4">
+      </v-progress-linear>
       <div class="overflow-y-auto px-2 pt-2" style="max-height: 75vh">
         <v-row v-if="invoice_doc" class="px-1 py-0">
           <v-col cols="7">
-            <v-text-field
-              outlined
-              color="indigo"
-              :label="frappe._('Paid Amount')"
-              background-color="white"
-              hide-details
-              :value="formtCurrency(total_payments)"
-              readonly
-              :prefix="invoice_doc.currency"
-              dense
-            ></v-text-field>
+            <v-text-field outlined color="indigo" :label="frappe._('Paid Amount')" background-color="white" hide-details
+              :value="formtCurrency(total_payments)" readonly :prefix="invoice_doc.currency" dense></v-text-field>
           </v-col>
           <v-col cols="5">
-            <v-text-field
-              outlined
-              color="indigo"
-              :label="frappe._(diff_lable)"
-              background-color="white"
-              hide-details
-              :value="formtCurrency(diff_payment)"
-              disabled
-              :prefix="invoice_doc.currency"
-              dense
-            ></v-text-field>
+            <v-text-field outlined color="indigo" :label="frappe._(diff_lable)" background-color="white" hide-details
+              :value="formtCurrency(diff_payment)" disabled :prefix="invoice_doc.currency" dense></v-text-field>
           </v-col>
 
           <v-col cols="7" v-if="diff_payment < 0 && !invoice_doc.is_return">
-            <v-text-field
-              outlined
-              color="indigo"
-              :label="frappe._('Paid Change')"
-              background-color="white"
-              v-model="paid_change"
-              @input="set_paid_change()"
-              :prefix="invoice_doc.currency"
-              :rules="paid_change_rules"
-              dense
-              type="number"
-            ></v-text-field>
+            <v-text-field outlined color="indigo" :label="frappe._('Paid Change')" background-color="white"
+              v-model="paid_change" @input="set_paid_change()" :prefix="invoice_doc.currency" :rules="paid_change_rules"
+              dense type="number"></v-text-field>
           </v-col>
 
           <v-col cols="5" v-if="diff_payment < 0 && !invoice_doc.is_return">
-            <v-text-field
-              outlined
-              color="indigo"
-              :label="frappe._('Credit Change')"
-              background-color="white"
-              hide-details
-              :value="formtCurrency(credit_change)"
-              disabled
-              :prefix="invoice_doc.currency"
-              dense
-            ></v-text-field>
+            <v-text-field outlined color="indigo" :label="frappe._('Credit Change')" background-color="white"
+              hide-details :value="formtCurrency(credit_change)" disabled :prefix="invoice_doc.currency" dense>
+            </v-text-field>
           </v-col>
         </v-row>
         <v-divider></v-divider>
 
         <div v-if="is_cashback">
-          <v-row
-            class="pyments px-1 py-0"
-            v-for="payment in invoice_doc.payments"
-            :key="payment.name"
-          >
+          <v-row class="pyments px-1 py-0" v-for="payment in invoice_doc.payments" :key="payment.name">
             <v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
-              <v-text-field
-                dense
-                outlined
-                color="indigo"
-                :label="frappe._(payment.mode_of_payment)"
-                background-color="white"
-                hide-details
-                v-model="payment.amount"
-                type="number"
-                :prefix="invoice_doc.currency"
-                @focus="set_rest_amount(payment.idx)"
-                :readonly="invoice_doc.is_return ? true : false"
-              ></v-text-field>
+              <v-text-field dense outlined color="indigo" :label="frappe._(payment.mode_of_payment)"
+                background-color="white" hide-details v-model="payment.amount" type="number"
+                :prefix="invoice_doc.currency" @focus="set_rest_amount(payment.idx)"
+                :readonly="invoice_doc.is_return ? true : false"></v-text-field>
             </v-col>
-            <v-col
-              v-if="!is_mpesa_c2b_payment(payment)"
-              :cols="
-                6
-                  ? (payment.type != 'Phone' ||
-                      payment.amount == 0 ||
-                      !request_payment_field) &&
-                    !is_mpesa_c2b_payment(payment)
-                  : 3
-              "
-            >
-              <v-btn
-                block
-                class=""
-                color="primary"
-                dark
-                @click="set_full_amount(payment.idx)"
-                >{{ payment.mode_of_payment }}</v-btn
-              >
+            <v-col v-if="!is_mpesa_c2b_payment(payment)" :cols="
+              6
+                ? (payment.type != 'Phone' ||
+                  payment.amount == 0 ||
+                  !request_payment_field) &&
+                !is_mpesa_c2b_payment(payment)
+                : 3
+            ">
+              <v-btn block class="" color="primary" dark @click="set_full_amount(payment.idx)">{{
+                  payment.mode_of_payment
+              }}</v-btn>
             </v-col>
             <v-col v-if="is_mpesa_c2b_payment(payment)" :cols="12" class="pl-3">
-              <v-btn
-                block
-                class=""
-                color="success"
-                dark
-                @click="mpesa_c2b_dialg(payment)"
-              >
+              <v-btn block class="" color="success" dark @click="mpesa_c2b_dialg(payment)">
                 {{ __(`Get Payments ${payment.mode_of_payment}`) }}
               </v-btn>
             </v-col>
-            <v-col
-              v-if="
-                payment.type == 'Phone' &&
-                payment.amount > 0 &&
-                request_payment_field
-              "
-              :cols="3"
-              class="pl-1"
-            >
-              <v-btn
-                block
-                class=""
-                color="success"
-                dark
-                :disabled="payment.amount == 0"
-                @click="phone_dialog = true"
-              >
+            <v-col v-if="
+              payment.type == 'Phone' &&
+              payment.amount > 0 &&
+              request_payment_field
+            " :cols="3" class="pl-1">
+              <v-btn block class="" color="success" dark :disabled="payment.amount == 0" @click="phone_dialog = true">
                 {{ __('Request') }}
               </v-btn>
             </v-col>
           </v-row>
         </div>
 
-        <v-row
-          class="pyments px-1 py-0"
-          v-if="
-            invoice_doc &&
-            available_pioints_amount > 0 &&
-            !invoice_doc.is_return
-          "
-        >
+        <v-row class="pyments px-1 py-0" v-if="
+          invoice_doc &&
+          available_pioints_amount > 0 &&
+          !invoice_doc.is_return
+        ">
           <v-col cols="7">
-            <v-text-field
-              dense
-              outlined
-              color="indigo"
-              :label="frappe._('Redeem Loyalty Points')"
-              background-color="white"
-              hide-details
-              v-model="loyalty_amount"
-              type="number"
-              :prefix="invoice_doc.currency"
-            ></v-text-field>
+            <v-text-field dense outlined color="indigo" :label="frappe._('Redeem Loyalty Points')"
+              background-color="white" hide-details v-model="loyalty_amount" type="number"
+              :prefix="invoice_doc.currency"></v-text-field>
           </v-col>
           <v-col cols="5">
-            <v-text-field
-              dense
-              outlined
-              color="indigo"
-              :label="frappe._('You can redeem upto')"
-              background-color="white"
-              hide-details
-              :value="formtFloat(available_pioints_amount)"
-              :prefix="invoice_doc.currency"
-              disabled
-            ></v-text-field>
+            <v-text-field dense outlined color="indigo" :label="frappe._('You can redeem upto')"
+              background-color="white" hide-details :value="formtFloat(available_pioints_amount)"
+              :prefix="invoice_doc.currency" disabled></v-text-field>
           </v-col>
         </v-row>
 
-        <v-row
-          class="pyments px-1 py-0"
-          v-if="
-            invoice_doc &&
-            available_customer_credit > 0 &&
-            !invoice_doc.is_return &&
-            redeem_customer_credit
-          "
-        >
+        <v-row class="pyments px-1 py-0" v-if="
+          invoice_doc &&
+          available_customer_credit > 0 &&
+          !invoice_doc.is_return &&
+          redeem_customer_credit
+        ">
           <v-col cols="7">
-            <v-text-field
-              dense
-              outlined
-              disabled
-              color="indigo"
-              :label="frappe._('Redeemed Customer Credit')"
-              background-color="white"
-              hide-details
-              v-model="redeemed_customer_credit"
-              type="number"
-              :prefix="invoice_doc.currency"
-            ></v-text-field>
+            <v-text-field dense outlined disabled color="indigo" :label="frappe._('Redeemed Customer Credit')"
+              background-color="white" hide-details v-model="redeemed_customer_credit" type="number"
+              :prefix="invoice_doc.currency"></v-text-field>
           </v-col>
           <v-col cols="5">
-            <v-text-field
-              dense
-              outlined
-              color="indigo"
-              :label="frappe._('You can redeem credit upto')"
-              background-color="white"
-              hide-details
-              :value="formtCurrency(available_customer_credit)"
-              :prefix="invoice_doc.currency"
-              disabled
-            ></v-text-field>
+            <v-text-field dense outlined color="indigo" :label="frappe._('You can redeem credit upto')"
+              background-color="white" hide-details :value="formtCurrency(available_customer_credit)"
+              :prefix="invoice_doc.currency" disabled></v-text-field>
           </v-col>
         </v-row>
         <v-divider></v-divider>
 
         <v-row class="px-1 py-0">
           <v-col cols="6">
-            <v-text-field
-              dense
-              outlined
-              color="indigo"
-              :label="frappe._('Net Total')"
-              background-color="white"
-              hide-details
-              :value="formtCurrency(invoice_doc.net_total)"
-              disabled
-              :prefix="invoice_doc.currency"
-            ></v-text-field>
+            <v-text-field dense outlined color="indigo" :label="frappe._('Net Total')" background-color="white"
+              hide-details :value="formtCurrency(invoice_doc.net_total)" disabled :prefix="invoice_doc.currency">
+            </v-text-field>
           </v-col>
           <v-col cols="6">
-            <v-text-field
-              dense
-              outlined
-              color="indigo"
-              :label="frappe._('Tax and Charges')"
-              background-color="white"
-              hide-details
-              :value="formtCurrency(invoice_doc.total_taxes_and_charges)"
-              disabled
-              :prefix="invoice_doc.currency"
-            ></v-text-field>
+            <v-text-field dense outlined color="indigo" :label="frappe._('Tax and Charges')" background-color="white"
+              hide-details :value="formtCurrency(invoice_doc.total_taxes_and_charges)" disabled
+              :prefix="invoice_doc.currency"></v-text-field>
           </v-col>
           <v-col cols="6">
-            <v-text-field
-              dense
-              outlined
-              color="indigo"
-              :label="frappe._('Total Amount')"
-              background-color="white"
-              hide-details
-              :value="formtCurrency(invoice_doc.total)"
-              disabled
-              :prefix="invoice_doc.currency"
-            ></v-text-field>
+            <v-text-field dense outlined color="indigo" :label="frappe._('Total Amount')" background-color="white"
+              hide-details :value="formtCurrency(invoice_doc.total)" disabled :prefix="invoice_doc.currency">
+            </v-text-field>
           </v-col>
           <v-col cols="6">
-            <v-text-field
-              dense
-              outlined
-              color="indigo"
-              :label="frappe._('Discount Amount')"
-              background-color="white"
-              hide-details
-              :value="formtCurrency(invoice_doc.discount_amount)"
-              disabled
-              :prefix="invoice_doc.currency"
-            ></v-text-field>
+            <v-text-field dense outlined color="indigo" :label="frappe._('Discount Amount')" background-color="white"
+              hide-details :value="formtCurrency(invoice_doc.discount_amount)" disabled :prefix="invoice_doc.currency">
+            </v-text-field>
           </v-col>
           <v-col cols="6">
-            <v-text-field
-              dense
-              outlined
-              color="indigo"
-              :label="frappe._('Grand Total')"
-              background-color="white"
-              hide-details
-              :value="formtCurrency(invoice_doc.grand_total)"
-              disabled
-              :prefix="invoice_doc.currency"
-            ></v-text-field>
+            <v-text-field dense outlined color="indigo" :label="frappe._('Grand Total')" background-color="white"
+              hide-details :value="formtCurrency(invoice_doc.grand_total)" disabled :prefix="invoice_doc.currency">
+            </v-text-field>
           </v-col>
-          <v-col
-            cols="6"
-            v-if="pos_profile.posa_allow_sales_order && invoiceType == 'Order'"
-          >
-            <v-menu
-              ref="order_delivery_date"
-              v-model="order_delivery_date"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              dense
-            >
+          <v-col cols="6" v-if="pos_profile.posa_allow_sales_order && invoiceType == 'Order'">
+            <v-menu ref="order_delivery_date" v-model="order_delivery_date" :close-on-content-click="false"
+              transition="scale-transition" dense>
               <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="invoice_doc.posa_delivery_date"
-                  :label="frappe._('Delivery Date')"
-                  readonly
-                  outlined
-                  dense
-                  background-color="white"
-                  clearable
-                  color="indigo"
-                  hide-details
-                  v-bind="attrs"
-                  v-on="on"
-                ></v-text-field>
+                <v-text-field v-model="invoice_doc.posa_delivery_date" :label="frappe._('Delivery Date')" readonly
+                  outlined dense background-color="white" clearable color="indigo" hide-details v-bind="attrs"
+                  v-on="on"></v-text-field>
               </template>
-              <v-date-picker
-                v-model="invoice_doc.posa_delivery_date"
-                no-title
-                scrollable
-                color="indigo"
-                :min="frappe.datetime.now_date()"
-                @input="order_delivery_date = false"
-              >
+              <v-date-picker v-model="invoice_doc.posa_delivery_date" no-title scrollable color="indigo"
+                :min="frappe.datetime.now_date()" @input="order_delivery_date = false">
               </v-date-picker>
             </v-menu>
           </v-col>
           <v-col cols="12" v-if="invoice_doc.posa_delivery_date">
-            <v-autocomplete
-              dense
-              clearable
-              auto-select-first
-              outlined
-              color="indigo"
-              :label="frappe._('Address')"
-              v-model="invoice_doc.shipping_address_name"
-              :items="addresses"
-              item-text="address_title"
-              item-value="name"
-              background-color="white"
-              no-data-text="Address not found"
-              hide-details
-              :filter="addressFilter"
-              append-icon="mdi-plus"
-              @click:append="new_address"
-            >
+            <v-autocomplete dense clearable auto-select-first outlined color="indigo" :label="frappe._('Address')"
+              v-model="invoice_doc.shipping_address_name" :items="addresses" item-text="address_title" item-value="name"
+              background-color="white" no-data-text="Address not found" hide-details :filter="addressFilter"
+              append-icon="mdi-plus" @click:append="new_address">
               <template v-slot:item="data">
                 <template>
                   <v-list-item-content>
-                    <v-list-item-title
-                      class="indigo--text subtitle-1"
-                      v-html="data.item.address_title"
-                    ></v-list-item-title>
-                    <v-list-item-title
-                      v-html="data.item.address_line1"
-                    ></v-list-item-title>
-                    <v-list-item-subtitle
-                      v-if="data.item.custoaddress_line2mer_name"
-                      v-html="data.item.address_line2"
-                    ></v-list-item-subtitle>
-                    <v-list-item-subtitle
-                      v-if="data.item.city"
-                      v-html="data.item.city"
-                    ></v-list-item-subtitle>
-                    <v-list-item-subtitle
-                      v-if="data.item.state"
-                      v-html="data.item.state"
-                    ></v-list-item-subtitle>
-                    <v-list-item-subtitle
-                      v-if="data.item.country"
-                      v-html="data.item.mobile_no"
-                    ></v-list-item-subtitle>
-                    <v-list-item-subtitle
-                      v-if="data.item.address_type"
-                      v-html="data.item.address_type"
-                    ></v-list-item-subtitle>
+                    <v-list-item-title class="indigo--text subtitle-1" v-html="data.item.address_title">
+                    </v-list-item-title>
+                    <v-list-item-title v-html="data.item.address_line1"></v-list-item-title>
+                    <v-list-item-subtitle v-if="data.item.custoaddress_line2mer_name" v-html="data.item.address_line2">
+                    </v-list-item-subtitle>
+                    <v-list-item-subtitle v-if="data.item.city" v-html="data.item.city"></v-list-item-subtitle>
+                    <v-list-item-subtitle v-if="data.item.state" v-html="data.item.state"></v-list-item-subtitle>
+                    <v-list-item-subtitle v-if="data.item.country" v-html="data.item.mobile_no"></v-list-item-subtitle>
+                    <v-list-item-subtitle v-if="data.item.address_type" v-html="data.item.address_type">
+                    </v-list-item-subtitle>
                   </v-list-item-content>
                 </template>
               </template>
             </v-autocomplete>
           </v-col>
           <v-col cols="12" v-if="pos_profile.posa_display_additional_notes">
-            <v-textarea
-              class="pa-0"
-              outlined
-              dense
-              background-color="white"
-              clearable
-              color="indigo"
-              auto-grow
-              rows="2"
-              :label="frappe._('Additional Notes')"
-              v-model="invoice_doc.posa_notes"
-              :value="invoice_doc.posa_notes"
-            ></v-textarea>
+            <v-textarea class="pa-0" outlined dense background-color="white" clearable color="indigo" auto-grow rows="2"
+              :label="frappe._('Additional Notes')" v-model="invoice_doc.posa_notes" :value="invoice_doc.posa_notes">
+            </v-textarea>
           </v-col>
         </v-row>
 
@@ -399,44 +174,18 @@
           <v-divider></v-divider>
           <v-row class="px-1 py-0" justify="center" align="start">
             <v-col cols="6">
-              <v-text-field
-                v-model="invoice_doc.po_no"
-                :label="frappe._('Purchase Order')"
-                outlined
-                dense
-                background-color="white"
-                clearable
-                color="indigo"
-                hide-details
-              ></v-text-field>
+              <v-text-field v-model="invoice_doc.po_no" :label="frappe._('Purchase Order')" outlined dense
+                background-color="white" clearable color="indigo" hide-details></v-text-field>
             </v-col>
             <v-col cols="6">
-              <v-menu
-                ref="po_date_menu"
-                v-model="po_date_menu"
-                :close-on-content-click="false"
-                transition="scale-transition"
-              >
+              <v-menu ref="po_date_menu" v-model="po_date_menu" :close-on-content-click="false"
+                transition="scale-transition">
                 <template v-slot:activator="{ on, attrs }">
-                  <v-text-field
-                    v-model="invoice_doc.po_date"
-                    :label="frappe._('Purchase Order Date')"
-                    readonly
-                    outlined
-                    dense
-                    hide-details
-                    v-bind="attrs"
-                    v-on="on"
-                    color="indigo"
-                  ></v-text-field>
+                  <v-text-field v-model="invoice_doc.po_date" :label="frappe._('Purchase Order Date')" readonly outlined
+                    dense hide-details v-bind="attrs" v-on="on" color="indigo"></v-text-field>
                 </template>
-                <v-date-picker
-                  v-model="invoice_doc.po_date"
-                  no-title
-                  scrollable
-                  color="indigo"
-                  @input="po_date_menu = false"
-                >
+                <v-date-picker v-model="invoice_doc.po_date" no-title scrollable color="indigo"
+                  @input="po_date_menu = false">
                 </v-date-picker>
               </v-menu>
             </v-col>
@@ -444,158 +193,77 @@
         </div>
         <v-divider></v-divider>
         <v-row class="px-1 py-0" align="start" no-gutters>
-          <v-col
-            cols="6"
-            v-if="
-              pos_profile.posa_allow_write_off_change &&
-              diff_payment > 0 &&
-              !invoice_doc.is_return
-            "
-          >
-            <v-switch
-              class="my-0 py-0"
-              v-model="is_write_off_change"
-              flat
-              :label="frappe._('Write Off Difference Amount')"
-            ></v-switch>
+          <v-col cols="6" v-if="
+            pos_profile.posa_allow_write_off_change &&
+            diff_payment > 0 &&
+            !invoice_doc.is_return
+          ">
+            <v-switch class="my-0 py-0" v-model="is_write_off_change" flat
+              :label="frappe._('Write Off Difference Amount')"></v-switch>
           </v-col>
-          <v-col
-            cols="6"
-            v-if="pos_profile.posa_allow_credit_sale && !invoice_doc.is_return"
-          >
-            <v-switch
-              v-model="is_credit_sale"
-              flat
-              :label="frappe._('Is Credit Sale')"
-              class="my-0 py-0"
-            ></v-switch>
+          <v-col cols="6" v-if="pos_profile.posa_allow_credit_sale && !invoice_doc.is_return">
+            <v-switch v-model="is_credit_sale" flat :label="frappe._('Is Credit Sale')" class="my-0 py-0"></v-switch>
           </v-col>
-          <v-col
-            cols="6"
-            v-if="invoice_doc.is_return && pos_profile.use_cashback"
-          >
-            <v-switch
-              v-model="is_cashback"
-              flat
-              :label="frappe._('Is Cashback')"
-              class="my-0 py-0"
-            ></v-switch>
+          <v-col cols="6" v-if="invoice_doc.is_return && pos_profile.use_cashback">
+            <v-switch v-model="is_cashback" flat :label="frappe._('Is Cashback')" class="my-0 py-0"></v-switch>
           </v-col>
           <v-col cols="6" v-if="is_credit_sale">
-            <v-menu
-              ref="date_menu"
-              v-model="date_menu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-            >
+            <v-menu ref="date_menu" v-model="date_menu" :close-on-content-click="false" transition="scale-transition">
               <template v-slot:activator="{ on, attrs }">
-                <v-text-field
-                  v-model="invoice_doc.due_date"
-                  :label="frappe._('Due Date')"
-                  readonly
-                  outlined
-                  dense
-                  hide-details
-                  v-bind="attrs"
-                  v-on="on"
-                  color="indigo"
-                ></v-text-field>
+                <v-text-field v-model="invoice_doc.due_date" :label="frappe._('Due Date')" readonly outlined dense
+                  hide-details v-bind="attrs" v-on="on" color="indigo"></v-text-field>
               </template>
-              <v-date-picker
-                v-model="invoice_doc.due_date"
-                no-title
-                scrollable
-                color="indigo"
-                :min="frappe.datetime.now_date()"
-                @input="date_menu = false"
-              >
+              <v-date-picker v-model="invoice_doc.due_date" no-title scrollable color="indigo"
+                :min="frappe.datetime.now_date()" @input="date_menu = false">
               </v-date-picker>
             </v-menu>
           </v-col>
-          <v-col
-            cols="6"
-            v-if="!invoice_doc.is_return && pos_profile.use_customer_credit"
-          >
-            <v-switch
-              v-model="redeem_customer_credit"
-              flat
-              :label="frappe._('Use Customer Credit')"
-              class="my-0 py-0"
-              @change="get_available_credit($event)"
-            ></v-switch>
+          <v-col cols="6" v-if="!invoice_doc.is_return && pos_profile.use_customer_credit">
+            <v-switch v-model="redeem_customer_credit" flat :label="frappe._('Use Customer Credit')" class="my-0 py-0"
+              @change="get_available_credit($event)"></v-switch>
           </v-col>
         </v-row>
-        <div
-          v-if="
-            invoice_doc &&
-            available_customer_credit > 0 &&
-            !invoice_doc.is_return &&
-            redeem_customer_credit
-          "
-        >
+        <div v-if="
+          invoice_doc &&
+          available_customer_credit > 0 &&
+          !invoice_doc.is_return &&
+          redeem_customer_credit
+        ">
           <v-row v-for="(row, idx) in customer_credit_dict" :key="idx">
             <v-col cols="4">
               <div class="pa-2 py-3">{{ row.credit_origin }}</div>
             </v-col>
             <v-col cols="4">
-              <v-text-field
-                dense
-                outlined
-                color="indigo"
-                :label="frappe._('Available Credit')"
-                background-color="white"
-                hide-details
-                :value="formtCurrency(row.total_credit)"
-                disabled
-                :prefix="invoice_doc.currency"
-              ></v-text-field>
+              <v-text-field dense outlined color="indigo" :label="frappe._('Available Credit')" background-color="white"
+                hide-details :value="formtCurrency(row.total_credit)" disabled :prefix="invoice_doc.currency">
+              </v-text-field>
             </v-col>
             <v-col cols="4">
-              <v-text-field
-                dense
-                outlined
-                color="indigo"
-                :label="frappe._('Redeem Credit')"
-                background-color="white"
-                hide-details
-                type="number"
-                v-model="row.credit_to_redeem"
-                :prefix="invoice_doc.currency"
-              ></v-text-field>
+              <v-text-field dense outlined color="indigo" :label="frappe._('Redeem Credit')" background-color="white"
+                hide-details type="number" v-model="row.credit_to_redeem" :prefix="invoice_doc.currency"></v-text-field>
             </v-col>
           </v-row>
         </div>
+        <v-col cols="12">
+          <v-autocomplete clearable dense outlined auto-select-first color="indigo" :label="frappe._('Territory')"
+            v-model="territory" :items="order_territory" background-color="white"
+            :no-data-text="__('Territory not found')" hide-details>
+          </v-autocomplete>
+        </v-col>
         <v-divider></v-divider>
         <v-row class="pb-0 mb-2" align="start">
           <v-col cols="12">
-            <v-autocomplete
-              dense
-              clearable
-              auto-select-first
-              outlined
-              color="indigo"
-              :label="frappe._('Sales Person')"
-              v-model="sales_person"
-              :items="sales_persons"
-              item-text="sales_person_name"
-              item-value="name"
-              background-color="white"
-              :no-data-text="__('Sales Person not found')"
-              hide-details
-              :filter="salesPersonFilter"
-              :disabled="readonly"
-            >
+            <v-autocomplete dense clearable auto-select-first outlined color="indigo" :label="frappe._('Sales Person')"
+              v-model="sales_person" :items="sales_persons" item-text="sales_person_name" item-value="name"
+              background-color="white" :no-data-text="__('Sales Person not found')" hide-details
+              :filter="salesPersonFilter" :disabled="readonly">
               <template v-slot:item="data">
                 <template>
                   <v-list-item-content>
-                    <v-list-item-title
-                      class="indigo--text subtitle-1"
-                      v-html="data.item.sales_person_name"
-                    ></v-list-item-title>
-                    <v-list-item-subtitle
-                      v-if="data.item.sales_person_name != data.item.name"
-                      v-html="`ID: ${data.item.name}`"
-                    ></v-list-item-subtitle>
+                    <v-list-item-title class="indigo--text subtitle-1" v-html="data.item.sales_person_name">
+                    </v-list-item-title>
+                    <v-list-item-subtitle v-if="data.item.sales_person_name != data.item.name"
+                      v-html="`ID: ${data.item.name}`"></v-list-item-subtitle>
                   </v-list-item-content>
                 </template>
               </template>
@@ -608,27 +276,11 @@
     <v-card flat class="cards mb-0 mt-3 py-0">
       <v-row align="start" no-gutters>
         <v-col cols="12">
-          <v-btn
-            block
-            class="pa-1"
-            large
-            color="warning"
-            dark
-            @click="back_to_invoice"
-            >{{ __('Back') }}</v-btn
-          >
+          <v-btn block class="pa-1" large color="warning" dark @click="back_to_invoice">{{ __('Back') }}</v-btn>
         </v-col>
         <v-col cols="12">
-          <v-btn
-            block
-            class="mt-2"
-            large
-            color="primary"
-            dark
-            @click="submit"
-            :disabled="vaildatPayment"
-            >{{ __('Submit Payments') }}</v-btn
-          >
+          <v-btn block class="mt-2" large color="primary" dark @click="submit" :disabled="vaildatPayment">{{ __('Submit
+          Payments') }}</v-btn>
         </v-col>
       </v-row>
     </v-card>
@@ -637,30 +289,22 @@
         <v-card>
           <v-card-title>
             <span class="headline indigo--text">{{
-              __('Confirm Mobile Number')
+                __('Confirm Mobile Number')
             }}</span>
           </v-card-title>
           <v-card-text class="pa-0">
             <v-container>
-              <v-text-field
-                dense
-                outlined
-                color="indigo"
-                :label="frappe._('Mobile Number')"
-                background-color="white"
-                hide-details
-                v-model="invoice_doc.contact_mobile"
-                type="number"
-              ></v-text-field>
+              <v-text-field dense outlined color="indigo" :label="frappe._('Mobile Number')" background-color="white"
+                hide-details v-model="invoice_doc.contact_mobile" type="number"></v-text-field>
             </v-container>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="error" dark @click="phone_dialog = false">{{
-              __('Close')
+                __('Close')
             }}</v-btn>
             <v-btn color="primary" dark @click="request_payment">{{
-              __('Request')
+                __('Request')
             }}</v-btn>
           </v-card-actions>
         </v-card>
@@ -686,6 +330,8 @@ export default {
     sales_person: '',
     paid_change: 0,
     order_delivery_date: false,
+    territory: "",
+    order_territory: [],
     paid_change_rules: [],
     is_return: false,
     is_cashback: true,
@@ -706,6 +352,14 @@ export default {
       evntBus.$emit('set_customer_readonly', false);
     },
     submit() {
+      if (this.invoice_doc.territory == "") {
+        evntBus.$emit('show_mesage', {
+          text: `There is no Territory !`,
+          color: 'error',
+        });
+        frappe.utils.play_sound('error');
+        return;
+      }
       if (!this.invoice_doc.is_return && this.total_payments < 0) {
         evntBus.$emit('show_mesage', {
           text: `Payments not correct`,
@@ -976,6 +630,23 @@ export default {
     },
     new_address() {
       evntBus.$emit('open_new_address', this.invoice_doc.customer);
+    },
+    get_territories() {
+      const vm = this;
+      frappe.call({
+        method: 'posawesome.posawesome.api.posapp.get_territory',
+        args: { customer: this.invoice_doc.customer },
+        callback: function (r) {
+          if (r.message) {
+            r.message.forEach((t, index) => {
+              if (index == 1) {
+                vm.territory = t.territory_name;
+              }
+              vm.order_territory.push(t.territory_name)
+            })
+          }
+        },
+      });
     },
     get_sales_person_names() {
       const vm = this;
@@ -1248,6 +919,9 @@ export default {
     this.$nextTick(function () {
       evntBus.$on('send_invoice_doc_payment', (invoice_doc) => {
         this.invoice_doc = invoice_doc;
+        if (this.invoice_doc && this.invoiceType == "Order") {
+          this.invoice_doc.posa_delivery_date = frappe.datetime.now_date();
+        }
         const default_payment = this.invoice_doc.payments.find(
           (payment) => payment.default == 1
         );
@@ -1261,6 +935,7 @@ export default {
         this.loyalty_amount = 0;
         this.get_addresses();
         this.get_sales_person_names();
+        this.get_territories();
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
@@ -1280,6 +955,8 @@ export default {
           this.invoice_doc.posa_delivery_date = null;
           this.invoice_doc.posa_notes = null;
           this.invoice_doc.shipping_address_name = null;
+        } else if (this.invoice_doc && data == 'Order') {
+          this.invoice_doc.posa_delivery_date = frappe.datetime.now_date();
         }
       });
     });
@@ -1346,6 +1023,13 @@ export default {
           text: `You can redeem customer credit upto ${this.available_customer_credit}`,
           color: 'error',
         });
+      }
+    },
+    territory() {
+      if (this.territory) {
+        this.invoice_doc.territory = this.territory;
+      } else {
+        this.invoice_doc.territory = "";
       }
     },
     sales_person() {

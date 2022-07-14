@@ -34,6 +34,17 @@
                 <v-text-field
                   dense
                   color="indigo"
+                  :label="frappe._('Territory')"
+                  background-color="white"
+                  hide-details
+                  v-model="customer_info.territory"
+                  @change="set_customer_info('territory', $event)"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  dense
+                  color="indigo"
                   :label="frappe._('Mobile No')"
                   background-color="white"
                   hide-details

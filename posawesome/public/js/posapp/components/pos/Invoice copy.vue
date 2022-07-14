@@ -657,7 +657,7 @@ export default {
       posa_coupons: [],
       allItems: [],
       discount_percentage_offer_name: null,
-      invoiceTypes: ['Invoice', 'Order'],
+      invoiceTypes: ['Order', 'Invoice'],
       invoiceType: '',
       itemsPerPage: 1000,
       expanded: [],
@@ -1359,6 +1359,7 @@ export default {
                 ...message,
               };
             }
+            console.log(message)
             vm.update_price_list();
           },
         });
@@ -2268,10 +2269,6 @@ export default {
 
   created() {
     evntBus.$on('register_pos_profile', (data) => {
-      if(sessionStorage.customer_name){
-          data.pos_profile.customer = sessionStorage.customer_name;
-          sessionStorage.removeItem("customer_name");
-      }
       this.pos_profile = data.pos_profile;
       this.customer = data.pos_profile.customer;
       this.pos_opening_shift = data.pos_opening_shift;
@@ -2374,8 +2371,8 @@ export default {
     },
   },
 };
-
 </script>
+
 <style scoped>
 .border_line_bottom {
   border-bottom: 1px solid lightgray;
