@@ -225,6 +225,7 @@ fixtures = [
                     "POS Profile-posa_new_line",
                     "POS Profile-posa_input_qty",
                     "POS Profile-posa_display_item_code",
+                    "POS Profile-posa_allow_zero_rated_items",
                 ),
             ]
         ],
