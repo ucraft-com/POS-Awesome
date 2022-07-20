@@ -24,8 +24,6 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 )
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
 
-from posawesome import console
-
 
 @frappe.whitelist()
 def get_opening_dialog_data():
