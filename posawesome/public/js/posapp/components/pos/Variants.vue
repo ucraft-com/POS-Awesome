@@ -26,8 +26,8 @@
                   {{ value.attribute_value }}
                 </v-chip>
               </v-chip-group>
+              <v-divider class="p-0 m-0"></v-divider>
             </div>
-            <v-divider></v-divider>
             <div>
               <v-row dense class="overflow-y-auto" style="max-height: 500px">
                 <v-col
