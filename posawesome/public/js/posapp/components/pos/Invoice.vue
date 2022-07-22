@@ -617,7 +617,7 @@
                 >{{ __('Save/New') }}</v-btn
               >
             </v-col>
-            <v-col cols="12" class="pa-1">
+            <v-col class="pa-1">
               <v-btn
                 block
                 class="pa-0"
@@ -625,6 +625,20 @@
                 @click="show_payment"
                 dark
                 >{{ __('PAY') }}</v-btn
+              >
+            </v-col>
+            <v-col
+              v-if="pos_profile.posa_allow_print_draft_invoices"
+              cols="6"
+              class="pa-1"
+            >
+              <v-btn
+                block
+                class="pa-0"
+                color="success"
+                @click="print_draft_invoice"
+                dark
+                >{{ __('Print Draft') }}</v-btn
               >
             </v-col>
           </v-row>
@@ -887,6 +901,7 @@ export default {
     },
 
     new_invoice(data = {}) {
+      let old_invoice = null;
       evntBus.$emit('set_customer_readonly', false);
       this.expanded = [];
       this.posa_offers = [];
@@ -895,10 +910,10 @@ export default {
       this.return_doc = '';
       const doc = this.get_invoice_doc();
       if (doc.name) {
-        this.update_invoice(doc);
+        old_invoice = this.update_invoice(doc);
       } else {
         if (doc.items.length) {
-          this.update_invoice(doc);
+          old_invoice = this.update_invoice(doc);
         }
       }
       if (!data.name && !data.is_return) {
@@ -944,6 +959,7 @@ export default {
           }
         });
       }
+      return old_invoice;
     },
 
     get_invoice_doc() {
@@ -2256,6 +2272,51 @@ export default {
           item.posa_delivery_date = today;
         }, 0);
       }
+    },
+    load_print_page(invoice_name) {
+      const print_format =
+        this.pos_profile.print_format_for_online ||
+        this.pos_profile.print_format;
+      const letter_head = this.pos_profile.letter_head || 0;
+      const url =
+        frappe.urllib.get_base_url() +
+        '/printview?doctype=Sales%20Invoice&name=' +
+        invoice_name +
+        '&trigger_print=1' +
+        '&format=' +
+        print_format +
+        '&no_letterhead=' +
+        letter_head;
+      const printWindow = window.open(url, 'Print');
+      printWindow.addEventListener(
+        'load',
+        function () {
+          printWindow.print();
+          // printWindow.close();
+          // NOTE : uncomoent this to auto closing printing window
+        },
+        true
+      );
+    },
+
+    print_draft_invoice() {
+      if (!this.pos_profile.posa_allow_print_draft_invoices) {
+        evntBus.$emit('show_mesage', {
+          text: __(`You are not allowed to print draft invoices`),
+          color: 'error',
+        });
+        return;
+      }
+      let invoice_name = this.invoice_doc.name;
+      frappe.run_serially([
+        () => {
+          const invoice_doc = this.new_invoice();
+          invoice_name = invoice_doc.name ? invoice_doc.name : invoice_name;
+        },
+        () => {
+          this.load_print_page(invoice_name);
+        },
+      ]);
     },
   },
 

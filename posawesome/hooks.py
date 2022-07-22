@@ -226,6 +226,7 @@ fixtures = [
                     "POS Profile-posa_input_qty",
                     "POS Profile-posa_display_item_code",
                     "POS Profile-posa_allow_zero_rated_items",
+                    "POS Profile-posa_allow_print_draft_invoices",
                 ),
             ]
         ],
