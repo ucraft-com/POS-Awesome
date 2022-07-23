@@ -3,7 +3,7 @@
     <v-dialog v-model="cancel_dialog" max-width="330">
       <v-card>
         <v-card-title class="text-h5">
-          {{ __('Cancel Current Invoice ?') }}
+          <span class="headline primary--text">{{ __('Cancel Current Invoice ?') }}</span>
         </v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
