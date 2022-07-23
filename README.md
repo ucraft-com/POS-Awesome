@@ -1,8 +1,9 @@
-## POS AWESOME
+<div align="center">
+    <img src="https://frappecloud.com/files/pos.png" height="128">
+    <h2>POS AWESOME</h2>
+</div>
 
-### An open-source Point of Sale for [Erpnext](https://github.com/frappe/erpnext) using [Vue.js](https://github.com/vuejs/vue) and [Vuetify](https://github.com/vuetifyjs/vuetify)
-
----
+#### An open-source Point of Sale for [Erpnext](https://github.com/frappe/erpnext) using [Vue.js](https://github.com/vuejs/vue) and [Vuetify](https://github.com/vuetifyjs/vuetify)
 
 ### Main Features
 
