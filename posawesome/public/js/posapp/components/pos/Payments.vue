@@ -9,14 +9,14 @@
         :indeterminate="loading"
         absolute
         top
-        color="deep-purple accent-4"
+        color="info"
       ></v-progress-linear>
       <div class="overflow-y-auto px-2 pt-2" style="max-height: 75vh">
         <v-row v-if="invoice_doc" class="px-1 py-0">
           <v-col cols="7">
             <v-text-field
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('Paid Amount')"
               background-color="white"
               hide-details
@@ -29,7 +29,7 @@
           <v-col cols="5">
             <v-text-field
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._(diff_lable)"
               background-color="white"
               hide-details
@@ -43,7 +43,7 @@
           <v-col cols="7" v-if="diff_payment < 0 && !invoice_doc.is_return">
             <v-text-field
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('Paid Change')"
               background-color="white"
               v-model="paid_change"
@@ -58,7 +58,7 @@
           <v-col cols="5" v-if="diff_payment < 0 && !invoice_doc.is_return">
             <v-text-field
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('Credit Change')"
               background-color="white"
               hide-details
@@ -81,7 +81,7 @@
               <v-text-field
                 dense
                 outlined
-                color="indigo"
+                color="primary"
                 :label="frappe._(payment.mode_of_payment)"
                 background-color="white"
                 hide-details
@@ -158,7 +158,7 @@
             <v-text-field
               dense
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('Redeem Loyalty Points')"
               background-color="white"
               hide-details
@@ -171,7 +171,7 @@
             <v-text-field
               dense
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('You can redeem upto')"
               background-color="white"
               hide-details
@@ -196,7 +196,7 @@
               dense
               outlined
               disabled
-              color="indigo"
+              color="primary"
               :label="frappe._('Redeemed Customer Credit')"
               background-color="white"
               hide-details
@@ -209,7 +209,7 @@
             <v-text-field
               dense
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('You can redeem credit upto')"
               background-color="white"
               hide-details
@@ -226,7 +226,7 @@
             <v-text-field
               dense
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('Net Total')"
               background-color="white"
               hide-details
@@ -239,7 +239,7 @@
             <v-text-field
               dense
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('Tax and Charges')"
               background-color="white"
               hide-details
@@ -252,7 +252,7 @@
             <v-text-field
               dense
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('Total Amount')"
               background-color="white"
               hide-details
@@ -265,7 +265,7 @@
             <v-text-field
               dense
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('Discount Amount')"
               background-color="white"
               hide-details
@@ -278,7 +278,7 @@
             <v-text-field
               dense
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('Grand Total')"
               background-color="white"
               hide-details
@@ -307,7 +307,7 @@
                   dense
                   background-color="white"
                   clearable
-                  color="indigo"
+                  color="primary"
                   hide-details
                   v-bind="attrs"
                   v-on="on"
@@ -317,7 +317,7 @@
                 v-model="invoice_doc.posa_delivery_date"
                 no-title
                 scrollable
-                color="indigo"
+                color="primary"
                 :min="frappe.datetime.now_date()"
                 @input="order_delivery_date = false"
               >
@@ -330,7 +330,7 @@
               clearable
               auto-select-first
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('Address')"
               v-model="invoice_doc.shipping_address_name"
               :items="addresses"
@@ -347,7 +347,7 @@
                 <template>
                   <v-list-item-content>
                     <v-list-item-title
-                      class="indigo--text subtitle-1"
+                      class="primary--text subtitle-1"
                       v-html="data.item.address_title"
                     ></v-list-item-title>
                     <v-list-item-title
@@ -385,7 +385,7 @@
               dense
               background-color="white"
               clearable
-              color="indigo"
+              color="primary"
               auto-grow
               rows="2"
               :label="frappe._('Additional Notes')"
@@ -406,7 +406,7 @@
                 dense
                 background-color="white"
                 clearable
-                color="indigo"
+                color="primary"
                 hide-details
               ></v-text-field>
             </v-col>
@@ -427,14 +427,14 @@
                     hide-details
                     v-bind="attrs"
                     v-on="on"
-                    color="indigo"
+                    color="primary"
                   ></v-text-field>
                 </template>
                 <v-date-picker
                   v-model="invoice_doc.po_date"
                   no-title
                   scrollable
-                  color="indigo"
+                  color="primary"
                   @input="po_date_menu = false"
                 >
                 </v-date-picker>
@@ -498,14 +498,14 @@
                   hide-details
                   v-bind="attrs"
                   v-on="on"
-                  color="indigo"
+                  color="primary"
                 ></v-text-field>
               </template>
               <v-date-picker
                 v-model="invoice_doc.due_date"
                 no-title
                 scrollable
-                color="indigo"
+                color="primary"
                 :min="frappe.datetime.now_date()"
                 @input="date_menu = false"
               >
@@ -541,7 +541,7 @@
               <v-text-field
                 dense
                 outlined
-                color="indigo"
+                color="primary"
                 :label="frappe._('Available Credit')"
                 background-color="white"
                 hide-details
@@ -554,7 +554,7 @@
               <v-text-field
                 dense
                 outlined
-                color="indigo"
+                color="primary"
                 :label="frappe._('Redeem Credit')"
                 background-color="white"
                 hide-details
@@ -573,7 +573,7 @@
               clearable
               auto-select-first
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('Sales Person')"
               v-model="sales_person"
               :items="sales_persons"
@@ -589,7 +589,7 @@
                 <template>
                   <v-list-item-content>
                     <v-list-item-title
-                      class="indigo--text subtitle-1"
+                      class="primary--text subtitle-1"
                       v-html="data.item.sales_person_name"
                     ></v-list-item-title>
                     <v-list-item-subtitle
@@ -612,7 +612,7 @@
             block
             class="pa-1"
             large
-            color="warning"
+            color="error"
             dark
             @click="back_to_invoice"
             >{{ __('Back') }}</v-btn
@@ -623,7 +623,7 @@
             block
             class="mt-2"
             large
-            color="primary"
+            color="success"
             dark
             @click="submit"
             :disabled="vaildatPayment"
@@ -636,7 +636,7 @@
       <v-dialog v-model="phone_dialog" max-width="400px">
         <v-card>
           <v-card-title>
-            <span class="headline indigo--text">{{
+            <span class="headline primary--text">{{
               __('Confirm Mobile Number')
             }}</span>
           </v-card-title>
@@ -645,7 +645,7 @@
               <v-text-field
                 dense
                 outlined
-                color="indigo"
+                color="primary"
                 :label="frappe._('Mobile Number')"
                 background-color="white"
                 hide-details

@@ -5,7 +5,7 @@
       style="max-height: 80vh; height: 80vh"
     >
       <v-card-title>
-        <span class="text-h6 warning--text">{{ __('Offers') }}</span>
+        <span class="text-h6 primary--text">{{ __('Offers') }}</span>
       </v-card-title>
       <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh">
         <template @mouseover="style = 'cursor: pointer'">
@@ -39,7 +39,7 @@
                 <v-row class="mt-2">
                   <v-col v-if="item.description">
                     <div
-                      class="indigo--text"
+                      class="primary--text"
                       v-html="handleNewLine(item.description)"
                     ></div>
                   </v-col>
@@ -50,7 +50,7 @@
                       item-text="item_code"
                       outlined
                       dense
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Give Item')"
                       :disabled="
                         item.apply_type != 'Item Group' ||

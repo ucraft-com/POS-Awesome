@@ -10,7 +10,7 @@
           <v-btn color="error" @click="cancel_invoice">
             {{ __('Cancel') }}
           </v-btn>
-          <v-btn color="primary" @click="cancel_dialog = false">
+          <v-btn color="warning" @click="cancel_dialog = false">
             {{ __('Back') }}
           </v-btn>
         </v-card-actions>
@@ -44,7 +44,7 @@
             dense
             hide-details
             outlined
-            color="indigo"
+            color="primary"
             background-color="white"
             :items="invoiceTypes"
             :label="frappe._('Type')"
@@ -90,7 +90,7 @@
                     <v-btn
                       :disabled="!!item.posa_is_offer || !!item.posa_is_replace"
                       icon
-                      color="red"
+                      color="error"
                       @click.stop="remove_item(item)"
                     >
                       <v-icon>mdi-delete</v-icon>
@@ -101,7 +101,7 @@
                     <v-btn
                       :disabled="!!item.posa_is_offer || !!item.posa_is_replace"
                       icon
-                      color="indigo lighten-1"
+                      color="secondary"
                       @click.stop="subtract_one(item)"
                     >
                       <v-icon>mdi-minus-circle-outline</v-icon>
@@ -111,7 +111,7 @@
                     <v-btn
                       :disabled="!!item.posa_is_offer || !!item.posa_is_replace"
                       icon
-                      color="indigo lighten-1"
+                      color="secondary"
                       @click.stop="add_one(item)"
                     >
                       <v-icon>mdi-plus-circle-outline</v-icon>
@@ -123,7 +123,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Item Code')"
                       background-color="white"
                       hide-details
@@ -135,7 +135,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('QTY')"
                       background-color="white"
                       hide-details
@@ -169,7 +169,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Rate')"
                       background-color="white"
                       hide-details
@@ -193,7 +193,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Discount Percentage')"
                       background-color="white"
                       hide-details
@@ -216,7 +216,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Discount Amount')"
                       background-color="white"
                       hide-details
@@ -240,7 +240,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Price list Rate')"
                       background-color="white"
                       hide-details
@@ -254,7 +254,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Available QTY')"
                       background-color="white"
                       hide-details
@@ -267,7 +267,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Group')"
                       background-color="white"
                       hide-details
@@ -279,7 +279,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Stock QTY')"
                       background-color="white"
                       hide-details
@@ -292,7 +292,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Stock UOM')"
                       background-color="white"
                       hide-details
@@ -317,7 +317,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Serial No QTY')"
                       background-color="white"
                       hide-details
@@ -337,7 +337,7 @@
                       outlined
                       dense
                       chips
-                      color="indigo"
+                      color="primary"
                       small-chips
                       :label="frappe._('Serial No')"
                       multiple
@@ -351,7 +351,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Batch No Available QTY')"
                       background-color="white"
                       hide-details
@@ -367,7 +367,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Batch No Expiry Date')"
                       background-color="white"
                       hide-details
@@ -385,7 +385,7 @@
                       item-text="batch_no"
                       outlined
                       dense
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Batch No')"
                       @change="set_batch_qty(item, $event)"
                     >
@@ -428,7 +428,7 @@
                           outlined
                           dense
                           clearable
-                          color="indigo"
+                          color="primary"
                           hide-details
                           v-bind="attrs"
                           v-on="on"
@@ -438,7 +438,7 @@
                         v-model="item.posa_delivery_date"
                         no-title
                         scrollable
-                        color="indigo"
+                        color="primary"
                         :min="frappe.datetime.now_date()"
                       >
                         <v-spacer></v-spacer>
@@ -475,7 +475,7 @@
                       outlined
                       dense
                       clearable
-                      color="indigo"
+                      color="primary"
                       auto-grow
                       rows="1"
                       :label="frappe._('Additional Notes')"
@@ -502,6 +502,7 @@
                 dense
                 readonly
                 hide-details
+                color="accent"
               ></v-text-field>
             </v-col>
             <v-col
@@ -516,6 +517,7 @@
                 outlined
                 dense
                 hide-details
+                color="warning"
                 type="number"
                 :prefix="pos_profile.currency"
                 :disabled="
@@ -537,6 +539,7 @@
                 ref="percentage_discount"
                 outlined
                 dense
+                color="warning"
                 hide-details
                 type="number"
                 :disabled="
@@ -554,6 +557,7 @@
                 :label="frappe._('Items Discounts')"
                 outlined
                 dense
+                color="warning"
                 readonly
                 hide-details
                 :prefix="pos_profile.currency"
@@ -568,7 +572,7 @@
                 dense
                 readonly
                 hide-details
-                class="text--red"
+                color="success"
                 :prefix="pos_profile.currency"
               ></v-text-field>
             </v-col>
@@ -591,7 +595,7 @@
                 block
                 class="pa-0"
                 :class="{ 'disable-events': !pos_profile.posa_allow_return }"
-                color="info"
+                color="secondary"
                 dark
                 @click="open_returns"
                 >{{ __('Return') }}</v-btn
@@ -611,7 +615,7 @@
               <v-btn
                 block
                 class="pa-0"
-                color="success"
+                color="accent"
                 dark
                 @click="new_invoice"
                 >{{ __('Save/New') }}</v-btn
@@ -621,7 +625,7 @@
               <v-btn
                 block
                 class="pa-0"
-                color="primary"
+                color="success"
                 @click="show_payment"
                 dark
                 >{{ __('PAY') }}</v-btn
@@ -635,7 +639,7 @@
               <v-btn
                 block
                 class="pa-0"
-                color="success"
+                color="primary"
                 @click="print_draft_invoice"
                 dark
                 >{{ __('Print Draft') }}</v-btn

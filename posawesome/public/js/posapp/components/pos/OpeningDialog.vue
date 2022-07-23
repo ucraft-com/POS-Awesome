@@ -6,7 +6,7 @@
       </template>-->
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">{{
+          <span class="headline primary--text">{{
             __('Create POS Opening Shift')
           }}</span>
         </v-card-title>
@@ -62,7 +62,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" dark @click="submit_dialog">Submit</v-btn>
+          <v-btn color="success" dark @click="submit_dialog">Submit</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

@@ -5,7 +5,7 @@
       clearable
       auto-select-first
       outlined
-      color="indigo"
+      color="primary"
       :label="frappe._('Customer')"
       v-model="customer"
       :items="customers"
@@ -25,7 +25,7 @@
         <template>
           <v-list-item-content>
             <v-list-item-title
-              class="indigo--text subtitle-1"
+              class="primary--text subtitle-1"
               v-html="data.item.customer_name"
             ></v-list-item-title>
             <v-list-item-subtitle
