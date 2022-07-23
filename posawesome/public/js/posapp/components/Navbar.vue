@@ -91,7 +91,7 @@
       v-model="drawer"
       :mini-variant.sync="mini"
       app
-      class="indigo margen-top"
+      class="primary margen-top"
     >
       <v-list dark>
         <v-list-item class="px-2">
