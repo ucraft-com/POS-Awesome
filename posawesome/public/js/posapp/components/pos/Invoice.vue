@@ -3,7 +3,9 @@
     <v-dialog v-model="cancel_dialog" max-width="330">
       <v-card>
         <v-card-title class="text-h5">
-          <span class="headline primary--text">{{ __('Cancel Current Invoice ?') }}</span>
+          <span class="headline primary--text">{{
+            __('Cancel Current Invoice ?')
+          }}</span>
         </v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
@@ -24,22 +26,18 @@
         <v-col
           v-if="pos_profile.posa_allow_sales_order"
           cols="9"
-          class="pb-0 mb-2 pr-0"
+          class="pb-2 pr-0"
         >
           <Customer></Customer>
         </v-col>
         <v-col
           v-if="!pos_profile.posa_allow_sales_order"
           cols="12"
-          class="pb-0 mb-2"
+          class="pb-2"
         >
           <Customer></Customer>
         </v-col>
-        <v-col
-          v-if="pos_profile.posa_allow_sales_order"
-          cols="3"
-          class="pb-0 mb-2"
-        >
+        <v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-2">
           <v-select
             dense
             hide-details
@@ -51,6 +49,60 @@
             v-model="invoiceType"
             :disabled="invoiceType == 'Return'"
           ></v-select>
+        </v-col>
+      </v-row>
+
+      <v-row
+        align="center"
+        class="items px-2 py-1 mt-0 pt-0"
+        v-if="pos_profile.posa_use_delivery_charges"
+      >
+        <v-col cols="8" class="pb-0 mb-2 pr-0 pt-0">
+          <v-autocomplete
+            dense
+            clearable
+            auto-select-first
+            outlined
+            color="primary"
+            :label="frappe._('Delivery Charges')"
+            v-model="selcted_delivery_charges"
+            :items="delivery_charges"
+            item-text="name"
+            return-object
+            background-color="white"
+            :no-data-text="__('Charges not found')"
+            hide-details
+            :filter="deliveryChargesFilter"
+            :disabled="readonly"
+            @change="update_delivery_charges()"
+          >
+            <template v-slot:item="data">
+              <template>
+                <v-list-item-content>
+                  <v-list-item-title
+                    class="primary--text subtitle-1"
+                    v-html="data.item.name"
+                  ></v-list-item-title>
+                  <v-list-item-subtitle
+                    v-html="`Rate: ${data.item.rate}`"
+                  ></v-list-item-subtitle>
+                </v-list-item-content>
+              </template>
+            </template>
+          </v-autocomplete>
+        </v-col>
+        <v-col cols="4" class="pb-0 mb-2 pt-0">
+          <v-text-field
+            dense
+            outlined
+            color="primary"
+            :label="frappe._('Delivery Charges Rate')"
+            background-color="white"
+            hide-details
+            :value="formtCurrency(delivery_charges_rate)"
+            :prefix="pos_profile.currency"
+            disabled
+          ></v-text-field>
         </v-col>
       </v-row>
 
@@ -684,6 +736,9 @@ export default {
       float_precision: 2,
       currency_precision: 2,
       new_line: false,
+      delivery_charges: [],
+      delivery_charges_rate: 0,
+      selcted_delivery_charges: {},
       items_headers: [
         {
           text: __('Name'),
@@ -727,6 +782,7 @@ export default {
         sum += item.qty * item.rate;
       });
       sum -= flt(this.discount_amount);
+      sum += flt(this.delivery_charges_rate);
       return flt(sum).toFixed(this.currency_precision);
     },
     total_items_discount_amount() {
@@ -900,6 +956,8 @@ export default {
       this.return_doc = '';
       this.discount_amount = 0;
       this.additional_discount_percentage = 0;
+      this.delivery_charges_rate = 0;
+      this.selcted_delivery_charges = null;
       evntBus.$emit('set_customer_readonly', false);
       this.cancel_dialog = false;
     },
@@ -993,6 +1051,10 @@ export default {
       doc.return_against = this.invoice_doc.return_against;
       doc.posa_offers = this.posa_offers;
       doc.posa_coupons = this.posa_coupons;
+      doc.posa_delivery_charges = null
+        ? !this.selcted_delivery_charges
+        : this.selcted_delivery_charges.name;
+      doc.posa_delivery_charges_rate = this.delivery_charges_rate;
       return doc;
     },
 
@@ -2322,6 +2384,48 @@ export default {
         },
       ]);
     },
+    set_delivery_charges() {
+      const vm = this;
+      if (
+        !this.pos_profile ||
+        !this.customer ||
+        !this.pos_profile.posa_use_delivery_charges
+      ) {
+        this.delivery_charges = [];
+        this.delivery_charges_rate = 0;
+        this.selcted_delivery_charges = {};
+        return;
+      }
+      this.delivery_charges_rate = 0;
+      this.selcted_delivery_charges = {};
+      frappe.call({
+        method:
+          'posawesome.posawesome.api.posapp.get_applicable_delivery_charges',
+        args: {
+          company: this.pos_profile.company,
+          pos_profile: this.pos_profile.name,
+          customer: this.customer,
+        },
+        async: true,
+        callback: function (r) {
+          if (r.message) {
+            vm.delivery_charges = r.message;
+          }
+        },
+      });
+    },
+    deliveryChargesFilter(item, queryText, itemText) {
+      const textOne = item.name.toLowerCase();
+      const searchText = queryText.toLowerCase();
+      return textOne.indexOf(searchText) > -1;
+    },
+    update_delivery_charges() {
+      if (this.selcted_delivery_charges) {
+        this.delivery_charges_rate = this.selcted_delivery_charges.rate;
+      } else {
+        this.delivery_charges_rate = 0;
+      }
+    },
   },
 
   created() {
@@ -2391,6 +2495,7 @@ export default {
       this.close_payments();
       evntBus.$emit('set_customer', this.customer);
       this.fetch_customer_details();
+      this.set_delivery_charges();
     },
     customer_info() {
       evntBus.$emit('set_customer_info_to_edit', this.customer_info);

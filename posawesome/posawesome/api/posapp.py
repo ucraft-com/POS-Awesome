@@ -23,6 +23,9 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
     get_loyalty_program_details_with_points,
 )
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
+from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
+    get_applicable_delivery_charges as _get_applicable_delivery_charges,
+)
 
 
 @frappe.whitelist()
@@ -349,7 +352,6 @@ def update_invoice(data):
 
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
-    invoice_doc.set_missing_values()
 
     if invoice_doc.is_return and invoice_doc.return_against:
         ref_doc = frappe.get_doc(invoice_doc.doctype, invoice_doc.return_against)
@@ -1430,3 +1432,10 @@ def get_customer_info(customer):
 
 def get_company_domain(company):
     return frappe.get_cached_value("Company", cstr(company), "domain")
+
+
+@frappe.whitelist()
+def get_applicable_delivery_charges(company, pos_profile, customer, shipping_address_name=None):
+    return _get_applicable_delivery_charges(
+        company, pos_profile, customer, shipping_address_name
+    )
