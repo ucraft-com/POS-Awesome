@@ -193,8 +193,11 @@ def calc_delivery_charges(doc):
     calculate_taxes_and_totals = False
     if not doc.is_new():
         old_doc = doc.get_doc_before_save()
-    if not doc.posa_delivery_charges and not old_doc.posa_delivery_charges:
-        return
+        if not doc.posa_delivery_charges and not old_doc.posa_delivery_charges:
+            return
+    else:
+        if not doc.posa_delivery_charges:
+            return
     if not doc.posa_delivery_charges:
         doc.posa_delivery_charges_rate = 0
 
@@ -204,7 +207,9 @@ def calc_delivery_charges(doc):
             "Delivery Charges", doc.posa_delivery_charges
         )
         doc.posa_delivery_charges_rate = charges_doc.default_rate
-        charges_profile = next((i for i in charges_doc.profiles if i.pos_profile == doc.pos_profile), None)
+        charges_profile = next(
+            (i for i in charges_doc.profiles if i.pos_profile == doc.pos_profile), None
+        )
         if charges_profile:
             doc.posa_delivery_charges_rate = charges_profile.rate
 
@@ -234,6 +239,6 @@ def calc_delivery_charges(doc):
             },
         )
         calculate_taxes_and_totals = True
-    
+
     if calculate_taxes_and_totals:
         doc.calculate_taxes_and_totals()

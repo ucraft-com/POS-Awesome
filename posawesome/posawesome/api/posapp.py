@@ -350,6 +350,7 @@ def update_invoice(data):
     else:
         invoice_doc = frappe.get_doc(data)
 
+    invoice_doc.set_missing_values()
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
 
@@ -373,7 +374,9 @@ def update_invoice(data):
             item.is_free_item = 0
         add_taxes_from_tax_template(item, invoice_doc)
 
-    if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"):
+    if frappe.get_cached_value(
+        "POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"
+    ):
         if invoice_doc.get("taxes"):
             for tax in invoice_doc.taxes:
                 tax.included_in_print_rate = 1
@@ -703,7 +706,7 @@ def get_draft_invoices(pos_opening_shift):
         },
         fields=["name"],
         limit_page_length=0,
-        order_by="customer",
+        order_by="modified desc",
     )
     data = []
     for invoice in invoices_list:
@@ -1435,7 +1438,9 @@ def get_company_domain(company):
 
 
 @frappe.whitelist()
-def get_applicable_delivery_charges(company, pos_profile, customer, shipping_address_name=None):
+def get_applicable_delivery_charges(
+    company, pos_profile, customer, shipping_address_name=None
+):
     return _get_applicable_delivery_charges(
         company, pos_profile, customer, shipping_address_name
     )

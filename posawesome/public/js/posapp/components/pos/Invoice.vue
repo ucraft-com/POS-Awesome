@@ -957,7 +957,7 @@ export default {
       this.discount_amount = 0;
       this.additional_discount_percentage = 0;
       this.delivery_charges_rate = 0;
-      this.selcted_delivery_charges = null;
+      this.selcted_delivery_charges = {};
       evntBus.$emit('set_customer_readonly', false);
       this.cancel_dialog = false;
     },
@@ -1051,10 +1051,8 @@ export default {
       doc.return_against = this.invoice_doc.return_against;
       doc.posa_offers = this.posa_offers;
       doc.posa_coupons = this.posa_coupons;
-      doc.posa_delivery_charges = null
-        ? !this.selcted_delivery_charges
-        : this.selcted_delivery_charges.name;
-      doc.posa_delivery_charges_rate = this.delivery_charges_rate;
+      doc.posa_delivery_charges = this.selcted_delivery_charges.name;
+      doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
       return doc;
     },
 
