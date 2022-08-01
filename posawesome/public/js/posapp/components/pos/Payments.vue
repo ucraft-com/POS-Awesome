@@ -279,8 +279,7 @@
           <v-btn block class="pa-1" large color="warning" dark @click="back_to_invoice">{{ __('Back') }}</v-btn>
         </v-col>
         <v-col cols="12">
-          <v-btn block class="mt-2" large color="primary" dark @click="submit" :disabled="vaildatPayment">{{ __('Submit
-          Payments') }}</v-btn>
+          <v-btn block class="mt-2" large color="primary" dark @click="submit" :disabled="vaildatPayment">{{ __('Submit Payments') }}</v-btn>
         </v-col>
       </v-row>
     </v-card>

@@ -24,7 +24,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 )
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
 
-from posawesome import console
+# from posawesome import console
 
 
 @frappe.whitelist()
@@ -69,11 +69,10 @@ def create_opening_voucher(pos_profile, company, balance_details):
             "user": frappe.session.user,
             "pos_profile": pos_profile,
             "company": company,
-            "docstatus": 1,
         }
     )
     new_pos_opening.set("balance_details", balance_details)
-    new_pos_opening.insert(ignore_permissions=True)
+    new_pos_opening.submit()
 
     data = {}
     data["pos_opening_shift"] = new_pos_opening.as_dict()
@@ -162,6 +161,8 @@ def get_items(pos_profile, price_list=None):
 
     if items_data:
         items = [d.item_code for d in items_data]
+        # frappe.errprint(["cod",(items_data[0].code)])  
+        code = items_data[0].code
         item_prices_data = frappe.get_all(
             "Item Price",
             fields=["item_code", "price_list_rate", "currency", "uom"],
@@ -230,9 +231,11 @@ def get_items(pos_profile, price_list=None):
                         "serial_no_data": serial_no_data or [],
                         "attributes": attributes or "",
                         "item_attributes": item_attributes or "",
+                        "code": code,
                     }
                 )
                 result.append(row)
+                # frappe.errprint(["Result", result])
 
     return result
 
@@ -327,18 +330,6 @@ def get_customer_names(pos_profile):
     )
     return customers
 
-@frappe.whitelist()
-def get_sales_person_names():    
-    sales_persons = frappe.db.sql(
-        """
-        SELECT name, sales_person_name
-        FROM `tabSales Person`        
-        ORDER by name
-        LIMIT 0, 10000
-        """,
-        as_dict=1,
-    )
-    return sales_persons
 
 @frappe.whitelist()
 def update_invoice(data):
@@ -355,7 +346,10 @@ def update_invoice(data):
         invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
         invoice_doc.update(data)
     else:
+        #frappe.errprint(['1',data])
         invoice_doc = frappe.get_doc(data)
+        #frappe.errprint(['2',data])
+        
 
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
@@ -367,21 +361,14 @@ def update_invoice(data):
             invoice_doc.update_stock = 0
 
     for item in invoice_doc.items:
-        if not item.rate or item.rate == 0:
-            item.price_list_rate = 0.00
-            item.is_free_item = 1
-        else:
-            item.is_free_item = 0
         add_taxes_from_tax_template(item, invoice_doc)
-
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"):
         if invoice_doc.get("taxes"):
             for tax in invoice_doc.taxes:
                 tax.included_in_print_rate = 1
-
+    
     invoice_doc.save()
     return invoice_doc
-
 
 @frappe.whitelist()
 def submit_invoice(invoice, data):
@@ -730,11 +717,11 @@ def get_items_details(pos_profile, items_data):
     if len(items_data) > 0:
         for item in items_data:
             item_code = item.get("item_code")
+            code = item.get("code")
             item_stock_qty = get_stock_availability(item_code, warehouse)
             has_batch_no, has_serial_no = frappe.get_value(
                 "Item", item_code, ["has_batch_no", "has_serial_no"]
             )
-
             uoms = frappe.get_all(
                 "UOM Conversion Detail",
                 filters={"parent": item_code},
@@ -771,6 +758,7 @@ def get_items_details(pos_profile, items_data):
 
             row = {}
             row.update(item)
+            
             row.update(
                 {
                     "item_uoms": uoms or [],
@@ -781,7 +769,6 @@ def get_items_details(pos_profile, items_data):
                     "has_serial_no": has_serial_no,
                 }
             )
-
             result.append(row)
 
     return result
@@ -1064,7 +1051,7 @@ def get_customer_addresses(customer):
             address.state,
             address.country,
             address.address_type
-        FROM `tabAddress` as address 
+        FROM `tabAddress` as address
         INNER JOIN `tabDynamic Link` AS link
 				ON address.name = link.parent
         WHERE link.link_doctype = 'Customer'
@@ -1076,19 +1063,6 @@ def get_customer_addresses(customer):
         ),
         as_dict=1,
     )
-@frappe.whitelist()
-def get_territory():    
-    territorys = frappe.db.sql(
-        """
-        SELECT territory_name
-        FROM `tabTerritory`        
-        ORDER by name
-        LIMIT 0, 10000
-        """,
-        as_dict=1,
-    )
-    return territorys
-   
 
 
 @frappe.whitelist()
