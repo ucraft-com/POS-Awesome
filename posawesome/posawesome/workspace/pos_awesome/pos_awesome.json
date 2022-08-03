@@ -14,7 +14,7 @@
  "is_standard": 1,
  "label": "POS Awesome",
  "links": [],
- "modified": "2021-07-29 22:32:00.550981",
+ "modified": "2022-07-24 16:10:36.057371",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Awesome",
@@ -60,6 +60,12 @@
    "doc_view": "",
    "label": "Referral Code",
    "link_to": "Referral Code",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Delivery Charges",
+   "link_to": "Delivery Charges",
    "type": "DocType"
   }
  ]

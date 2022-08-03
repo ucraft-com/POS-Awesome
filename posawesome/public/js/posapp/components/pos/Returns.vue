@@ -3,12 +3,14 @@
     <v-dialog v-model="invoicesDialog" max-width="800px" min-width="800px">
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">{{__('Select Return Invoice')}}</span>
+          <span class="headline primary--text">{{
+            __('Select Return Invoice')
+          }}</span>
         </v-card-title>
         <v-container>
           <v-row class="mb-4">
             <v-text-field
-              color="indigo"
+              color="primary"
               :label="frappe._('Invoice ID')"
               background-color="white"
               hide-details
@@ -23,7 +25,7 @@
               color="primary"
               dark
               @click="search_invoices"
-              >{{__('Search')}}</v-btn
+              >{{ __('Search') }}</v-btn
             >
           </v-row>
           <v-row>
@@ -51,10 +53,10 @@
           <v-btn color="error mx-2" dark @click="close_dialog">Close</v-btn>
           <v-btn
             v-if="selected.length"
-            color="primary"
+            color="success"
             dark
             @click="submit_dialog"
-            >{{__('Select')}}</v-btn
+            >{{ __('Select') }}</v-btn
           >
         </v-card-actions>
       </v-card>

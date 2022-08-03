@@ -10,10 +10,15 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, add_days
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_code_count
 from posawesome.posawesome.api.posapp import get_company_domain
+from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
+    get_applicable_delivery_charges,
+)
 
 
 def validate(doc, method):
     set_patient(doc)
+    auto_set_delivery_charges(doc)
+    calc_delivery_charges(doc)
 
 
 def before_submit(doc, method):
@@ -146,3 +151,94 @@ def set_patient(doc):
     )
     if len(patient_list) > 0:
         doc.patient = patient_list[0].name
+
+
+def auto_set_delivery_charges(doc):
+    if not doc.pos_profile:
+        return
+    if not frappe.get_cached_value(
+        "POS Profile", doc.pos_profile, "posa_auto_set_delivery_charges"
+    ):
+        return
+
+    delivery_charges = get_applicable_delivery_charges(
+        doc.company,
+        doc.pos_profile,
+        doc.customer,
+        doc.shipping_address_name,
+        doc.posa_delivery_charges,
+        restrict=True,
+    )
+
+    if doc.posa_delivery_charges:
+        if doc.posa_delivery_charges_rate:
+            return
+        else:
+            if len(delivery_charges) > 0:
+                doc.posa_delivery_charges_rate = delivery_charges[0].rate
+    else:
+        if len(delivery_charges) > 0:
+            doc.posa_delivery_charges = delivery_charges[0].name
+            doc.posa_delivery_charges_rate = delivery_charges[0].rate
+        else:
+            doc.posa_delivery_charges = None
+            doc.posa_delivery_charges_rate = None
+
+
+def calc_delivery_charges(doc):
+    if not doc.pos_profile:
+        return
+
+    old_doc = None
+    calculate_taxes_and_totals = False
+    if not doc.is_new():
+        old_doc = doc.get_doc_before_save()
+        if not doc.posa_delivery_charges and not old_doc.posa_delivery_charges:
+            return
+    else:
+        if not doc.posa_delivery_charges:
+            return
+    if not doc.posa_delivery_charges:
+        doc.posa_delivery_charges_rate = 0
+
+    charges_doc = None
+    if doc.posa_delivery_charges:
+        charges_doc = frappe.get_cached_doc(
+            "Delivery Charges", doc.posa_delivery_charges
+        )
+        doc.posa_delivery_charges_rate = charges_doc.default_rate
+        charges_profile = next(
+            (i for i in charges_doc.profiles if i.pos_profile == doc.pos_profile), None
+        )
+        if charges_profile:
+            doc.posa_delivery_charges_rate = charges_profile.rate
+
+    if old_doc and old_doc.posa_delivery_charges:
+        old_charges = next(
+            (
+                i
+                for i in doc.taxes
+                if i.charge_type == "Actual"
+                and i.description == old_doc.posa_delivery_charges
+            ),
+            None,
+        )
+        if old_charges:
+            doc.taxes.remove(old_charges)
+            calculate_taxes_and_totals = True
+
+    if doc.posa_delivery_charges:
+        doc.append(
+            "taxes",
+            {
+                "charge_type": "Actual",
+                "description": doc.posa_delivery_charges,
+                "tax_amount": doc.posa_delivery_charges_rate,
+                "cost_center": charges_doc.cost_center,
+                "account_head": charges_doc.shipping_account,
+            },
+        )
+        calculate_taxes_and_totals = True
+
+    if calculate_taxes_and_totals:
+        doc.calculate_taxes_and_totals()

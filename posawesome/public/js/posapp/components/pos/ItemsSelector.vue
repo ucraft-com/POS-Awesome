@@ -9,7 +9,7 @@
         :indeterminate="loading"
         absolute
         top
-        color="deep-purple accent-4"
+        color="info"
       ></v-progress-linear>
       <v-row class="items px-2 py-1">
         <v-col class="pb-0 mb-2">
@@ -18,7 +18,7 @@
             clearable
             autofocus
             outlined
-            color="indigo"
+            color="primary"
             :label="frappe._('Search Items')"
             hint="Search by item code, serial number, batch no or barcode"
             background-color="white"
@@ -33,7 +33,7 @@
           <v-text-field
             dense
             outlined
-            color="indigo"
+            color="primary"
             :label="frappe._('QTY')"
             background-color="white"
             hide-details
@@ -46,7 +46,7 @@
         <v-col cols="2" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
           <v-checkbox
             v-model="new_line"
-            color="orange"
+            color="accent"
             value="true"
             label="NLine"
             dense
@@ -82,8 +82,9 @@
                     ></v-card-text>
                   </v-img>
                   <v-card-text class="text--primary pa-1">
-                    <div class="text-caption indigo--text accent-3">
-                      {{ item.rate || 0 }} {{ item.currency || '' }}
+                    <div class="text-caption primary--text">
+                      {{ formtCurrency(item.rate) || 0 }}
+                      {{ item.currency || '' }}
                     </div>
                   </v-card-text>
                 </v-card>
@@ -128,18 +129,24 @@
           ></v-select>
         </v-col>
         <v-col cols="3" class="mt-1">
-          <v-btn-toggle v-model="items_view" color="orange" group dense rounded>
+          <v-btn-toggle
+            v-model="items_view"
+            color="primary"
+            group
+            dense
+            rounded
+          >
             <v-btn small value="list">{{ __('List') }}</v-btn>
             <v-btn small value="card">{{ __('Card') }}</v-btn>
           </v-btn-toggle>
         </v-col>
         <v-col cols="4" class="mt-2">
-          <v-btn small block color="warning" text @click="show_coupons"
+          <v-btn small block color="primary" text @click="show_coupons"
             >{{ couponsCount }} {{ __('Coupons') }}</v-btn
           >
         </v-col>
         <v-col cols="5" class="mt-2">
-          <v-btn small block color="warning" text @click="show_offers"
+          <v-btn small block color="primary" text @click="show_offers"
             >{{ offersCount }} {{ __('Offers') }} : {{ appliedOffersCount }}
             {{ __('Applied') }}</v-btn
           >

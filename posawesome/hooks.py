@@ -37,6 +37,7 @@ app_include_js = [
 # include js in doctype views
 doctype_js = {
     "POS Profile": "posawesome/api/pos_profile.js",
+    "Sales Invoice": "posawesome/api/invoice.js",
     "Company": "posawesome/api/company.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
@@ -225,6 +226,13 @@ fixtures = [
                     "POS Profile-posa_new_line",
                     "POS Profile-posa_input_qty",
                     "POS Profile-posa_display_item_code",
+                    "POS Profile-posa_allow_zero_rated_items",
+                    "POS Profile-posa_allow_print_draft_invoices",
+                    "Address-posa_delivery_charges",
+                    "Sales Invoice-posa_delivery_charges",
+                    "Sales Invoice-posa_delivery_charges_rate",
+                    "POS Profile-posa_auto_set_delivery_charges",
+                    "POS Profile-posa_use_delivery_charges",
                 ),
             ]
         ],

@@ -5,23 +5,32 @@
         @click.stop="drawer = !drawer"
         class="grey--text"
       ></v-app-bar-nav-icon>
+      <v-img
+        src="/assets/posawesome/js/posapp/components/pos/pos.png"
+        alt="POS Awesome"
+        max-width="32"
+        class="mr-2"
+        color="primary"
+      ></v-img>
       <v-toolbar-title
         @click="go_desk"
         style="cursor: pointer"
-        class="text-uppercase indigo--text"
+        class="text-uppercase primary--text"
       >
         <span class="font-weight-light">pos</span>
         <span>awesome</span>
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
-      <v-btn style="cursor: unset" text color="grey">
+      <v-btn style="cursor: unset" text color="primary">
         <span right>{{ pos_profile.name }}</span>
       </v-btn>
       <div class="text-center">
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
-            <v-btn color="grey" dark text v-bind="attrs" v-on="on">Menu</v-btn>
+            <v-btn color="primary" dark text v-bind="attrs" v-on="on"
+              >Menu</v-btn
+            >
           </template>
           <v-card class="mx-auto" max-width="300" tile>
             <v-list dense>
@@ -82,7 +91,7 @@
       v-model="drawer"
       :mini-variant.sync="mini"
       app
-      class="indigo margen-top"
+      class="primary margen-top"
     >
       <v-list dark>
         <v-list-item class="px-2">

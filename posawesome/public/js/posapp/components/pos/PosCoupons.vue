@@ -7,13 +7,13 @@
       <v-card-title>
         <v-row no-gutters align="center" justify="center">
           <v-col cols="6">
-            <span class="text-h6 warning--text">{{ __('Coupons') }}</span>
+            <span class="text-h6 primary--text">{{ __('Coupons') }}</span>
           </v-col>
           <v-col cols="4">
             <v-text-field
               dense
               outlined
-              color="indigo"
+              color="primary"
               :label="frappe._('Coupon')"
               background-color="white"
               hide-details
@@ -24,7 +24,7 @@
           <v-col cols="2">
             <v-btn
               class="pa-1"
-              color="primary"
+              color="success"
               dark
               @click="add_coupon(new_coupon)"
               >{{ __('add') }}</v-btn

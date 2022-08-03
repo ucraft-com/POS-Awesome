@@ -3,7 +3,7 @@
     <v-dialog v-model="varaintsDialog" max-width="600px">
       <v-card min-height="500px">
         <v-card-title>
-          <span class="headline indigo--text">Select Item</span>
+          <span class="headline primary--text">Select Item</span>
           <v-spacer></v-spacer>
           <v-btn color="error" dark @click="close_dialog">Close</v-btn>
         </v-card-title>
@@ -26,8 +26,8 @@
                   {{ value.attribute_value }}
                 </v-chip>
               </v-chip-group>
+              <v-divider class="p-0 m-0"></v-divider>
             </div>
-            <v-divider></v-divider>
             <div>
               <v-row dense class="overflow-y-auto" style="max-height: 500px">
                 <v-col
@@ -56,7 +56,7 @@
                       ></v-card-text>
                     </v-img>
                     <v-card-text class="text--primary pa-1">
-                      <div class="text-caption indigo--text accent-3">
+                      <div class="text-caption primary--text accent-3">
                         {{ item.rate || 0 }} {{ item.currency || '' }}
                       </div>
                     </v-card-text>

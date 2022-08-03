@@ -3,12 +3,12 @@
     <v-dialog v-model="dialog" max-width="800px" min-width="800px">
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">{{ __('Select Payment') }}</span>
+          <span class="headline primary--text">{{ __('Select Payment') }}</span>
         </v-card-title>
         <v-container>
           <v-row class="mb-4">
             <v-text-field
-              color="indigo"
+              color="primary"
               :label="frappe._('Full Name')"
               background-color="white"
               hide-details
@@ -18,7 +18,7 @@
               class="mx-4"
             ></v-text-field>
             <v-text-field
-              color="indigo"
+              color="primary"
               :label="frappe._('Mobile No')"
               background-color="white"
               hide-details
@@ -59,7 +59,7 @@
           <v-btn color="error mx-2" dark @click="close_dialog">Close</v-btn>
           <v-btn
             v-if="selected.length"
-            color="primary"
+            color="success"
             dark
             @click="submit_dialog"
             >{{ __('Select') }}</v-btn

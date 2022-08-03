@@ -3,14 +3,16 @@
     <v-dialog v-model="cancel_dialog" max-width="330">
       <v-card>
         <v-card-title class="text-h5">
-          {{ __('Cancel Current Invoice ?') }}
+          <span class="headline primary--text">{{
+            __('Cancel Current Invoice ?')
+          }}</span>
         </v-card-title>
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="error" @click="cancel_invoice">
             {{ __('Cancel') }}
           </v-btn>
-          <v-btn color="primary" @click="cancel_dialog = false">
+          <v-btn color="warning" @click="cancel_dialog = false">
             {{ __('Back') }}
           </v-btn>
         </v-card-actions>
@@ -24,33 +26,83 @@
         <v-col
           v-if="pos_profile.posa_allow_sales_order"
           cols="9"
-          class="pb-0 mb-2 pr-0"
+          class="pb-2 pr-0"
         >
           <Customer></Customer>
         </v-col>
         <v-col
           v-if="!pos_profile.posa_allow_sales_order"
           cols="12"
-          class="pb-0 mb-2"
+          class="pb-2"
         >
           <Customer></Customer>
         </v-col>
-        <v-col
-          v-if="pos_profile.posa_allow_sales_order"
-          cols="3"
-          class="pb-0 mb-2"
-        >
+        <v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-2">
           <v-select
             dense
             hide-details
             outlined
-            color="indigo"
+            color="primary"
             background-color="white"
             :items="invoiceTypes"
             :label="frappe._('Type')"
             v-model="invoiceType"
             :disabled="invoiceType == 'Return'"
           ></v-select>
+        </v-col>
+      </v-row>
+
+      <v-row
+        align="center"
+        class="items px-2 py-1 mt-0 pt-0"
+        v-if="pos_profile.posa_use_delivery_charges"
+      >
+        <v-col cols="8" class="pb-0 mb-2 pr-0 pt-0">
+          <v-autocomplete
+            dense
+            clearable
+            auto-select-first
+            outlined
+            color="primary"
+            :label="frappe._('Delivery Charges')"
+            v-model="selcted_delivery_charges"
+            :items="delivery_charges"
+            item-text="name"
+            return-object
+            background-color="white"
+            :no-data-text="__('Charges not found')"
+            hide-details
+            :filter="deliveryChargesFilter"
+            :disabled="readonly"
+            @change="update_delivery_charges()"
+          >
+            <template v-slot:item="data">
+              <template>
+                <v-list-item-content>
+                  <v-list-item-title
+                    class="primary--text subtitle-1"
+                    v-html="data.item.name"
+                  ></v-list-item-title>
+                  <v-list-item-subtitle
+                    v-html="`Rate: ${data.item.rate}`"
+                  ></v-list-item-subtitle>
+                </v-list-item-content>
+              </template>
+            </template>
+          </v-autocomplete>
+        </v-col>
+        <v-col cols="4" class="pb-0 mb-2 pt-0">
+          <v-text-field
+            dense
+            outlined
+            color="primary"
+            :label="frappe._('Delivery Charges Rate')"
+            background-color="white"
+            hide-details
+            :value="formtCurrency(delivery_charges_rate)"
+            :prefix="pos_profile.currency"
+            disabled
+          ></v-text-field>
         </v-col>
       </v-row>
 
@@ -90,7 +142,7 @@
                     <v-btn
                       :disabled="!!item.posa_is_offer || !!item.posa_is_replace"
                       icon
-                      color="red"
+                      color="error"
                       @click.stop="remove_item(item)"
                     >
                       <v-icon>mdi-delete</v-icon>
@@ -101,7 +153,7 @@
                     <v-btn
                       :disabled="!!item.posa_is_offer || !!item.posa_is_replace"
                       icon
-                      color="indigo lighten-1"
+                      color="secondary"
                       @click.stop="subtract_one(item)"
                     >
                       <v-icon>mdi-minus-circle-outline</v-icon>
@@ -111,7 +163,7 @@
                     <v-btn
                       :disabled="!!item.posa_is_offer || !!item.posa_is_replace"
                       icon
-                      color="indigo lighten-1"
+                      color="secondary"
                       @click.stop="add_one(item)"
                     >
                       <v-icon>mdi-plus-circle-outline</v-icon>
@@ -123,7 +175,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Item Code')"
                       background-color="white"
                       hide-details
@@ -135,7 +187,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('QTY')"
                       background-color="white"
                       hide-details
@@ -169,7 +221,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Rate')"
                       background-color="white"
                       hide-details
@@ -193,7 +245,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Discount Percentage')"
                       background-color="white"
                       hide-details
@@ -216,7 +268,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Discount Amount')"
                       background-color="white"
                       hide-details
@@ -240,7 +292,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Price list Rate')"
                       background-color="white"
                       hide-details
@@ -254,7 +306,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Available QTY')"
                       background-color="white"
                       hide-details
@@ -267,7 +319,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Group')"
                       background-color="white"
                       hide-details
@@ -279,7 +331,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Stock QTY')"
                       background-color="white"
                       hide-details
@@ -292,7 +344,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Stock UOM')"
                       background-color="white"
                       hide-details
@@ -317,7 +369,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Serial No QTY')"
                       background-color="white"
                       hide-details
@@ -337,7 +389,7 @@
                       outlined
                       dense
                       chips
-                      color="indigo"
+                      color="primary"
                       small-chips
                       :label="frappe._('Serial No')"
                       multiple
@@ -351,7 +403,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Batch No Available QTY')"
                       background-color="white"
                       hide-details
@@ -367,7 +419,7 @@
                     <v-text-field
                       dense
                       outlined
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Batch No Expiry Date')"
                       background-color="white"
                       hide-details
@@ -385,7 +437,7 @@
                       item-text="batch_no"
                       outlined
                       dense
-                      color="indigo"
+                      color="primary"
                       :label="frappe._('Batch No')"
                       @change="set_batch_qty(item, $event)"
                     >
@@ -428,7 +480,7 @@
                           outlined
                           dense
                           clearable
-                          color="indigo"
+                          color="primary"
                           hide-details
                           v-bind="attrs"
                           v-on="on"
@@ -438,7 +490,7 @@
                         v-model="item.posa_delivery_date"
                         no-title
                         scrollable
-                        color="indigo"
+                        color="primary"
                         :min="frappe.datetime.now_date()"
                       >
                         <v-spacer></v-spacer>
@@ -475,7 +527,7 @@
                       outlined
                       dense
                       clearable
-                      color="indigo"
+                      color="primary"
                       auto-grow
                       rows="1"
                       :label="frappe._('Additional Notes')"
@@ -502,6 +554,7 @@
                 dense
                 readonly
                 hide-details
+                color="accent"
               ></v-text-field>
             </v-col>
             <v-col
@@ -516,6 +569,7 @@
                 outlined
                 dense
                 hide-details
+                color="warning"
                 type="number"
                 :prefix="pos_profile.currency"
                 :disabled="
@@ -537,6 +591,7 @@
                 ref="percentage_discount"
                 outlined
                 dense
+                color="warning"
                 hide-details
                 type="number"
                 :disabled="
@@ -554,6 +609,7 @@
                 :label="frappe._('Items Discounts')"
                 outlined
                 dense
+                color="warning"
                 readonly
                 hide-details
                 :prefix="pos_profile.currency"
@@ -568,7 +624,7 @@
                 dense
                 readonly
                 hide-details
-                class="text--red"
+                color="success"
                 :prefix="pos_profile.currency"
               ></v-text-field>
             </v-col>
@@ -591,7 +647,7 @@
                 block
                 class="pa-0"
                 :class="{ 'disable-events': !pos_profile.posa_allow_return }"
-                color="info"
+                color="secondary"
                 dark
                 @click="open_returns"
                 >{{ __('Return') }}</v-btn
@@ -611,20 +667,34 @@
               <v-btn
                 block
                 class="pa-0"
-                color="success"
+                color="accent"
                 dark
                 @click="new_invoice"
                 >{{ __('Save/New') }}</v-btn
               >
             </v-col>
-            <v-col cols="12" class="pa-1">
+            <v-col class="pa-1">
+              <v-btn
+                block
+                class="pa-0"
+                color="success"
+                @click="show_payment"
+                dark
+                >{{ __('PAY') }}</v-btn
+              >
+            </v-col>
+            <v-col
+              v-if="pos_profile.posa_allow_print_draft_invoices"
+              cols="6"
+              class="pa-1"
+            >
               <v-btn
                 block
                 class="pa-0"
                 color="primary"
-                @click="show_payment"
+                @click="print_draft_invoice"
                 dark
-                >{{ __('PAY') }}</v-btn
+                >{{ __('Print Draft') }}</v-btn
               >
             </v-col>
           </v-row>
@@ -666,6 +736,9 @@ export default {
       float_precision: 2,
       currency_precision: 2,
       new_line: false,
+      delivery_charges: [],
+      delivery_charges_rate: 0,
+      selcted_delivery_charges: {},
       items_headers: [
         {
           text: __('Name'),
@@ -709,6 +782,7 @@ export default {
         sum += item.qty * item.rate;
       });
       sum -= flt(this.discount_amount);
+      sum += flt(this.delivery_charges_rate);
       return flt(sum).toFixed(this.currency_precision);
     },
     total_items_discount_amount() {
@@ -882,11 +956,14 @@ export default {
       this.return_doc = '';
       this.discount_amount = 0;
       this.additional_discount_percentage = 0;
+      this.delivery_charges_rate = 0;
+      this.selcted_delivery_charges = {};
       evntBus.$emit('set_customer_readonly', false);
       this.cancel_dialog = false;
     },
 
     new_invoice(data = {}) {
+      let old_invoice = null;
       evntBus.$emit('set_customer_readonly', false);
       this.expanded = [];
       this.posa_offers = [];
@@ -895,10 +972,10 @@ export default {
       this.return_doc = '';
       const doc = this.get_invoice_doc();
       if (doc.name) {
-        this.update_invoice(doc);
+        old_invoice = this.update_invoice(doc);
       } else {
         if (doc.items.length) {
-          this.update_invoice(doc);
+          old_invoice = this.update_invoice(doc);
         }
       }
       if (!data.name && !data.is_return) {
@@ -944,6 +1021,7 @@ export default {
           }
         });
       }
+      return old_invoice;
     },
 
     get_invoice_doc() {
@@ -973,6 +1051,8 @@ export default {
       doc.return_against = this.invoice_doc.return_against;
       doc.posa_offers = this.posa_offers;
       doc.posa_coupons = this.posa_coupons;
+      doc.posa_delivery_charges = this.selcted_delivery_charges.name;
+      doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
       return doc;
     },
 
@@ -2257,6 +2337,93 @@ export default {
         }, 0);
       }
     },
+    load_print_page(invoice_name) {
+      const print_format =
+        this.pos_profile.print_format_for_online ||
+        this.pos_profile.print_format;
+      const letter_head = this.pos_profile.letter_head || 0;
+      const url =
+        frappe.urllib.get_base_url() +
+        '/printview?doctype=Sales%20Invoice&name=' +
+        invoice_name +
+        '&trigger_print=1' +
+        '&format=' +
+        print_format +
+        '&no_letterhead=' +
+        letter_head;
+      const printWindow = window.open(url, 'Print');
+      printWindow.addEventListener(
+        'load',
+        function () {
+          printWindow.print();
+          // printWindow.close();
+          // NOTE : uncomoent this to auto closing printing window
+        },
+        true
+      );
+    },
+
+    print_draft_invoice() {
+      if (!this.pos_profile.posa_allow_print_draft_invoices) {
+        evntBus.$emit('show_mesage', {
+          text: __(`You are not allowed to print draft invoices`),
+          color: 'error',
+        });
+        return;
+      }
+      let invoice_name = this.invoice_doc.name;
+      frappe.run_serially([
+        () => {
+          const invoice_doc = this.new_invoice();
+          invoice_name = invoice_doc.name ? invoice_doc.name : invoice_name;
+        },
+        () => {
+          this.load_print_page(invoice_name);
+        },
+      ]);
+    },
+    set_delivery_charges() {
+      const vm = this;
+      if (
+        !this.pos_profile ||
+        !this.customer ||
+        !this.pos_profile.posa_use_delivery_charges
+      ) {
+        this.delivery_charges = [];
+        this.delivery_charges_rate = 0;
+        this.selcted_delivery_charges = {};
+        return;
+      }
+      this.delivery_charges_rate = 0;
+      this.selcted_delivery_charges = {};
+      frappe.call({
+        method:
+          'posawesome.posawesome.api.posapp.get_applicable_delivery_charges',
+        args: {
+          company: this.pos_profile.company,
+          pos_profile: this.pos_profile.name,
+          customer: this.customer,
+        },
+        async: true,
+        callback: function (r) {
+          if (r.message) {
+            vm.delivery_charges = r.message;
+          }
+        },
+      });
+    },
+    deliveryChargesFilter(item, queryText, itemText) {
+      const textOne = item.name.toLowerCase();
+      const searchText = queryText.toLowerCase();
+      return textOne.indexOf(searchText) > -1;
+    },
+    update_delivery_charges() {
+      if (this.selcted_delivery_charges) {
+        this.delivery_charges_rate = this.selcted_delivery_charges.rate;
+      } else {
+        this.delivery_charges_rate = 0;
+      }
+    },
   },
 
   created() {
@@ -2326,6 +2493,7 @@ export default {
       this.close_payments();
       evntBus.$emit('set_customer', this.customer);
       this.fetch_customer_details();
+      this.set_delivery_charges();
     },
     customer_info() {
       evntBus.$emit('set_customer_info_to_edit', this.customer_info);

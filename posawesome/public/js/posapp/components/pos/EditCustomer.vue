@@ -3,7 +3,7 @@
     <v-dialog v-model="customerDialog" max-width="600px">
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">{{ __('Customer Info') }}</span>
+          <span class="headline primary--text">{{ __('Customer Info') }}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -11,7 +11,7 @@
               <v-col cols="12">
                 <v-text-field
                   dense
-                  color="indigo"
+                  color="primary"
                   :label="frappe._('Customer Name')"
                   background-color="white"
                   hide-details
@@ -22,7 +22,7 @@
               <v-col cols="6">
                 <v-text-field
                   dense
-                  color="indigo"
+                  color="primary"
                   :label="frappe._('Email')"
                   background-color="white"
                   hide-details
@@ -33,7 +33,7 @@
               <v-col cols="6">
                 <v-text-field
                   dense
-                  color="indigo"
+                  color="primary"
                   :label="frappe._('Mobile No')"
                   background-color="white"
                   hide-details

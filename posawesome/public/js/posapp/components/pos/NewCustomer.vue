@@ -3,7 +3,7 @@
     <v-dialog v-model="customerDialog" max-width="600px">
       <v-card>
         <v-card-title>
-          <span class="headline indigo--text">{{ __('New Customer') }}</span>
+          <span class="headline primary--text">{{ __('New Customer') }}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -11,7 +11,7 @@
               <v-col cols="12">
                 <v-text-field
                   dense
-                  color="indigo"
+                  color="primary"
                   :label="frappe._('Customer Name')"
                   background-color="white"
                   hide-details
@@ -21,7 +21,7 @@
               <v-col cols="6">
                 <v-text-field
                   dense
-                  color="indigo"
+                  color="primary"
                   :label="frappe._('Tax ID')"
                   background-color="white"
                   hide-details
@@ -31,7 +31,7 @@
               <v-col cols="6">
                 <v-text-field
                   dense
-                  color="indigo"
+                  color="primary"
                   :label="frappe._('Mobile No')"
                   background-color="white"
                   hide-details
@@ -41,7 +41,7 @@
               <v-col cols="6">
                 <v-text-field
                   dense
-                  color="indigo"
+                  color="primary"
                   :label="frappe._('Email Id')"
                   background-color="white"
                   hide-details
@@ -51,7 +51,7 @@
               <v-col cols="6">
                 <v-text-field
                   dense
-                  color="indigo"
+                  color="primary"
                   :label="frappe._('Referral Code')"
                   background-color="white"
                   hide-details
@@ -76,12 +76,12 @@
                       hide-details
                       v-bind="attrs"
                       v-on="on"
-                      color="indigo"
+                      color="primary"
                     ></v-text-field>
                   </template>
                   <v-date-picker
                     v-model="birthday"
-                    color="indigo"
+                    color="primary"
                     no-title
                     scrollable
                     :max="frappe.datetime.now_date()"
@@ -95,7 +95,7 @@
                   clearable
                   dense
                   auto-select-first
-                  color="indigo"
+                  color="primary"
                   :label="frappe._('Customer Group')"
                   v-model="group"
                   :items="groups"
@@ -110,7 +110,7 @@
                   clearable
                   dense
                   auto-select-first
-                  color="indigo"
+                  color="primary"
                   :label="frappe._('Territory')"
                   v-model="territory"
                   :items="territorys"
@@ -128,7 +128,7 @@
           <v-btn color="error" dark @click="close_dialog">{{
             __('Close')
           }}</v-btn>
-          <v-btn color="primary" dark @click="submit_dialog">{{
+          <v-btn color="success" dark @click="submit_dialog">{{
             __('Submit')
           }}</v-btn>
         </v-card-actions>

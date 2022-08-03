@@ -23,8 +23,9 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
     get_loyalty_program_details_with_points,
 )
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_code
-
-from posawesome import console
+from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
+    get_applicable_delivery_charges as _get_applicable_delivery_charges,
+)
 
 
 @frappe.whitelist()
@@ -325,18 +326,20 @@ def get_customer_names(pos_profile):
     )
     return customers
 
+
 @frappe.whitelist()
-def get_sales_person_names():    
+def get_sales_person_names():
     sales_persons = frappe.db.sql(
         """
         SELECT name, sales_person_name
-        FROM `tabSales Person`        
+        FROM `tabSales Person`
         ORDER by name
         LIMIT 0, 10000
         """,
         as_dict=1,
     )
     return sales_persons
+
 
 @frappe.whitelist()
 def update_invoice(data):
@@ -347,24 +350,33 @@ def update_invoice(data):
     else:
         invoice_doc = frappe.get_doc(data)
 
+    invoice_doc.set_missing_values()
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
-    invoice_doc.set_missing_values()
 
     if invoice_doc.is_return and invoice_doc.return_against:
         ref_doc = frappe.get_doc(invoice_doc.doctype, invoice_doc.return_against)
         if not ref_doc.update_stock:
             invoice_doc.update_stock = 0
-
+    allow_zero_rated_items = frappe.get_cached_value(
+        "POS Profile", invoice_doc.pos_profile, "posa_allow_zero_rated_items"
+    )
     for item in invoice_doc.items:
         if not item.rate or item.rate == 0:
-            item.price_list_rate = 0.00
-            item.is_free_item = 1
+            if allow_zero_rated_items:
+                item.price_list_rate = 0.00
+                item.is_free_item = 1
+            else:
+                frappe.throw(
+                    _("Rate cannot be zero for item {0}").format(item.item_code)
+                )
         else:
             item.is_free_item = 0
         add_taxes_from_tax_template(item, invoice_doc)
 
-    if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"):
+    if frappe.get_cached_value(
+        "POS Profile", invoice_doc.pos_profile, "posa_tax_inclusive"
+    ):
         if invoice_doc.get("taxes"):
             for tax in invoice_doc.taxes:
                 tax.included_in_print_rate = 1
@@ -694,7 +706,7 @@ def get_draft_invoices(pos_opening_shift):
         },
         fields=["name"],
         limit_page_length=0,
-        order_by="customer",
+        order_by="modified desc",
     )
     data = []
     for invoice in invoices_list:
@@ -1423,3 +1435,12 @@ def get_customer_info(customer):
 
 def get_company_domain(company):
     return frappe.get_cached_value("Company", cstr(company), "domain")
+
+
+@frappe.whitelist()
+def get_applicable_delivery_charges(
+    company, pos_profile, customer, shipping_address_name=None
+):
+    return _get_applicable_delivery_charges(
+        company, pos_profile, customer, shipping_address_name
+    )
