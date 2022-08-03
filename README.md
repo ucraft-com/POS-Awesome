@@ -5,6 +5,8 @@
 
 #### An open-source Point of Sale for [Erpnext](https://github.com/frappe/erpnext) using [Vue.js](https://github.com/vuejs/vue) and [Vuetify](https://github.com/vuetifyjs/vuetify)
 
+---
+
 ### Main Features
 
 1. Supports Erpnext Version 12 & 13
@@ -33,10 +35,18 @@
 24. POS Coupons
 25. Supports Referral Code
 26. Supports Customer and Customer Group price list
+27. Supports Sales Person
+28. Supports Delivery Charges
 
 ---
 
 ### How to Install
+
+#### Frappe Cloud:
+
+One-click installing available if you are hosting on FC from [here](https://frappecloud.com/marketplace/apps/posawesome)
+
+#### Self Hosting:
 
 1. `bench get-app https://github.com/yrestom/POS-Awesome.git`
 2. `bench setup requirements`
@@ -44,6 +54,28 @@
 4. `bench restart`
 5. `bench --site [your.site.name] install-app posawesome`
 6. `bench --site [your.site.name] migrate`
+
+---
+
+### Support
+
+#### Frappe Cloud:
+
+If you are hosting on FC premium support is available [here](https://frappecloud.com/marketplace/apps/posawesome)
+
+#### Self Hosting:
+
+If you need premium support it is available [here](https://forms.clickup.com/2191574/f/22w6p-14180/8J92BNHRMKG5ZW2EPF)
+
+#### Community Support:
+
+Available in GitHub [discussions](https://github.com/yrestom/POS-Awesome/discussions)
+
+---
+
+### New Features and Bug report:
+
+Please Create Github Issue from [here](https://github.com/yrestom/POS-Awesome/issues/new/choose) after checking the existing issues, and for paid features you can submit this [form](https://forms.clickup.com/2191574/f/22w6p-14740/NK7DUHU0CPM3HVXVDC)
 
 ---
 
