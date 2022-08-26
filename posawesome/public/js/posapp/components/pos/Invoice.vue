@@ -542,6 +542,31 @@
         </template>
       </div>
     </v-card>
+    <template>
+  <v-expansion-panels>
+    <v-expansion-panel
+      v-for="(item,i) in 1"
+      :key="i"
+    >
+    <v-expansion-panel-header>
+        xxx
+      </v-expansion-panel-header>
+    <v-expansion-panel-content>
+         <v-row>
+          <v-col cols="12" sm="6" md="4">
+            <v-text-field label="Certification" placeholder="Placeholder" outlined dense></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="6" md="4">
+            <v-text-field label="HUID NO" placeholder="Placeholder" outlined dense></v-text-field>
+          </v-col>
+            <v-col cols="12" sm="6" md="4">
+          <v-text-field label="Design no" placeholder="Placeholder" outlined  dense></v-text-field>
+        </v-col>
+           </v-row>
+       </v-expansion-panel-content>
+    </v-expansion-panel>
+  </v-expansion-panels>
+</template>
     <v-card class="cards mb-0 mt-3 py-0 grey lighten-5">
       <v-row no-gutters>
         <v-col cols="7">

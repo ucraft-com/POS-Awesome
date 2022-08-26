@@ -1,5 +1,17 @@
 <template>
   <div>
+  <v-card elevation="2">
+      <v-col cols="12">
+          <v-select
+            :items="items_group"
+            :label="frappe._('Items Group')"
+            dense
+            outlined
+            hide-details
+            v-model="item_group"
+          ></v-select>
+        </v-col>
+        </v-card>
     <v-card
       class="selection mx-auto grey lighten-5"
       style="max-height: 75vh; height: 75vh"
@@ -11,6 +23,7 @@
         top
         color="info"
       ></v-progress-linear>
+      
       <v-row class="items px-2 py-1">
         <v-col class="pb-0 mb-2">
           <v-text-field
@@ -116,43 +129,7 @@
         </v-col>
       </v-row>
     </v-card>
-    <v-card class="cards mb-0 mt-3 pa-2 grey lighten-5">
-      <v-row no-gutters align="center" justify="center">
-        <v-col cols="12">
-          <v-select
-            :items="items_group"
-            :label="frappe._('Items Group')"
-            dense
-            outlined
-            hide-details
-            v-model="item_group"
-          ></v-select>
-        </v-col>
-        <v-col cols="3" class="mt-1">
-          <v-btn-toggle
-            v-model="items_view"
-            color="primary"
-            group
-            dense
-            rounded
-          >
-            <v-btn small value="list">{{ __('List') }}</v-btn>
-            <v-btn small value="card">{{ __('Card') }}</v-btn>
-          </v-btn-toggle>
-        </v-col>
-        <v-col cols="4" class="mt-2">
-          <v-btn small block color="primary" text @click="show_coupons"
-            >{{ couponsCount }} {{ __('Coupons') }}</v-btn
-          >
-        </v-col>
-        <v-col cols="5" class="mt-2">
-          <v-btn small block color="primary" text @click="show_offers"
-            >{{ offersCount }} {{ __('Offers') }} : {{ appliedOffersCount }}
-            {{ __('Applied') }}</v-btn
-          >
-        </v-col>
-      </v-row>
-    </v-card>
+    
   </div>
 </template>
 
@@ -164,7 +141,7 @@ export default {
   data: () => ({
     pos_profile: '',
     flags: {},
-    items_view: 'list',
+    items_view: 'card',
     item_group: 'ALL',
     loading: false,
     items_group: ['ALL'],
