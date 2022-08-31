@@ -124,6 +124,12 @@ def get_items(pos_profile, price_list=None):
     condition += get_item_group_condition(pos_profile.get("name"))
     if not pos_profile.get("posa_show_template_items"):
         condition += " AND has_variants = 0"
+    if pos_profile.get("posa_display_items_in_stock"):
+        stock_items = frappe.db.get_all("Bin", filters={
+            "actual_qty": [">", 0],
+            "warehouse": pos_profile.get("warehouse")
+        }, pluck="item_code")
+        condition += f" AND item_code IN {tuple(stock_items)}"
 
     result = []
 
@@ -198,10 +204,6 @@ def get_items(pos_profile, price_list=None):
                     filters={"item_code": item_code, "status": "Active"},
                     fields=["name as serial_no"],
                 )
-            if pos_profile.get("posa_display_items_in_stock"):
-                item_stock_qty = get_stock_availability(
-                    item_code, pos_profile.get("warehouse")
-                )
             attributes = ""
             if pos_profile.get("posa_show_template_items") and item.has_variants:
                 attributes = get_item_attributes(item.item_code)
@@ -212,26 +214,22 @@ def get_items(pos_profile, price_list=None):
                     fields=["attribute", "attribute_value"],
                     filters={"parent": item.item_code, "parentfield": "attributes"},
                 )
-            if pos_profile.get("posa_display_items_in_stock") and (
-                not item_stock_qty or item_stock_qty < 0
-            ):
-                pass
-            else:
-                row = {}
-                row.update(item)
-                row.update(
-                    {
-                        "rate": item_price.get("price_list_rate") or 0,
-                        "currency": item_price.get("currency")
-                        or pos_profile.get("currency"),
-                        "item_barcode": item_barcode or [],
-                        "actual_qty": 0,
-                        "serial_no_data": serial_no_data or [],
-                        "attributes": attributes or "",
-                        "item_attributes": item_attributes or "",
-                    }
-                )
-                result.append(row)
+
+            row = {}
+            row.update(item)
+            row.update(
+                {
+                    "rate": item_price.get("price_list_rate") or 0,
+                    "currency": item_price.get("currency")
+                    or pos_profile.get("currency"),
+                    "item_barcode": item_barcode or [],
+                    "actual_qty": 0,
+                    "serial_no_data": serial_no_data or [],
+                    "attributes": attributes or "",
+                    "item_attributes": item_attributes or "",
+                }
+            )
+            result.append(row)
 
     return result
 
