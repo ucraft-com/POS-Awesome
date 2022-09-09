@@ -131,6 +131,8 @@ def get_items(pos_profile, price_list=None):
         SELECT
             name AS item_code,
             item_name,
+            code,
+            item_type,
             description,
             stock_uom,
             image,
@@ -341,6 +343,14 @@ def get_sales_person_names():
 @frappe.whitelist()
 def update_invoice(data):
     data = json.loads(data)
+    invitem = frappe.db.get_list('Item',  filters={'name': data['items'][0]["item_code"]},fields=['code', 'item_type'])
+    code = invitem[0]["code"]
+    itemtype = invitem[0]["item_type"]
+    for i in range(len(data['items'])):
+        frappe.errprint(i)
+        data['items'][i]['code'] = code
+        data['items'][i]['item_type'] = itemtype
+    frappe.errprint(data['items'])
     if data.get("name"):
         invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
         invoice_doc.update(data)
