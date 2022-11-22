@@ -684,6 +684,7 @@ def get_available_credit(customer, company):
             "party_type": "Customer",
             "party": customer,
             "company": company,
+            "docstatus": 1,
         },
         ["name", "unallocated_amount"],
     )
