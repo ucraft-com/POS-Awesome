@@ -96,7 +96,7 @@ export default {
         method: 'posawesome.posawesome.api.posapp.set_customer_info',
         args: {
           fieldname: field,
-          customer: this.customer_info.customer,
+          customer: this.customer_info.name,
           value: value,
         },
         callback: (r) => {
