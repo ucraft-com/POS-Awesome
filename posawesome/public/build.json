@@ -1,8 +1,0 @@
-{
-    "js/toConsole.min.js": [
-        "public/js/toConsole.js"
-    ],
-    "js/posapp.min.js": [
-        "public/js/posapp/posapp.js"
-    ]
-}
