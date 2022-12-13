@@ -53,6 +53,7 @@ def get_opening_dialog_data():
         fields=["*"],
         limit_page_length=0,
         order_by="parent",
+        ignore_permissions=True
     )
 
     return data
