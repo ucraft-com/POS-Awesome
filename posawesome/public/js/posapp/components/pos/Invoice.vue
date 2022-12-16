@@ -57,7 +57,7 @@
         class="items px-2 py-1 mt-0 pt-0"
         v-if="pos_profile.posa_use_delivery_charges"
       >
-        <v-col cols="8" class="pb-0 mb-2 pr-0 pt-0">
+        <v-col cols="8" class="pb-0 mb-0 pr-0 pt-0">
           <v-autocomplete
             dense
             clearable
@@ -91,7 +91,7 @@
             </template>
           </v-autocomplete>
         </v-col>
-        <v-col cols="4" class="pb-0 mb-2 pt-0">
+        <v-col cols="4" class="pb-0 mb-0 pt-0">
           <v-text-field
             dense
             outlined
@@ -103,6 +103,53 @@
             :prefix="pos_profile.currency"
             disabled
           ></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row
+        align="center"
+        class="items px-2 py-1 mt-0 pt-0"
+        v-if="pos_profile.posa_allow_change_posting_date"
+      >
+        <v-col
+          v-if="pos_profile.posa_allow_change_posting_date"
+          cols="4"
+          class="pb-2"
+        >
+          <v-menu
+            ref="invoice_posting_date"
+            v-model="invoice_posting_date"
+            :close-on-content-click="false"
+            transition="scale-transition"
+            dense
+          >
+            <template v-slot:activator="{ on, attrs }">
+              <v-text-field
+                v-model="posting_date"
+                :label="frappe._('Posting Date')"
+                readonly
+                outlined
+                dense
+                background-color="white"
+                clearable
+                color="primary"
+                hide-details
+                v-bind="attrs"
+                v-on="on"
+              ></v-text-field>
+            </template>
+            <v-date-picker
+              v-model="posting_date"
+              no-title
+              scrollable
+              color="primary"
+              :min="
+                frappe.datetime.add_days(frappe.datetime.now_date(true), -7)
+              "
+              :max="frappe.datetime.add_days(frappe.datetime.now_date(true), 7)"
+              @input="invoice_posting_date = false"
+            >
+            </v-date-picker>
+          </v-menu>
         </v-col>
       </v-row>
 
@@ -739,6 +786,8 @@ export default {
       delivery_charges: [],
       delivery_charges_rate: 0,
       selcted_delivery_charges: {},
+      invoice_posting_date: false,
+      posting_date: frappe.datetime.nowdate(),
       items_headers: [
         {
           text: __('Name'),
@@ -932,6 +981,7 @@ export default {
       const doc = this.get_invoice_doc();
       this.invoiceType = 'Invoice';
       this.invoiceTypes = ['Invoice', 'Order'];
+      this.posting_date = frappe.datetime.nowdate();
       if (doc.name && this.pos_profile.posa_allow_delete) {
         frappe.call({
           method: 'posawesome.posawesome.api.posapp.delete_invoice',
@@ -1005,6 +1055,7 @@ export default {
           }
         });
         this.customer = data.customer;
+        this.posting_date = data.posting_date || frappe.datetime.nowdate();
         this.discount_amount = data.discount_amount;
         this.additional_discount_percentage =
           data.additional_discount_percentage;
@@ -1053,6 +1104,7 @@ export default {
       doc.posa_coupons = this.posa_coupons;
       doc.posa_delivery_charges = this.selcted_delivery_charges.name;
       doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
+      doc.posting_date = this.posting_date;
       return doc;
     },
 
