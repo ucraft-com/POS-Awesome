@@ -233,6 +233,8 @@ fixtures = [
                     "Sales Invoice-posa_delivery_charges_rate",
                     "POS Profile-posa_auto_set_delivery_charges",
                     "POS Profile-posa_use_delivery_charges",
+                    "POS Profile-hide_expected_amount",
+                    "POS Profile-posa_allow_change_posting_date",
                 ),
             ]
         ],

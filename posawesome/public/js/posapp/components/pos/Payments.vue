@@ -1320,7 +1320,7 @@ export default {
         this.invoice_doc.loyalty_amount = flt(this.loyalty_amount);
         this.invoice_doc.redeem_loyalty_points = 1;
         this.invoice_doc.loyalty_points =
-          flt(this.loyalty_amount) * this.customer_info.conversion_factor;
+          flt(this.loyalty_amount) / this.customer_info.conversion_factor;
       }
     },
     is_credit_sale(value) {

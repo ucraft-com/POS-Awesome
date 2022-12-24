@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import json
 import frappe
-from frappe.utils import nowdate, flt, cstr
+from frappe.utils import nowdate, flt, cstr, cint
 from frappe import _
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.stock.get_item_details import get_item_details
@@ -26,6 +26,8 @@ from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_cod
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges as _get_applicable_delivery_charges,
 )
+from erpnext.accounts.party import get_party_account_currency
+from erpnext.controllers.accounts_controller import get_payment_terms
 
 
 @frappe.whitelist()
@@ -482,6 +484,8 @@ def submit_invoice(invoice, data):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
+    invoice_doc.calculate_taxes_and_totals()
+    set_payment_schedule(invoice_doc)
     invoice_doc.save()
 
     if frappe.get_value(
@@ -1451,3 +1455,79 @@ def get_applicable_delivery_charges(
     return _get_applicable_delivery_charges(
         company, pos_profile, customer, shipping_address_name
     )
+
+
+def set_payment_schedule(doc):
+    if doc.doctype == "Sales Invoice" and doc.is_return:
+        doc.payment_terms_template = ""
+        return
+
+    party_account_currency = doc.get("party_account_currency")
+    if not party_account_currency:
+        party_type, party = doc.get_party()
+
+        if party_type and party:
+            party_account_currency = get_party_account_currency(party_type, party, doc.company)
+
+    posting_date = doc.get("bill_date") or doc.get("posting_date") or doc.get("transaction_date")
+    date = doc.get("due_date")
+    due_date = date or posting_date
+
+    base_grand_total = doc.get("base_rounded_total") or doc.base_grand_total - doc.base_paid_amount
+    grand_total = doc.get("rounded_total") or doc.grand_total - doc.paid_amount
+
+    if doc.doctype in ("Sales Invoice", "Purchase Invoice"):
+        base_grand_total = base_grand_total - flt(doc.base_write_off_amount)
+        grand_total = grand_total - flt(doc.write_off_amount)
+        po_or_so, doctype, fieldname = doc.get_order_details()
+        automatically_fetch_payment_terms = cint(
+            frappe.db.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
+        )
+
+    if doc.get("total_advance"):
+        if party_account_currency == doc.company_currency:
+            base_grand_total -= doc.get("total_advance")
+            grand_total = flt(
+                base_grand_total / doc.get("conversion_rate"), doc.precision("grand_total")
+            )
+        else:
+            grand_total -= doc.get("total_advance")
+            base_grand_total = flt(
+                grand_total * doc.get("conversion_rate"), doc.precision("base_grand_total")
+            )
+
+    if not doc.get("payment_schedule"):
+        if (
+            doc.doctype in ["Sales Invoice", "Purchase Invoice"]
+            and automatically_fetch_payment_terms
+            and doc.linked_order_has_payment_terms(po_or_so, fieldname, doctype)
+        ):
+            doc.fetch_payment_terms_from_order(po_or_so, doctype)
+            if doc.get("payment_terms_template"):
+                doc.ignore_default_payment_terms_template = 1
+        elif doc.get("payment_terms_template"):
+            data = get_payment_terms(doc.payment_terms_template, posting_date, grand_total, base_grand_total)
+            for item in data:
+                doc.append("payment_schedule", item)
+        elif doc.doctype not in ["Purchase Receipt"]:
+            data = dict(
+                due_date=due_date,
+                invoice_portion=100,
+                payment_amount=grand_total,
+                base_payment_amount=base_grand_total,
+            )
+            doc.append("payment_schedule", data)
+    frappe.msgprint(str(doc.outstanding_amount))
+    for d in doc.get("payment_schedule"):
+        if d.invoice_portion:
+            d.payment_amount = flt(
+                grand_total * flt(d.invoice_portion / 100), d.precision("payment_amount")
+            )
+            d.base_payment_amount = flt(
+                base_grand_total * flt(d.invoice_portion / 100), d.precision("base_payment_amount")
+            )
+            d.outstanding = d.payment_amount
+        elif not d.invoice_portion:
+            d.base_payment_amount = flt(
+                d.payment_amount * doc.get("conversion_rate"), d.precision("base_payment_amount")
+            )
