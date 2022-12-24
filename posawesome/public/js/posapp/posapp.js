@@ -15,6 +15,7 @@ frappe.PosApp.posapp = class {
         this.vue = new Vue({
             vuetify: new Vuetify(
                 {
+                    rtl: frappe.utils.is_rtl(),
                     theme: {
                         themes: {
                             light: {
