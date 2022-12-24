@@ -7,12 +7,14 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, add_days
+from frappe.utils import flt, add_days, cint
 from posawesome.posawesome.doctype.pos_coupon.pos_coupon import update_coupon_code_count
 from posawesome.posawesome.api.posapp import get_company_domain
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges,
 )
+from erpnext.accounts.party import get_party_account_currency
+from erpnext.controllers.accounts_controller import get_payment_terms
 
 
 def validate(doc, method):
@@ -72,6 +74,7 @@ def create_sales_order(doc):
             sales_order_doc.posa_notes = doc.posa_notes
             sales_order_doc.flags.ignore_permissions = True
             sales_order_doc.flags.ignore_account_permission = True
+            sales_order_doc.is_pos = 1
             sales_order_doc.save()
             sales_order_doc.submit()
             url = frappe.utils.get_url_to_form(
@@ -120,12 +123,23 @@ def make_sales_order(source_name, target_doc=None, ignore_permissions=True):
                 },
                 "postprocess": update_item,
             },
+            "Payment Schedule": {
+                "doctype": "Payment Schedule",
+                "field_map": {
+                    "discount": "discount",
+                    "discounted_amount": "discounted_amount",
+                    "due_date": "due_date",
+                    "outstanding": "outstanding",
+                    "paid_amount": "paid_amount",
+                    "payment_amount": "payment_amount",
+                },
+                "add_if_empty": False
+            },
             "Sales Taxes and Charges": {
                 "doctype": "Sales Taxes and Charges",
-                "add_if_empty": True,
+                "add_if_empty": False,
             },
             "Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
-            "Payment Schedule": {"doctype": "Payment Schedule", "add_if_empty": True},
         },
         target_doc,
         set_missing_values,
