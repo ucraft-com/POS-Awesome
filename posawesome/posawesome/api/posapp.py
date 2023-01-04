@@ -862,9 +862,13 @@ def create_customer(
         )
         if customer_group:
             customer.customer_group = customer_group
+        else:
+            customer.customer_group = "All Customer Groups"
         if territory:
             customer.territory = territory
-        customer.save(ignore_permissions=True)
+        else:
+            customer.territory = "All Territories"
+        customer.save()
         return customer
 
 
