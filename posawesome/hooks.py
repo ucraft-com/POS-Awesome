@@ -96,6 +96,8 @@ doc_events = {
         "validate": "posawesome.posawesome.api.invoice.validate",
         "before_submit": "posawesome.posawesome.api.invoice.before_submit",
         "before_cancel": "posawesome.posawesome.api.invoice.before_cancel",
+        # "on_update": "posawesome.posawesome.api.invoice.update_posting_date"
+
     },
     "Customer": {
         "validate": "posawesome.posawesome.api.customer.validate",
@@ -232,8 +234,17 @@ fixtures = [
                     "Sales Invoice-posa_delivery_charges_rate",
                     "POS Profile-posa_auto_set_delivery_charges",
                     "POS Profile-posa_use_delivery_charges",
-                    "POS Profile-hide_expected_amount",
-                    "POS Profile-posa_allow_change_posting_date",
+                    "POS Profile-default_order_type",
+                    "POS Profile-warehouse_ending_time",
+                    "POS Profile-current_date",
+                    "POS Profile User-hide_close_shift_for_this_user",
+                    "POS Profile User-allow_to_use_software_after_day_close_hrs",
+                    "Sales Invoice-dates",
+                    "POS Profile-customer_type",
+                    "POS Profile-customer_group",
+                    "POS Profile-customer_territory",
+                    "POS Profile-pos_default_settings"
+                    
                 ),
             ]
         ],
