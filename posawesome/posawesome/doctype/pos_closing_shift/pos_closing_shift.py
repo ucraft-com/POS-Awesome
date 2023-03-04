@@ -7,7 +7,9 @@ import frappe
 import json
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import getdate, get_datetime, flt
+from collections import defaultdict
+from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 
 
 class POSClosingShift(Document):
@@ -26,14 +28,6 @@ class POSClosingShift(Document):
         if frappe.db.get_value("POS Opening Shift", self.pos_opening_shift, "status") != "Open":
             frappe.throw(_("Selected POS Opening Shift should be open."), title=_(
                 "Invalid Opening Entry"))
-        self.update_payment_reconciliation()
-    
-    def update_payment_reconciliation(self):
-        # update the difference values in Payment Reconciliation child table
-        # get default precision for site
-        precision = frappe.get_cached_value('System Settings', None, 'currency_precision') or 3
-        for d in self.payment_reconciliation:
-            d.difference = flt(d.opening_amount, precision) + flt(d.closing_amount, precision) - flt(d.expected_amount, precision)
 
     def on_submit(self):
         opening_entry = frappe.get_doc(

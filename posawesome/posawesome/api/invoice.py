@@ -206,12 +206,18 @@ def calc_delivery_charges(doc):
         charges_doc = frappe.get_cached_doc(
             "Delivery Charges", doc.posa_delivery_charges
         )
-        doc.posa_delivery_charges_rate = charges_doc.default_rate
-        charges_profile = next(
-            (i for i in charges_doc.profiles if i.pos_profile == doc.pos_profile), None
-        )
-        if charges_profile:
-            doc.posa_delivery_charges_rate = charges_profile.rate
+        
+        # Customized
+        # Start
+
+        # doc.posa_delivery_charges_rate = charges_doc.default_rate
+        # charges_profile = next(
+        #     (i for i in charges_doc.profiles if i.pos_profile == doc.pos_profile), None
+        # )
+        # if charges_profile:
+        #     doc.posa_delivery_charges_rate = charges_profile.rate
+
+        # End
 
     if old_doc and old_doc.posa_delivery_charges:
         old_charges = next(
@@ -242,3 +248,13 @@ def calc_delivery_charges(doc):
 
     if calculate_taxes_and_totals:
         doc.calculate_taxes_and_totals()
+@frappe.whitelist() 
+def update_posting_date(doc,method):
+    # str_po_time  = str(doc.posting_time).split(":")
+    # settings = frappe.get_single("POS Custom Settings")
+    # if int(str_po_time[0])<=settings.day_starts_timehr:
+    po_date = doc.dates
+    # po_update = frappe.utils.add_days(doc.posting_date, 0)
+    frappe.db.sql("UPDATE `tabSales Invoice` set posting_date=%(posting_date)s WHERE name=%(invoice_id)s",{"posting_date":po_date,"invoice_id":doc.name})
+    frappe.db.commit()
+    doc.reload()

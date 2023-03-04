@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">POS Awesome</span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Awesome App\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">POS Awesome</span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Awesome App\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Kitchen Display System\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"KDS Settings\",\"col\":3}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Day Close Settings\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}}]",
  "creation": "2022-11-29 14:33:45.038200",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -141,7 +141,7 @@
    "type": "Link"
   }
  ],
- "modified": "2022-11-29 15:06:41.606620",
+ "modified": "2023-03-01 05:53:15.239796",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Awesome",
@@ -155,8 +155,29 @@
   {
    "color": "Grey",
    "doc_view": "List",
+   "label": "Day Close Settings",
+   "link_to": "POS Custom Settings",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
    "label": "POS Awesome App",
    "link_to": "posapp",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "KDS Settings",
+   "link_to": "KDS Settings",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Kitchen Display System",
+   "link_to": "kds-management",
    "type": "Page"
   }
  ],

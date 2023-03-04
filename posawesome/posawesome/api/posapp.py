@@ -26,8 +26,8 @@ from posawesome.posawesome.doctype.pos_coupon.pos_coupon import check_coupon_cod
 from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges as _get_applicable_delivery_charges,
 )
-
-
+from datetime import datetime,timedelta
+import time
 @frappe.whitelist()
 def get_opening_dialog_data():
     data = {}
@@ -47,13 +47,12 @@ def get_opening_dialog_data():
     payment_method_table = (
         "POS Payment Method" if get_version() == 13 else "Sales Invoice Payment"
     )
-    data["payments_method"] = frappe.get_list(
+    data["payments_method"] = frappe.db.get_all(
         payment_method_table,
         filters={"parent": ["in", pos_profiles_list]},
         fields=["*"],
         limit_page_length=0,
         order_by="parent",
-        ignore_permissions=True
     )
 
     return data
@@ -103,12 +102,126 @@ def check_opening_shift(user):
             "POS Opening Shift", open_vouchers[0]["name"]
         )
         update_opening_shift_data(data, open_vouchers[0]["pos_profile"])
+    #frappe.log_error("posobj",data)
     return data
 
 
 def update_opening_shift_data(data, pos_profile):
     data["pos_profile"] = frappe.get_doc("POS Profile", pos_profile)
     data["company"] = frappe.get_doc("Company", data["pos_profile"].company)
+
+    
+    ctime = []
+    alloclshf = frappe.db.get_all('Warehouse Time Dtls', filters={ 'warehouse': data["pos_profile"].warehouse }, fields=['allow_todo_daycls'])
+    
+    ctable = frappe.db.get_all('POS Profile User', filters={ 'parent': data["pos_profile"].name }, fields=['user'])
+    
+    allo_closs_shift = frappe.db.get_all('POS Profile User', filters={ 'user': frappe.session.user}, fields=['hide_close_shift_for_this_user'])
+    
+    allo_to_use_aft_clsshift_hrs = frappe.db.get_all('POS Profile User', filters={ 'user': frappe.session.user}, fields=['allow_to_use_software_after_day_close_hrs'])
+    if alloclshf:
+        if alloclshf[0]["allow_todo_daycls"] == 1:
+            ctime = frappe.db.get_all('Warehouse Time Dtls', filters={ 'warehouse': data["pos_profile"].warehouse }, fields=['ending_time'])
+
+    #datetim = str(frappe.utils.getdate())+" "+str(ctime[0]["ending_time"] )
+    #dtime_object = datetime.strptime(datetim, '%Y-%m-%d  %H:%M:%S')
+    
+    #frappe.log_error(message = dtime_object,title='test')
+    #frappe.log_error(message = cshift[0]["hide_close_shift_for_this_user"],title='test')
+    
+    #frappe.msgprint( msg= cshift[0]["hide_close_shift_for_this_user"], title='Date & Time')
+    #Time
+    named_tuple = time.localtime() 
+    time_string = time.strftime("%H:%M:%S", named_tuple)
+
+    # Fixed Time
+    #ctime = '15:00:00';
+    from frappe.utils import now
+    currentdate = frappe.utils.get_datetime(now()) 
+    if alloclshf:
+        cshifts = alloclshf[0]["allow_todo_daycls"]
+        if allo_to_use_aft_clsshift_hrs:
+            cshifts_allo_hr = allo_to_use_aft_clsshift_hrs[0]["allow_to_use_software_after_day_close_hrs"]
+        else:
+            cshifts_allo_hr = 0
+    else:
+        if  frappe.session.user=="Administrator":
+            cshifts = 1
+            cshifts_allo_hr = 1
+        else:
+            cshifts = 0
+            cshifts_allo_hr = 0
+    if len(ctime) > 0:
+        data["endingTime"]  = ctime[0]["ending_time"] 
+        datetime_str = str(frappe.utils.getdate())+" "+str(ctime[0]["ending_time"] )
+        datetime_object = datetime.strptime(datetime_str, '%Y-%m-%d  %H:%M:%S')
+
+        if datetime_object <= currentdate:
+
+            #Date
+            currentTimeDate = datetime.now() - timedelta(days=0)
+            currentdate = currentTimeDate.strftime('%Y-%m-%d  %H:%M:%S')
+            currentdate2 = currentTimeDate.strftime('%Y-%m-%d')
+           # frappe.msgprint( msg= "Current " + currentdate +" "+ time_string, title='Date & Time')
+        else :
+        
+            #Date
+            currentTimeDate = datetime.now() - timedelta(days=1)
+            currentdate = currentTimeDate.strftime('%Y-%m-%d  %H:%M:%S')
+            currentdate2 = currentTimeDate.strftime('%Y-%m-%d')
+            #frappe.msgprint( msg= "Old " + currentdate +" "+ time_string, title='Date & Time')
+    else :
+
+        #Date
+        
+        currentTimeDate = datetime.now() - timedelta(days=0)
+        currentdate = currentTimeDate.strftime('%Y-%m-%d  %H:%M:%S')
+        currentdate2 = currentTimeDate.strftime('%Y-%m-%d')
+        currenttimm = currentTimeDate.strftime('%H:%M:%S')
+        
+        data["endingTime"]  = currenttimm
+        #frappe.msgprint( msg= "Old " + currentdate +" "+ time_string, title='Date & Time')
+        datetime_str = ""
+        datetime_object = datetime.now()
+        
+    curTimDat = datetime.now() - timedelta(days=0)
+    currdatevl = curTimDat.strftime('%Y-%m-%d')
+
+    #--------------------------------------
+    values = {'warehouse': data["pos_profile"].warehouse }
+    datedtls = frappe.db.sql("""
+        SELECT
+            date,time,user,location
+        from `tabPOS Shift Clossing Entry`
+        WHERE location = %(warehouse)s order by date desc limit 1
+    """, values=values, as_dict=1)
+    if datedtls:
+        #datetime_str = str(datedtls[0].date)+" "+str(datedtls[1].time)
+        #datetime_object = datetime.strptime(datetime_str, '%Y-%m-%d  %H:%M:%S')
+    
+        currentTimeDate = datedtls[0].date - timedelta(days=-1)
+        post_dates = currentTimeDate
+    else:
+        post_dates = currdatevl
+    #frappe.log_error(message = post_dates,title='test')
+    data["postDtime"]  = post_dates
+    
+    #---------------------------------
+
+    
+
+    data["dateTimes"]  = currentdate
+    data["allocShift"]  = cshifts
+    data["allocShifthrs"]  = cshifts_allo_hr
+    data["dateTimes2"]  = currentdate2
+    data["currTimes"]  = datetime_object
+    data["currDates"]  = currdatevl
+    data["currUser"]  = ctable
+    
+    
+    data["currnTime"]  = time_string
+
+
     allow_negative_stock = frappe.get_value(
         "Stock Settings", None, "allow_negative_stock"
     )
@@ -388,6 +501,20 @@ def update_invoice(data):
             for tax in invoice_doc.taxes:
                 tax.included_in_print_rate = 1
 
+    # Customized
+    # Start
+    try:
+        invoice_doc.orders_type = data["order_type"]
+
+        if invoice_doc.orders_type == "Dine In":
+            invoice_doc.table_number = data["table_number"]
+        else:
+            invoice_doc.table_number = None
+            
+    except:
+        pass
+    # End
+
     invoice_doc.save()
     return invoice_doc
 
@@ -398,8 +525,8 @@ def submit_invoice(invoice, data):
     invoice = json.loads(invoice)
     invoice_doc = frappe.get_doc("Sales Invoice", invoice.get("name"))
     invoice_doc.update(invoice)
-    if invoice.get("posa_delivery_date"):
-        invoice_doc.update_stock = 0
+    # if invoice.get("posa_delivery_date"):
+    #     invoice_doc.update_stock = 0
     mop_cash_list = [
         i.mode_of_payment
         for i in invoice_doc.payments
@@ -862,13 +989,9 @@ def create_customer(
         )
         if customer_group:
             customer.customer_group = customer_group
-        else:
-            customer.customer_group = "All Customer Groups"
         if territory:
             customer.territory = territory
-        else:
-            customer.territory = "All Territories"
-        customer.save()
+        customer.save(ignore_permissions=True)
         return customer
 
 
@@ -1456,3 +1579,104 @@ def get_applicable_delivery_charges(
     return _get_applicable_delivery_charges(
         company, pos_profile, customer, shipping_address_name
     )
+
+# Customized
+# Start
+@frappe.whitelist()
+def get_order_types():
+    return frappe.db.sql(
+        """
+        select name 
+        from `tabOrder Type`
+        order by name
+        LIMIT 0, 200 """,
+        as_dict=1,
+    )
+
+@frappe.whitelist()
+def get_table_number():
+    return frappe.db.sql(
+        """
+        select name 
+        from `tabTable Number`
+        order by name
+        LIMIT 0, 200 """,
+        as_dict=1,
+    )
+ # End
+
+@frappe.whitelist()
+def get_setclos_entry(pos_profile):
+    #frappe.log_error(message = pos_profile,title='test')
+    
+    pos_profile = frappe.get_doc("POS Profile", pos_profile)
+    
+    closs_datevl = frappe.db.get_all('POS Shift Clossing Entry', filters={ 'user': frappe.session.user }, fields=['date'])
+    
+    ctime = frappe.db.get_all('Warehouse Time Dtls', filters={ 'warehouse': pos_profile.warehouse }, fields=['ending_time'])
+    
+    from frappe.utils import now
+    currentdate = frappe.utils.get_datetime(now())
+    
+    if len(ctime) > 0:
+        datetime_str = str(frappe.utils.getdate())+" "+str(ctime[0]["ending_time"] )
+        datetime_object = datetime.strptime(datetime_str, '%Y-%m-%d  %H:%M:%S')
+
+        if datetime_object <= currentdate:
+
+            #Date
+            currentTimeDate = datetime.now() - timedelta(days=0)
+            currentdate = currentTimeDate.strftime('%Y-%m-%d  %H:%M:%S')
+            currentdate2 = currentTimeDate.strftime('%Y-%m-%d')
+           # frappe.msgprint( msg= "Current " + currentdate +" "+ time_string, title='Date & Time')
+        else :
+        
+            #Date
+            currentTimeDate = datetime.now() - timedelta(days=1)
+            currentdate = currentTimeDate.strftime('%Y-%m-%d  %H:%M:%S')
+            currentdate2 = currentTimeDate.strftime('%Y-%m-%d')
+            #frappe.msgprint( msg= "Old " + currentdate +" "+ time_string, title='Date & Time')
+    else :
+
+        #Date
+        currentTimeDate = datetime.now() - timedelta(days=0)
+        currentdate = currentTimeDate.strftime('%Y-%m-%d  %H:%M:%S')
+        currentdate2 = currentTimeDate.strftime('%Y-%m-%d')
+        #frappe.msgprint( msg= "Old " + currentdate +" "+ time_string, title='Date & Time')
+        datetime_str = ""
+        datetime_object = datetime.now()
+        
+    curTimDat = datetime.now() - timedelta(days=0)
+    currdatevl = curTimDat.strftime('%Y-%m-%d')
+        #frappe.msgprint( msg= "Old " + currentdate +" "+ time_string, title='Date & Time')
+    datetime_str = ""
+    datetime_object = datetime.now()
+    #frappe.msgprint( msg= currentdate, title='Date & Time')
+    #frappe.log_error(message = currentdate2,title='dateval1')
+    #frappe.log_error(message = closs_datevl[0]["date"],title='dateval2')
+    #if str(currentdate2) != str(closs_datevl[0]["date"]):
+    
+    #-----------------------------------------------
+    values = {'warehouse': pos_profile.warehouse }
+    datedtls = frappe.db.sql("""
+        SELECT
+            date,time,user,location
+        from `tabPOS Shift Clossing Entry`
+        WHERE location = %(warehouse)s order by date desc limit 1
+    """, values=values, as_dict=1)
+    if datedtls:
+        #datetime_str = str(datedtls[0].date)+" "+str(datedtls[1].time)
+        #datetime_object = datetime.strptime(datetime_str, '%Y-%m-%d  %H:%M:%S')
+    
+        currentTimeDate = datedtls[0].date - timedelta(days=-1)
+        post_dates = currentTimeDate
+    else:
+        post_dates = currdatevl
+    
+    doc=frappe.get_doc({
+        'doctype': 'POS Shift Clossing Entry',
+        'date': post_dates,
+        'user': frappe.session.user,
+        'location': pos_profile.warehouse
+    })
+    doc.insert()

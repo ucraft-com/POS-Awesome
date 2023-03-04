@@ -1,0 +1,48 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-02-22 15:55:05.786815",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "warehouse",
+  "ending_time",
+  "allow_todo_daycls"
+ ],
+ "fields": [
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ending_time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Closing Time",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_todo_daycls",
+   "fieldtype": "Check",
+   "label": "Allow To Do Day Close"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-03-02 13:34:08.195194",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "Warehouse Time Dtls",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

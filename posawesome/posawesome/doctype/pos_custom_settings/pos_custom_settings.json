@@ -1,0 +1,50 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-02-17 12:55:44.235787",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "day_starts_timehr",
+  "time_dtls"
+ ],
+ "fields": [
+  {
+   "fieldname": "day_starts_timehr",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Day Starts Time(Hr)"
+  },
+  {
+   "fieldname": "time_dtls",
+   "fieldtype": "Table",
+   "label": "Warehouse Time Details",
+   "options": "Warehouse Time Dtls"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2023-02-22 15:56:35.727020",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "POS Custom Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
