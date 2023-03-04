@@ -18,26 +18,32 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-card
-      style="max-height: 70vh; height: 70vh"
-      class="cards my-0 py-0 grey lighten-5"
-    >
-      <v-row align="center" class="items px-2 py-1">
-        <v-col
-          v-if="pos_profile.posa_allow_sales_order"
-          cols="9"
-          class="pb-2 pr-0"
-        >
+    <!-- Customized
+    Start -->
+  
+    <v-card  style="max-height: 73vh; height: 73vh"  class="cards my-0 py-0 grey lighten-5" >
+        <v-row align="center" class="items px-2 py-1">
+        <v-col v-if="pos_profile.posa_allow_sales_order" cols="6" class="pb-2 pr-0">
           <Customer></Customer>
         </v-col>
-        <v-col
-          v-if="!pos_profile.posa_allow_sales_order"
-          cols="12"
-          class="pb-2"
-        >
+        
+        <v-col v-if="!pos_profile.posa_allow_sales_order" cols="12" class="pb-2">
           <Customer></Customer>
         </v-col>
-        <v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-2">
+        
+        <v-col cols="3" class="pb-2 pr-0">
+        <v-select
+            :items="order_types"
+            :label="frappe._('Order Type')"
+            dense
+            outlined
+            hide-details
+            v-model="order_type"
+            @change="order_type_update(order_type)"
+
+          ></v-select>
+        </v-col>
+        <v-col v-if="pos_profile.posa_allow_sales_order" cols="3" class="pb-2 pr-0">
           <v-select
             dense
             hide-details
@@ -52,107 +58,52 @@
         </v-col>
       </v-row>
 
-      <v-row
+      <p  style="font-size: 0.03px">.</p>
+      <!-- End -->
+
+      <v-row style="height: 7.5vh"
         align="center"
         class="items px-2 py-1 mt-0 pt-0"
-        v-if="pos_profile.posa_use_delivery_charges"
+        v-if="this.order_type == 'Dine In' || this.order_type == 'Delivery'"
       >
-        <v-col cols="8" class="pb-0 mb-0 pr-0 pt-0">
-          <v-autocomplete
-            dense
-            clearable
-            auto-select-first
-            outlined
-            color="primary"
-            :label="frappe._('Delivery Charges')"
-            v-model="selcted_delivery_charges"
-            :items="delivery_charges"
-            item-text="name"
-            return-object
-            background-color="white"
-            :no-data-text="__('Charges not found')"
-            hide-details
-            :filter="deliveryChargesFilter"
-            :disabled="readonly"
-            @change="update_delivery_charges()"
-          >
-            <template v-slot:item="data">
-              <template>
-                <v-list-item-content>
-                  <v-list-item-title
-                    class="primary--text subtitle-1"
-                    v-html="data.item.name"
-                  ></v-list-item-title>
-                  <v-list-item-subtitle
-                    v-html="`Rate: ${data.item.rate}`"
-                  ></v-list-item-subtitle>
-                </v-list-item-content>
-              </template>
-            </template>
-          </v-autocomplete>
+        <v-col v-if="this.order_type == 'Dine In'" cols="2" class="pb-0 mb-2 pr-0 pt-0">
+          <v-select
+              :items="tables_number"
+              :label="frappe._('Table')"
+              dense
+              
+              outlined
+              hide-details
+              v-model="table_number"
+              @change="table_number_update(table_number, $event)"
+          ></v-select>
         </v-col>
-        <v-col cols="4" class="pb-0 mb-0 pt-0">
+
+    
+        <!-- Customized
+        Start -->
+        <v-col cols="3" v-if="this.order_type == 'Delivery'"  class="pb-0 mb-2 pt-0">
           <v-text-field
             dense
             outlined
+            auto-select-first
             color="primary"
             :label="frappe._('Delivery Charges Rate')"
             background-color="white"
             hide-details
             :value="formtCurrency(delivery_charges_rate)"
+            v-model="change_delivery_charage"
             :prefix="pos_profile.currency"
-            disabled
+            @change="change_delivery_charges()"
+            
           ></v-text-field>
         </v-col>
+    
+        <!-- End -->
       </v-row>
-      <v-row
-        align="center"
-        class="items px-2 py-1 mt-0 pt-0"
-        v-if="pos_profile.posa_allow_change_posting_date"
-      >
-        <v-col
-          v-if="pos_profile.posa_allow_change_posting_date"
-          cols="4"
-          class="pb-2"
-        >
-          <v-menu
-            ref="invoice_posting_date"
-            v-model="invoice_posting_date"
-            :close-on-content-click="false"
-            transition="scale-transition"
-            dense
-          >
-            <template v-slot:activator="{ on, attrs }">
-              <v-text-field
-                v-model="posting_date"
-                :label="frappe._('Posting Date')"
-                readonly
-                outlined
-                dense
-                background-color="white"
-                clearable
-                color="primary"
-                hide-details
-                v-bind="attrs"
-                v-on="on"
-              ></v-text-field>
-            </template>
-            <v-date-picker
-              v-model="posting_date"
-              no-title
-              scrollable
-              color="primary"
-              :min="
-                frappe.datetime.add_days(frappe.datetime.now_date(true), -7)
-              "
-              :max="frappe.datetime.add_days(frappe.datetime.now_date(true), 7)"
-              @input="invoice_posting_date = false"
-            >
-            </v-date-picker>
-          </v-menu>
-        </v-col>
-      </v-row>
-
+    
+      <p  style="font-size: 0.03px">.</p>
+      
       <div class="my-0 py-0 overflow-y-auto" style="max-height: 60vh">
         <template @mouseover="style = 'cursor: pointer'">
           <v-data-table
@@ -504,7 +455,9 @@
                       </template>
                     </v-autocomplete>
                   </v-col>
-                  <v-col
+                  <!-- Customized
+                  Start -->
+                  <!-- <v-col
                     cols="4"
                     v-if="
                       pos_profile.posa_allow_sales_order &&
@@ -564,7 +517,8 @@
                         </v-btn>
                       </v-date-picker>
                     </v-menu>
-                  </v-col>
+                  </v-col> -->
+                  <!-- End -->
                   <v-col
                     cols="8"
                     v-if="pos_profile.posa_display_additional_notes"
@@ -589,6 +543,8 @@
         </template>
       </div>
     </v-card>
+
+<v-card  class="right-btns">
     <v-card class="cards mb-0 mt-3 py-0 grey lighten-5">
       <v-row no-gutters>
         <v-col cols="7">
@@ -686,7 +642,7 @@
                 color="warning"
                 dark
                 @click="get_draft_invoices"
-                >{{ __('Held') }}</v-btn
+                >{{ __('Held')  }}</v-btn
               >
             </v-col>
             <v-col cols="6" class="pa-1">
@@ -726,6 +682,7 @@
                 class="pa-0"
                 color="success"
                 @click="show_payment"
+                
                 dark
                 >{{ __('PAY') }}</v-btn
               >
@@ -748,6 +705,11 @@
         </v-col>
       </v-row>
     </v-card>
+</v-card>
+  
+  
+  
+  
   </div>
 </template>
 
@@ -764,6 +726,9 @@ export default {
       invoice_doc: '',
       return_doc: '',
       customer: '',
+      allocShifthrs: 0,
+      curTest: '',
+      currDates: '',
       customer_info: '',
       discount_amount: 0,
       additional_discount_percentage: 0,
@@ -786,8 +751,6 @@ export default {
       delivery_charges: [],
       delivery_charges_rate: 0,
       selcted_delivery_charges: {},
-      invoice_posting_date: false,
-      posting_date: frappe.datetime.nowdate(),
       items_headers: [
         {
           text: __('Name'),
@@ -801,6 +764,15 @@ export default {
         { text: __('Amount'), value: 'amount', align: 'center' },
         { text: __('is Offer'), value: 'posa_is_offer', align: 'center' },
       ],
+      // Customized
+      // Start
+      order_types:[" "],
+      order_type: "",
+      tables_number:[" "],
+     
+      table_number:"",
+      change_delivery_charage: 0,
+      // End
     };
   },
 
@@ -844,6 +816,55 @@ export default {
   },
 
   methods: {
+    // Customized
+    // Start
+    order_type_update(order_type){
+      this.pos_profile["order_type"] = order_type
+      if (order_type == "Delivery"){
+        this.invoiceType = "Order"
+        this.change_delivery_charage = 0;
+        this.delivery_charges_rate = 0;
+        this.selcted_delivery_charges = {};
+      }
+      else{
+        this.invoiceType = "Invoice"
+        this.change_delivery_charage = 0;
+        this.delivery_charges_rate = 0;
+        this.selcted_delivery_charges = {};
+      }
+    },
+    table_number_update(table_number){
+      this.pos_profile["table_number"] = table_number
+    },
+    get_table_number(){
+      const vm = this;
+      frappe.call({
+        method: 'posawesome.posawesome.api.posapp.get_table_number',
+        args: {},
+        callback: function (r) {
+          if (r.message) {
+            r.message.forEach((element) => {
+              vm.tables_number.push(element.name);
+            });
+          }
+        },
+      });
+    },
+    get_order_types(){
+      const vm = this;
+      frappe.call({
+        method: 'posawesome.posawesome.api.posapp.get_order_types',
+        args: {},
+        callback: function (r) {
+          if (r.message) {
+            r.message.forEach((element) => {
+              vm.order_types.push(element.name);
+            });
+          }
+        },
+      });
+    },
+    // End
     remove_item(item) {
       const index = this.items.findIndex(
         (el) => el.posa_row_id == item.posa_row_id
@@ -981,7 +1002,6 @@ export default {
       const doc = this.get_invoice_doc();
       this.invoiceType = 'Invoice';
       this.invoiceTypes = ['Invoice', 'Order'];
-      this.posting_date = frappe.datetime.nowdate();
       if (doc.name && this.pos_profile.posa_allow_delete) {
         frappe.call({
           method: 'posawesome.posawesome.api.posapp.delete_invoice',
@@ -1008,6 +1028,11 @@ export default {
       this.additional_discount_percentage = 0;
       this.delivery_charges_rate = 0;
       this.selcted_delivery_charges = {};
+      // Customized
+      // Start
+      this.order_type = this.pos_profile.order_type;
+      this.table_number = "";
+      // End
       evntBus.$emit('set_customer_readonly', false);
       this.cancel_dialog = false;
     },
@@ -1055,7 +1080,6 @@ export default {
           }
         });
         this.customer = data.customer;
-        this.posting_date = data.posting_date || frappe.datetime.nowdate();
         this.discount_amount = data.discount_amount;
         this.additional_discount_percentage =
           data.additional_discount_percentage;
@@ -1083,6 +1107,12 @@ export default {
       doc.doctype = 'Sales Invoice';
       doc.is_pos = 1;
       doc.ignore_pricing_rule = 1;
+    //doc.posting_date = this.dateTimes;
+    doc.posting_date = this.dateTimes2;
+    doc.dates = this.dateTimes2;
+    //console.log("-------------------------TEST---------------------------")
+    //console.log(this.dateTimes2)
+    
       doc.company = doc.company || this.pos_profile.company;
       doc.pos_profile = doc.pos_profile || this.pos_profile.name;
       doc.campaign = doc.campaign || this.pos_profile.campaign;
@@ -1104,7 +1134,11 @@ export default {
       doc.posa_coupons = this.posa_coupons;
       doc.posa_delivery_charges = this.selcted_delivery_charges.name;
       doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
-      doc.posting_date = this.posting_date;
+      // Customized
+      // Start
+      doc.order_type = this.pos_profile.order_type
+      doc.table_number = this.pos_profile.table_number
+      // End
       return doc;
     },
 
@@ -1191,6 +1225,20 @@ export default {
           color: 'error',
         });
         return;
+      }
+      //console.log(this.pos_profile.make_order_type_as_required)
+      //console.log(this.invoice_doc.order_type)
+      
+      if (this.pos_profile.make_order_type_as_required) {
+      console.log(this.order_type)
+        if (this.order_type === " ") {
+         evntBus.$emit('show_mesage', {
+            text: __(`Please select Order Type`),
+            color: 'error',
+          });
+          this.back_to_invoice();
+          return;
+        }
       }
       if (!this.validate()) {
         return;
@@ -1399,12 +1447,11 @@ export default {
             currency: this.pos_profile.currency,
             // plc_conversion_rate: 1,
             pos_profile: this.pos_profile.name,
-            price_list: this.pos_profile.selling_price_list,
+            price_list: this.get_price_list() || this.pos_profile.selling_price_list,
             uom: item.uom,
             tax_category: '',
             transaction_type: 'selling',
             update_stock: this.pos_profile.update_stock,
-            price_list: this.get_price_list(),
             has_batch_no: item.has_batch_no,
             serial_no: item.serial_no,
             batch_no: item.batch_no,
@@ -2469,29 +2516,114 @@ export default {
       const searchText = queryText.toLowerCase();
       return textOne.indexOf(searchText) > -1;
     },
+    // Customized
+    // Start
     update_delivery_charges() {
       if (this.selcted_delivery_charges) {
+        this.change_delivery_charage = this.selcted_delivery_charges.rate;
         this.delivery_charges_rate = this.selcted_delivery_charges.rate;
       } else {
+        this.change_delivery_charage = 0;
         this.delivery_charges_rate = 0;
       }
     },
+    change_delivery_charges(){
+      this.delivery_charges_rate = this.change_delivery_charage
+    }
+    // End
   },
 
   created() {
     evntBus.$on('register_pos_profile', (data) => {
+    //this.curTest = 0;
+    //console.log("---------------------123----------------------")
+   
       this.pos_profile = data.pos_profile;
+    this.dateTimes = data.dateTimes;
+    this.currTimes = data.currTimes;
+    
+    this.currDates = data.currDates;
+    this.dateTimes2 = data.dateTimes2;
+	this.postDtime = data.postDtime;
+    
+    this.allocShifthrs = data.allocShifthrs;
+      // Customized
+      // Start
+      this.get_order_types();
+      this.get_table_number();
+    //console.log(data.pos_profile.default_order_type);
+    this.order_type = data.pos_profile.default_order_type;
+      // End
       this.customer = data.pos_profile.customer;
+    this.warehouse = data.pos_profile.warehouse;
       this.pos_opening_shift = data.pos_opening_shift;
       this.stock_settings = data.stock_settings;
       this.float_precision =
         frappe.defaults.get_default('float_precision') || 2;
       this.currency_precision =
         frappe.defaults.get_default('currency_precision') || 2;
+    
+  var alloshfthr = this.allocShifthrs;
+  var currdates = this.currDates;
+  //var daatetime2 = this.dateTimes2;
+  //var curr_vdate = this.dateTimes2;
+  var daatetime2 = this.postDtime;
+  var curr_vdate = this.postDtime;
+  
+  this.curTest = 1;
+  if(!true){
+  if(this.warehouse &&  this.postDtime){
+    frappe.call({
+      method: "posawesome.posawesome.client.get_datedtls_possce",
+      args: { "location":this.warehouse },
+      freeze: true,
+      callback: function(r) {
+        
+        //console.log(r.message[0])
+        if(!r.exc && r.message) {
+          var datevalue = r.message[0];
+          if(datevalue!=undefined){
+          //console.log(datevalue['date'] )
+          //console.log(curr_vdate)
+          
+          if ( datevalue['date'] == curr_vdate ) {
+            
+              this.curTest = 1
+              if(alloshfthr==1){
+                this.curTest = 0;
+              }
+              else{
+               $(".right-btns").hide();
+              }
+          }
+          else{
+            this.curTest = 0
+            //console.log(curTest)
+          }
+          }
+          else{
+            this.curTest = 1;
+             if(alloshfthr==1){
+                this.curTest = 0;
+              }
+            else{
+               $(".right-btns").hide();
+            }
+          }
+        }
+      }
+    }) 
+    
+  }
+  }
+    
+    
+    
     });
     evntBus.$on('add_item', (item) => {
       this.add_item(item);
     });
+   
     evntBus.$on('update_customer', (customer) => {
       this.customer = customer;
     });
