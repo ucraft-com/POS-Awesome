@@ -583,7 +583,7 @@
               :no-data-text="__('Sales Person not found')"
               hide-details
               :filter="salesPersonFilter"
-              :disabled="readonly"
+              disabled
             >
               <template v-slot:item="data">
                 <template>
@@ -1019,7 +1019,7 @@ export default {
       const vm = this;
       if (!this.invoice_doc.contact_mobile) {
         evntBus.$emit('show_mesage', {
-          text: __(`Pleas Set Customer Mobile Number`),
+          text: __(`Please Set Customer Mobile Number`),
           color: 'error',
         });
         evntBus.$emit('open_edit_customer');
@@ -1029,7 +1029,7 @@ export default {
       evntBus.$emit('freeze', {
         title: __(`Waiting for payment... `),
       });
-
+      
       let formData = this.invoice_doc;
       formData['total_change'] = -this.diff_payment;
       formData['paid_change'] = this.paid_change;

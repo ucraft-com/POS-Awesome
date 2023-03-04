@@ -240,6 +240,8 @@ export default {
     });
     evntBus.$on('register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
+	    this.group = data.pos_profile.customer_group;
+	    this.territory = data.pos_profile.customer_territory;
     });
     this.getCustomerGroups();
     this.getCustomerTerritorys();

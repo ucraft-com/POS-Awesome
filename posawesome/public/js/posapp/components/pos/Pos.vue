@@ -9,6 +9,11 @@
     <MpesaPayments></MpesaPayments>
     <Variants></Variants>
     <OpeningDialog v-if="dialog" :dialog="dialog"></OpeningDialog>
+    <!-- Customized
+    Start -->
+    <v-divider></v-divider>
+    <v-divider></v-divider>
+    <!-- End -->
     <v-row v-show="!dialog">
       <v-col
         v-show="!payment && !offers && !coupons"
@@ -19,7 +24,7 @@
         cols="12"
         class="pos pr-0"
       >
-        <ItemsSelector></ItemsSelector>
+        <ItemsSelector ref="positems"></ItemsSelector>
       </v-col>
       <v-col
         v-show="offers"
@@ -221,6 +226,10 @@ export default {
       evntBus.$on('submit_closing_pos', (data) => {
         this.submit_closing_pos(data);
       });
+      evntBus.$on('update_pos_items', () => {
+        this.$refs.positems.get_items();
+      });
+    
     });
   },
 };

@@ -38,7 +38,6 @@
             :headers="items_headers"
             :items="posa_coupons"
             :single-expand="singleExpand"
-            :expanded.sync="expanded"
             item-key="coupon"
             class="elevation-1"
             :items-per-page="itemsPerPage"

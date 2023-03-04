@@ -2,7 +2,7 @@
   <div>
     <v-card
       class="selection mx-auto grey lighten-5"
-      style="max-height: 75vh; height: 75vh"
+      style="max-height: 77vh; height: 77vh"
     >
       <v-progress-linear
         :active="loading"

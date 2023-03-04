@@ -75,7 +75,6 @@ export default {
     closingDialog: false,
     itemsPerPage: 20,
     dialog_data: {},
-    pos_profile: '',
     headers: [
       {
         text: __('Mode of Payment'),
@@ -94,6 +93,18 @@ export default {
         value: 'closing_amount',
         align: 'end',
         sortable: true,
+      },
+      {
+        text: __('Expected Amount'),
+        value: 'expected_amount',
+        align: 'end',
+        sortable: false,
+      },
+      {
+        text: __('Difference'),
+        value: 'difference',
+        align: 'end',
+        sortable: false,
       },
     ],
     max25chars: (v) => v.length <= 20 || 'Input too long!', // TODO : should validate as number
@@ -118,23 +129,6 @@ export default {
     evntBus.$on('open_ClosingDialog', (data) => {
       this.closingDialog = true;
       this.dialog_data = data;
-    });
-    evntBus.$on('register_pos_profile', (data) => {
-      this.pos_profile = data.pos_profile;
-      if (!this.pos_profile.hide_expected_amount) {
-        this.headers.push({
-          text: __('Expected Amount'),
-          value: 'expected_amount',
-          align: 'end',
-          sortable: false,
-        });
-        this.headers.push({
-          text: __('Difference'),
-          value: 'difference',
-          align: 'end',
-          sortable: false,
-        });
-      }
     });
   },
 };
