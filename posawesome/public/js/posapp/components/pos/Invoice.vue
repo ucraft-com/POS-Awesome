@@ -2623,7 +2623,6 @@ export default {
     evntBus.$on('add_item', (item) => {
       this.add_item(item);
     });
-   
     evntBus.$on('update_customer', (customer) => {
       this.customer = customer;
     });
