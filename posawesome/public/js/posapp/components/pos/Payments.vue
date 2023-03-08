@@ -1258,6 +1258,9 @@ export default {
             this.currency_precision
           );
         }
+
+        this.invoice_doc.posa_delivery_date = (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10);
+
         this.loyalty_amount = 0;
         this.get_addresses();
         this.get_sales_person_names();
