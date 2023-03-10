@@ -1,3 +1,0 @@
-posawesome.patches.item_uom_change
-posawesome.patches.chnage_item_uom_in_bom
-posawesome.patches.chnage_item_uom_in_material_request
