@@ -1399,7 +1399,6 @@ export default {
             currency: this.pos_profile.currency,
             // plc_conversion_rate: 1,
             pos_profile: this.pos_profile.name,
-            price_list: this.pos_profile.selling_price_list,
             uom: item.uom,
             tax_category: '',
             transaction_type: 'selling',
