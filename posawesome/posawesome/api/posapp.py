@@ -1517,7 +1517,7 @@ def set_payment_schedule(doc):
                 base_payment_amount=base_grand_total,
             )
             doc.append("payment_schedule", data)
-    frappe.msgprint(str(doc.outstanding_amount))
+
     for d in doc.get("payment_schedule"):
         if d.invoice_portion:
             d.payment_amount = flt(
