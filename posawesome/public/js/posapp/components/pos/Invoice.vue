@@ -1525,6 +1525,7 @@ export default {
     },
 
     calc_prices(item, value, $event) {
+      console.info('calc_prices', item, value, event);
       if (event.target.id === 'rate') {
         item.discount_percentage = 0;
         if (value < item.price_list_rate) {
@@ -1555,7 +1556,7 @@ export default {
             (flt(item.price_list_rate) * flt(value)) / 100
           ).toFixed(this.currency_precision);
           item.discount_amount = (
-            flt(item.price_list_rate) - flt(item.rate)
+            flt(item.price_list_rate) - flt(+item.rate)
           ).toFixed(this.currency_precision);
         }
       }
