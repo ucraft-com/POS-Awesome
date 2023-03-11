@@ -204,7 +204,7 @@ export default {
     },
     get_items() {
       if (!this.pos_profile) {
-        console.log('No POS Profile');
+        console.error('No POS Profile');
         return;
       }
       const vm = this;
@@ -285,6 +285,7 @@ export default {
       return items_headers;
     },
     add_item(item) {
+      item = { ...item };
       if (item.has_variants) {
         evntBus.$emit('open_variants_model', item, this.items);
       } else {
