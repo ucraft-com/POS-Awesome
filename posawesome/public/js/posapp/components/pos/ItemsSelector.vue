@@ -86,6 +86,10 @@
                       {{ formtCurrency(item.rate) || 0 }}
                       {{ item.currency || '' }}
                     </div>
+                    <div class="text-caption">
+                      {{ formtFloat(item.actual_qty) || 0 }}
+                      {{ item.stock_uom || '' }}
+                    </div>
                   </v-card-text>
                 </v-card>
               </v-col>
@@ -155,7 +159,6 @@
     </v-card>
   </div>
 </template>
-
 
 <script>
 import { evntBus } from '../../bus';
@@ -541,5 +544,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
