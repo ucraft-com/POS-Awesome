@@ -870,6 +870,8 @@ def create_customer(
             customer.territory = "All Territories"
         customer.save()
         return customer
+    else:
+        frappe.throw(_("Customer already exists"))
 
 
 @frappe.whitelist()
