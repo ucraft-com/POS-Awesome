@@ -32,17 +32,29 @@ import time
 def get_opening_dialog_data():
     data = {}
     data["companys"] = frappe.get_list("Company", limit_page_length=0, order_by="name")
-    data["pos_profiles_data"] = frappe.get_list(
-        "POS Profile",
-        filters={"disabled": 0},
-        fields=["name", "company"],
+    cur_user = frappe.session.user
+    
+    profiles_list = frappe.get_all(
+        "POS Profile User",
+        filters={"user": cur_user},
+        fields=["parent"],
         limit_page_length=0,
         order_by="name",
     )
-
+    data["pos_profiles_data"] =[]
+    newdata=[]
+    for row in profiles_list:
+        item_list={}
+        name , company = frappe.db.get_value('POS Profile', {'name': row.parent}, ['name', 'company']) 
+        item_list={"name":name,"company":company}
+        newdata.append(item_list)
+    
+    data["pos_profiles_data"] = newdata
+   
+    
     pos_profiles_list = []
     for i in data["pos_profiles_data"]:
-        pos_profiles_list.append(i.name)
+        pos_profiles_list.append(i['name'])
 
     payment_method_table = (
         "POS Payment Method" if get_version() == 13 else "Sales Invoice Payment"
