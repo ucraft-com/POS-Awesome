@@ -521,6 +521,9 @@ export default {
         frappe.defaults.get_default('float_precision') || 2;
       this.currency_precision =
         frappe.defaults.get_default('currency_precision') || 2;
+      this.items_view = this.pos_profile.posa_default_card_view
+        ? 'card'
+        : 'list';
     });
     evntBus.$on('update_cur_items_details', () => {
       this.update_cur_items_details();

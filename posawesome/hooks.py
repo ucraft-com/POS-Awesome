@@ -234,6 +234,8 @@ fixtures = [
                     "POS Profile-posa_use_delivery_charges",
                     "POS Profile-hide_expected_amount",
                     "POS Profile-posa_allow_change_posting_date",
+                    "POS Profile-posa_default_card_view",
+                    "POS Profile-posa_default_sales_order",
                 ),
             ]
         ],

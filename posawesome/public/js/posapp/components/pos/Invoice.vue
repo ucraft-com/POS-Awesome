@@ -2488,6 +2488,9 @@ export default {
         frappe.defaults.get_default('float_precision') || 2;
       this.currency_precision =
         frappe.defaults.get_default('currency_precision') || 2;
+      this.invoiceType = this.pos_profile.posa_default_sales_order
+        ? 'Order'
+        : 'Invoice';
     });
     evntBus.$on('add_item', (item) => {
       this.add_item(item);
