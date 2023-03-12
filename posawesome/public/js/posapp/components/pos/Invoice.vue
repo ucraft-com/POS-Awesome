@@ -1399,7 +1399,6 @@ export default {
             currency: this.pos_profile.currency,
             // plc_conversion_rate: 1,
             pos_profile: this.pos_profile.name,
-            price_list: this.pos_profile.selling_price_list,
             uom: item.uom,
             tax_category: '',
             transaction_type: 'selling',
@@ -1526,6 +1525,7 @@ export default {
     },
 
     calc_prices(item, value, $event) {
+      console.info('calc_prices', item, value, event);
       if (event.target.id === 'rate') {
         item.discount_percentage = 0;
         if (value < item.price_list_rate) {
@@ -1556,7 +1556,7 @@ export default {
             (flt(item.price_list_rate) * flt(value)) / 100
           ).toFixed(this.currency_precision);
           item.discount_amount = (
-            flt(item.price_list_rate) - flt(item.rate)
+            flt(item.price_list_rate) - flt(+item.rate)
           ).toFixed(this.currency_precision);
         }
       }
@@ -2488,6 +2488,9 @@ export default {
         frappe.defaults.get_default('float_precision') || 2;
       this.currency_precision =
         frappe.defaults.get_default('currency_precision') || 2;
+      this.invoiceType = this.pos_profile.posa_default_sales_order
+        ? 'Order'
+        : 'Invoice';
     });
     evntBus.$on('add_item', (item) => {
       this.add_item(item);

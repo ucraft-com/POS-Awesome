@@ -870,6 +870,8 @@ def create_customer(
             customer.territory = "All Territories"
         customer.save()
         return customer
+    else:
+        frappe.throw(_("Customer already exists"))
 
 
 @frappe.whitelist()
@@ -1245,6 +1247,15 @@ def get_new_payment_request(doc, mop):
     return make_payment_request(**args)
 
 
+def get_payment_gateway_account(args):
+	return frappe.db.get_value(
+		"Payment Gateway Account",
+		args,
+		["name", "payment_gateway", "payment_account", "message"],
+		as_dict=1,
+	)
+
+
 def get_existing_payment_request(doc, pay):
     payment_gateway_account = frappe.db.get_value(
         "Payment Gateway Account",
@@ -1272,7 +1283,9 @@ def make_payment_request(**args):
     args = frappe._dict(args)
 
     ref_doc = frappe.get_doc(args.dt, args.dn)
-    gateway_account = get_gateway_details(args) or frappe._dict()
+    gateway_account = get_payment_gateway_account(args.get("payment_gateway_account"))
+    if not gateway_account:
+        frappe.throw(_("Payment Gateway Account not found")) 
 
     grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
     if args.loyalty_points and args.dt == "Sales Order":

@@ -86,6 +86,10 @@
                       {{ formtCurrency(item.rate) || 0 }}
                       {{ item.currency || '' }}
                     </div>
+                    <div class="text-caption">
+                      {{ formtFloat(item.actual_qty) || 0 }}
+                      {{ item.stock_uom || '' }}
+                    </div>
                   </v-card-text>
                 </v-card>
               </v-col>
@@ -156,7 +160,6 @@
   </div>
 </template>
 
-
 <script>
 import { evntBus } from '../../bus';
 import _ from 'lodash';
@@ -204,7 +207,7 @@ export default {
     },
     get_items() {
       if (!this.pos_profile) {
-        console.log('No POS Profile');
+        console.error('No POS Profile');
         return;
       }
       const vm = this;
@@ -285,6 +288,7 @@ export default {
       return items_headers;
     },
     add_item(item) {
+      item = { ...item };
       if (item.has_variants) {
         evntBus.$emit('open_variants_model', item, this.items);
       } else {
@@ -517,6 +521,9 @@ export default {
         frappe.defaults.get_default('float_precision') || 2;
       this.currency_precision =
         frappe.defaults.get_default('currency_precision') || 2;
+      this.items_view = this.pos_profile.posa_default_card_view
+        ? 'card'
+        : 'list';
     });
     evntBus.$on('update_cur_items_details', () => {
       this.update_cur_items_details();
@@ -540,5 +547,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>
