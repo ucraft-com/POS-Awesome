@@ -227,6 +227,12 @@ export default {
               vm.birthday = '';
               vm.group = '';
               vm.customerDialog = false;
+            } else {
+              frappe.utils.play_sound('error');
+              evntBus.$emit('show_mesage', {
+                text: __('Customer creation failed.'),
+                color: 'error',
+              });
             }
           },
         });
