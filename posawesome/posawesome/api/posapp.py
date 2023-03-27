@@ -837,45 +837,66 @@ def get_stock_availability(item_code, warehouse):
 
 @frappe.whitelist()
 def create_customer(
+    customer_id,
     customer_name,
     company,
-    tax_id,
-    mobile_no,
-    email_id,
+    tax_id=None,
+    mobile_no=None,
+    email_id=None,
     referral_code=None,
     birthday=None,
     customer_group=None,
     territory=None,
     customer_type=None,
     gender=None,
+    method='create',
 ):
-    if not frappe.db.exists("Customer", {"customer_name": customer_name}):
-        customer = frappe.get_doc(
-            {
-                "doctype": "Customer",
-                "customer_name": customer_name,
-                "posa_referral_company": company,
-                "tax_id": tax_id,
-                "mobile_no": mobile_no,
-                "email_id": email_id,
-                "posa_referral_code": referral_code,
-                "posa_birthday": birthday,
-                "customer_type": customer_type,
-                "gender": gender,
-            }
-        )
-        if customer_group:
-            customer.customer_group = customer_group
+    if method == 'create':
+        if not frappe.db.exists("Customer", {"customer_name": customer_name}):
+            customer = frappe.get_doc(
+                {
+                    "doctype": "Customer",
+                    "customer_name": customer_name,
+                    "posa_referral_company": company,
+                    "tax_id": tax_id,
+                    "mobile_no": mobile_no,
+                    "email_id": email_id,
+                    "posa_referral_code": referral_code,
+                    "posa_birthday": birthday,
+                    "customer_type": customer_type,
+                    "gender": gender,
+                }
+            )
+            if customer_group:
+                customer.customer_group = customer_group
+            else:
+                customer.customer_group = "All Customer Groups"
+            if territory:
+                customer.territory = territory
+            else:
+                customer.territory = "All Territories"
+            customer.save()
+            return customer
         else:
-            customer.customer_group = "All Customer Groups"
-        if territory:
-            customer.territory = territory
-        else:
-            customer.territory = "All Territories"
-        customer.save()
-        return customer
-    else:
-        frappe.throw(_("Customer already exists"))
+            frappe.throw(_("Customer already exists"))
+
+    elif method == 'update':
+        customer_doc = frappe.get_doc("Customer", customer_id)
+        customer_doc.customer_name = customer_name
+        customer_doc.posa_referral_company = company
+        customer_doc.tax_id = tax_id
+        customer_doc.posa_referral_code = referral_code
+        customer_doc.posa_birthday = birthday
+        customer_doc.customer_type = customer_type
+        customer_doc.territory = territory
+        customer_doc.customer_group = customer_group
+        customer_doc.gender = gender
+        customer_doc.save()
+        if mobile_no != customer_doc.mobile_no:
+            set_customer_info(customer_doc.name, "mobile_no", mobile_no)
+        if email_id != customer_doc.email_id:
+            set_customer_info(customer_doc.name, "email_id", email_id)
+        return customer_doc
 
 
 @frappe.whitelist()
@@ -948,7 +969,7 @@ def get_items_from_barcode(selling_price_list, currency, barcode):
 
 
 @frappe.whitelist()
-def set_customer_info(fieldname, customer, value=""):
+def set_customer_info(customer, fieldname, value=""):
     if fieldname == "loyalty_program":
         frappe.db.set_value("Customer", customer, "loyalty_program", value)
 
@@ -1442,6 +1463,11 @@ def get_customer_info(customer):
     res["loyalty_program"] = customer.loyalty_program
     res["customer_price_list"] = customer.default_price_list
     res["customer_group"] = customer.customer_group
+    res["customer_type"] = customer.customer_type
+    res["territory"] = customer.territory
+    res["birthday"] = customer.posa_birthday
+    res["gender"] = customer.gender
+    res["tax_id"] = customer.tax_id
     res["posa_discount"] = customer.posa_discount
     res["name"] = customer.name
     res["customer_name"] = customer.customer_name
