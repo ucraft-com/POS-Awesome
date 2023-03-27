@@ -62,6 +62,7 @@
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
+          <v-btn color="error" dark @click="go_desk">Cancel</v-btn>
           <v-btn color="success" dark @click="submit_dialog">Submit</v-btn>
         </v-card-actions>
       </v-card>
@@ -172,6 +173,10 @@ export default {
     formtCurrency(value) {
       value = parseFloat(value);
       return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+    },
+    go_desk() {
+      frappe.set_route('/');
+      location.reload();
     },
   },
   created: function () {
