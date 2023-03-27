@@ -846,6 +846,8 @@ def create_customer(
     birthday=None,
     customer_group=None,
     territory=None,
+    customer_type=None,
+    gender=None,
 ):
     if not frappe.db.exists("Customer", {"customer_name": customer_name}):
         customer = frappe.get_doc(
@@ -858,6 +860,8 @@ def create_customer(
                 "email_id": email_id,
                 "posa_referral_code": referral_code,
                 "posa_birthday": birthday,
+                "customer_type": customer_type,
+                "gender": gender,
             }
         )
         if customer_group:

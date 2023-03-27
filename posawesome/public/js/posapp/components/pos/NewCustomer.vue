@@ -49,6 +49,14 @@
                 ></v-text-field>
               </v-col>
               <v-col cols="6">
+                <v-select
+                  dense
+                  label="Gender"
+                  :items="genders"
+                  v-model="gender"
+                ></v-select>
+              </v-col>
+              <v-col cols="6">
                 <v-text-field
                   dense
                   color="primary"
@@ -154,6 +162,9 @@ export default {
     groups: [],
     territory: '',
     territorys: [],
+    genders: ['Male', 'Female'],
+    customer_type: 'Individual',
+    gender: 'Male',
   }),
   watch: {},
   methods: {
@@ -192,6 +203,21 @@ export default {
           }
         });
     },
+    getGenders() {
+      const vm = this;
+      frappe.db
+        .get_list('Gender', {
+          fields: ['name'],
+          page_length: 10,
+        })
+        .then((data) => {
+          if (data.length > 0) {
+            data.forEach((el) => {
+              vm.genders.push(el.name);
+            });
+          }
+        });
+    },
     submit_dialog() {
       if (this.customer_name) {
         const vm = this;
@@ -205,6 +231,8 @@ export default {
           birthday: this.birthday,
           customer_group: this.group,
           territory: this.territory,
+          customer_type: this.customer_type,
+          gender: this.gender,
         };
         frappe.call({
           method: 'posawesome.posawesome.api.posapp.create_customer',
@@ -249,6 +277,7 @@ export default {
     });
     this.getCustomerGroups();
     this.getCustomerTerritorys();
+    this.getGenders();
   },
 };
 </script>
