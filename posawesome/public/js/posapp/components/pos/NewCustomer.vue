@@ -12,7 +12,7 @@
                 <v-text-field
                   dense
                   color="primary"
-                  :label="frappe._('Customer Name')"
+                  :label="frappe._('Customer Name') + ' *'"
                   background-color="white"
                   hide-details
                   v-model="customer_name"
@@ -104,12 +104,13 @@
                   dense
                   auto-select-first
                   color="primary"
-                  :label="frappe._('Customer Group')"
+                  :label="frappe._('Customer Group') + ' *'"
                   v-model="group"
                   :items="groups"
                   background-color="white"
                   :no-data-text="__('Group not found')"
                   hide-details
+                  required
                 >
                 </v-autocomplete>
               </v-col>
@@ -119,12 +120,13 @@
                   dense
                   auto-select-first
                   color="primary"
-                  :label="frappe._('Territory')"
+                  :label="frappe._('Territory') + ' *'"
                   v-model="territory"
                   :items="territorys"
                   background-color="white"
                   :no-data-text="__('Territory not found')"
                   hide-details
+                  required
                 >
                 </v-autocomplete>
               </v-col>
@@ -177,6 +179,7 @@ export default {
       frappe.db
         .get_list('Customer Group', {
           fields: ['name'],
+          filters: { is_group: 0 },
           page_length: 1000,
         })
         .then((data) => {
@@ -193,6 +196,7 @@ export default {
       frappe.db
         .get_list('Territory', {
           fields: ['name'],
+          filters: { is_group: 0 },
           page_length: 1000,
         })
         .then((data) => {
@@ -219,6 +223,28 @@ export default {
         });
     },
     submit_dialog() {
+      // validate if all required fields are filled
+      if (!this.customer_name) {
+        evntBus.$emit('show_mesage', {
+          text: __('Customer name is required.'),
+          color: 'error',
+        });
+        return;
+      }
+      if (!this.group) {
+        evntBus.$emit('show_mesage', {
+          text: __('Customer group is required.'),
+          color: 'error',
+        });
+        return;
+      }
+      if (!this.territory) {
+        evntBus.$emit('show_mesage', {
+          text: __('Customer territory is required.'),
+          color: 'error',
+        });
+        return;
+      }
       if (this.customer_name) {
         const vm = this;
         const args = {
@@ -278,6 +304,9 @@ export default {
     this.getCustomerGroups();
     this.getCustomerTerritorys();
     this.getGenders();
+    // set default values for customer group and territory from user defaults
+    this.group = frappe.defaults.get_user_default('Customer Group');
+    this.territory = frappe.defaults.get_user_default('Territory');
   },
 };
 </script>
