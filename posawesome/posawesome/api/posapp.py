@@ -5,6 +5,8 @@
 from __future__ import unicode_literals
 import json
 import frappe
+import time
+from dateutil.relativedelta import relativedelta
 from frappe.utils import nowdate, flt, cstr
 from frappe import _
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
@@ -622,6 +624,15 @@ def submit_invoice(invoice, data):
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
+
+    # Day Close Feature   
+    pos_time = frappe.get_doc("Day Close Setting")
+    date = datetime.now() - relativedelta(days=1)
+    for row in pos_time.profile_list:
+        if invoice_doc.pos_profile == row.profile:
+            if invoice_doc.posting_time > '00:00:00' and invoice_doc.posting_time < row.end_time:
+                invoice_doc.set_posting_time = 1
+                invoice_doc.posting_date = date    
     invoice_doc.save()
 
     if frappe.get_value(
