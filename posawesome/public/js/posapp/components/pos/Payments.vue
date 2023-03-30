@@ -714,8 +714,7 @@ export default {
         frappe.utils.play_sound('error');
         return;
       }
-      console.info('payment_received', payment_received);
-
+      // validate phone payment
       if (!payment_received) {
         let phone_payment_is_valid = true;
         this.invoice_doc.payments.forEach((payment) => {

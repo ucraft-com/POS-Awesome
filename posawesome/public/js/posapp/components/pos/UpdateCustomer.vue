@@ -194,7 +194,7 @@ export default {
     territorys: [],
     genders: ['Male', 'Female'],
     customer_type: 'Individual',
-    gender: 'Male',
+    gender: '',
     loyalty_points: null,
     loyalty_program: null,
   }),
@@ -215,7 +215,7 @@ export default {
       this.territory = frappe.defaults.get_user_default('Territory');
       this.customer_id = '';
       this.customer_type = 'Individual';
-      this.gender = 'Male';
+      this.gender = '';
       this.loyalty_points = null;
       this.loyalty_program = null;
     },
