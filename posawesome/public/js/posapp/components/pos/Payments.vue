@@ -705,7 +705,7 @@ export default {
       evntBus.$emit('show_payment', 'false');
       evntBus.$emit('set_customer_readonly', false);
     },
-    submit() {
+    submit(event, payment_received = false) {
       if (!this.invoice_doc.is_return && this.total_payments < 0) {
         evntBus.$emit('show_mesage', {
           text: `Payments not correct`,
@@ -713,6 +713,29 @@ export default {
         });
         frappe.utils.play_sound('error');
         return;
+      }
+      // validate phone payment
+      if (!payment_received) {
+        let phone_payment_is_valid = true;
+        this.invoice_doc.payments.forEach((payment) => {
+          if (
+            payment.type == 'Phone' &&
+            ![0, '0', '', null, undefined].includes(payment.amount)
+          ) {
+            phone_payment_is_valid = false;
+          }
+        });
+        if (!phone_payment_is_valid) {
+          evntBus.$emit('show_mesage', {
+            text: __(
+              'Please request phone payment or use other payment method'
+            ),
+            color: 'error',
+          });
+          frappe.utils.play_sound('error');
+          console.error('phone payment not requested');
+          return;
+        }
       }
 
       if (
@@ -1030,7 +1053,7 @@ export default {
         title: __(`Waiting for payment... `),
       });
 
-      let formData = this.invoice_doc;
+      let formData = { ...this.invoice_doc };
       formData['total_change'] = -this.diff_payment;
       formData['paid_change'] = this.paid_change;
       formData['credit_change'] = -this.credit_change;
@@ -1087,7 +1110,7 @@ export default {
                       evntBus.$emit('unfreeze');
                       evntBus.$emit('show_mesage', {
                         text: __('Payment of {0} received successfully.', [
-                          formtCurrency(
+                          vm.formtCurrency(
                             message.grand_total,
                             vm.invoice_doc.currency,
                             0
@@ -1099,7 +1122,7 @@ export default {
                         .get_doc('Sales Invoice', vm.invoice_doc.name)
                         .then((doc) => {
                           vm.invoice_doc = doc;
-                          vm.submit();
+                          vm.submit('Payment Received');
                         });
                     }
                   });

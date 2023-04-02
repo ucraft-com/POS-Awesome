@@ -63,6 +63,7 @@ export default {
     customers: [],
     customer: '',
     readonly: false,
+    customer_info: {},
   }),
 
   methods: {
@@ -92,10 +93,10 @@ export default {
       });
     },
     new_customer() {
-      evntBus.$emit('open_new_customer');
+      evntBus.$emit('open_update_customer', null);
     },
     edit_customer() {
-      evntBus.$emit('open_edit_customer');
+      evntBus.$emit('open_update_customer', this.customer_info);
     },
     customFilter(item, queryText, itemText) {
       const textOne = item.customer_name
@@ -133,6 +134,12 @@ export default {
       });
       evntBus.$on('set_customer_readonly', (value) => {
         this.readonly = value;
+      });
+      evntBus.$on('set_customer_info_to_edit', (data) => {
+        this.customer_info = data;
+      });
+      evntBus.$on('fetch_customer_details', () => {
+        this.get_customer_names();
       });
     });
   },

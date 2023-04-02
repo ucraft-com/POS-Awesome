@@ -2498,6 +2498,9 @@ export default {
     evntBus.$on('update_customer', (customer) => {
       this.customer = customer;
     });
+    evntBus.$on('fetch_customer_details', () => {
+      this.fetch_customer_details();
+    });
     evntBus.$on('new_invoice', () => {
       this.invoice_doc = '';
       this.cancel_invoice();

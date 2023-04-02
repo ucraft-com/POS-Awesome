@@ -3,8 +3,7 @@
     <ClosingDialog></ClosingDialog>
     <Drafts></Drafts>
     <Returns></Returns>
-    <NewCustomer></NewCustomer>
-    <EditCustomer></EditCustomer>
+    <UpdateCustomer></UpdateCustomer>
     <NewAddress></NewAddress>
     <MpesaPayments></MpesaPayments>
     <Variants></Variants>
@@ -62,7 +61,6 @@
   </div>
 </template>
 
-
 <script>
 import { evntBus } from '../../bus';
 import ItemsSelector from './ItemsSelector.vue';
@@ -73,8 +71,7 @@ import PosOffers from './PosOffers.vue';
 import PosCoupons from './PosCoupons.vue';
 import Drafts from './Drafts.vue';
 import ClosingDialog from './ClosingDialog.vue';
-import NewCustomer from './NewCustomer.vue';
-import EditCustomer from './EditCustomer.vue';
+import UpdateCustomer from './UpdateCustomer.vue';
 import NewAddress from './NewAddress.vue';
 import Variants from './Variants.vue';
 import Returns from './Returns.vue';
@@ -99,11 +96,10 @@ export default {
     Payments,
     Drafts,
     ClosingDialog,
-    NewCustomer,
+    UpdateCustomer,
     Returns,
     PosOffers,
     PosCoupons,
-    EditCustomer,
     NewAddress,
     Variants,
     MpesaPayments,
@@ -224,7 +220,6 @@ export default {
     });
   },
 };
-</script> 
+</script>
 
-<style scoped>
-</style>
+<style scoped></style>
