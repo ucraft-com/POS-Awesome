@@ -718,7 +718,6 @@ export default {
       if (!payment_received) {
         let phone_payment_is_valid = true;
         this.invoice_doc.payments.forEach((payment) => {
-          console.info(payment);
           if (
             payment.type == 'Phone' &&
             ![0, '0', '', null, undefined].includes(payment.amount)
@@ -1054,7 +1053,7 @@ export default {
         title: __(`Waiting for payment... `),
       });
 
-      let formData = this.invoice_doc;
+      let formData = { ...this.invoice_doc };
       formData['total_change'] = -this.diff_payment;
       formData['paid_change'] = this.paid_change;
       formData['credit_change'] = -this.credit_change;
@@ -1111,7 +1110,7 @@ export default {
                       evntBus.$emit('unfreeze');
                       evntBus.$emit('show_mesage', {
                         text: __('Payment of {0} received successfully.', [
-                          formtCurrency(
+                          vm.formtCurrency(
                             message.grand_total,
                             vm.invoice_doc.currency,
                             0
