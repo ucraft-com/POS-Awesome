@@ -1299,7 +1299,7 @@ def get_existing_payment_request(doc, pay):
     }
     pr = frappe.db.exists(args)
     if pr:
-        return frappe.get_doc("Payment Request", pr[0][0])
+        return frappe.get_doc("Payment Request", pr)
 
 
 def make_payment_request(**args):
