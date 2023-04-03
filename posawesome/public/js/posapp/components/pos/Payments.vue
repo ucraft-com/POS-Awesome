@@ -715,8 +715,8 @@ export default {
         return;
       }
       // validate phone payment
+      let phone_payment_is_valid = true;
       if (!payment_received) {
-        let phone_payment_is_valid = true;
         this.invoice_doc.payments.forEach((payment) => {
           if (
             payment.type == 'Phone' &&
@@ -1122,7 +1122,7 @@ export default {
                         .get_doc('Sales Invoice', vm.invoice_doc.name)
                         .then((doc) => {
                           vm.invoice_doc = doc;
-                          vm.submit('Payment Received');
+                          vm.submit(null, true);
                         });
                     }
                   });
