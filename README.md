@@ -75,7 +75,8 @@ Available in GitHub [discussions](https://github.com/yrestom/POS-Awesome/discuss
 
 ### New Features and Bug report:
 
-Please Create Github Issue from [here](https://github.com/yrestom/POS-Awesome/issues/new/choose) after checking the existing issues, and for paid features you can submit this [form](https://forms.clickup.com/2191574/f/22w6p-14740/NK7DUHU0CPM3HVXVDC)
+- Please Create Github Issue from [here](https://github.com/yrestom/POS-Awesome/issues/new/choose) after checking the existing issues
+- For paid features, you can email me on youssef[at]totrox.com
 
 ---
 
