@@ -138,7 +138,10 @@
                 color="success"
                 dark
                 :disabled="payment.amount == 0"
-                @click="phone_dialog = true"
+                @click="
+                  (phone_dialog = true),
+                    (payment.amount = Math.ceil(payment.amount))
+                "
               >
                 {{ __('Request') }}
               </v-btn>
