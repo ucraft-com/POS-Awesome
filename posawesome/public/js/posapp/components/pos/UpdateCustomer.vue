@@ -226,7 +226,8 @@ export default {
         .get_list('Customer Group', {
           fields: ['name'],
           filters: { is_group: 0 },
-          page_length: 1000,
+          limit: 1000,
+          order_by: 'name',
         })
         .then((data) => {
           if (data.length > 0) {
@@ -243,7 +244,8 @@ export default {
         .get_list('Territory', {
           fields: ['name'],
           filters: { is_group: 0 },
-          page_length: 1000,
+          limit: 5000,
+          order_by: 'name',
         })
         .then((data) => {
           if (data.length > 0) {
