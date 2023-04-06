@@ -7,21 +7,21 @@ import frappe
 import json
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, get_datetime, flt
-from collections import defaultdict
-from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
+from frappe.utils import flt
 
 
 class POSClosingShift(Document):
     def validate(self):
-        user = frappe.get_all('POS Closing Shift',
-                              filters={'user': self.user, 'docstatus': 1},
-                              or_filters={
-                                  'period_start_date': ('between', [self.period_start_date, self.period_end_date]),
-                                  'period_end_date': ('between', [self.period_start_date, self.period_end_date])
-                              })
+        other_profiles = frappe.get_all('POS Closing Shift',
+            filters={
+                'user': self.user,
+                'docstatus': 1,
+                "pos_opening_shift" :self.pos_opening_shift,
+                "name": ["!=", self.name]
+            }
+        )
 
-        if user:
+        if other_profiles:
             frappe.throw(_("POS Closing Shift {} against {} between selected period"
                            .format(frappe.bold("already exists"), frappe.bold(self.user))), title=_("Invalid Period"))
 
