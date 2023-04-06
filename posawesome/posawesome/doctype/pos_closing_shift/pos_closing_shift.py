@@ -7,9 +7,7 @@ import frappe
 import json
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, get_datetime, flt
-from collections import defaultdict
-from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
+from frappe.utils import flt
 
 
 class POSClosingShift(Document):
