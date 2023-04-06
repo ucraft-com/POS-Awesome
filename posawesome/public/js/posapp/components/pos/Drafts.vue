@@ -1,6 +1,6 @@
 <template>
   <v-row justify="center">
-    <v-dialog v-model="draftsDialog" max-width="800px">
+    <v-dialog v-model="draftsDialog" max-width="900px">
       <!-- <template v-slot:activator="{ on, attrs }">
         <v-btn color="primary" dark v-bind="attrs" v-on="on">Open Dialog</v-btn>
       </template>-->
@@ -24,6 +24,9 @@
                     show-select
                     v-model="selected"
                   >
+                    <template v-slot:item.posting_time="{ item }">
+                      {{ item.posting_time.split('.')[0] }}
+                    </template>
                   </v-data-table>
                 </template>
               </v-col>
@@ -52,7 +55,7 @@ export default {
     headers: [
       {
         text: __('Customer'),
-        value: 'customer',
+        value: 'customer_name',
         align: 'start',
         sortable: true,
       },
@@ -61,6 +64,12 @@ export default {
         align: 'start',
         sortable: true,
         value: 'posting_date',
+      },
+      {
+        text: __('Time'),
+        align: 'start',
+        sortable: true,
+        value: 'posting_time',
       },
       {
         text: __('Invoice'),
