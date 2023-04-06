@@ -13,11 +13,13 @@ from frappe.utils import flt
 class POSClosingShift(Document):
     def validate(self):
         user = frappe.get_all('POS Closing Shift',
-                              filters={'user': self.user, 'docstatus': 1},
-                              or_filters={
-                                  'period_start_date': ('between', [self.period_start_date, self.period_end_date]),
-                                  'period_end_date': ('between', [self.period_start_date, self.period_end_date])
-                              })
+            filters={
+                'user': self.user,
+                'docstatus': 1,
+                "pos_opening_shift": self.pos_opening_shift,
+                "name": ["!=", self.name]
+            }
+        )
 
         if user:
             frappe.throw(_("POS Closing Shift {} against {} between selected period"
