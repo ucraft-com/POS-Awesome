@@ -39,8 +39,8 @@ class MpesaC2BRegisterURL(Document):
         payload = {
             "ShortCode": business_shortcode,
             "ResponseType": "Completed",
-            "ConfirmationURL": validation_url,
-            "ValidationURL": confirmation_url,
+            "ConfirmationURL": confirmation_url,
+            "ValidationURL": validation_url,
         }
         headers = {
             "Authorization": "Bearer {0}".format(token),
