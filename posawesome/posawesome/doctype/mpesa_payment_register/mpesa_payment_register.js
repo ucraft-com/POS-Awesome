@@ -20,6 +20,13 @@ frappe.ui.form.on("Mpesa Payment Register", {
 			"options": "Mode of Payment",
 			"default": frm.doc.mode_of_payment,
 			"reqd": 1,
+			"get_query": function() {
+				return {
+					"filters": {
+						"enabled": 1,
+					}
+				};
+			}
 		}];
 
 		if (!frm.doc.customer) {
