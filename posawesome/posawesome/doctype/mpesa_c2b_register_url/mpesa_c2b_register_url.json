@@ -9,10 +9,10 @@
         "consumer_key",
         "consumer_secret",
         "business_shortcode",
-        "sandbox",
         "column_break_4",
         "company",
-        "register_status"
+        "register_status",
+        "sandbox"
     ],
     "fields": [
         {
@@ -41,10 +41,13 @@
             "fieldtype": "Column Break"
         },
         {
-            "default": "0",
-            "fieldname": "sandbox",
-            "fieldtype": "Check",
-            "label": "Sandbox"
+            "fieldname": "company",
+            "fieldtype": "Link",
+            "in_list_view": 1,
+            "in_standard_filter": 1,
+            "label": "Company",
+            "options": "Company",
+            "reqd": 1
         },
         {
             "default": "Pending",
@@ -57,13 +60,10 @@
             "read_only": 1
         },
         {
-            "fieldname": "company",
-            "fieldtype": "Link",
-            "in_list_view": 1,
-            "in_standard_filter": 1,
-            "label": "Company",
-            "options": "Company",
-            "reqd": 1
+            "default": "0",
+            "fieldname": "sandbox",
+            "fieldtype": "Check",
+            "label": "Sandbox"
         }
     ],
     "index_web_pages_for_search": 1,
