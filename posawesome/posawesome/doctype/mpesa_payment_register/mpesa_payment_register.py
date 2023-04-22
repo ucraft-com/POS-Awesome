@@ -27,11 +27,10 @@ class MpesaPaymentRegister(Document):
                 "business_shortcode": self.businessshortcode,
                 "register_status": "Success",
             },
-            fields=["company", "mode_of_payment"],
+            fields=["company"],
         )
         if len(register_url_list) > 0:
             self.company = register_url_list[0].company
-            self.mode_of_payment = register_url_list[0].mode_of_payment
 
     def before_submit(self):
         if not self.transamount:
