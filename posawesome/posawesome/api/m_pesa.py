@@ -2,7 +2,8 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, requests
+import frappe
+import requests
 from frappe import _
 from requests.auth import HTTPBasicAuth
 
@@ -55,11 +56,15 @@ def validation(**kwargs):
 
 @frappe.whitelist()
 def get_mpesa_mode_of_payment(company):
-    modes = frappe.get_all(
-        "Mpesa C2B Register URL",
-        filters={"company": company, "register_status": "Success"},
-        fields=["mode_of_payment"],
+    modes = frappe.db.sql(
+        """
+		select mp.mode_of_payment
+		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp
+		where mpa.parent = mp.name and mpa.company = %s and mp.enabled = 1 and mp.type = 'Phone'""",
+        (company),
+        as_dict=0,
     )
+
     modes_of_payment = []
     for mode in modes:
         if not mode.mode_of_payment in modes_of_payment:
@@ -68,8 +73,8 @@ def get_mpesa_mode_of_payment(company):
 
 
 @frappe.whitelist()
-def get_mpesa_draft_payments(company, mode_of_payment, mobile_no=None, full_name=None):
-    filters = {"company": company, "mode_of_payment": mode_of_payment, "docstatus": 0}
+def get_mpesa_draft_payments(company, mobile_no=None, full_name=None):
+    filters = {"company": company, "docstatus": 0}
     if mobile_no:
         filters["msisdn"] = ["like", f"%{mobile_no}%"]
     if full_name:
@@ -85,7 +90,6 @@ def get_mpesa_draft_payments(company, mode_of_payment, mobile_no=None, full_name
             "posting_date",
             "transamount as amount",
             "currency",
-            "mode_of_payment",
             "company",
         ],
     )

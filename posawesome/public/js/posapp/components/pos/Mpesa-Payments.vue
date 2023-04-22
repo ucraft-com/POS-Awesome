@@ -126,7 +126,6 @@ export default {
         method: 'posawesome.posawesome.api.m_pesa.get_mpesa_draft_payments',
         args: {
           company: this.company,
-          mode_of_payment: this.mode_of_payment,
           mobile_no: this.mobile_no,
           full_name: this.full_name,
         },
@@ -170,7 +169,6 @@ export default {
       this.mobile_no = '';
       this.company = data.company;
       this.customer = data.customer;
-      this.mode_of_payment = data.mode_of_payment;
       this.dialog_data = '';
       this.selected = [];
     });
