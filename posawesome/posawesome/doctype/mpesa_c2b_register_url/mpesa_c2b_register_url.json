@@ -18,14 +18,14 @@
         {
             "fieldname": "consumer_key",
             "fieldtype": "Data",
-            "in_list_view": 1,
+            "in_list_view": 0,
             "label": "Consumer Key",
             "reqd": 1
         },
         {
             "fieldname": "consumer_secret",
             "fieldtype": "Password",
-            "in_list_view": 1,
+            "in_list_view": 0,
             "label": "Consumer Secret",
             "reqd": 1
         },
@@ -63,12 +63,13 @@
             "default": "0",
             "fieldname": "sandbox",
             "fieldtype": "Check",
+            "in_list_view": 1,
             "label": "Sandbox"
         }
     ],
     "index_web_pages_for_search": 1,
     "links": [],
-    "modified": "2023-04-22 12:08:03.509002",
+    "modified": "2023-04-22 03:21:03.509002",
     "modified_by": "Administrator",
     "module": "POSAwesome",
     "name": "Mpesa C2B Register URL",
