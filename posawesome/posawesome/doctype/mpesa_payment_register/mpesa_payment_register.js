@@ -18,7 +18,8 @@ frappe.ui.form.on("Mpesa Payment Register", {
 			"label": __("Mode of Payment"),
 			"fieldname": "mode_of_payment",
 			"options": "Mode of Payment",
-			"default": frm.doc.mode_of_payment
+			"default": frm.doc.mode_of_payment,
+			"reqd": 1,
 		}];
 
 		if (!frm.doc.customer) {
