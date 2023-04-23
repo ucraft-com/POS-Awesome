@@ -820,7 +820,7 @@ export default {
         this.redeemed_customer_credit > this.invoice_doc.grand_total
       ) {
         evntBus.$emit('show_mesage', {
-          text: `can not redeam customer credit more than invoice total`,
+          text: `can not redeem customer credit more than invoice total`,
           color: 'error',
         });
         frappe.utils.play_sound('error');
@@ -1059,7 +1059,7 @@ export default {
       const vm = this;
       if (!this.invoice_doc.contact_mobile) {
         evntBus.$emit('show_mesage', {
-          text: __(`Pleas Set Customer Mobile Number`),
+          text: __(`Please Set Customer Mobile Number`),
           color: 'error',
         });
         evntBus.$emit('open_edit_customer');
