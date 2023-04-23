@@ -41,18 +41,18 @@ class MpesaPaymentRegister(Document):
             frappe.throw(_("Customer is required"))
         if not self.mode_of_payment:
             frappe.throw(_("Mode of Payment is required"))
+        self.payment_entry = self.create_payment_entry()
 
-@frappe.whitelist()
-def create_payment_entry(self, mode_of_payment=None, customer=None, currency=None):
-    payment_entry = create_payment_entry(
-        self.company,
-        customer,
-        self.transamount,
-        self.currency,
-        mode_of_payment,
-        self.posting_date,
-        self.transid,
-        self.posting_date,
-        self.submit_payment,
-    )
-    return payment_entry.name
+    def create_payment_entry(self):
+        payment_entry = create_payment_entry(
+            self.company,
+            self.customer,
+            self.transamount,
+            self.currency,
+            self.mode_of_payment,
+            self.posting_date,
+            self.transid,
+            self.posting_date,
+            self.submit_payment,
+        )
+        return payment_entry.name
