@@ -62,7 +62,6 @@ def get_mpesa_mode_of_payment(company):
 		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp
 		where mpa.parent = mp.name and mpa.company = %s and mp.enabled = 1 and mp.type = 'Phone'""",
         (company),
-        as_dict=0,
     )
 
     modes_of_payment = []
