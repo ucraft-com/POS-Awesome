@@ -34,7 +34,7 @@ class MpesaC2BRegisterURL(Document):
         confirmation_url = (
             site_url + "/api/method/posawesome.posawesome.api.m_pesa.confirmation"
         )
-        register_url = base_url + "/mpesa/c2b/v1/registerurl"
+        register_url = base_url + "/mpesa/c2b/v2/registerurl"
 
         payload = {
             "ShortCode": business_shortcode,

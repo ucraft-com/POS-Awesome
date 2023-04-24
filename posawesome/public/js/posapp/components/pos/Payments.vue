@@ -610,21 +610,9 @@
 
     <v-card flat class="cards mb-0 mt-3 py-0">
       <v-row align="start" no-gutters>
-        <v-col cols="12">
-          <v-btn
-            block
-            class="pa-1"
-            large
-            color="error"
-            dark
-            @click="back_to_invoice"
-            >{{ __('Cancel Payment') }}</v-btn
-          >
-        </v-col>
         <v-col cols="6">
           <v-btn
             block
-            class="mt-2"
             large
             color="primary"
             dark
@@ -636,13 +624,23 @@
         <v-col cols="6" class="pl-1">
           <v-btn
             block
-            class="mt-2"
             large
             color="success"
             dark
             @click="submit(undefined, false, true)"
             :disabled="vaildatPayment"
             >{{ __('Submit & Print') }}</v-btn
+          >
+        </v-col>
+        <v-col cols="12">
+          <v-btn
+            block
+            class="mt-2 pa-1"
+            large
+            color="error"
+            dark
+            @click="back_to_invoice"
+            >{{ __('Cancel Payment') }}</v-btn
           >
         </v-col>
       </v-row>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card
-      class="selection mx-auto grey lighten-5"
+      class="selection mx-auto grey lighten-5 mt-3"
       style="max-height: 75vh; height: 75vh"
     >
       <v-progress-linear
@@ -78,7 +78,7 @@
                   >
                     <v-card-text
                       v-text="item.item_name"
-                      class="text-subtitle-2 px-1 pb-2"
+                      class="text-caption px-1 pb-0"
                     ></v-card-text>
                   </v-img>
                   <v-card-text class="text--primary pa-1">
@@ -86,7 +86,7 @@
                       {{ formtCurrency(item.rate) || 0 }}
                       {{ item.currency || '' }}
                     </div>
-                    <div class="text-caption">
+                    <div class="text-caption golden--text">
                       {{ formtFloat(item.actual_qty) || 0 }}
                       {{ item.stock_uom || '' }}
                     </div>
@@ -108,10 +108,14 @@
                   @click:row="add_item"
                 >
                   <template v-slot:item.rate="{ item }">
-                    {{ formtCurrency(item.rate) }}
+                    <span class="primary--text">{{
+                      formtCurrency(item.rate)
+                    }}</span>
                   </template>
                   <template v-slot:item.actual_qty="{ item }">
-                    {{ formtFloat(item.actual_qty) }}
+                    <span class="golden--text">{{
+                      formtFloat(item.actual_qty)
+                    }}</span>
                   </template>
                 </v-data-table>
               </template>
