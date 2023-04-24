@@ -1,7 +1,7 @@
 <template>
   <div>
     <v-card
-      class="selection mx-auto grey lighten-5"
+      class="selection mx-auto grey lighten-5 mt-3"
       style="max-height: 75vh; height: 75vh"
     >
       <v-progress-linear

@@ -20,7 +20,7 @@
     </v-dialog>
     <v-card
       style="max-height: 70vh; height: 70vh"
-      class="cards my-0 py-0 grey lighten-5"
+      class="cards my-0 py-0 mt-3 grey lighten-5"
     >
       <v-row align="center" class="items px-2 py-1">
         <v-col
