@@ -236,6 +236,9 @@ fixtures = [
                     "POS Profile-posa_allow_change_posting_date",
                     "POS Profile-posa_default_card_view",
                     "POS Profile-posa_default_sales_order",
+                    "POS Profile-column_break_dqsba",
+                    "POS Profile-posa_use_server_cache",
+                    "POS Profile-posa_server_cache_duration",
                 ),
             ]
         ],
