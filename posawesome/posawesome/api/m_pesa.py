@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe, requests
 from frappe import _
 from requests.auth import HTTPBasicAuth
-import json
 
 
 def get_token(app_key, app_secret, base_url):
