@@ -17,7 +17,7 @@ def get_token(app_key, app_secret, base_url):
 
 
 @frappe.whitelist(allow_guest=True)
-def validation(**kwargs):
+def confirmation(**kwargs):
     try:
         args = frappe._dict(kwargs)
         doc = frappe.new_doc("Mpesa Payment Register")
@@ -45,7 +45,7 @@ def validation(**kwargs):
 
 
 @frappe.whitelist(allow_guest=True)
-def confirmation(**kwargs):
+def validation(**kwargs):
     context = {"ResultCode": 0, "ResultDesc": "Accepted"}
     return dict(context)
 
