@@ -73,7 +73,7 @@
                       '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'
                     "
                     class="white--text align-end"
-                    gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
+                    gradient="to bottom, rgba(0,0,0,0), rgba(0,0,0,0.4)"
                     height="100px"
                   >
                     <v-card-text
