@@ -168,7 +168,7 @@ fixtures = [
                     "POS Profile-posa_allow_partial_payment",
                     "POS Profile-posa_allow_credit_sale",
                     "POS Profile-posa_pos_awesome_advance_settings",
-                    "Batch-posa_btach_price",
+                    "Batch-posa_batch_price",
                     "POS Profile-posa_max_discount_allowed",
                     "POS Profile-posa_allow_return",
                     "POS Profile-posa_col_1",
