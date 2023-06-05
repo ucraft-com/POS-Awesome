@@ -147,7 +147,9 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
         batch_no = data.get("batch_no") if data.get("batch_no") else ""
         barcode = data.get("barcode") if data.get("barcode") else ""
 
-        condition += get_conditions(item_code, serial_no, batch_no, barcode)
+        condition += get_seearch_items_conditions(
+            item_code, serial_no, batch_no, barcode
+        )
         if item_group:
             condition += " AND item_group like '%{item_group}%'".format(
                 item_group=item_group
@@ -1618,7 +1620,7 @@ def search_serial_or_batch_or_barcode_number(search_value, search_serial_no):
     return {}
 
 
-def get_conditions(item_code, serial_no, batch_no, barcode):
+def get_seearch_items_conditions(item_code, serial_no, batch_no, barcode):
     if serial_no or batch_no or barcode:
         return " and name = {0}".format(frappe.db.escape(item_code))
     return """ and (name like {item_code} or item_name like {item_code})""".format(
