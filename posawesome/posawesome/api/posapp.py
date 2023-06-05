@@ -28,6 +28,7 @@ from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
 )
 from frappe.utils.caching import redis_cache
 
+
 @frappe.whitelist()
 def get_opening_dialog_data():
     data = {}
@@ -53,7 +54,7 @@ def get_opening_dialog_data():
         fields=["*"],
         limit_page_length=0,
         order_by="parent",
-        ignore_permissions=True
+        ignore_permissions=True,
     )
 
     return data
@@ -390,7 +391,9 @@ def update_invoice(data):
             invoice_doc.update_stock = 0
         if len(invoice_doc.payments) == 0:
             invoice_doc.payments = ref_doc.payments
-        invoice_doc.paid_amount = invoice_doc.rounded_total or invoice_doc.grand_total or invoice_doc.total
+        invoice_doc.paid_amount = (
+            invoice_doc.rounded_total or invoice_doc.grand_total or invoice_doc.total
+        )
         for payment in invoice_doc.payments:
             if payment.default:
                 payment.amount = invoice_doc.paid_amount
@@ -884,6 +887,7 @@ def create_customer(
     customer_id,
     customer_name,
     company,
+    pos_profile_doc,
     tax_id=None,
     mobile_no=None,
     email_id=None,
@@ -893,10 +897,12 @@ def create_customer(
     territory=None,
     customer_type=None,
     gender=None,
-    method='create',
+    method="create",
 ):
-    if method == 'create':
-        if not frappe.db.exists("Customer", {"customer_name": customer_name}):
+    pos_profile = json.loads(pos_profile_doc)
+    if method == "create":
+        is_exist = frappe.db.exists("Customer", {"customer_name": customer_name})
+        if pos_profile.get("posa_allow_duplicate_customer_names") or not is_exist:
             customer = frappe.get_doc(
                 {
                     "doctype": "Customer",
@@ -924,7 +930,7 @@ def create_customer(
         else:
             frappe.throw(_("Customer already exists"))
 
-    elif method == 'update':
+    elif method == "update":
         customer_doc = frappe.get_doc("Customer", customer_id)
         customer_doc.customer_name = customer_name
         customer_doc.posa_referral_company = company
@@ -1317,12 +1323,12 @@ def get_new_payment_request(doc, mop):
 
 
 def get_payment_gateway_account(args):
-	return frappe.db.get_value(
-		"Payment Gateway Account",
-		args,
-		["name", "payment_gateway", "payment_account", "message"],
-		as_dict=1,
-	)
+    return frappe.db.get_value(
+        "Payment Gateway Account",
+        args,
+        ["name", "payment_gateway", "payment_account", "message"],
+        as_dict=1,
+    )
 
 
 def get_existing_payment_request(doc, pay):
@@ -1354,7 +1360,7 @@ def make_payment_request(**args):
     ref_doc = frappe.get_doc(args.dt, args.dn)
     gateway_account = get_payment_gateway_account(args.get("payment_gateway_account"))
     if not gateway_account:
-        frappe.throw(_("Payment Gateway Account not found")) 
+        frappe.throw(_("Payment Gateway Account not found"))
 
     grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
     if args.loyalty_points and args.dt == "Sales Order":
@@ -1571,11 +1577,10 @@ def auto_create_items():
                 "is_variant_item": 0,
                 "is_stock_item": 1,
                 "opening_stock": 1000,
-                "valuation_rate" : 50 + i,
+                "valuation_rate": 50 + i,
                 "standard_rate": 100 + i,
             }
         )
         print("Creating Item: {}".format(item_code))
         item.insert(ignore_permissions=True)
         frappe.db.commit()
-
