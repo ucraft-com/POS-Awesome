@@ -25,7 +25,7 @@
             hide-details
             v-model="debounce_search"
             @keydown.esc="esc_event"
-            @keydown.enter="enter_event"
+            @keydown.enter="search_onchange"
             ref="debounce_search"
           ></v-text-field>
         </v-col>
@@ -134,6 +134,7 @@
             outlined
             hide-details
             v-model="item_group"
+            v-on:change="search_onchange"
           ></v-select>
         </v-col>
         <v-col cols="3" class="mt-1">
@@ -192,7 +193,9 @@ export default {
 
   watch: {
     filtred_items(data_value) {
-      this.update_items_details(data_value);
+      if (!this.pos_profile.pose_use_limit_search) {
+        this.update_items_details(data_value);
+      }
     },
     customer_price_list() {
       this.get_items();
@@ -216,7 +219,20 @@ export default {
       }
       const vm = this;
       this.loading = true;
-      if (vm.pos_profile.posa_local_storage && localStorage.items_storage) {
+      let search = this.get_search(this.first_search);
+      let gr = '';
+      let sr = '';
+      if (search) {
+        sr = search;
+      }
+      if (vm.item_group != 'ALL') {
+        gr = vm.item_group.toLowerCase();
+      }
+      if (
+        vm.pos_profile.posa_local_storage &&
+        localStorage.items_storage &&
+        !vm.pos_profile.pose_use_limit_search
+      ) {
         vm.items = JSON.parse(localStorage.getItem('items_storage'));
         evntBus.$emit('set_all_items', vm.items);
         vm.loading = false;
@@ -226,16 +242,31 @@ export default {
         args: {
           pos_profile: vm.pos_profile,
           price_list: vm.customer_price_list,
+          item_group: gr,
+          search_value: sr,
         },
         callback: function (r) {
           if (r.message) {
             vm.items = r.message;
             evntBus.$emit('set_all_items', vm.items);
             vm.loading = false;
-            console.info('loadItmes');
-            if (vm.pos_profile.posa_local_storage) {
+            console.info('Items Loaded');
+            if (
+              vm.pos_profile.posa_local_storage &&
+              !vm.pos_profile.pose_use_limit_search
+            ) {
               localStorage.setItem('items_storage', '');
-              localStorage.setItem('items_storage', JSON.stringify(r.message));
+              try {
+                localStorage.setItem(
+                  'items_storage',
+                  JSON.stringify(r.message)
+                );
+              } catch (e) {
+                console.error(e);
+              }
+            }
+            if (vm.pos_profile.pose_use_limit_search) {
+              vm.enter_event();
             }
           }
         },
@@ -304,6 +335,7 @@ export default {
       }
     },
     enter_event() {
+      let match = false;
       if (!this.filtred_items.length || !this.first_search) {
         return;
       }
@@ -313,18 +345,41 @@ export default {
       new_item.item_barcode.forEach((element) => {
         if (this.search == element.barcode) {
           new_item.uom = element.posa_uom;
+          match = true;
         }
       });
+      if (
+        !new_item.to_set_serial_no &&
+        new_item.has_serial_no &&
+        this.pos_profile.posa_search_serial_no
+      ) {
+        new_item.serial_no_data.forEach((element) => {
+          if (this.search && element.serial_no == this.search) {
+            new_item.to_set_serial_no = this.first_search;
+            match = true;
+          }
+        });
+      }
       if (this.flags.serial_no) {
         new_item.to_set_serial_no = this.flags.serial_no;
       }
-      this.add_item(new_item);
-      this.search = null;
-      this.first_search = null;
-      this.debounce_search = null;
-      this.flags.serial_no = null;
-      this.qty = 1;
-      this.$refs.debounce_search.focus();
+      if (match) {
+        this.add_item(new_item);
+        this.search = null;
+        this.first_search = null;
+        this.debounce_search = null;
+        this.flags.serial_no = null;
+        this.qty = 1;
+        this.$refs.debounce_search.focus();
+      }
+    },
+    search_onchange() {
+      const vm = this;
+      if (vm.pos_profile.pose_use_limit_search) {
+        vm.get_items();
+      } else {
+        vm.enter_event();
+      }
     },
     get_item_qty(first_search) {
       let scal_qty = Math.abs(this.qty);
@@ -437,72 +492,79 @@ export default {
   computed: {
     filtred_items() {
       this.search = this.get_search(this.first_search);
-      let filtred_list = [];
-      let filtred_group_list = [];
-      if (this.item_group != 'ALL') {
-        filtred_group_list = this.items.filter((item) =>
-          item.item_group.toLowerCase().includes(this.item_group.toLowerCase())
-        );
-      } else {
-        filtred_group_list = this.items;
-      }
-      if (!this.search || this.search.length < 3) {
+      if (!this.pos_profile.pose_use_limit_search) {
+        this.search = this.get_search(this.first_search);
+        let filtred_list = [];
+        let filtred_group_list = [];
+        if (this.item_group != 'ALL') {
+          filtred_group_list = this.items.filter((item) =>
+            item.item_group
+              .toLowerCase()
+              .includes(this.item_group.toLowerCase())
+          );
+        } else {
+          filtred_group_list = this.items;
+        }
+        if (!this.search || this.search.length < 3) {
+          if (
+            this.pos_profile.posa_show_template_items &&
+            this.pos_profile.posa_hide_variants_items
+          ) {
+            return (filtred_list = filtred_group_list
+              .filter((item) => !item.variant_of)
+              .slice(0, 50));
+          } else {
+            return (filtred_list = filtred_group_list.slice(0, 50));
+          }
+        } else if (this.search) {
+          filtred_list = filtred_group_list.filter((item) => {
+            let found = false;
+            for (let element of item.item_barcode) {
+              if (element.barcode == this.search) {
+                found = true;
+                break;
+              }
+            }
+            return found;
+          });
+          if (filtred_list.length == 0) {
+            filtred_list = filtred_group_list.filter((item) =>
+              item.item_code.toLowerCase().includes(this.search.toLowerCase())
+            );
+            if (filtred_list.length == 0) {
+              filtred_list = filtred_group_list.filter((item) =>
+                item.item_name.toLowerCase().includes(this.search.toLowerCase())
+              );
+            }
+            if (
+              filtred_list.length == 0 &&
+              this.pos_profile.posa_search_serial_no
+            ) {
+              filtred_list = filtred_group_list.filter((item) => {
+                let found = false;
+                for (let element of item.serial_no_data) {
+                  if (element.serial_no == this.search) {
+                    found = true;
+                    this.flags.serial_no = null;
+                    this.flags.serial_no = this.search;
+                    break;
+                  }
+                }
+                return found;
+              });
+            }
+          }
+        }
         if (
           this.pos_profile.posa_show_template_items &&
           this.pos_profile.posa_hide_variants_items
         ) {
-          return (filtred_list = filtred_group_list
-            .filter((item) => !item.variant_of)
-            .slice(0, 50));
+          return filtred_list.filter((item) => !item.variant_of).slice(0, 50);
         } else {
-          return (filtred_list = filtred_group_list.slice(0, 50));
+          return filtred_list.slice(0, 50);
         }
-      } else if (this.search) {
-        filtred_list = filtred_group_list.filter((item) => {
-          let found = false;
-          for (let element of item.item_barcode) {
-            if (element.barcode == this.search) {
-              found = true;
-              break;
-            }
-          }
-          return found;
-        });
-        if (filtred_list.length == 0) {
-          filtred_list = filtred_group_list.filter((item) =>
-            item.item_code.toLowerCase().includes(this.search.toLowerCase())
-          );
-          if (filtred_list.length == 0) {
-            filtred_list = filtred_group_list.filter((item) =>
-              item.item_name.toLowerCase().includes(this.search.toLowerCase())
-            );
-          }
-          if (
-            filtred_list.length == 0 &&
-            this.pos_profile.posa_search_serial_no
-          ) {
-            filtred_list = filtred_group_list.filter((item) => {
-              let found = false;
-              for (let element of item.serial_no_data) {
-                if (element.serial_no == this.search) {
-                  found = true;
-                  this.flags.serial_no = null;
-                  this.flags.serial_no = this.search;
-                  break;
-                }
-              }
-              return found;
-            });
-          }
-        }
-      }
-      if (
-        this.pos_profile.posa_show_template_items &&
-        this.pos_profile.posa_hide_variants_items
-      ) {
-        return filtred_list.filter((item) => !item.variant_of).slice(0, 50);
       } else {
-        return filtred_list.slice(0, 50);
+        return this.items.slice(0, 50);
       }
     },
     debounce_search: {

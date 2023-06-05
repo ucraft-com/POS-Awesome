@@ -167,7 +167,7 @@ fixtures = [
                     "POS Profile-posa_allow_partial_payment",
                     "POS Profile-posa_allow_credit_sale",
                     "POS Profile-posa_pos_awesome_advance_settings",
-                    "Batch-posa_btach_price",
+                    "Batch-posa_batch_price",
                     "POS Profile-posa_max_discount_allowed",
                     "POS Profile-posa_allow_return",
                     "POS Profile-posa_col_1",
@@ -240,6 +240,9 @@ fixtures = [
                     "POS Profile-posa_use_server_cache",
                     "POS Profile-posa_server_cache_duration",
                     "POS Profile-posa_allow_duplicate_customer_names",
+                    "POS Profile-column_break_anyol",
+                    "POS Profile-pose_use_limit_search",
+                    "POS Profile-posa_search_limit",
                 ),
             ]
         ],
