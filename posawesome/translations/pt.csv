@@ -104,7 +104,7 @@ DocType: POS Closing Shift,Payment Reconciliation,Reconciliação de Pagamento
 DocType: POS Closing Shift,Period End Date,Data de Fim de Periodo
 DocType: POS Closing Shift,Period Start Date,Data de Inicio de Periodo
 DocType: POS Closing Shift,Posting Date,Data de Postagem
-Custom Field - label: Batch-posa_btach_price,Price,Preço
+Custom Field - label: Batch-posa_batch_price,Price,Preço
 DocType: POS Offer,Price Discount Scheme ,Esquema de Desconto de Preço
 Custom Field - label: Sales Invoice-posa_is_printed,Printed,Imprimido
 DocType: POS Offer,Product Discount Scheme,Esquema de Desconto de Produto

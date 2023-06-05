@@ -118,13 +118,45 @@ def update_opening_shift_data(data, pos_profile):
 
 
 @frappe.whitelist()
-def get_items(pos_profile, price_list=None):
+def get_items(pos_profile, price_list=None, item_group="", search_value=""):
     pos_profile = json.loads(pos_profile)
+    data = dict()
+
+    posa_display_items_in_stock = pos_profile.get("posa_display_items_in_stock")
+    search_serial_no = pos_profile.get("posa_search_serial_no")
+    posa_show_template_items = pos_profile.get("posa_show_template_items")
+    warehouse = pos_profile.get("warehouse")
+    limit_search = pos_profile.get("posa_limit_search")
+    search_limit = pos_profile.get("posa_search_limit")
+
     if not price_list:
         price_list = pos_profile.get("selling_price_list")
+
     condition = ""
+    limit = ""
     condition += get_item_group_condition(pos_profile.get("name"))
-    if not pos_profile.get("posa_show_template_items"):
+
+    if limit_search:
+        if search_value:
+            data = search_serial_or_batch_or_barcode_number(
+                search_value, search_serial_no
+            )
+
+        item_code = data.get("item_code") if data.get("item_code") else search_value
+        serial_no = data.get("serial_no") if data.get("serial_no") else ""
+        batch_no = data.get("batch_no") if data.get("batch_no") else ""
+        barcode = data.get("barcode") if data.get("barcode") else ""
+
+        condition += get_seearch_items_conditions(
+            item_code, serial_no, batch_no, barcode
+        )
+        if item_group:
+            condition += " AND item_group like '%{item_group}%'".format(
+                item_group=item_group
+            )
+        limit = " LIMIT {search_limit}".format(search_limit=search_limit)
+
+    if not posa_show_template_items:
         condition += " AND has_variants = 0"
 
     result = []
@@ -152,11 +184,12 @@ def get_items(pos_profile, price_list=None):
             disabled = 0
                 AND is_sales_item = 1
                 AND is_fixed_asset = 0
-                {0}
+                {condition}
         ORDER BY
-            name asc
+            item_name asc
+        {limit}
             """.format(
-            condition
+            condition=condition, limit=limit
         ),
         as_dict=1,
     )
@@ -194,16 +227,18 @@ def get_items(pos_profile, price_list=None):
                 fields=["barcode", "posa_uom"],
             )
             serial_no_data = []
-            if pos_profile.get("posa_search_serial_no"):
+            if search_serial_no:
                 serial_no_data = frappe.get_all(
                     "Serial No",
-                    filters={"item_code": item_code, "status": "Active"},
+                    filters={
+                        "item_code": item_code,
+                        "status": "Active",
+                        "warehouse": warehouse,
+                    },
                     fields=["name as serial_no"],
                 )
-            if pos_profile.get("posa_display_items_in_stock"):
-                item_stock_qty = get_stock_availability(
-                    item_code, pos_profile.get("warehouse")
-                )
+
+            item_stock_qty = get_stock_availability(item_code, warehouse)
             attributes = ""
             if pos_profile.get("posa_show_template_items") and item.has_variants:
                 attributes = get_item_attributes(item.item_code)
@@ -214,7 +249,7 @@ def get_items(pos_profile, price_list=None):
                     fields=["attribute", "attribute_value"],
                     filters={"parent": item.item_code, "parentfield": "attributes"},
                 )
-            if pos_profile.get("posa_display_items_in_stock") and (
+            if posa_display_items_in_stock and (
                 not item_stock_qty or item_stock_qty < 0
             ):
                 pass
@@ -227,7 +262,7 @@ def get_items(pos_profile, price_list=None):
                         "currency": item_price.get("currency")
                         or pos_profile.get("currency"),
                         "item_barcode": item_barcode or [],
-                        "actual_qty": 0,
+                        "actual_qty": item_stock_qty or 0,
                         "serial_no_data": serial_no_data or [],
                         "attributes": attributes or "",
                         "item_attributes": item_attributes or "",
@@ -239,10 +274,10 @@ def get_items(pos_profile, price_list=None):
 
 
 def get_item_group_condition(pos_profile):
-    cond = "and 1=1"
+    cond = " and 1=1"
     item_groups = get_item_groups(pos_profile)
     if item_groups:
-        cond = "and item_group in (%s)" % (", ".join(["%s"] * len(item_groups)))
+        cond = " and item_group in (%s)" % (", ".join(["%s"] * len(item_groups)))
 
     return cond % tuple(item_groups)
 
@@ -362,7 +397,9 @@ def update_invoice(data):
             invoice_doc.update_stock = 0
         if len(invoice_doc.payments) == 0:
             invoice_doc.payments = ref_doc.payments
-        invoice_doc.paid_amount = invoice_doc.rounded_total or invoice_doc.grand_total or invoice_doc.total
+        invoice_doc.paid_amount = (
+            invoice_doc.rounded_total or invoice_doc.grand_total or invoice_doc.total
+        )
         for payment in invoice_doc.payments:
             if payment.default:
                 payment.amount = invoice_doc.paid_amount
@@ -532,9 +569,7 @@ def set_batch_nos_for_bundels(doc, warehouse_field, throw=False):
         warehouse = d.get(warehouse_field, None)
         if has_batch_no and warehouse and qty > 0:
             if not d.batch_no:
-                batch_no = get_batch_no(
-                    d.item_code, warehouse, qty, throw, d.serial_no
-                )
+                batch_no = get_batch_no(d.item_code, warehouse, qty, throw, d.serial_no)
                 if batch_no:
                     d.batch_no = batch_no.get("batch_no")
             else:
@@ -758,7 +793,11 @@ def get_items_details(pos_profile, items_data):
 
             serial_no_data = frappe.get_all(
                 "Serial No",
-                filters={"item_code": item_code, "status": "Active"},
+                filters={
+                    "item_code": item_code,
+                    "status": "Active",
+                    "warehouse": warehouse,
+                },
                 fields=["name as serial_no"],
             )
 
@@ -780,7 +819,7 @@ def get_items_details(pos_profile, items_data):
                                     "batch_no": batch.batch_no,
                                     "batch_qty": batch.qty,
                                     "expiry_date": batch_doc.expiry_date,
-                                    "btach_price": batch_doc.posa_btach_price,
+                                    "batch_price": batch_doc.posa_batch_price,
                                 }
                             )
 
@@ -1473,13 +1512,19 @@ def set_payment_schedule(doc):
         party_type, party = doc.get_party()
 
         if party_type and party:
-            party_account_currency = get_party_account_currency(party_type, party, doc.company)
+            party_account_currency = get_party_account_currency(
+                party_type, party, doc.company
+            )
 
-    posting_date = doc.get("bill_date") or doc.get("posting_date") or doc.get("transaction_date")
+    posting_date = (
+        doc.get("bill_date") or doc.get("posting_date") or doc.get("transaction_date")
+    )
     date = doc.get("due_date")
     due_date = date or posting_date
 
-    base_grand_total = doc.get("base_rounded_total") or doc.base_grand_total - doc.base_paid_amount
+    base_grand_total = (
+        doc.get("base_rounded_total") or doc.base_grand_total - doc.base_paid_amount
+    )
     grand_total = doc.get("rounded_total") or doc.grand_total - doc.paid_amount
 
     if doc.doctype in ("Sales Invoice", "Purchase Invoice"):
@@ -1487,19 +1532,23 @@ def set_payment_schedule(doc):
         grand_total = grand_total - flt(doc.write_off_amount)
         po_or_so, doctype, fieldname = doc.get_order_details()
         automatically_fetch_payment_terms = cint(
-            frappe.db.get_single_value("Accounts Settings", "automatically_fetch_payment_terms")
+            frappe.db.get_single_value(
+                "Accounts Settings", "automatically_fetch_payment_terms"
+            )
         )
 
     if doc.get("total_advance"):
         if party_account_currency == doc.company_currency:
             base_grand_total -= doc.get("total_advance")
             grand_total = flt(
-                base_grand_total / doc.get("conversion_rate"), doc.precision("grand_total")
+                base_grand_total / doc.get("conversion_rate"),
+                doc.precision("grand_total"),
             )
         else:
             grand_total -= doc.get("total_advance")
             base_grand_total = flt(
-                grand_total * doc.get("conversion_rate"), doc.precision("base_grand_total")
+                grand_total * doc.get("conversion_rate"),
+                doc.precision("base_grand_total"),
             )
 
     if not doc.get("payment_schedule"):
@@ -1512,7 +1561,9 @@ def set_payment_schedule(doc):
             if doc.get("payment_terms_template"):
                 doc.ignore_default_payment_terms_template = 1
         elif doc.get("payment_terms_template"):
-            data = get_payment_terms(doc.payment_terms_template, posting_date, grand_total, base_grand_total)
+            data = get_payment_terms(
+                doc.payment_terms_template, posting_date, grand_total, base_grand_total
+            )
             for item in data:
                 doc.append("payment_schedule", item)
         elif doc.doctype not in ["Purchase Receipt"]:
@@ -1527,13 +1578,51 @@ def set_payment_schedule(doc):
     for d in doc.get("payment_schedule"):
         if d.invoice_portion:
             d.payment_amount = flt(
-                grand_total * flt(d.invoice_portion / 100), d.precision("payment_amount")
+                grand_total * flt(d.invoice_portion / 100),
+                d.precision("payment_amount"),
             )
             d.base_payment_amount = flt(
-                base_grand_total * flt(d.invoice_portion / 100), d.precision("base_payment_amount")
+                base_grand_total * flt(d.invoice_portion / 100),
+                d.precision("base_payment_amount"),
             )
             d.outstanding = d.payment_amount
         elif not d.invoice_portion:
             d.base_payment_amount = flt(
-                d.payment_amount * doc.get("conversion_rate"), d.precision("base_payment_amount")
+                d.payment_amount * doc.get("conversion_rate"),
+                d.precision("base_payment_amount"),
             )
+
+
+@frappe.whitelist()
+def search_serial_or_batch_or_barcode_number(search_value, search_serial_no):
+    # search barcode no
+    barcode_data = frappe.db.get_value(
+        "Item Barcode",
+        {"barcode": search_value},
+        ["barcode", "parent as item_code"],
+        as_dict=True,
+    )
+    if barcode_data:
+        return barcode_data
+    # search serial no
+    if search_serial_no:
+        serial_no_data = frappe.db.get_value(
+            "Serial No", search_value, ["name as serial_no", "item_code"], as_dict=True
+        )
+        if serial_no_data:
+            return serial_no_data
+    # search batch no
+    batch_no_data = frappe.db.get_value(
+        "Batch", search_value, ["name as batch_no", "item as item_code"], as_dict=True
+    )
+    if batch_no_data:
+        return batch_no_data
+    return {}
+
+
+def get_seearch_items_conditions(item_code, serial_no, batch_no, barcode):
+    if serial_no or batch_no or barcode:
+        return " and name = {0}".format(frappe.db.escape(item_code))
+    return """ and (name like {item_code} or item_name like {item_code})""".format(
+        item_code=frappe.db.escape("%" + item_code + "%")
+    )
