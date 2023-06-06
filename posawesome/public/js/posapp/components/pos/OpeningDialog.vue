@@ -63,7 +63,13 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="error" dark @click="go_desk">Cancel</v-btn>
-          <v-btn color="success" dark @click="submit_dialog">Submit</v-btn>
+          <v-btn
+            color="success"
+            :disabled="is_loading"
+            dark
+            @click="submit_dialog"
+            >Submit</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -76,6 +82,7 @@ export default {
   props: ['dialog'],
   data: () => ({
     dialog_data: {},
+    is_loading: false,
     companys: [],
     company: '',
     pos_profiles_data: [],
@@ -155,6 +162,7 @@ export default {
       if (!this.payments_methods.length || !this.company || !this.pos_profile) {
         return;
       }
+      this.is_loading = true;
       const vm = this;
       return frappe
         .call('posawesome.posawesome.api.posapp.create_opening_voucher', {
@@ -167,6 +175,7 @@ export default {
             evntBus.$emit('register_pos_data', r.message);
             evntBus.$emit('set_company', r.message.company);
             vm.close_opening_dialog();
+            is_loading = false;
           }
         });
     },
