@@ -887,7 +887,8 @@ export default {
             el.item_code === item.item_code &&
             el.uom === item.uom &&
             !el.posa_is_offer &&
-            !el.posa_is_replace
+            !el.posa_is_replace &&
+            el.batch_no === item.batch_no
         );
       }
       if (index === -1 || this.new_line) {
@@ -896,6 +897,12 @@ export default {
           new_item.serial_no_selected = [];
           new_item.serial_no_selected.push(item.to_set_serial_no);
           item.to_set_serial_no = null;
+        }
+        if (item.has_batch_no && item.to_set_batch_no) {
+          new_item.batch_no = item.to_set_batch_no;
+          item.to_set_batch_no = null;
+          item.batch_no = null;
+          this.set_batch_qty(new_item, new_item.batch_no, false);
         }
         this.items.unshift(new_item);
         this.update_item_detail(new_item);
@@ -921,17 +928,23 @@ export default {
           this.calc_stock_qty(cur_item, cur_item.qty);
         } else {
           if (
-            cur_item.stock_qty < cur_item.actual_batch_qty ||
+            (cur_item.stock_qty < cur_item.actual_batch_qty &&
+              cur_item.batch_no == item.batch_no) ||
             !cur_item.batch_no
           ) {
             cur_item.qty += item.qty || 1;
             this.calc_stock_qty(cur_item, cur_item.qty);
           } else {
             const new_item = this.get_new_item(cur_item);
-            new_item.batch_no = '';
+            new_item.batch_no = item.batch_no || item.to_set_batch_no;
             new_item.batch_no_expiry_date = '';
             new_item.actual_batch_qty = '';
             new_item.qty = item.qty || 1;
+            if (new_item.batch_no) {
+              this.set_batch_qty(new_item, new_item.batch_no, false);
+              item.to_set_batch_no = null;
+              item.batch_no = null;
+            }
             this.items.unshift(new_item);
           }
         }

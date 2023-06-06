@@ -243,6 +243,7 @@ fixtures = [
                     "POS Profile-column_break_anyol",
                     "POS Profile-pose_use_limit_search",
                     "POS Profile-posa_search_limit",
+                    "POS Profile-posa_search_batch_no",
                 ),
             ]
         ],

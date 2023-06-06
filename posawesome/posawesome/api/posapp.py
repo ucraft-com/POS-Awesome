@@ -12,7 +12,11 @@ from erpnext.stock.get_item_details import get_item_details
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
 from frappe.utils.background_jobs import enqueue
 from erpnext.accounts.party import get_party_bank_account
-from erpnext.stock.doctype.batch.batch import get_batch_no, get_batch_qty, set_batch_nos
+from erpnext.stock.doctype.batch.batch import (
+    get_batch_no,
+    get_batch_qty,
+    set_batch_nos,
+)
 from erpnext.accounts.doctype.payment_request.payment_request import (
     get_dummy_message,
     get_existing_payment_request_amount,
@@ -129,9 +133,11 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
 
     def _get_items(pos_profile, price_list, item_group, search_value):
         pos_profile = json.loads(pos_profile)
+        today = nowdate()
         data = dict()
         posa_display_items_in_stock = pos_profile.get("posa_display_items_in_stock")
         search_serial_no = pos_profile.get("posa_search_serial_no")
+        search_batch_no = pos_profile.get("posa_search_batch_no")
         posa_show_template_items = pos_profile.get("posa_show_template_items")
         warehouse = pos_profile.get("warehouse")
         use_limit_search = pos_profile.get("pose_use_limit_search")
@@ -236,6 +242,27 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                     filters={"parent": item_code},
                     fields=["barcode", "posa_uom"],
                 )
+                batch_no_data = []
+                if search_batch_no:
+                    batch_list = get_batch_qty(warehouse=warehouse, item_code=item_code)
+                    if batch_list:
+                        for batch in batch_list:
+                            if batch.qty > 0 and batch.batch_no:
+                                batch_doc = frappe.get_cached_doc(
+                                    "Batch", batch.batch_no
+                                )
+                                if (
+                                    str(batch_doc.expiry_date) > str(today)
+                                    or batch_doc.expiry_date in ["", None]
+                                ) and batch_doc.disabled == 0:
+                                    batch_no_data.append(
+                                        {
+                                            "batch_no": batch.batch_no,
+                                            "batch_qty": batch.qty,
+                                            "expiry_date": batch_doc.expiry_date,
+                                            "batch_price": batch_doc.posa_batch_price,
+                                        }
+                                    )
                 serial_no_data = []
                 if search_serial_no:
                     serial_no_data = frappe.get_all(
@@ -277,6 +304,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                             "item_barcode": item_barcode or [],
                             "actual_qty": item_stock_qty or 0,
                             "serial_no_data": serial_no_data or [],
+                            "batch_no_data": batch_no_data or [],
                             "attributes": attributes or "",
                             "item_attributes": item_attributes or "",
                         }
@@ -616,6 +644,7 @@ def redeeming_customer_credit(
     invoice_doc, data, is_payment_entry, total_cash, cash_account
 ):
     # redeeming customer credit with journal voucher
+    today = nowdate()
     if data.get("redeemed_customer_credit"):
         cost_center = frappe.get_value(
             "POS Profile", invoice_doc.pos_profile, "cost_center"
@@ -640,7 +669,7 @@ def redeeming_customer_credit(
                     {
                         "doctype": "Journal Entry",
                         "voucher_type": "Journal Entry",
-                        "posting_date": nowdate(),
+                        "posting_date": today,
                         "company": invoice_doc.company,
                     }
                 )
@@ -678,7 +707,7 @@ def redeeming_customer_credit(
         payment_entry_doc = frappe.get_doc(
             {
                 "doctype": "Payment Entry",
-                "posting_date": nowdate(),
+                "posting_date": today,
                 "payment_type": "Receive",
                 "party_type": "Customer",
                 "party": invoice_doc.customer,
@@ -812,6 +841,7 @@ def get_items_details(pos_profile, items_data):
         return _get_items_details(pos_profile, items_data)
 
     def _get_items_details(pos_profile, items_data):
+        today = nowdate()
         pos_profile = json.loads(pos_profile)
         items_data = json.loads(items_data)
         warehouse = pos_profile.get("warehouse")
@@ -848,9 +878,9 @@ def get_items_details(pos_profile, items_data):
                 if batch_list:
                     for batch in batch_list:
                         if batch.qty > 0 and batch.batch_no:
-                            batch_doc = frappe.get_doc("Batch", batch.batch_no)
+                            batch_doc = frappe.get_cached_doc("Batch", batch.batch_no)
                             if (
-                                str(batch_doc.expiry_date) > str(nowdate())
+                                str(batch_doc.expiry_date) > str(today)
                                 or batch_doc.expiry_date in ["", None]
                             ) and batch_doc.disabled == 0:
                                 batch_no_data.append(

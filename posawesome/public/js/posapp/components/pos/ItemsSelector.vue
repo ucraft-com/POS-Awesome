@@ -192,9 +192,11 @@ export default {
   }),
 
   watch: {
-    filtred_items(data_value) {
+    filtred_items(new_value, old_value) {
       if (!this.pos_profile.pose_use_limit_search) {
-        this.update_items_details(data_value);
+        if (new_value.length != old_value.length) {
+          this.update_items_details(new_value);
+        }
       }
     },
     customer_price_list() {
@@ -363,12 +365,33 @@ export default {
       if (this.flags.serial_no) {
         new_item.to_set_serial_no = this.flags.serial_no;
       }
-      if (match) {
+      if (
+        !new_item.to_set_batch_no &&
+        new_item.has_batch_no &&
+        this.pos_profile.posa_search_batch_no
+      ) {
+        new_item.batch_no_data.forEach((element) => {
+          if (this.search && element.batch_no == this.search) {
+            new_item.to_set_batch_no = this.first_search;
+            new_item.batch_no = this.first_search;
+            match = true;
+          }
+        });
+      }
+      if (this.flags.batch_no) {
+        new_item.to_set_batch_no = this.flags.batch_no;
+      }
+      if (
+        match ||
+        (!this.pos_profile.posa_search_serial_no &&
+          !this.pos_profile.search_batch_no)
+      ) {
         this.add_item(new_item);
         this.search = null;
         this.first_search = null;
         this.debounce_search = null;
         this.flags.serial_no = null;
+        this.flags.batch_no = null;
         this.qty = 1;
         this.$refs.debounce_search.focus();
       }
@@ -422,6 +445,7 @@ export default {
       this.$refs.debounce_search.focus();
     },
     update_items_details(items) {
+      // set debugger
       const vm = this;
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.get_items_details',
@@ -493,7 +517,6 @@ export default {
     filtred_items() {
       this.search = this.get_search(this.first_search);
       if (!this.pos_profile.pose_use_limit_search) {
-        this.search = this.get_search(this.first_search);
         let filtred_list = [];
         let filtred_group_list = [];
         if (this.item_group != 'ALL') {
@@ -547,6 +570,23 @@ export default {
                     found = true;
                     this.flags.serial_no = null;
                     this.flags.serial_no = this.search;
+                    break;
+                  }
+                }
+                return found;
+              });
+            }
+            if (
+              filtred_list.length == 0 &&
+              this.pos_profile.posa_search_batch_no
+            ) {
+              filtred_list = filtred_group_list.filter((item) => {
+                let found = false;
+                for (let element of item.batch_no_data) {
+                  if (element.batch_no == this.search) {
+                    found = true;
+                    this.flags.batch_no = null;
+                    this.flags.batch_no = this.search;
                     break;
                   }
                 }
