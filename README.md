@@ -37,6 +37,7 @@
 26. Supports Customer and Customer Group price list
 27. Supports Sales Person
 28. Supports Delivery Charges
+29. Search and add items by Batch Number
 
 ---
 
