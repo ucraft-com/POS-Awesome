@@ -55,7 +55,6 @@ frappe.ui.form.on('POS Offer', {
 
 
 const controllers = (frm) => {
-	console.info("controllers");
 	frm.toggle_display('item', frm.doc.apply_on === 'Item Code');
 	frm.toggle_reqd('item', frm.doc.apply_on === 'Item Code');
 

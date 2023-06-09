@@ -73,10 +73,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-18 05:08:03.509002",
+ "modified": "2023-06-07 17:56:04.569137",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Mpesa C2B Register URL",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -124,5 +125,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

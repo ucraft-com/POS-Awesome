@@ -23,6 +23,7 @@
   "lastname",
   "column_break_14",
   "posting_date",
+  "posting_time",
   "company",
   "default_currency",
   "customer",
@@ -157,9 +158,9 @@
    "options": "Customer"
   },
   {
-   "default": "Now",
+   "default": "Today",
    "fieldname": "posting_date",
-   "fieldtype": "Datetime",
+   "fieldtype": "Date",
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
@@ -218,16 +219,25 @@
    "fieldname": "submit_payment",
    "fieldtype": "Check",
    "label": "Submit Payment "
+  },
+  {
+   "default": "Now",
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-11-19 23:05:24.242365",
+ "modified": "2023-06-07 22:24:09.518620",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "Mpesa Payment Register",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -280,6 +290,7 @@
  "show_preview_popup": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "customer",
  "track_changes": 1
 }

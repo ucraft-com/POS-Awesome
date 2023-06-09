@@ -92,6 +92,7 @@
       :mini-variant.sync="mini"
       app
       class="primary margen-top"
+      width="170"
     >
       <v-list dark>
         <v-list-item class="px-2">
@@ -146,7 +147,10 @@ export default {
       drawer: false,
       mini: true,
       item: 0,
-      items: [{ text: 'POS', icon: 'mdi-point-of-sale' }],
+      items: [
+        { text: 'POS', icon: 'mdi-point-of-sale' },
+        { text: 'Payments', icon: 'mdi-cash' },
+      ],
       page: '',
       fav: true,
       menu: false,

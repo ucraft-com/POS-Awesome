@@ -59,14 +59,18 @@ def get_mpesa_mode_of_payment(company):
     )
     modes_of_payment = []
     for mode in modes:
-        if not mode.mode_of_payment in modes_of_payment:
+        if mode.mode_of_payment not in modes_of_payment:
             modes_of_payment.append(mode.mode_of_payment)
     return modes_of_payment
 
 
 @frappe.whitelist()
-def get_mpesa_draft_payments(company, mode_of_payment, mobile_no=None, full_name=None):
-    filters = {"company": company, "mode_of_payment": mode_of_payment, "docstatus": 0}
+def get_mpesa_draft_payments(
+    company, mode_of_payment=None, mobile_no=None, full_name=None
+):
+    filters = {"company": company, "docstatus": 0}
+    if mode_of_payment:
+        filters["mode_of_payment"] = mode_of_payment
     if mobile_no:
         filters["msisdn"] = ["like", f"%{mobile_no}%"]
     if full_name:
@@ -77,6 +81,7 @@ def get_mpesa_draft_payments(company, mode_of_payment, mobile_no=None, full_name
         filters=filters,
         fields=[
             "name",
+            "transid",
             "msisdn as mobile_no",
             "full_name",
             "posting_date",
@@ -85,6 +90,7 @@ def get_mpesa_draft_payments(company, mode_of_payment, mobile_no=None, full_name
             "mode_of_payment",
             "company",
         ],
+        order_by="posting_date desc",
     )
     return payments
 
