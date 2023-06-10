@@ -22,7 +22,7 @@
               hide-details
               :value="formtCurrency(total_payments)"
               readonly
-              :prefix="invoice_doc.currency"
+              :prefix="currencySymbol(invoice_doc.currency)"
               dense
             ></v-text-field>
           </v-col>
@@ -34,8 +34,8 @@
               background-color="white"
               hide-details
               :value="formtCurrency(diff_payment)"
-              disabled
-              :prefix="invoice_doc.currency"
+              readonly
+              :prefix="currencySymbol(invoice_doc.currency)"
               dense
             ></v-text-field>
           </v-col>
@@ -48,9 +48,10 @@
               background-color="white"
               v-model="paid_change"
               @input="set_paid_change()"
-              :prefix="invoice_doc.currency"
+              :prefix="currencySymbol(invoice_doc.currency)"
               :rules="paid_change_rules"
               dense
+              readonly
               type="number"
             ></v-text-field>
           </v-col>
@@ -63,8 +64,8 @@
               background-color="white"
               hide-details
               :value="formtCurrency(credit_change)"
-              disabled
-              :prefix="invoice_doc.currency"
+              readonly
+              :prefix="currencySymbol(invoice_doc.currency)"
               dense
             ></v-text-field>
           </v-col>
@@ -85,9 +86,12 @@
                 :label="frappe._(payment.mode_of_payment)"
                 background-color="white"
                 hide-details
-                v-model="payment.amount"
-                type="number"
-                :prefix="invoice_doc.currency"
+                :value="formtCurrency(payment.amount)"
+                @change="
+                  setFormatedCurrency(payment, 'amount', null, true, $event)
+                "
+                :rules="[isNumber]"
+                :prefix="currencySymbol(invoice_doc.currency)"
                 @focus="set_rest_amount(payment.idx)"
                 :readonly="invoice_doc.is_return ? true : false"
               ></v-text-field>
@@ -140,7 +144,7 @@
                 :disabled="payment.amount == 0"
                 @click="
                   (phone_dialog = true),
-                    (payment.amount = Math.ceil(payment.amount))
+                    (payment.amount = flt(payment.amount, 0))
                 "
               >
                 {{ __('Request') }}
@@ -167,7 +171,7 @@
               hide-details
               v-model="loyalty_amount"
               type="number"
-              :prefix="invoice_doc.currency"
+              :prefix="currencySymbol(invoice_doc.currency)"
             ></v-text-field>
           </v-col>
           <v-col cols="5">
@@ -179,7 +183,7 @@
               background-color="white"
               hide-details
               :value="formtFloat(available_pioints_amount)"
-              :prefix="invoice_doc.currency"
+              :prefix="currencySymbol(invoice_doc.currency)"
               disabled
             ></v-text-field>
           </v-col>
@@ -205,7 +209,7 @@
               hide-details
               v-model="redeemed_customer_credit"
               type="number"
-              :prefix="invoice_doc.currency"
+              :prefix="currencySymbol(invoice_doc.currency)"
             ></v-text-field>
           </v-col>
           <v-col cols="5">
@@ -217,7 +221,7 @@
               background-color="white"
               hide-details
               :value="formtCurrency(available_customer_credit)"
-              :prefix="invoice_doc.currency"
+              :prefix="currencySymbol(invoice_doc.currency)"
               disabled
             ></v-text-field>
           </v-col>
@@ -235,7 +239,7 @@
               hide-details
               :value="formtCurrency(invoice_doc.net_total)"
               disabled
-              :prefix="invoice_doc.currency"
+              :prefix="currencySymbol(invoice_doc.currency)"
             ></v-text-field>
           </v-col>
           <v-col cols="6">
@@ -248,7 +252,7 @@
               hide-details
               :value="formtCurrency(invoice_doc.total_taxes_and_charges)"
               disabled
-              :prefix="invoice_doc.currency"
+              :prefix="currencySymbol(invoice_doc.currency)"
             ></v-text-field>
           </v-col>
           <v-col cols="6">
@@ -261,7 +265,7 @@
               hide-details
               :value="formtCurrency(invoice_doc.total)"
               disabled
-              :prefix="invoice_doc.currency"
+              :prefix="currencySymbol(invoice_doc.currency)"
             ></v-text-field>
           </v-col>
           <v-col cols="6">
@@ -274,7 +278,7 @@
               hide-details
               :value="formtCurrency(invoice_doc.discount_amount)"
               disabled
-              :prefix="invoice_doc.currency"
+              :prefix="currencySymbol(invoice_doc.currency)"
             ></v-text-field>
           </v-col>
           <v-col cols="6">
@@ -287,7 +291,7 @@
               hide-details
               :value="formtCurrency(invoice_doc.grand_total)"
               disabled
-              :prefix="invoice_doc.currency"
+              :prefix="currencySymbol(invoice_doc.currency)"
             ></v-text-field>
           </v-col>
           <v-col
@@ -550,7 +554,7 @@
                 hide-details
                 :value="formtCurrency(row.total_credit)"
                 disabled
-                :prefix="invoice_doc.currency"
+                :prefix="currencySymbol(invoice_doc.currency)"
               ></v-text-field>
             </v-col>
             <v-col cols="4">
@@ -563,7 +567,7 @@
                 hide-details
                 type="number"
                 v-model="row.credit_to_redeem"
-                :prefix="invoice_doc.currency"
+                :prefix="currencySymbol(invoice_doc.currency)"
               ></v-text-field>
             </v-col>
           </v-row>
@@ -684,7 +688,9 @@
 
 <script>
 import { evntBus } from '../../bus';
+import format from '../../format';
 export default {
+  mixins: [format],
   data: () => ({
     loading: false,
     pos_profile: '',
@@ -787,7 +793,9 @@ export default {
         return;
       }
 
-      let total_change = flt(flt(this.paid_change) + flt(-this.credit_change));
+      let total_change = this.flt(
+        this.flt(this.paid_change) + this.flt(-this.credit_change)
+      );
 
       if (this.is_cashback && total_change != -this.diff_payment) {
         evntBus.$emit('show_mesage', {
@@ -922,18 +930,6 @@ export default {
           this.invoice_doc.due_date = today;
         }, 0);
       }
-    },
-    formtCurrency(value) {
-      value = parseFloat(value);
-      return value
-        .toFixed(this.currency_precision)
-        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
-    },
-    formtFloat(value) {
-      value = parseFloat(value);
-      return value
-        .toFixed(this.float_precision)
-        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
     shortPay(e) {
       if (e.key === 'x' && (e.ctrlKey || e.metaKey)) {
@@ -1198,27 +1194,28 @@ export default {
       let total = parseFloat(this.invoice_doc.loyalty_amount);
       if (this.invoice_doc && this.invoice_doc.payments) {
         this.invoice_doc.payments.forEach((payment) => {
-          total += parseFloat(payment.amount);
+          total += this.flt(payment.amount);
         });
       }
 
-      total += parseFloat(this.redeemed_customer_credit);
+      total += this.flt(this.redeemed_customer_credit);
 
       if (!this.is_cashback) total = 0;
 
-      return total.toFixed(this.currency_precision);
+      return this.flt(total, this.currency_precision);
     },
     diff_payment() {
-      let diff_payment = (
-        this.invoice_doc.grand_total - this.total_payments
-      ).toFixed(this.currency_precision);
+      let diff_payment = this.flt(
+        this.invoice_doc.grand_total - this.total_payments,
+        this.currency_precision
+      );
       this.paid_change = -diff_payment;
       return diff_payment;
     },
     credit_change() {
       let change = -this.diff_payment;
       if (this.paid_change > change) return 0;
-      return (this.paid_change - change).toFixed(this.currency_precision);
+      return this.flt(this.paid_change - change, this.currency_precision);
     },
     diff_lable() {
       let lable = this.diff_payment < 0 ? 'Change' : 'To Be Paid';
@@ -1244,7 +1241,7 @@ export default {
     redeemed_customer_credit() {
       let total = 0;
       this.customer_credit_dict.map((row) => {
-        if (row.credit_to_redeem) total += parseFloat(row.credit_to_redeem);
+        if (row.credit_to_redeem) total += this.flt(row.credit_to_redeem);
         else row.credit_to_redeem = 0;
       });
 
@@ -1292,7 +1289,8 @@ export default {
         this.is_credit_sale = 0;
         this.is_write_off_change = 0;
         if (default_payment) {
-          default_payment.amount = invoice_doc.grand_total.toFixed(
+          default_payment.amount = this.flt(
+            invoice_doc.grand_total,
             this.currency_precision
           );
         }
@@ -1355,10 +1353,10 @@ export default {
           color: 'error',
         });
       } else {
-        this.invoice_doc.loyalty_amount = flt(this.loyalty_amount);
+        this.invoice_doc.loyalty_amount = this.flt(this.loyalty_amount);
         this.invoice_doc.redeem_loyalty_points = 1;
         this.invoice_doc.loyalty_points =
-          flt(this.loyalty_amount) / this.customer_info.conversion_factor;
+          this.flt(this.loyalty_amount) / this.customer_info.conversion_factor;
       }
     },
     is_credit_sale(value) {

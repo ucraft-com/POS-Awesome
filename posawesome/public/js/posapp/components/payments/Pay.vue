@@ -15,7 +15,7 @@
                   <strong>{{ __('Invoices') }}</strong>
                   <span v-if="total_outstanding_amount" class="primary--text"
                     >{{ __('- Total Outstanding') }} :
-                    {{ pos_profile.currency }}
+                    {{ currencySymbol(pos_profile.currency) }}
                     {{ formtCurrency(total_outstanding_amount) }}</span
                   >
                 </p>
@@ -24,7 +24,7 @@
                 <p v-if="total_selected_invoices" class="golden--text text-end">
                   <span>{{ __('Total Selected :') }}</span>
                   <span>
-                    {{ pos_profile.currency }}
+                    {{ currencySymbol(pos_profile.currency) }}
                     {{ formtCurrency(total_selected_invoices) }}
                   </span>
                 </p>
@@ -41,12 +41,12 @@
               checkbox-color="primary"
             >
               <template v-slot:item.grand_total="{ item }">
-                {{ __(item.currency) }}
+                {{ currencySymbol(item.currency) }}
                 {{ formtCurrency(item.grand_total) }}
               </template>
               <template v-slot:item.outstanding_amount="{ item }">
                 <span class="primary--text"
-                  >{{ __(item.currency) }}
+                  >{{ currencySymbol(item.currency) }}
                   {{ formtCurrency(item.outstanding_amount) }}</span
                 >
               </template>
@@ -60,7 +60,7 @@
                   <strong>{{ __('Payments') }}</strong>
                   <span v-if="total_unallocated_amount" class="primary--text">
                     {{ __('- Total Unallocated') }} :
-                    {{ pos_profile.currency }}
+                    {{ currencySymbol(pos_profile.currency) }}
                     {{ formtCurrency(total_unallocated_amount) }}
                   </span>
                 </p>
@@ -69,7 +69,7 @@
                 <p v-if="total_selected_payments" class="golden--text text-end">
                   <span>{{ __('Total Selected :') }}</span>
                   <span>
-                    {{ pos_profile.currency }}
+                    {{ currencySymbol(pos_profile.currency) }}
                     {{ formtCurrency(total_selected_payments) }}
                   </span>
                 </p>
@@ -87,12 +87,12 @@
               checkbox-color="primary"
             >
               <template v-slot:item.paid_amount="{ item }">
-                {{ __(item.currency) }}
+                {{ currencySymbol(item.currency) }}
                 {{ formtCurrency(item.paid_amount) }}
               </template>
               <template v-slot:item.unallocated_amount="{ item }">
                 <span class="primary--text"
-                  >{{ __(item.currency) }}
+                  >{{ currencySymbol(item.currency) }}
                   {{ formtCurrency(item.unallocated_amount) }}</span
                 >
               </template>
@@ -112,7 +112,7 @@
                 <p class="golden--text text-end">
                   <span>{{ __('Total Selected :') }}</span>
                   <span>
-                    {{ pos_profile.currency }}
+                    {{ currencySymbol(pos_profile.currency) }}
                     {{ formtCurrency(total_selected_mpesa_payments) }}
                   </span>
                 </p>
@@ -167,7 +167,7 @@
             >
               <template v-slot:item.amount="{ item }">
                 <span class="primary--text">
-                  {{ __(item.currency) }}
+                  {{ currencySymbol(item.currency) }}
                   {{ formtCurrency(item.amount) }}
                 </span>
               </template>
@@ -197,7 +197,7 @@
                   total_selected_invoices
                   readonly
                   flat
-                  :prefix="pos_profile.currency"
+                  :prefix="currencySymbol(pos_profile.currency)"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -217,7 +217,7 @@
                   total_selected_payments
                   readonly
                   flat
-                  :prefix="pos_profile.currency"
+                  :prefix="currencySymbol(pos_profile.currency)"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -237,7 +237,7 @@
                   total_selected_mpesa_payments
                   readonly
                   flat
-                  :prefix="pos_profile.currency"
+                  :prefix="currencySymbol(pos_profile.currency)"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -260,10 +260,12 @@
                   background-color="white"
                   hide-details
                   :value="formtCurrency(method.amount)"
-                  @change="update_payment_amount(method, $event)"
+                  @change="
+                    setFormatedCurrency(method, 'amount', null, true, $event)
+                  "
                   payments_methods
                   flat
-                  :prefix="pos_profile.currency"
+                  :prefix="currencySymbol(pos_profile.currency)"
                 ></v-text-field
               ></v-col>
             </v-row>
@@ -284,7 +286,7 @@
                   total_of_diff
                   flat
                   readonly
-                  :prefix="pos_profile.currency"
+                  :prefix="currencySymbol(pos_profile.currency)"
                 ></v-text-field>
               </v-col>
             </v-row>
@@ -305,10 +307,12 @@
 
 <script>
 import { evntBus } from '../../bus';
+import format from '../../format';
 import Customer from '../pos/Customer.vue';
 import UpdateCustomer from '../pos/UpdateCustomer.vue';
 
 export default {
+  mixins: [format],
   data: function () {
     return {
       dialog: false,
@@ -590,34 +594,6 @@ export default {
       this.selected_mpesa_payments = [];
       this.set_payment_methods();
     },
-    formtCurrency(value) {
-      value = parseFloat(value);
-      return value
-        .toFixed(this.currency_precision)
-        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
-    },
-    formtFloat(value) {
-      value = parseFloat(value);
-      return value
-        .toFixed(this.float_precision)
-        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
-    },
-    update_payment_amount(method, $event) {
-      let value = 0;
-      try {
-        // make sure it is a number and positive
-        value = parseFloat($event);
-        if (isNaN(value)) {
-          value = 0;
-        } else if (value < 0) {
-          value = value * -1;
-        }
-      } catch (e) {
-        value = 0;
-      }
-
-      method.amount = value;
-    },
     submit() {
       const customer = this.customer_name;
       const vm = this;
@@ -680,43 +656,46 @@ export default {
   computed: {
     total_outstanding_amount() {
       return this.outstanding_invoices.reduce(
-        (acc, cur) => acc + cur.outstanding_amount,
+        (acc, cur) => acc + flt(cur.outstanding_amount),
         0
       );
     },
     total_unallocated_amount() {
       return this.unallocated_payments.reduce(
-        (acc, cur) => acc + cur.unallocated_amount,
+        (acc, cur) => acc + flt(cur.unallocated_amount),
         0
       );
     },
     total_selected_invoices() {
       return this.selected_invoices.reduce(
-        (acc, cur) => acc + cur.outstanding_amount,
+        (acc, cur) => acc + flt(cur.outstanding_amount),
         0
       );
     },
     total_selected_payments() {
       return this.selected_payments.reduce(
-        (acc, cur) => acc + cur.unallocated_amount,
+        (acc, cur) => acc + flt(cur.unallocated_amount),
         0
       );
     },
     total_selected_mpesa_payments() {
       return this.selected_mpesa_payments.reduce(
-        (acc, cur) => acc + cur.amount,
+        (acc, cur) => acc + flt(cur.amount),
         0
       );
     },
     total_payment_methods() {
-      return this.payment_methods.reduce((acc, cur) => acc + cur.amount, 0);
+      return this.payment_methods.reduce(
+        (acc, cur) => acc + flt(cur.amount),
+        0
+      );
     },
     total_of_diff() {
-      return (
+      return flt(
         this.total_selected_invoices -
-        this.total_selected_payments -
-        this.total_selected_mpesa_payments -
-        this.total_payment_methods
+          this.total_selected_payments -
+          this.total_selected_mpesa_payments -
+          this.total_payment_methods
       );
     },
   },

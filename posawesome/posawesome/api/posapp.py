@@ -39,7 +39,7 @@ def get_opening_dialog_data():
     data["pos_profiles_data"] = frappe.get_list(
         "POS Profile",
         filters={"disabled": 0},
-        fields=["name", "company"],
+        fields=["name", "company", "currency"],
         limit_page_length=0,
         order_by="name",
     )
@@ -59,6 +59,11 @@ def get_opening_dialog_data():
         order_by="parent",
         ignore_permissions=True,
     )
+    # set currency from pos profile
+    for mode in data["payments_method"]:
+        mode["currency"] = frappe.get_cached_value(
+            "POS Profile", mode["parent"], "currency"
+        )
 
     return data
 
@@ -817,7 +822,7 @@ def get_draft_invoices(pos_opening_shift):
     )
     data = []
     for invoice in invoices_list:
-        data.append(frappe.get_doc("Sales Invoice", invoice["name"]))
+        data.append(frappe.get_cached_doc("Sales Invoice", invoice["name"]))
     return data
 
 

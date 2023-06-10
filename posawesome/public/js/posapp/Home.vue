@@ -15,7 +15,7 @@ import Payments from './components/payments/Pay.vue';
 export default {
   data: function () {
     return {
-      page: 'Payments',
+      page: 'POS',
     };
   },
   components: {
