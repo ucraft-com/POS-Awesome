@@ -54,7 +54,7 @@ export default {
             let value = 0;
             try {
                 // make sure it is a number and positive
-                // value = parseFloat($event);
+                value = parseFloat($event);
                 if (isNaN(value)) {
                     value = 0;
                 } else if (no_negative && value < 0) {

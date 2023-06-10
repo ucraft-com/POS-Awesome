@@ -175,7 +175,7 @@
             >
             <template v-slot:item.amount="{ item }"
               >{{ currencySymbol(pos_profile.currency) }}
-              {{ formtCurrency(item.qty * item.rate) }}</template
+              {{ formtCurrency(flt(item.qty) * flt(item.rate)) }}</template
             >
             <template v-slot:item.posa_is_offer="{ item }">
               <v-simple-checkbox
@@ -1193,14 +1193,14 @@ export default {
           posa_is_offer: item.posa_is_offer,
           posa_is_replace: item.posa_is_replace,
           is_free_item: item.is_free_item,
-          qty: item.qty,
-          rate: item.rate,
+          qty: flt(item.qty),
+          rate: flt(item.rate),
           uom: item.uom,
-          amount: item.qty * item.rate,
+          amount: flt(item.qty) * flt(item.rate),
           conversion_factor: item.conversion_factor,
           serial_no: item.serial_no,
-          discount_percentage: item.discount_percentage,
-          discount_amount: item.discount_amount,
+          discount_percentage: flt(item.discount_percentage),
+          discount_amount: flt(item.discount_amount),
           batch_no: item.batch_no,
           posa_notes: item.posa_notes,
           posa_delivery_date: item.posa_delivery_date,
