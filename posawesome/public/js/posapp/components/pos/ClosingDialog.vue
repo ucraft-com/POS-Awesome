@@ -24,6 +24,7 @@
                       <v-edit-dialog
                         :return-value.sync="props.item.closing_amount"
                       >
+                        {{ currencySymbol(pos_profile.currency) }}
                         {{ formtCurrency(props.item.closing_amount) }}
                         <template v-slot:input>
                           <v-text-field
@@ -37,17 +38,22 @@
                         </template>
                       </v-edit-dialog>
                     </template>
-                    <template v-slot:item.difference="{ item }">{{
-                      (item.difference = formtCurrency(
-                        item.expected_amount - item.closing_amount
-                      ))
-                    }}</template>
-                    <template v-slot:item.opening_amount="{ item }">{{
-                      formtCurrency(item.opening_amount)
-                    }}</template>
-                    <template v-slot:item.expected_amount="{ item }">{{
-                      formtCurrency(item.expected_amount)
-                    }}</template>
+                    <template v-slot:item.difference="{ item }">
+                      {{ currencySymbol(pos_profile.currency) }}
+                      {{
+                        (item.difference = formtCurrency(
+                          item.expected_amount - item.closing_amount
+                        ))
+                      }}</template
+                    >
+                    <template v-slot:item.opening_amount="{ item }">
+                      {{ currencySymbol(pos_profile.currency) }}
+                      {{ formtCurrency(item.opening_amount) }}</template
+                    >
+                    <template v-slot:item.expected_amount="{ item }">
+                      {{ currencySymbol(pos_profile.currency) }}
+                      {{ formtCurrency(item.expected_amount) }}</template
+                    >
                   </v-data-table>
                 </template>
               </v-col>
@@ -70,7 +76,9 @@
 
 <script>
 import { evntBus } from '../../bus';
+import format from '../../format';
 export default {
+  mixins: [format],
   data: () => ({
     closingDialog: false,
     itemsPerPage: 20,
@@ -100,20 +108,17 @@ export default {
     pagination: {},
   }),
   watch: {},
+
   methods: {
     close_dialog() {
       this.closingDialog = false;
     },
-
     submit_dialog() {
       evntBus.$emit('submit_closing_pos', this.dialog_data);
       this.closingDialog = false;
     },
-    formtCurrency(value) {
-      value = parseFloat(value);
-      return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-    },
   },
+
   created: function () {
     evntBus.$on('open_ClosingDialog', (data) => {
       this.closingDialog = true;

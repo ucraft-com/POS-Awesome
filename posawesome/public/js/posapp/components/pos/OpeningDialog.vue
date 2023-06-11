@@ -41,6 +41,7 @@
                   >
                     <template v-slot:item.amount="props">
                       <v-edit-dialog :return-value.sync="props.item.amount">
+                        {{ currencySymbol(props.item.currency) }}
                         {{ formtCurrency(props.item.amount) }}
                         <template v-slot:input>
                           <v-text-field
@@ -63,7 +64,13 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="error" dark @click="go_desk">Cancel</v-btn>
-          <v-btn color="success" dark @click="submit_dialog">Submit</v-btn>
+          <v-btn
+            color="success"
+            :disabled="is_loading"
+            dark
+            @click="submit_dialog"
+            >Submit</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -72,10 +79,13 @@
 
 <script>
 import { evntBus } from '../../bus';
+import format from '../../format';
 export default {
+  mixins: [format],
   props: ['dialog'],
   data: () => ({
     dialog_data: {},
+    is_loading: false,
     companys: [],
     company: '',
     pos_profiles_data: [],
@@ -125,6 +135,7 @@ export default {
           this.payments_methods.push({
             mode_of_payment: element.mode_of_payment,
             amount: 0,
+            currency: element.currency,
           });
         }
       });
@@ -141,6 +152,7 @@ export default {
         args: {},
         callback: function (r) {
           if (r.message) {
+            console.info(r.message);
             r.message.companys.forEach((element) => {
               vm.companys.push(element.name);
             });
@@ -155,6 +167,7 @@ export default {
       if (!this.payments_methods.length || !this.company || !this.pos_profile) {
         return;
       }
+      this.is_loading = true;
       const vm = this;
       return frappe
         .call('posawesome.posawesome.api.posapp.create_opening_voucher', {
@@ -167,12 +180,9 @@ export default {
             evntBus.$emit('register_pos_data', r.message);
             evntBus.$emit('set_company', r.message.company);
             vm.close_opening_dialog();
+            is_loading = false;
           }
         });
-    },
-    formtCurrency(value) {
-      value = parseFloat(value);
-      return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
     go_desk() {
       frappe.set_route('/');

@@ -100,7 +100,7 @@
             background-color="white"
             hide-details
             :value="formtCurrency(delivery_charges_rate)"
-            :prefix="pos_profile.currency"
+            :prefix="currencySymbol(pos_profile.currency)"
             disabled
           ></v-text-field>
         </v-col>
@@ -169,12 +169,14 @@
             <template v-slot:item.qty="{ item }">{{
               formtFloat(item.qty)
             }}</template>
-            <template v-slot:item.rate="{ item }">{{
-              formtCurrency(item.rate)
-            }}</template>
-            <template v-slot:item.amount="{ item }">{{
-              formtCurrency(item.qty * item.rate)
-            }}</template>
+            <template v-slot:item.rate="{ item }"
+              >{{ currencySymbol(pos_profile.currency) }}
+              {{ formtCurrency(item.rate) }}</template
+            >
+            <template v-slot:item.amount="{ item }"
+              >{{ currencySymbol(pos_profile.currency) }}
+              {{ formtCurrency(flt(item.qty) * flt(item.rate)) }}</template
+            >
             <template v-slot:item.posa_is_offer="{ item }">
               <v-simple-checkbox
                 :value="!!item.posa_is_offer || !!item.posa_is_replace"
@@ -238,9 +240,14 @@
                       :label="frappe._('QTY')"
                       background-color="white"
                       hide-details
-                      v-model.number="item.qty"
-                      type="number"
-                      @change="calc_sotck_gty(item, $event)"
+                      :value="formtFloat(item.qty)"
+                      @change="
+                        [
+                          setFormatedCurrency(item, 'qty', null, false, $event),
+                          calc_stock_qty(item, $event),
+                        ]
+                      "
+                      :rules="[isNumber]"
                       :disabled="!!item.posa_is_offer || !!item.posa_is_replace"
                     ></v-text-field>
                   </v-col>
@@ -272,10 +279,21 @@
                       :label="frappe._('Rate')"
                       background-color="white"
                       hide-details
-                      v-model.number="item.rate"
-                      type="number"
-                      :prefix="invoice_doc.currency"
-                      @change="calc_prices(item, $event)"
+                      :prefix="currencySymbol(pos_profile.currency)"
+                      :value="formtCurrency(item.rate)"
+                      @change="
+                        [
+                          setFormatedCurrency(
+                            item,
+                            'rate',
+                            null,
+                            false,
+                            $event
+                          ),
+                          calc_prices(item, $event),
+                        ]
+                      "
+                      :rules="[isNumber]"
                       id="rate"
                       :disabled="
                         !!item.posa_is_offer ||
@@ -296,9 +314,20 @@
                       :label="frappe._('Discount Percentage')"
                       background-color="white"
                       hide-details
-                      v-model.number="item.discount_percentage"
-                      type="number"
-                      @change="calc_prices(item, $event)"
+                      :value="formtFloat(item.discount_percentage)"
+                      @change="
+                        [
+                          setFormatedCurrency(
+                            item,
+                            'discount_percentage',
+                            null,
+                            true,
+                            $event
+                          ),
+                          calc_prices(item, $event),
+                        ]
+                      "
+                      :rules="[isNumber]"
                       id="discount_percentage"
                       :disabled="
                         !!item.posa_is_offer ||
@@ -309,6 +338,7 @@
                           ? true
                           : false
                       "
+                      suffix="%"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -319,10 +349,22 @@
                       :label="frappe._('Discount Amount')"
                       background-color="white"
                       hide-details
-                      v-model.number="item.discount_amount"
-                      type="number"
-                      :prefix="invoice_doc.currency"
-                      @change="calc_prices(item, $event)"
+                      :value="formtCurrency(item.discount_amount)"
+                      :rules="[isNumber]"
+                      @change="
+                        [
+                          setFormatedCurrency(
+                            item,
+                            'discount_amount',
+                            null,
+                            true,
+                            $event
+                          ),
+                          ,
+                          calc_prices(item, $event),
+                        ]
+                      "
+                      :prefix="currencySymbol(pos_profile.currency)"
                       id="discount_amount"
                       :disabled="
                         !!item.posa_is_offer ||
@@ -343,10 +385,9 @@
                       :label="frappe._('Price list Rate')"
                       background-color="white"
                       hide-details
-                      v-model="item.price_list_rate"
-                      type="number"
+                      :value="formtCurrency(item.price_list_rate)"
                       disabled
-                      :prefix="invoice_doc.currency"
+                      :prefix="currencySymbol(pos_profile.currency)"
                     ></v-text-field>
                   </v-col>
                   <v-col cols="4">
@@ -357,8 +398,7 @@
                       :label="frappe._('Available QTY')"
                       background-color="white"
                       hide-details
-                      v-model="item.actual_qty"
-                      type="number"
+                      :value="formtFloat(item.actual_qty)"
                       disabled
                     ></v-text-field>
                   </v-col>
@@ -382,8 +422,7 @@
                       :label="frappe._('Stock QTY')"
                       background-color="white"
                       hide-details
-                      v-model="item.stock_qty"
-                      type="number"
+                      :value="formtFloat(item.stock_qty)"
                       disabled
                     ></v-text-field>
                   </v-col>
@@ -451,11 +490,10 @@
                       dense
                       outlined
                       color="primary"
-                      :label="frappe._('Batch No Available QTY')"
+                      :label="frappe._('Batch No. Available QTY')"
                       background-color="white"
                       hide-details
-                      v-model="item.actual_batch_qty"
-                      type="number"
+                      :value="formtFloat(item.actual_batch_qty)"
                       disabled
                     ></v-text-field>
                   </v-col>
@@ -610,15 +648,24 @@
               class="pa-1"
             >
               <v-text-field
-                v-model="discount_amount"
+                :value="formtCurrency(discount_amount)"
+                @change="
+                  setFormatedCurrency(
+                    discount_amount,
+                    'discount_amount',
+                    null,
+                    false,
+                    $event
+                  )
+                "
+                :rules="[isNumber]"
                 :label="frappe._('Additional Discount')"
                 ref="discount"
                 outlined
                 dense
                 hide-details
                 color="warning"
-                type="number"
-                :prefix="pos_profile.currency"
+                :prefix="currencySymbol(pos_profile.currency)"
                 :disabled="
                   !pos_profile.posa_allow_user_to_edit_additional_discount ||
                   discount_percentage_offer_name
@@ -633,46 +680,58 @@
               class="pa-1"
             >
               <v-text-field
-                v-model="additional_discount_percentage"
+                :value="formtFloat(additional_discount_percentage)"
+                @change="
+                  [
+                    setFormatedFloat(
+                      additional_discount_percentage,
+                      'additional_discount_percentage',
+                      null,
+                      false,
+                      $event
+                    ),
+                    update_discount_umount(),
+                  ]
+                "
+                :rules="[isNumber]"
                 :label="frappe._('Additional Discount %')"
+                suffix="%"
                 ref="percentage_discount"
                 outlined
                 dense
                 color="warning"
                 hide-details
-                type="number"
                 :disabled="
                   !pos_profile.posa_allow_user_to_edit_additional_discount ||
                   discount_percentage_offer_name
                     ? true
                     : false
                 "
-                @change="update_discount_umount"
               ></v-text-field>
             </v-col>
             <v-col cols="6" class="pa-1 mt-2">
               <v-text-field
                 :value="formtCurrency(total_items_discount_amount)"
+                :prefix="currencySymbol(pos_profile.currency)"
                 :label="frappe._('Items Discounts')"
                 outlined
                 dense
                 color="warning"
                 readonly
                 hide-details
-                :prefix="pos_profile.currency"
               ></v-text-field>
             </v-col>
 
             <v-col cols="6" class="pa-1 mt-2">
               <v-text-field
                 :value="formtCurrency(subtotal)"
+                :prefix="currencySymbol(pos_profile.currency)"
                 :label="frappe._('Total')"
                 outlined
                 dense
                 readonly
                 hide-details
                 color="success"
-                :prefix="pos_profile.currency"
               ></v-text-field>
             </v-col>
           </v-row>
@@ -753,9 +812,11 @@
 
 <script>
 import { evntBus } from '../../bus';
+import format from '../../format';
 import Customer from './Customer.vue';
 
 export default {
+  mixins: [format],
   data() {
     return {
       pos_profile: '',
@@ -813,33 +874,33 @@ export default {
       this.close_payments();
       let qty = 0;
       this.items.forEach((item) => {
-        qty += item.qty;
+        qty += flt(item.qty);
       });
-      return flt(qty).toFixed(this.float_precision);
+      return this.flt(qty, this.float_precision);
     },
     Total() {
       let sum = 0;
       this.items.forEach((item) => {
-        sum += item.qty * item.rate;
+        sum += flt(item.qty) * flt(item.rate);
       });
-      return flt(sum).toFixed(this.currency_precision);
+      return this.flt(sum, this.currency_precision);
     },
     subtotal() {
       this.close_payments();
       let sum = 0;
       this.items.forEach((item) => {
-        sum += item.qty * item.rate;
+        sum += flt(item.qty) * flt(item.rate);
       });
-      sum -= flt(this.discount_amount);
-      sum += flt(this.delivery_charges_rate);
-      return flt(sum).toFixed(this.currency_precision);
+      sum -= this.flt(this.discount_amount);
+      sum += this.flt(this.delivery_charges_rate);
+      return this.flt(sum, this.currency_precision);
     },
     total_items_discount_amount() {
       let sum = 0;
       this.items.forEach((item) => {
-        sum += item.qty * item.discount_amount;
+        sum += flt(item.qty) * flt(item.discount_amount);
       });
-      return flt(sum).toFixed(this.float_precision);
+      return this.flt(sum, this.float_precision);
     },
   },
 
@@ -864,7 +925,7 @@ export default {
       if (item.qty == 0) {
         this.remove_item(item);
       }
-      this.calc_sotck_gty(item, item.qty);
+      this.calc_stock_qty(item, item.qty);
       this.$forceUpdate();
     },
     subtract_one(item) {
@@ -872,7 +933,7 @@ export default {
       if (item.qty == 0) {
         this.remove_item(item);
       }
-      this.calc_sotck_gty(item, item.qty);
+      this.calc_stock_qty(item, item.qty);
       this.$forceUpdate();
     },
 
@@ -887,7 +948,8 @@ export default {
             el.item_code === item.item_code &&
             el.uom === item.uom &&
             !el.posa_is_offer &&
-            !el.posa_is_replace
+            !el.posa_is_replace &&
+            el.batch_no === item.batch_no
         );
       }
       if (index === -1 || this.new_line) {
@@ -896,6 +958,12 @@ export default {
           new_item.serial_no_selected = [];
           new_item.serial_no_selected.push(item.to_set_serial_no);
           item.to_set_serial_no = null;
+        }
+        if (item.has_batch_no && item.to_set_batch_no) {
+          new_item.batch_no = item.to_set_batch_no;
+          item.to_set_batch_no = null;
+          item.batch_no = null;
+          this.set_batch_qty(new_item, new_item.batch_no, false);
         }
         this.items.unshift(new_item);
         this.update_item_detail(new_item);
@@ -918,20 +986,26 @@ export default {
         }
         if (!cur_item.has_batch_no) {
           cur_item.qty += item.qty || 1;
-          this.calc_sotck_gty(cur_item, cur_item.qty);
+          this.calc_stock_qty(cur_item, cur_item.qty);
         } else {
           if (
-            cur_item.stock_qty < cur_item.actual_batch_qty ||
+            (cur_item.stock_qty < cur_item.actual_batch_qty &&
+              cur_item.batch_no == item.batch_no) ||
             !cur_item.batch_no
           ) {
             cur_item.qty += item.qty || 1;
-            this.calc_sotck_gty(cur_item, cur_item.qty);
+            this.calc_stock_qty(cur_item, cur_item.qty);
           } else {
             const new_item = this.get_new_item(cur_item);
-            new_item.batch_no = '';
+            new_item.batch_no = item.batch_no || item.to_set_batch_no;
             new_item.batch_no_expiry_date = '';
             new_item.actual_batch_qty = '';
             new_item.qty = item.qty || 1;
+            if (new_item.batch_no) {
+              this.set_batch_qty(new_item, new_item.batch_no, false);
+              item.to_set_batch_no = null;
+              item.batch_no = null;
+            }
             this.items.unshift(new_item);
           }
         }
@@ -1119,14 +1193,14 @@ export default {
           posa_is_offer: item.posa_is_offer,
           posa_is_replace: item.posa_is_replace,
           is_free_item: item.is_free_item,
-          qty: item.qty,
-          rate: item.rate,
+          qty: flt(item.qty),
+          rate: flt(item.rate),
           uom: item.uom,
-          amount: item.qty * item.rate,
+          amount: flt(item.qty) * flt(item.rate),
           conversion_factor: item.conversion_factor,
           serial_no: item.serial_no,
-          discount_percentage: item.discount_percentage,
-          discount_amount: item.discount_amount,
+          discount_percentage: flt(item.discount_percentage),
+          discount_amount: flt(item.discount_amount),
           batch_no: item.batch_no,
           posa_notes: item.posa_notes,
           posa_delivery_date: item.posa_delivery_date,
@@ -1218,6 +1292,15 @@ export default {
             });
             value = false;
           }
+        }
+        if (item.qty == 0) {
+          evntBus.$emit('show_mesage', {
+            text: __(`Quantity for item '{0}' cannot be Zero (0)`, [
+              item.item_name,
+            ]),
+            color: 'error',
+          });
+          value = false;
         }
         if (
           item.max_discount > 0 &&
@@ -1443,7 +1526,7 @@ export default {
                 }
               }
             }
-            if (!item.btach_price) {
+            if (!item.batch_price) {
               if (
                 !item.is_free_item &&
                 !item.posa_is_offer &&
@@ -1528,9 +1611,10 @@ export default {
       if (event.target.id === 'rate') {
         item.discount_percentage = 0;
         if (value < item.price_list_rate) {
-          item.discount_amount = (
-            flt(item.price_list_rate) - flt(value)
-          ).toFixed(this.currency_precision);
+          item.discount_amount = this.flt(
+            this.flt(item.price_list_rate) - flt(value),
+            this.currency_precision
+          );
         } else if (value < 0) {
           item.rate = item.price_list_rate;
           item.discount_amount = 0;
@@ -1550,13 +1634,15 @@ export default {
           item.discount_amount = 0;
           item.discount_percentage = 0;
         } else {
-          item.rate = (
+          item.rate = this.flt(
             flt(item.price_list_rate) -
-            (flt(item.price_list_rate) * flt(value)) / 100
-          ).toFixed(this.currency_precision);
-          item.discount_amount = (
-            flt(item.price_list_rate) - flt(+item.rate)
-          ).toFixed(this.currency_precision);
+              (flt(item.price_list_rate) * flt(value)) / 100,
+            this.currency_precision
+          );
+          item.discount_amount = this.flt(
+            flt(item.price_list_rate) - flt(+item.rate),
+            this.currency_precision
+          );
         }
       }
     },
@@ -1571,13 +1657,15 @@ export default {
         item.rate =
           flt(item.price_list_rate) -
           (flt(item.price_list_rate) * flt(item.discount_percentage)) / 100;
-        item.discount_amount = (
-          flt(item.price_list_rate) - flt(item.rate)
-        ).toFixed(this.currency_precision);
+        item.discount_amount = this.flt(
+          flt(item.price_list_rate) - flt(item.rate),
+          this.currency_precision
+        );
       } else if (item.discount_amount) {
-        item.rate = (
-          flt(item.price_list_rate) - flt(item.discount_amount)
-        ).toFixed(this.currency_precision);
+        item.rate = this.flt(
+          flt(item.price_list_rate) - flt(item.discount_amount),
+          this.currency_precision
+        );
       }
     },
 
@@ -1588,13 +1676,13 @@ export default {
         item.discount_amount = 0;
         item.discount_percentage = 0;
       }
-      if (item.btach_price) {
-        item.price_list_rate = item.btach_price * new_uom.conversion_factor;
+      if (item.batch_price) {
+        item.price_list_rate = item.batch_price * new_uom.conversion_factor;
       }
       this.update_item_detail(item);
     },
 
-    calc_sotck_gty(item, value) {
+    calc_stock_qty(item, value) {
       item.stock_qty = item.conversion_factor * value;
     },
 
@@ -1606,13 +1694,9 @@ export default {
       });
       item.serial_no_selected_count = item.serial_no_selected.length;
       if (item.serial_no_selected_count != item.stock_qty) {
-        evntBus.$emit('show_mesage', {
-          text: __(`Selected Serial No QTY is {0} it should be {1}`, [
-            item.serial_no_selected_count,
-            item.stock_qty,
-          ]),
-          color: 'warning',
-        });
+        item.qty = item.serial_no_selected_count;
+        this.calc_stock_qty(item, item.qty);
+        this.$forceUpdate();
       }
     },
 
@@ -1622,28 +1706,14 @@ export default {
       );
       item.actual_batch_qty = batch_no.batch_qty;
       item.batch_no_expiry_date = batch_no.expiry_date;
-      if (batch_no.btach_price) {
-        item.btach_price = batch_no.btach_price;
-        item.price_list_rate = batch_no.btach_price;
-        item.rate = batch_no.btach_price;
+      if (batch_no.batch_price) {
+        item.batch_price = batch_no.batch_price;
+        item.price_list_rate = batch_no.batch_price;
+        item.rate = batch_no.batch_price;
       } else if (update) {
-        item.btach_price = null;
+        item.batch_price = null;
         this.update_item_detail(item);
       }
-    },
-
-    formtCurrency(value) {
-      value = parseFloat(value);
-      return value
-        .toFixed(this.currency_precision)
-        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
-    },
-
-    formtFloat(value) {
-      value = parseFloat(value);
-      return value
-        .toFixed(this.float_precision)
-        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
 
     shortOpenPayment(e) {
@@ -2324,10 +2394,10 @@ export default {
         offer.discount_percentage > 0 &&
         offer.discount_percentage <= 100
       ) {
-        this.discount_amount = (
-          (flt(this.Total) * flt(offer.discount_percentage)) /
-          100
-        ).toFixed(this.currency_precision);
+        this.discount_amount = this.flt(
+          (flt(this.Total) * flt(offer.discount_percentage)) / 100,
+          this.currency_precision
+        );
         this.discount_percentage_offer_name = offer.name;
       }
     },

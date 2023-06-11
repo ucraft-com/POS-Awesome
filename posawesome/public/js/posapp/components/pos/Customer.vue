@@ -52,11 +52,15 @@
         </template>
       </template>
     </v-autocomplete>
+    <div class="mb-8">
+      <UpdateCustomer></UpdateCustomer>
+    </div>
   </div>
 </template>
 
 <script>
 import { evntBus } from '../../bus';
+import UpdateCustomer from './UpdateCustomer.vue';
 export default {
   data: () => ({
     pos_profile: '',
@@ -65,6 +69,10 @@ export default {
     readonly: false,
     customer_info: {},
   }),
+
+  components: {
+    UpdateCustomer,
+  },
 
   methods: {
     get_customer_names() {

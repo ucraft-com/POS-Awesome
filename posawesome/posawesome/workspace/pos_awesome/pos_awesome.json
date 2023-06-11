@@ -1,13 +1,15 @@
 {
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">POS Awesome</span>\",\"col\":12}},{\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Awesome App\",\"col\":3}},{\"type\":\"spacer\",\"data\":{\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}}]",
+ "content": "[{\"id\":\"cJigdSD9mh\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">POS Awesome</span>\",\"col\":12}},{\"id\":\"4D2sc3CbN3\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Awesome App\",\"col\":3}},{\"id\":\"nVBkn7nfDw\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"-B_qEZqEA6\",\"type\":\"card\",\"data\":{\"card_name\":\"POS\",\"col\":4}},{\"id\":\"tsAHaUCd5l\",\"type\":\"card\",\"data\":{\"card_name\":\"Profile\",\"col\":4}},{\"id\":\"2-3HMkGou3\",\"type\":\"card\",\"data\":{\"card_name\":\"Shift\",\"col\":4}},{\"id\":\"GdPtnrazDS\",\"type\":\"card\",\"data\":{\"card_name\":\"Delivery Charges\",\"col\":4}},{\"id\":\"cABO53xhGv\",\"type\":\"card\",\"data\":{\"card_name\":\"Offers &amp; Coupons\",\"col\":4}}]",
  "creation": "2022-11-29 14:33:45.038200",
+ "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
  "icon": "retail",
  "idx": 0,
+ "is_hidden": 0,
  "label": "POS Awesome",
  "links": [
   {
@@ -34,34 +36,6 @@
    "label": "POS Profile",
    "link_count": 0,
    "link_to": "POS Profile",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Shift",
-   "link_count": 2,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Opening Entry",
-   "link_count": 0,
-   "link_to": "POS Opening Entry",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Closing Shift",
-   "link_count": 0,
-   "link_to": "POS Closing Shift",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -139,12 +113,41 @@
    "link_type": "Page",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Shift",
+   "link_count": 2,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Opening Shift",
+   "link_count": 0,
+   "link_to": "POS Opening Shift",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Closing Shift",
+   "link_count": 0,
+   "link_to": "POS Closing Shift",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2022-11-29 15:06:41.606620",
+ "modified": "2023-06-07 17:35:14.887611",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Awesome",
+ "number_cards": [],
  "owner": "Administrator",
  "parent_page": "",
  "public": 1,

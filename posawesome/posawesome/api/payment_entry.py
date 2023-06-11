@@ -1,9 +1,9 @@
 # Copyright (c) 2021, Youssef Restom and contributors
 # For license information, please see license.txt
 
-import frappe, erpnext
+import frappe, erpnext, json
 from frappe import _
-from frappe.utils import nowdate
+from frappe.utils import nowdate, getdate
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.journal_entry.journal_entry import (
@@ -11,6 +11,7 @@ from erpnext.accounts.doctype.journal_entry.journal_entry import (
 )
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account
+from posawesome.posawesome.api.m_pesa import submit_mpesa_payment
 
 
 def create_payment_entry(
@@ -122,3 +123,185 @@ def set_paid_amount_and_received_amount(
             paid_amount = received_amount * conversion_rate
 
     return paid_amount, received_amount
+
+
+@frappe.whitelist()
+def get_outsanding_invoices(customer, company, currency):
+    invoices = frappe.get_all(
+        "Sales Invoice",
+        filters={
+            "customer": customer,
+            "company": company,
+            "outstanding_amount": (">", 0),
+            "docstatus": 1,
+            "is_return": 0,
+            "currency": currency,
+        },
+        fields=[
+            "name",
+            "outstanding_amount",
+            "grand_total",
+            "due_date",
+            "posting_date",
+            "currency",
+        ],
+        order_by="due_date asc",
+    )
+    return invoices
+
+
+@frappe.whitelist()
+def get_unallocated_payments(customer, company, currency):
+    unallocated_payment = frappe.get_all(
+        "Payment Entry",
+        filters={
+            "party": customer,
+            "company": company,
+            "docstatus": 1,
+            "party_type": "Customer",
+            "payment_type": "Receive",
+            "unallocated_amount": [">", 0],
+            "paid_from_account_currency": currency,
+        },
+        fields=[
+            "name",
+            "paid_amount",
+            "received_amount",
+            "posting_date",
+            "unallocated_amount",
+            "mode_of_payment",
+            "paid_from_account_currency as currency",
+        ],
+        order_by="posting_date asc",
+    )
+    return unallocated_payment
+
+
+@frappe.whitelist()
+def process_pos_payment(payload):
+    data = json.loads(payload)
+    data = frappe._dict(data)
+
+    # validate data
+    if not data.customer:
+        frappe.throw(_("Customer is required"))
+    if not data.company:
+        frappe.throw(_("Company is required"))
+    if not data.currency:
+        frappe.throw(_("Currency is required"))
+    if not data.pos_profile_name:
+        frappe.throw(_("POS Profile is required"))
+    if not data.pos_opening_shift_name:
+        frappe.throw(_("POS Opening Shift is required"))
+
+    company = data.company
+    currency = data.currency
+    customer = data.customer
+    pos_profile_name = data.pos_profile_name
+    pos_opening_shift_name = data.pos_opening_shift_name
+    today = nowdate()
+
+    new_payments_entry = []
+    all_payments_entry = []
+    errors = []
+    reconcile_doc = None
+
+    # first process mpesa payments
+    if len(data.selected_mpesa_payments) > 0 and data.total_selected_mpesa_payments > 0:
+        for mpesa_payment in data.selected_mpesa_payments:
+            try:
+                new_mpesa_payment = submit_mpesa_payment(
+                    mpesa_payment.get("name"), customer
+                )
+                new_payments_entry.append(new_mpesa_payment)
+                all_payments_entry.append(new_mpesa_payment)
+            except Exception as e:
+                errors.append(e)
+
+    # then process the new payments
+    if len(data.payment_methods) > 0 and data.total_payment_methods > 0:
+        for payment_method in data.payment_methods:
+            try:
+                if not payment_method.get("amount"):
+                    continue
+                new_payment_entry = create_payment_entry(
+                    company=company,
+                    customer=customer,
+                    currency=currency,
+                    amount=payment_method.get("amount"),
+                    mode_of_payment=payment_method.get("mode_of_payment"),
+                    posting_date=today,
+                    reference_no=pos_opening_shift_name,
+                    reference_date=today,
+                    submit=1,
+                )
+                new_payments_entry.append(new_payment_entry)
+                all_payments_entry.append(new_payment_entry)
+            except Exception as e:
+                errors.append(e)
+
+    # then then reconcile the new payments and the unallocated payments with the outstanding invoices
+    if len(data.selected_invoices) > 0 and data.total_selected_invoices > 0:
+        if len(data.selected_payments) > 0 and data.total_selected_payments > 0:
+            # add the unallocated payments to the all payments entry
+            for selected_payment in data.selected_payments:
+                all_payments_entry.append(selected_payment)
+
+        if len(all_payments_entry) > 0:
+            # sort the all payments entry by posting date
+            all_payments_entry = sorted(
+                all_payments_entry,
+                key=lambda k: getdate(str(k.get("posting_date"))),
+                reverse=True,
+            )
+            all_invoices_list = sorted(
+                data.selected_invoices,
+                key=lambda k: getdate(k.get("posting_date")),
+                reverse=True,
+            )
+            reconcile_doc = frappe.new_doc("Payment Reconciliation")
+            reconcile_doc.party_type = "Customer"
+            reconcile_doc.party = customer
+            reconcile_doc.company = company
+            reconcile_doc.receivable_payable_account = get_party_account(
+                "Customer", customer, company
+            )
+            reconcile_doc.get_unreconciled_entries()
+            args = {
+                "invoices": [],
+                "payments": [],
+            }
+            for invoice in all_invoices_list:
+                args["invoices"].append(
+                    {
+                        "invoice_type": "Sales Invoice",
+                        "invoice_number": invoice.get("name"),
+                        "invoice_date": invoice.get("posting_date"),
+                        "amount": invoice.get("grand_total"),
+                        "outstanding_amount": invoice.get("outstanding_amount"),
+                        "currency": invoice.get("currency"),
+                        "exchange_rate": 0,
+                    }
+                )
+            for payment in all_payments_entry:
+                args["payments"].append(
+                    {
+                        "reference_type": "Payment Entry",
+                        "reference_name": payment.get("name"),
+                        "posting_date": payment.get("posting_date"),
+                        "amount": payment.get("unallocated_amount"),
+                        "unallocated_amount": payment.get("unallocated_amount"),
+                        "difference_amount": 0,
+                        "currency": payment.get("currency"),
+                        "exchange_rate": 0,
+                    }
+                )
+            reconcile_doc.allocate_entries(args)
+            reconcile_doc.reconcile()
+
+    return {
+        "new_payments_entry": new_payments_entry,
+        "all_payments_entry": all_payments_entry,
+        "errors": errors,
+        "reconcile_doc": reconcile_doc,
+    }
