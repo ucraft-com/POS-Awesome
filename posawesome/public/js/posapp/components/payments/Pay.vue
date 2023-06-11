@@ -53,7 +53,12 @@
             </v-data-table>
             <v-divider></v-divider>
           </div>
-          <div v-if="unallocated_payments.length">
+          <div
+            v-if="
+              pos_profile.posa_allow_reconcile_payments &&
+              unallocated_payments.length
+            "
+          >
             <v-row>
               <v-col md="7" cols="12">
                 <p>
@@ -99,7 +104,7 @@
             </v-data-table>
             <v-divider></v-divider>
           </div>
-          <div>
+          <div v-if="pos_profile.posa_allow_mpesa_reconcile_payments">
             <v-row>
               <v-col md="8" cols="12">
                 <p>
@@ -243,32 +248,34 @@
             </v-row>
 
             <v-divider v-if="payment_methods.length"></v-divider>
-            <h4 class="primary--text">Make New Payment</h4>
-            <v-row
-              v-if="payment_methods.length"
-              v-for="method in payment_methods"
-              :key="method.row_id"
-            >
-              <v-col md="7"
-                ><span class="mt-1">{{ __(method.mode_of_payment) }}:</span>
-              </v-col>
-              <v-col md="5"
-                ><v-text-field
-                  class="p-0 m-0"
-                  dense
-                  color="primary"
-                  background-color="white"
-                  hide-details
-                  :value="formtCurrency(method.amount)"
-                  @change="
-                    setFormatedCurrency(method, 'amount', null, true, $event)
-                  "
-                  payments_methods
-                  flat
-                  :prefix="currencySymbol(pos_profile.currency)"
-                ></v-text-field
-              ></v-col>
-            </v-row>
+            <div v-if="pos_profile.posa_allow_make_new_payments">
+              <h4 class="primary--text">Make New Payment</h4>
+              <v-row
+                v-if="payment_methods.length"
+                v-for="method in payment_methods"
+                :key="method.row_id"
+              >
+                <v-col md="7"
+                  ><span class="mt-1">{{ __(method.mode_of_payment) }}:</span>
+                </v-col>
+                <v-col md="5"
+                  ><v-text-field
+                    class="p-0 m-0"
+                    dense
+                    color="primary"
+                    background-color="white"
+                    hide-details
+                    :value="formtCurrency(method.amount)"
+                    @change="
+                      setFormatedCurrency(method, 'amount', null, true, $event)
+                    "
+                    payments_methods
+                    flat
+                    :prefix="currencySymbol(pos_profile.currency)"
+                  ></v-text-field
+                ></v-col>
+              </v-row>
+            </div>
 
             <v-divider></v-divider>
             <v-row>
@@ -509,6 +516,7 @@ export default {
         });
     },
     get_unallocated_payments() {
+      if (!this.pos_profile.posa_allow_reconcile_payments) return;
       this.unallocated_payments_loading = true;
       if (!this.customer_name) {
         this.unallocated_payments = [];
@@ -532,6 +540,7 @@ export default {
         });
     },
     set_mpesa_search_params() {
+      if (!this.pos_profile.posa_allow_mpesa_reconcile_payments) return;
       if (!this.customer_name) return;
       this.mpesa_search_name = this.customer_info.customer_name.split(' ')[0];
       if (this.customer_info.mobile_no) {
@@ -542,6 +551,7 @@ export default {
       }
     },
     get_draft_mpesa_payments_register() {
+      if (!this.pos_profile.posa_allow_mpesa_reconcile_payments) return;
       const vm = this;
       this.mpesa_payments_loading = true;
       const customer_name = this.mpesa_search_name;
@@ -569,6 +579,7 @@ export default {
     },
     set_payment_methods() {
       // get payment methods from pos profile
+      if (!this.pos_profile.posa_allow_make_new_payments) return;
       this.payment_methods = [];
       this.pos_profile.payments.forEach((method) => {
         this.payment_methods.push({

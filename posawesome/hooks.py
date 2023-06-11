@@ -244,6 +244,12 @@ fixtures = [
                     "POS Profile-pose_use_limit_search",
                     "POS Profile-posa_search_limit",
                     "POS Profile-posa_search_batch_no",
+                    "POS Profile-pos_awesome_payments",
+                    "POS Profile-posa_use_pos_awesome_payments",
+                    "POS Profile-posa_allow_make_new_payments",
+                    "POS Profile-posa_allow_reconcile_payments",
+                    "POS Profile-column_break_uolvm",
+                    "POS Profile-posa_allow_mpesa_reconcile_payments",
                 ),
             ]
         ],

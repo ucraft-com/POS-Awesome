@@ -147,10 +147,7 @@ export default {
       drawer: false,
       mini: true,
       item: 0,
-      items: [
-        { text: 'POS', icon: 'mdi-point-of-sale' },
-        { text: 'Payments', icon: 'mdi-cash' },
-      ],
+      items: [{ text: 'POS', icon: 'mdi-point-of-sale' }],
       page: '',
       fav: true,
       menu: false,
@@ -244,6 +241,13 @@ export default {
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
+        const payments = { text: 'Payments', icon: 'mdi-cash' };
+        if (
+          this.pos_profile.posa_use_pos_awesome_payments &&
+          this.items.length !== 2
+        ) {
+          this.items.push(payments);
+        }
       });
       evntBus.$on('set_last_invoice', (data) => {
         this.last_invoice = data;

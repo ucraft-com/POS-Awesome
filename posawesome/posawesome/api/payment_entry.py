@@ -181,6 +181,8 @@ def get_unallocated_payments(customer, company, currency):
 def process_pos_payment(payload):
     data = json.loads(payload)
     data = frappe._dict(data)
+    if not data.pos_profile.get("posa_use_pos_awesome_payments"):
+        frappe.throw(_("POS Awesome Payments is not enabled for this POS Profile"))
 
     # validate data
     if not data.customer:
@@ -199,6 +201,11 @@ def process_pos_payment(payload):
     customer = data.customer
     pos_profile_name = data.pos_profile_name
     pos_opening_shift_name = data.pos_opening_shift_name
+    allow_make_new_payments = data.pos_profile.get("posa_allow_make_new_payments")
+    allow_reconcile_payments = data.pos_profile.get("posa_allow_reconcile_payments")
+    allow_mpesa_reconcile_payments = data.pos_profile.get(
+        "posa_allow_mpesa_reconcile_payments"
+    )
     today = nowdate()
 
     new_payments_entry = []
@@ -207,7 +214,11 @@ def process_pos_payment(payload):
     reconcile_doc = None
 
     # first process mpesa payments
-    if len(data.selected_mpesa_payments) > 0 and data.total_selected_mpesa_payments > 0:
+    if (
+        allow_mpesa_reconcile_payments
+        and len(data.selected_mpesa_payments) > 0
+        and data.total_selected_mpesa_payments > 0
+    ):
         for mpesa_payment in data.selected_mpesa_payments:
             try:
                 new_mpesa_payment = submit_mpesa_payment(
@@ -219,7 +230,11 @@ def process_pos_payment(payload):
                 errors.append(e)
 
     # then process the new payments
-    if len(data.payment_methods) > 0 and data.total_payment_methods > 0:
+    if (
+        allow_make_new_payments
+        and len(data.payment_methods) > 0
+        and data.total_payment_methods > 0
+    ):
         for payment_method in data.payment_methods:
             try:
                 if not payment_method.get("amount"):
@@ -242,7 +257,11 @@ def process_pos_payment(payload):
 
     # then then reconcile the new payments and the unallocated payments with the outstanding invoices
     if len(data.selected_invoices) > 0 and data.total_selected_invoices > 0:
-        if len(data.selected_payments) > 0 and data.total_selected_payments > 0:
+        if (
+            allow_reconcile_payments
+            and len(data.selected_payments) > 0
+            and data.total_selected_payments > 0
+        ):
             # add the unallocated payments to the all payments entry
             for selected_payment in data.selected_payments:
                 all_payments_entry.append(selected_payment)
