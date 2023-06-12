@@ -3,7 +3,7 @@
 
 import frappe, erpnext, json
 from frappe import _
-from frappe.utils import nowdate, getdate
+from frappe.utils import nowdate, getdate, flt
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.doctype.journal_entry.journal_entry import (
@@ -243,7 +243,7 @@ def process_pos_payment(payload):
                     company=company,
                     customer=customer,
                     currency=currency,
-                    amount=payment_method.get("amount"),
+                    amount=flt(payment_method.get("amount")),
                     mode_of_payment=payment_method.get("mode_of_payment"),
                     posting_date=today,
                     reference_no=pos_opening_shift_name,
@@ -317,6 +317,53 @@ def process_pos_payment(payload):
                 )
             reconcile_doc.allocate_entries(args)
             reconcile_doc.reconcile()
+
+    # then show the results
+    msg = ""
+    if len(new_payments_entry) > 0:
+        msg += "<h4>New Payments</h4>"
+        msg += "<table class='table table-bordered'>"
+        msg += "<thead><tr><th>Payment Entry</th><th>Amount</th></tr></thead>"
+        msg += "<tbody>"
+        for payment_entry in new_payments_entry:
+            msg += "<tr><td>{0}</td><td>{1}</td></tr>".format(
+                payment_entry.get("name"), payment_entry.get("unallocated_amount")
+            )
+        msg += "</tbody>"
+        msg += "</table>"
+    if len(all_payments_entry) > 0:
+        msg += "<h4>Reconciled Payments</h4>"
+        msg += "<table class='table table-bordered'>"
+        msg += "<thead><tr><th>Payment Entry</th><th>Amount</th></tr></thead>"
+        msg += "<tbody>"
+        for payment_entry in all_payments_entry:
+            msg += "<tr><td>{0}</td><td>{1}</td></tr>".format(
+                payment_entry.get("name"), payment_entry.get("unallocated_amount")
+            )
+        msg += "</tbody>"
+        msg += "</table>"
+    if len(data.selected_invoices) > 0 and data.total_selected_invoices > 0:
+        msg += "<h4>Reconciled Invoices</h4>"
+        msg += "<table class='table table-bordered'>"
+        msg += "<thead><tr><th>Invoice</th><th>Amount</th></tr></thead>"
+        msg += "<tbody>"
+        for invoice in data.selected_invoices:
+            msg += "<tr><td>{0}</td><td>{1}</td></tr>".format(
+                invoice.get("name"), invoice.get("outstanding_amount")
+            )
+        msg += "</tbody>"
+        msg += "</table>"
+    if len(errors) > 0:
+        msg += "<h4>Errors</h4>"
+        msg += "<table class='table table-bordered'>"
+        msg += "<thead><tr><th>Error</th></tr></thead>"
+        msg += "<tbody>"
+        for error in errors:
+            msg += "<tr><td>{0}</td></tr>".format(error)
+        msg += "</tbody>"
+        msg += "</table>"
+    if len(msg) > 0:
+        frappe.msgprint(msg)
 
     return {
         "new_payments_entry": new_payments_entry,

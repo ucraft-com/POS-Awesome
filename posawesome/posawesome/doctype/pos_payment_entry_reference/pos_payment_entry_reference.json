@@ -1,23 +1,25 @@
 {
  "actions": [],
- "creation": "2020-09-29 02:58:12.486831",
+ "creation": "2023-06-12 02:59:56.133380",
+ "default_view": "List",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "sales_invoice",
+  "payment_entry",
   "posting_date",
   "column_break_3",
   "customer",
-  "grand_total"
+  "paid_amount",
+  "mode_of_payment"
  ],
  "fields": [
   {
-   "fieldname": "sales_invoice",
+   "fieldname": "payment_entry",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Sales Invoice",
-   "options": "Sales Invoice",
+   "label": "Payment Entry",
+   "options": "Payment Entry",
    "reqd": 1
   },
   {
@@ -44,19 +46,25 @@
   },
   {
    "fetch_from": "pos_invoice.grand_total",
-   "fieldname": "grand_total",
+   "fieldname": "paid_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Data",
+   "label": "Mode Of Payment",
    "reqd": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-06-12 02:57:24.861219",
+ "modified": "2023-06-12 02:59:56.133380",
  "modified_by": "Administrator",
  "module": "POSAwesome",
- "name": "Sales Invoice Reference",
+ "name": "POS Payment Entry Reference",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

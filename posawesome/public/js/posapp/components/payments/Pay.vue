@@ -628,6 +628,10 @@ export default {
         return;
       }
 
+      this.payment_methods.forEach((payment) => {
+        payment.amount = flt(payment.amount);
+      });
+
       const payload = {};
       payload.customer = customer;
       payload.company = this.company;
@@ -638,12 +642,13 @@ export default {
       payload.payment_methods = this.payment_methods;
       payload.selected_invoices = this.selected_invoices;
       payload.selected_payments = this.selected_payments;
-      payload.total_selected_invoices = this.total_selected_invoices;
+      payload.total_selected_invoices = flt(this.total_selected_invoices);
       payload.selected_mpesa_payments = this.selected_mpesa_payments;
-      payload.total_selected_payments = this.total_selected_payments;
-      payload.total_payment_methods = this.total_payment_methods;
-      payload.total_selected_mpesa_payments =
-        this.total_selected_mpesa_payments;
+      payload.total_selected_payments = flt(this.total_selected_payments);
+      payload.total_payment_methods = flt(this.total_payment_methods);
+      payload.total_selected_mpesa_payments = flt(
+        this.total_selected_mpesa_payments
+      );
 
       frappe.call({
         method: 'posawesome.posawesome.api.payment_entry.process_pos_payment',

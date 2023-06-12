@@ -843,6 +843,9 @@ export default {
       this.back_to_invoice();
     },
     submit_invoice(print) {
+      this.invoice_doc.payments.forEach((payment) => {
+        payment.amount = flt(payment.amount);
+      });
       let data = {};
       data['total_change'] = -this.diff_payment;
       data['paid_change'] = this.paid_change;
@@ -1063,7 +1066,9 @@ export default {
       evntBus.$emit('freeze', {
         title: __(`Waiting for payment... `),
       });
-
+      this.invoice_doc.payments.forEach((payment) => {
+        payment.amount = flt(payment.amount);
+      });
       let formData = { ...this.invoice_doc };
       formData['total_change'] = -this.diff_payment;
       formData['paid_change'] = this.paid_change;
