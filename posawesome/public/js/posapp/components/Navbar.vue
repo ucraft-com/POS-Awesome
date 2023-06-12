@@ -147,7 +147,7 @@ export default {
       drawer: false,
       mini: true,
       item: 0,
-      items: [{ text: 'POS', icon: 'mdi-point-of-sale' }],
+      items: [{ text: 'POS', icon: 'mdi-network-pos' }],
       page: '',
       fav: true,
       menu: false,
@@ -241,7 +241,7 @@ export default {
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
-        const payments = { text: 'Payments', icon: 'mdi-cash' };
+        const payments = { text: 'Payments', icon: 'mdi-cash-register' };
         if (
           this.pos_profile.posa_use_pos_awesome_payments &&
           this.items.length !== 2

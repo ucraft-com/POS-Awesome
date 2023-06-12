@@ -126,24 +126,31 @@ def set_paid_amount_and_received_amount(
 
 
 @frappe.whitelist()
-def get_outsanding_invoices(customer, company, currency):
+def get_outstanding_invoices(company, currency, customer=None, pos_profile_name=None):
+    filters = {
+        "company": company,
+        "outstanding_amount": (">", 0),
+        "docstatus": 1,
+        "is_return": 0,
+        "currency": currency,
+    }
+    if customer:
+        filters.update({"customer": customer})
+    if pos_profile_name:
+        filters.update({"pos_profile": pos_profile_name})
     invoices = frappe.get_all(
         "Sales Invoice",
-        filters={
-            "customer": customer,
-            "company": company,
-            "outstanding_amount": (">", 0),
-            "docstatus": 1,
-            "is_return": 0,
-            "currency": currency,
-        },
+        filters=filters,
         fields=[
             "name",
+            "customer",
+            "customer_name",
             "outstanding_amount",
             "grand_total",
             "due_date",
             "posting_date",
             "currency",
+            "pos_profile",
         ],
         order_by="due_date asc",
     )
@@ -151,21 +158,25 @@ def get_outsanding_invoices(customer, company, currency):
 
 
 @frappe.whitelist()
-def get_unallocated_payments(customer, company, currency):
+def get_unallocated_payments(customer, company, currency, mode_of_payment=None):
+    filters = {
+        "party": customer,
+        "company": company,
+        "docstatus": 1,
+        "party_type": "Customer",
+        "payment_type": "Receive",
+        "unallocated_amount": [">", 0],
+        "paid_from_account_currency": currency,
+    }
+    if mode_of_payment:
+        filters.update({"mode_of_payment": mode_of_payment})
     unallocated_payment = frappe.get_all(
         "Payment Entry",
-        filters={
-            "party": customer,
-            "company": company,
-            "docstatus": 1,
-            "party_type": "Customer",
-            "payment_type": "Receive",
-            "unallocated_amount": [">", 0],
-            "paid_from_account_currency": currency,
-        },
+        filters=filters,
         fields=[
             "name",
             "paid_amount",
+            "party_name as customer_name",
             "received_amount",
             "posting_date",
             "unallocated_amount",
@@ -199,7 +210,6 @@ def process_pos_payment(payload):
     company = data.company
     currency = data.currency
     customer = data.customer
-    pos_profile_name = data.pos_profile_name
     pos_opening_shift_name = data.pos_opening_shift_name
     allow_make_new_payments = data.pos_profile.get("posa_allow_make_new_payments")
     allow_reconcile_payments = data.pos_profile.get("posa_allow_reconcile_payments")
@@ -331,7 +341,7 @@ def process_pos_payment(payload):
             )
         msg += "</tbody>"
         msg += "</table>"
-    if len(all_payments_entry) > 0:
+    if len(all_payments_entry) > 0 and len(data.selected_invoices) > 0:
         msg += "<h4>Reconciled Payments</h4>"
         msg += "<table class='table table-bordered'>"
         msg += "<thead><tr><th>Payment Entry</th><th>Amount</th></tr></thead>"
@@ -371,3 +381,14 @@ def process_pos_payment(payload):
         "errors": errors,
         "reconcile_doc": reconcile_doc,
     }
+
+
+@frappe.whitelist()
+def get_available_pos_profiles(company, currency):
+    pos_profiles_list = frappe.get_list(
+        "POS Profile",
+        filters={"disabled": 0, "company": company, "currency": currency},
+        page_length=1000,
+        pluck="name",
+    )
+    return pos_profiles_list

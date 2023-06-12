@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe, requests
 from frappe import _
 from requests.auth import HTTPBasicAuth
+import json
 
 
 def get_token(app_key, app_secret, base_url):
@@ -66,7 +67,11 @@ def get_mpesa_mode_of_payment(company):
 
 @frappe.whitelist()
 def get_mpesa_draft_payments(
-    company, mode_of_payment=None, mobile_no=None, full_name=None
+    company,
+    mode_of_payment=None,
+    mobile_no=None,
+    full_name=None,
+    payment_methods_list=None,
 ):
     filters = {"company": company, "docstatus": 0}
     if mode_of_payment:
@@ -75,6 +80,8 @@ def get_mpesa_draft_payments(
         filters["msisdn"] = ["like", f"%{mobile_no}%"]
     if full_name:
         filters["full_name"] = ["like", f"%{full_name}%"]
+    if payment_methods_list:
+        filters["mode_of_payment"] = ["in", json.loads(payment_methods_list)]
 
     payments = frappe.get_all(
         "Mpesa Payment Register",
