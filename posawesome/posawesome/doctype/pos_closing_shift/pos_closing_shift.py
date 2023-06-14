@@ -78,6 +78,7 @@ class POSClosingShift(Document):
             for invoice in data:
                 frappe.delete_doc("Sales Invoice", invoice.name, force=1)
 
+    @frappe.whitelist()
     def get_payment_reconciliation_details(self):
         currency = frappe.get_cached_value("Company", self.company, "default_currency")
         return frappe.render_template(
@@ -114,6 +115,26 @@ def get_pos_invoices(pos_opening_shift):
 
 
 @frappe.whitelist()
+def get_payments_entries(pos_opening_shift):
+    return frappe.get_all(
+        "Payment Entry",
+        filters={
+            "docstatus": 1,
+            "reference_no": pos_opening_shift,
+            "payment_type": "Receive",
+        },
+        fields=[
+            "name",
+            "mode_of_payment",
+            "paid_amount",
+            "reference_no",
+            "posting_date",
+            "party",
+        ],
+    )
+
+
+@frappe.whitelist()
 def make_closing_shift_from_opening(opening_shift):
     opening_shift = json.loads(opening_shift)
     submit_printed_invoices(opening_shift.get("name"))
@@ -133,6 +154,7 @@ def make_closing_shift_from_opening(opening_shift):
     pos_transactions = []
     taxes = []
     payments = []
+    pos_payments_table = []
     for detail in opening_shift.get("balance_details"):
         payments.append(
             frappe._dict(
@@ -206,9 +228,40 @@ def make_closing_shift_from_opening(opening_shift):
                     )
                 )
 
+    pos_payments = get_payments_entries(opening_shift.get("name"))
+
+    for py in pos_payments:
+        pos_payments_table.append(
+            frappe._dict(
+                {
+                    "payment_entry": py.name,
+                    "mode_of_payment": py.mode_of_payment,
+                    "paid_amount": py.paid_amount,
+                    "posting_date": py.posting_date,
+                    "customer": py.party,
+                }
+            )
+        )
+        existing_pay = [
+            pay for pay in payments if pay.mode_of_payment == py.mode_of_payment
+        ]
+        if existing_pay:
+            existing_pay[0].expected_amount += flt(py.paid_amount)
+        else:
+            payments.append(
+                frappe._dict(
+                    {
+                        "mode_of_payment": py.mode_of_payment,
+                        "opening_amount": 0,
+                        "expected_amount": py.paid_amount,
+                    }
+                )
+            )
+
     closing_shift.set("pos_transactions", pos_transactions)
     closing_shift.set("payment_reconciliation", payments)
     closing_shift.set("taxes", taxes)
+    closing_shift.set("pos_payments", pos_payments_table)
 
     return closing_shift
 

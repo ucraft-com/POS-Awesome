@@ -3,7 +3,6 @@
     <ClosingDialog></ClosingDialog>
     <Drafts></Drafts>
     <Returns></Returns>
-    <UpdateCustomer></UpdateCustomer>
     <NewAddress></NewAddress>
     <MpesaPayments></MpesaPayments>
     <Variants></Variants>
@@ -71,7 +70,6 @@ import PosOffers from './PosOffers.vue';
 import PosCoupons from './PosCoupons.vue';
 import Drafts from './Drafts.vue';
 import ClosingDialog from './ClosingDialog.vue';
-import UpdateCustomer from './UpdateCustomer.vue';
 import NewAddress from './NewAddress.vue';
 import Variants from './Variants.vue';
 import Returns from './Returns.vue';
@@ -96,7 +94,7 @@ export default {
     Payments,
     Drafts,
     ClosingDialog,
-    UpdateCustomer,
+
     Returns,
     PosOffers,
     PosCoupons,
@@ -139,7 +137,7 @@ export default {
           if (r.message) {
             evntBus.$emit('open_ClosingDialog', r.message);
           } else {
-            console.log(r);
+            // console.log(r);
           }
         });
     },

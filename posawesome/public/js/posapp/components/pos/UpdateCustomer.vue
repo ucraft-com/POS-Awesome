@@ -192,7 +192,7 @@ export default {
     groups: [],
     territory: '',
     territorys: [],
-    genders: ['Male', 'Female'],
+    genders: [],
     customer_type: 'Individual',
     gender: '',
     loyalty_points: null,
@@ -358,9 +358,13 @@ export default {
         this.territory = data.territory;
         this.loyalty_points = data.loyalty_points;
         this.loyalty_program = data.loyalty_program;
+        this.gender = data.gender;
       }
     });
     evntBus.$on('register_pos_profile', (data) => {
+      this.pos_profile = data.pos_profile;
+    });
+    evntBus.$on('payments_register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
     });
     this.getCustomerGroups();

@@ -27,8 +27,11 @@ frappe.ui.form.on('POS Closing Shift', {
 	pos_opening_shift (frm) {
 		if (frm.doc.pos_opening_shift && frm.doc.user) {
 			reset_values(frm);
-			frm.trigger("set_opening_amounts");
-			frm.trigger("get_pos_invoices");
+			frappe.run_serially([
+				() => frm.trigger("set_opening_amounts"),
+				() => frm.trigger("get_pos_invoices"),
+				() => frm.trigger("get_pos_payments")
+			]);
 		}
 	},
 
@@ -58,6 +61,21 @@ frappe.ui.form.on('POS Closing Shift', {
 				set_html_data(frm);
 			}
 		});
+	},
+
+	get_pos_payments (frm) {
+		frappe.call({
+			method: 'posawesome.posawesome.doctype.pos_closing_shift.pos_closing_shift.get_payments_entries',
+			args: {
+				pos_opening_shift: frm.doc.pos_opening_shift,
+			},
+			callback: (r) => {
+				let pos_payments = r.message;
+				set_form_payments_data(pos_payments, frm);
+				refresh_fields(frm);
+				set_html_data(frm);
+			}
+		});
 	}
 });
 
@@ -79,12 +97,29 @@ function set_form_data (data, frm) {
 	});
 }
 
+function set_form_payments_data (data, frm) {
+	data.forEach(d => {
+		add_to_pos_payments(d, frm);
+		add_pos_payment_to_payments(d, frm);
+	});
+}
+
 function add_to_pos_transaction (d, frm) {
 	frm.add_child("pos_transactions", {
 		sales_invoice: d.name,
 		posting_date: d.posting_date,
 		grand_total: d.grand_total,
 		customer: d.customer
+	});
+}
+
+function add_to_pos_payments (d, frm) {
+	frm.add_child("pos_payments", {
+		payment_entry: d.name,
+		posting_date: d.posting_date,
+		paid_amount: d.paid_amount,
+		customer: d.party,
+		mode_of_payment: d.mode_of_payment
 	});
 }
 
@@ -111,6 +146,21 @@ function add_to_payments (d, frm) {
 	});
 }
 
+function add_pos_payment_to_payments (p, frm) {
+	const payment = frm.doc.payment_reconciliation.find(pay => pay.mode_of_payment === p.mode_of_payment);
+	if (payment) {
+		let amount = p.paid_amount;
+		payment.expected_amount += flt(amount);
+	} else {
+		frm.add_child("payment_reconciliation", {
+			mode_of_payment: p.mode_of_payment,
+			opening_amount: 0,
+			expected_amount: p.amount || 0
+		});
+	}
+};
+
+
 function add_to_taxes (d, frm) {
 	d.taxes.forEach(t => {
 		const tax = frm.doc.taxes.find(tx => tx.account_head === t.account_head && tx.rate === t.rate);
@@ -129,6 +179,7 @@ function add_to_taxes (d, frm) {
 function reset_values (frm) {
 	frm.set_value("pos_transactions", []);
 	frm.set_value("payment_reconciliation", []);
+	frm.set_value("pos_payments", []);
 	frm.set_value("taxes", []);
 	frm.set_value("grand_total", 0);
 	frm.set_value("net_total", 0);
@@ -138,6 +189,7 @@ function reset_values (frm) {
 function refresh_fields (frm) {
 	frm.refresh_field("pos_transactions");
 	frm.refresh_field("payment_reconciliation");
+	frm.refresh_field("pos_payments");
 	frm.refresh_field("taxes");
 	frm.refresh_field("grand_total");
 	frm.refresh_field("net_total");
