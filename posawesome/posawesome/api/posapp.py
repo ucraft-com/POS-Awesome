@@ -280,7 +280,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                         fields=["name as serial_no"],
                     )
                 item_stock_qty = 0
-                if pos_profile.get("posa_display_items_in_stock"):
+                if pos_profile.get("posa_display_items_in_stock") or use_limit_search:
                     item_stock_qty = get_stock_availability(
                         item_code, pos_profile.get("warehouse")
                     )
