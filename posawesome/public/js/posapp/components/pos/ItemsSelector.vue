@@ -83,8 +83,8 @@
                   </v-img>
                   <v-card-text class="text--primary pa-1">
                     <div class="text-caption primary--text">
+                      {{ currencySymbol(item.currency) || '' }}
                       {{ formtCurrency(item.rate) || 0 }}
-                      {{ item.currency || '' }}
                     </div>
                     <div class="text-caption golden--text">
                       {{ formtFloat(item.actual_qty) || 0 }}
@@ -108,9 +108,10 @@
                   @click:row="add_item"
                 >
                   <template v-slot:item.rate="{ item }">
-                    <span class="primary--text">{{
-                      formtCurrency(item.rate)
-                    }}</span>
+                    <span class="primary--text"
+                      >{{ currencySymbol(item.currency) }}
+                      {{ formtCurrency(item.rate) }}</span
+                    >
                   </template>
                   <template v-slot:item.actual_qty="{ item }">
                     <span class="golden--text">{{
@@ -167,8 +168,10 @@
 
 <script>
 import { evntBus } from '../../bus';
+import format from '../../format';
 import _ from 'lodash';
 export default {
+  mixins: [format],
   data: () => ({
     pos_profile: '',
     flags: {},
@@ -381,11 +384,7 @@ export default {
       if (this.flags.batch_no) {
         new_item.to_set_batch_no = this.flags.batch_no;
       }
-      if (
-        match ||
-        (!this.pos_profile.posa_search_serial_no &&
-          !this.pos_profile.search_batch_no)
-      ) {
+      if (match) {
         this.add_item(new_item);
         this.search = null;
         this.first_search = null;
@@ -498,18 +497,6 @@ export default {
         this.debounce_search = null;
         this.search = null;
       }
-    },
-    formtCurrency(value) {
-      value = parseFloat(value);
-      return value
-        .toFixed(this.currency_precision)
-        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
-    },
-    formtFloat(value) {
-      value = parseFloat(value);
-      return value
-        .toFixed(this.float_precision)
-        .replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
   },
 

@@ -2,9 +2,7 @@
   <v-app class="container1">
     <v-main>
       <Navbar @changePage="setPage($event)"></Navbar>
-      <keep-alive>
-        <component v-bind:is="page" class="mx-4 md-4"></component>
-      </keep-alive>
+      <component v-bind:is="page" class="mx-4 md-4"></component>
     </v-main>
   </v-app>
 </template>
@@ -12,6 +10,7 @@
 <script>
 import Navbar from './components/Navbar.vue';
 import POS from './components/pos/Pos.vue';
+import Payments from './components/payments/Pay.vue';
 
 export default {
   data: function () {
@@ -22,6 +21,7 @@ export default {
   components: {
     Navbar,
     POS,
+    Payments,
   },
   methods: {
     setPage(page) {

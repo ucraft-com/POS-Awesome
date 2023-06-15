@@ -12,7 +12,7 @@
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
-            <v-row>
+            <v-row no-gutters>
               <v-col cols="12" class="pa-1">
                 <template>
                   <v-data-table
@@ -26,6 +26,10 @@
                   >
                     <template v-slot:item.posting_time="{ item }">
                       {{ item.posting_time.split('.')[0] }}
+                    </template>
+                    <template v-slot:item.grand_total="{ item }">
+                      {{ currencySymbol(item.currency) }}
+                      {{ formtCurrency(item.grand_total) }}
                     </template>
                   </v-data-table>
                 </template>
@@ -45,8 +49,10 @@
 
 <script>
 import { evntBus } from '../../bus';
+import format from '../../format';
 export default {
   // props: ["draftsDialog"],
+  mixins: [format],
   data: () => ({
     draftsDialog: false,
     singleSelect: true,
@@ -80,7 +86,7 @@ export default {
       {
         text: __('Amount'),
         value: 'grand_total',
-        align: 'start',
+        align: 'end',
         sortable: false,
       },
     ],

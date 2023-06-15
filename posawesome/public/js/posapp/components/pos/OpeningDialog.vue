@@ -41,6 +41,7 @@
                   >
                     <template v-slot:item.amount="props">
                       <v-edit-dialog :return-value.sync="props.item.amount">
+                        {{ currencySymbol(props.item.currency) }}
                         {{ formtCurrency(props.item.amount) }}
                         <template v-slot:input>
                           <v-text-field
@@ -78,7 +79,9 @@
 
 <script>
 import { evntBus } from '../../bus';
+import format from '../../format';
 export default {
+  mixins: [format],
   props: ['dialog'],
   data: () => ({
     dialog_data: {},
@@ -132,6 +135,7 @@ export default {
           this.payments_methods.push({
             mode_of_payment: element.mode_of_payment,
             amount: 0,
+            currency: element.currency,
           });
         }
       });
@@ -148,6 +152,7 @@ export default {
         args: {},
         callback: function (r) {
           if (r.message) {
+            console.info(r.message);
             r.message.companys.forEach((element) => {
               vm.companys.push(element.name);
             });
@@ -178,10 +183,6 @@ export default {
             is_loading = false;
           }
         });
-    },
-    formtCurrency(value) {
-      value = parseFloat(value);
-      return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
     go_desk() {
       frappe.set_route('/');

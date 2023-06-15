@@ -20,6 +20,8 @@
   "section_break_12",
   "pos_transactions",
   "section_break_9",
+  "pos_payments",
+  "section_break_if3m1",
   "payment_reconciliation_details",
   "section_break_11",
   "payment_reconciliation",
@@ -184,14 +186,25 @@
    "label": "POS Opening Shift",
    "options": "POS Opening Shift",
    "reqd": 1
+  },
+  {
+   "fieldname": "pos_payments",
+   "fieldtype": "Table",
+   "label": "POS Payments",
+   "options": "POS Payment Entry Reference"
+  },
+  {
+   "fieldname": "section_break_if3m1",
+   "fieldtype": "Section Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-22 14:59:27.483244",
+ "modified": "2023-06-12 03:01:49.146706",
  "modified_by": "Administrator",
  "module": "POSAwesome",
  "name": "POS Closing Shift",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -238,5 +251,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

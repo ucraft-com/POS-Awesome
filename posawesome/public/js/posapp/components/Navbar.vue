@@ -37,7 +37,7 @@
               <v-list-item-group v-model="menu_item" color="primary">
                 <v-list-item
                   @click="close_shift_dialog"
-                  v-if="!pos_profile.posa_hide_closing_shift"
+                  v-if="!pos_profile.posa_hide_closing_shift && item == 0"
                 >
                   <v-list-item-icon>
                     <v-icon>mdi-content-save-move-outline</v-icon>
@@ -92,6 +92,7 @@
       :mini-variant.sync="mini"
       app
       class="primary margen-top"
+      width="170"
     >
       <v-list dark>
         <v-list-item class="px-2">
@@ -146,7 +147,7 @@ export default {
       drawer: false,
       mini: true,
       item: 0,
-      items: [{ text: 'POS', icon: 'mdi-point-of-sale' }],
+      items: [{ text: 'POS', icon: 'mdi-network-pos' }],
       page: '',
       fav: true,
       menu: false,
@@ -240,6 +241,13 @@ export default {
       });
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
+        const payments = { text: 'Payments', icon: 'mdi-cash-register' };
+        if (
+          this.pos_profile.posa_use_pos_awesome_payments &&
+          this.items.length !== 2
+        ) {
+          this.items.push(payments);
+        }
       });
       evntBus.$on('set_last_invoice', (data) => {
         this.last_invoice = data;

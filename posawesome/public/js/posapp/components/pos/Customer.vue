@@ -52,11 +52,15 @@
         </template>
       </template>
     </v-autocomplete>
+    <div class="mb-8">
+      <UpdateCustomer></UpdateCustomer>
+    </div>
   </div>
 </template>
 
 <script>
 import { evntBus } from '../../bus';
+import UpdateCustomer from './UpdateCustomer.vue';
 export default {
   data: () => ({
     pos_profile: '',
@@ -66,9 +70,16 @@ export default {
     customer_info: {},
   }),
 
+  components: {
+    UpdateCustomer,
+  },
+
   methods: {
     get_customer_names() {
       const vm = this;
+      if (this.customers.length > 0) {
+        return;
+      }
       if (vm.pos_profile.posa_local_storage && localStorage.customer_storage) {
         vm.customers = JSON.parse(localStorage.getItem('customer_storage'));
       }
@@ -123,6 +134,10 @@ export default {
   created: function () {
     this.$nextTick(function () {
       evntBus.$on('register_pos_profile', (pos_profile) => {
+        this.pos_profile = pos_profile;
+        this.get_customer_names();
+      });
+      evntBus.$on('payments_register_pos_profile', (pos_profile) => {
         this.pos_profile = pos_profile;
         this.get_customer_names();
       });
