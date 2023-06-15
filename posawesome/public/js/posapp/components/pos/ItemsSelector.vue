@@ -384,11 +384,7 @@ export default {
       if (this.flags.batch_no) {
         new_item.to_set_batch_no = this.flags.batch_no;
       }
-      if (
-        match ||
-        (!this.pos_profile.posa_search_serial_no &&
-          !this.pos_profile.search_batch_no)
-      ) {
+      if (match) {
         this.add_item(new_item);
         this.search = null;
         this.first_search = null;
