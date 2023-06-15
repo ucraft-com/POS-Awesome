@@ -37,7 +37,7 @@
               <v-list-item-group v-model="menu_item" color="primary">
                 <v-list-item
                   @click="close_shift_dialog"
-                  v-if="!pos_profile.posa_hide_closing_shift"
+                  v-if="!pos_profile.posa_hide_closing_shift && item == 0"
                 >
                   <v-list-item-icon>
                     <v-icon>mdi-content-save-move-outline</v-icon>
