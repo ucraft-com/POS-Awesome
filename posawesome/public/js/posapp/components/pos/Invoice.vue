@@ -2547,7 +2547,7 @@ export default {
     },
   },
 
-  created() {
+  mounted() {
     evntBus.$on('register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
       this.customer = data.pos_profile.customer;
@@ -2608,6 +2608,17 @@ export default {
     document.addEventListener('keydown', this.shortDeleteFirstItem.bind(this));
     document.addEventListener('keydown', this.shortOpenFirstItem.bind(this));
     document.addEventListener('keydown', this.shortSelectDiscount.bind(this));
+  },
+  beforeDestroy() {
+    evntBus.$off('register_pos_profile');
+    evntBus.$off('add_item');
+    evntBus.$off('update_customer');
+    evntBus.$off('fetch_customer_details');
+    evntBus.$off('new_invoice');
+    evntBus.$off('set_offers');
+    evntBus.$off('update_invoice_offers');
+    evntBus.$off('update_invoice_coupons');
+    evntBus.$off('set_all_items');
   },
   destroyed() {
     document.removeEventListener('keydown', this.shortOpenPayment);

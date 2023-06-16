@@ -562,19 +562,17 @@ def submit_invoice(invoice, data):
                 is_payment_entry = 1
 
     payments = []
+    for payment in invoice.get("payments"):
+        for i in invoice_doc.payments:
+            if i.mode_of_payment == payment["mode_of_payment"]:
+                i.amount = payment["amount"]
+                i.base_amount = 0
+                if i.amount:
+                    payments.append(i)
+                break
 
-    if data.get("is_cashback") and not is_payment_entry:
-        for payment in invoice.get("payments"):
-            for i in invoice_doc.payments:
-                if i.mode_of_payment == payment["mode_of_payment"]:
-                    i.amount = payment["amount"]
-                    i.base_amount = 0
-                    if i.amount:
-                        payments.append(i)
-                    break
-
-        if len(payments) == 0 and not invoice_doc.is_return and invoice_doc.is_pos:
-            payments = [invoice_doc.payments[0]]
+    if len(payments) == 0 and not invoice_doc.is_return and invoice_doc.is_pos:
+        payments = [invoice_doc.payments[0]]
     else:
         invoice_doc.is_pos = 0
 
@@ -613,12 +611,13 @@ def submit_invoice(invoice, data):
                     "is_payment_entry": is_payment_entry,
                     "total_cash": total_cash,
                     "cash_account": cash_account,
+                    "payments": payments,
                 },
             )
     else:
         invoice_doc.submit()
         redeeming_customer_credit(
-            invoice_doc, data, is_payment_entry, total_cash, cash_account
+            invoice_doc, data, is_payment_entry, total_cash, cash_account, payments
         )
 
     return {"name": invoice_doc.name, "status": invoice_doc.docstatus}
@@ -646,7 +645,7 @@ def set_batch_nos_for_bundels(doc, warehouse_field, throw=False):
 
 
 def redeeming_customer_credit(
-    invoice_doc, data, is_payment_entry, total_cash, cash_account
+    invoice_doc, data, is_payment_entry, total_cash, cash_account, payments
 ):
     # redeeming customer credit with journal voucher
     today = nowdate()
@@ -709,35 +708,39 @@ def redeeming_customer_credit(
                 jv_doc.submit()
 
     if is_payment_entry and total_cash > 0:
-        payment_entry_doc = frappe.get_doc(
-            {
-                "doctype": "Payment Entry",
-                "posting_date": today,
-                "payment_type": "Receive",
-                "party_type": "Customer",
-                "party": invoice_doc.customer,
-                "paid_amount": total_cash,
-                "received_amount": total_cash,
-                "paid_from": invoice_doc.debit_to,
-                "paid_to": cash_account["account"],
-                "company": invoice_doc.company,
+        for payment in payments:
+            if not payment.amount:
+                continue
+            payment_entry_doc = frappe.get_doc(
+                {
+                    "doctype": "Payment Entry",
+                    "posting_date": today,
+                    "payment_type": "Receive",
+                    "party_type": "Customer",
+                    "party": invoice_doc.customer,
+                    "paid_amount": payment.amount,
+                    "received_amount": payment.amount,
+                    "paid_from": invoice_doc.debit_to,
+                    "paid_to": payment.account,
+                    "company": invoice_doc.company,
+                    "mode_of_payment": payment.mode_of_payment,
+                    "reference_no": invoice_doc.posa_pos_opening_shift,
+                    "reference_date": today,
+                }
+            )
+
+            payment_reference = {
+                "allocated_amount": payment.amount,
+                "due_date": data.get("due_date"),
+                "reference_doctype": "Sales Invoice",
+                "reference_name": invoice_doc.name,
             }
-        )
 
-        payment_reference = {
-            "allocated_amount": total_cash,
-            "due_date": data.get("due_date"),
-            "outstanding_amount": total_cash,
-            "reference_doctype": "Sales Invoice",
-            "reference_name": invoice_doc.name,
-            "total_amount": total_cash,
-        }
-
-        payment_entry_doc.append("references", payment_reference)
-        payment_entry_doc.flags.ignore_permissions = True
-        frappe.flags.ignore_account_permission = True
-        payment_entry_doc.save()
-        payment_entry_doc.submit()
+            payment_entry_doc.append("references", payment_reference)
+            payment_entry_doc.flags.ignore_permissions = True
+            frappe.flags.ignore_account_permission = True
+            payment_entry_doc.save()
+            payment_entry_doc.submit()
 
 
 def submit_in_background_job(kwargs):

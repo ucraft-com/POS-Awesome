@@ -807,8 +807,8 @@ export default {
       }
 
       let credit_calc_check = this.customer_credit_dict.filter((row) => {
-        if (row.credit_to_redeem)
-          return row.credit_to_redeem > row.total_credit;
+        if (flt(row.credit_to_redeem))
+          return flt(row.credit_to_redeem) > flt(row.total_credit);
         else return false;
       });
 
@@ -846,6 +846,11 @@ export default {
       this.invoice_doc.payments.forEach((payment) => {
         payment.amount = flt(payment.amount);
       });
+      if (this.customer_credit_dict.length) {
+        this.customer_credit_dict.forEach((row) => {
+          row.credit_to_redeem = flt(row.credit_to_redeem);
+        });
+      }
       let data = {};
       data['total_change'] = -this.diff_payment;
       data['paid_change'] = this.paid_change;
@@ -1186,8 +1191,8 @@ export default {
       const advance = {
         type: 'Advance',
         credit_origin: payment.name,
-        total_credit: payment.unallocated_amount,
-        credit_to_redeem: payment.unallocated_amount,
+        total_credit: flt(payment.unallocated_amount),
+        credit_to_redeem: flt(payment.unallocated_amount),
       };
       this.clear_all_amounts();
       this.customer_credit_dict.push(advance);
@@ -1246,7 +1251,7 @@ export default {
     redeemed_customer_credit() {
       let total = 0;
       this.customer_credit_dict.map((row) => {
-        if (row.credit_to_redeem) total += this.flt(row.credit_to_redeem);
+        if (flt(row.credit_to_redeem)) total += flt(row.credit_to_redeem);
         else row.credit_to_redeem = 0;
       });
 
@@ -1284,7 +1289,7 @@ export default {
     },
   },
 
-  created: function () {
+  mounted: function () {
     this.$nextTick(function () {
       evntBus.$on('send_invoice_doc_payment', (invoice_doc) => {
         this.invoice_doc = invoice_doc;
@@ -1341,6 +1346,17 @@ export default {
       this.set_mpesa_payment(data);
     });
     document.addEventListener('keydown', this.shortPay.bind(this));
+  },
+  beforeDestroy() {
+    evntBus.$off('send_invoice_doc_payment');
+    evntBus.$off('register_pos_profile');
+    evntBus.$off('add_the_new_address');
+    evntBus.$off('update_invoice_type');
+    evntBus.$off('update_customer');
+    evntBus.$off('set_pos_settings');
+    evntBus.$off('set_customer_info_to_edit');
+    evntBus.$off('update_invoice_coupons');
+    evntBus.$off('set_mpesa_payment');
   },
 
   destroyed() {
