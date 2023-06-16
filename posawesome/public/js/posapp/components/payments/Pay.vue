@@ -715,6 +715,7 @@ export default {
         freeze_message: __('Processing Payment'),
         callback: function (r) {
           if (r.message) {
+            frappe.utils.play_sound('submit');
             vm.clear_all(false);
             vm.customer_name = customer;
             vm.get_outstanding_invoices();
