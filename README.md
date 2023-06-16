@@ -38,6 +38,8 @@
 27. Supports Sales Person
 28. Supports Delivery Charges
 29. Search and add items by Batch Number
+30. Accept new payments from customers against existing invoices
+31. Payments Reconciliation
 
 ---
 
