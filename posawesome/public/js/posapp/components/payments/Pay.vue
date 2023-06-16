@@ -774,7 +774,7 @@ export default {
     },
   },
 
-  created: function () {
+  mounted: function () {
     this.$nextTick(function () {
       this.float_precision =
         frappe.defaults.get_default('float_precision') || 2;
@@ -793,6 +793,10 @@ export default {
         this.fetch_customer_details();
       });
     });
+  },
+  beforeDestroy() {
+    evntBus.$off('update_customer');
+    evntBus.$off('fetch_customer_details');
   },
 };
 </script>
