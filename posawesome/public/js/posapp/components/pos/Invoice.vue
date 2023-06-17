@@ -243,7 +243,7 @@
                       :value="formtFloat(item.qty)"
                       @change="
                         [
-                          setFormatedCurrency(item, 'qty', null, false, $event),
+                          setFormatedFloat(item, 'qty', null, false, $event),
                           calc_stock_qty(item, $event),
                         ]
                       "

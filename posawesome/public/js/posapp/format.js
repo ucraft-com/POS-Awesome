@@ -1,4 +1,10 @@
 export default {
+    data () {
+        return {
+            float_precision: 2,
+            currency_precision: 2
+        };
+    },
     methods: {
         flt (value, precision, number_format, rounding_method) {
             if (!precision && precision != 0) {
@@ -10,17 +16,17 @@ export default {
             return flt(value, precision, number_format, rounding_method);
         },
         formtCurrency (value, precision) {
-            const fomrat = get_number_format(this.pos_profile?.currency);
+            const format = get_number_format(this.pos_profile?.currency);
             value = format_number(
                 value,
-                fomrat,
+                format,
                 precision || this.currency_precision || 2
             );
             return value;
         },
         formtFloat (value, precision) {
-            const fomrat = get_number_format(this.pos_profile.currency);
-            value = format_number(value, fomrat, precision || this.float_precision || 2);
+            const format = get_number_format(this.pos_profile.currency);
+            value = format_number(value, format, precision || this.float_precision || 2);
             return value;
         },
         setFormatedCurrency (el, field_name, precision, no_negative = false, $event) {
@@ -60,7 +66,7 @@ export default {
                 } else if (no_negative && value < 0) {
                     value = value * -1;
                 }
-                value = this.formtCurrency($event, precision);
+                value = this.formtFloat($event, precision);
             } catch (e) {
                 console.error(e);
                 value = 0;
@@ -83,4 +89,10 @@ export default {
 
         }
     },
+    mounted () {
+        this.float_precision =
+            frappe.defaults.get_default('float_precision') || 2;
+        this.currency_precision =
+            frappe.defaults.get_default('currency_precision') || 2;
+    }
 };

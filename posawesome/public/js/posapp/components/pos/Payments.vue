@@ -715,8 +715,6 @@ export default {
     pos_settings: '',
     customer_info: '',
     mpesa_modes: [],
-    float_precision: 2,
-    currency_precision: 2,
   }),
 
   methods: {
@@ -1311,10 +1309,6 @@ export default {
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
         this.get_mpesa_modes();
-        this.float_precision =
-          frappe.defaults.get_default('float_precision') || 2;
-        this.currency_precision =
-          frappe.defaults.get_default('currency_precision') || 2;
       });
       evntBus.$on('add_the_new_address', (data) => {
         this.addresses.push(data);

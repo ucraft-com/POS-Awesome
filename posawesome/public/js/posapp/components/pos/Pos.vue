@@ -1,5 +1,5 @@
 <template>
-  <div fluid>
+  <div fluid class="mt-2">
     <ClosingDialog></ClosingDialog>
     <Drafts></Drafts>
     <Returns></Returns>
