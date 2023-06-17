@@ -354,8 +354,6 @@ export default {
       customer_name: '',
       customer_info: '',
       company: '',
-      float_precision: 2,
-      currency_precision: 2,
       singleSelect: false,
       invoices_loading: false,
       unallocated_payments_loading: false,
@@ -777,10 +775,6 @@ export default {
 
   mounted: function () {
     this.$nextTick(function () {
-      this.float_precision =
-        frappe.defaults.get_default('float_precision') || 2;
-      this.currency_precision =
-        frappe.defaults.get_default('currency_precision') || 2;
       this.check_opening_entry();
       evntBus.$on('update_customer', (customer_name) => {
         this.clear_all(true);

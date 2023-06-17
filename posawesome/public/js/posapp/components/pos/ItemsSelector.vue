@@ -188,8 +188,6 @@ export default {
     couponsCount: 0,
     appliedCouponsCount: 0,
     customer_price_list: null,
-    float_precision: 2,
-    currency_precision: 2,
     new_line: false,
     qty: 1,
   }),
@@ -610,10 +608,6 @@ export default {
       this.pos_profile = data.pos_profile;
       this.get_items();
       this.get_items_groups();
-      this.float_precision =
-        frappe.defaults.get_default('float_precision') || 2;
-      this.currency_precision =
-        frappe.defaults.get_default('currency_precision') || 2;
       this.items_view = this.pos_profile.posa_default_card_view
         ? 'card'
         : 'list';
