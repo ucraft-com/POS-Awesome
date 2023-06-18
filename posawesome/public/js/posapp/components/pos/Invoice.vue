@@ -175,7 +175,12 @@
             >
             <template v-slot:item.amount="{ item }"
               >{{ currencySymbol(pos_profile.currency) }}
-              {{ formtCurrency(flt(item.qty) * flt(item.rate)) }}</template
+              {{
+                formtCurrency(
+                  flt(item.qty, float_precision) *
+                    flt(item.rate, currency_precision)
+                )
+              }}</template
             >
             <template v-slot:item.posa_is_offer="{ item }">
               <v-simple-checkbox

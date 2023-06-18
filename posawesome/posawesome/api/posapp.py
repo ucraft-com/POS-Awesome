@@ -561,22 +561,8 @@ def submit_invoice(invoice, data):
                 invoice_doc.is_pos = 0
                 is_payment_entry = 1
 
-    payments = []
-    for payment in invoice.get("payments"):
-        for i in invoice_doc.payments:
-            if i.mode_of_payment == payment["mode_of_payment"]:
-                i.amount = payment["amount"]
-                i.base_amount = 0
-                if i.amount:
-                    payments.append(i)
-                break
+    payments = invoice_doc.payments
 
-    if len(payments) == 0 and not invoice_doc.is_return and invoice_doc.is_pos:
-        payments = [invoice_doc.payments[0]]
-    else:
-        invoice_doc.is_pos = 0
-
-    invoice_doc.payments = payments
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_auto_set_batch"):
         set_batch_nos(invoice_doc, "warehouse", throw=True)
     set_batch_nos_for_bundels(invoice_doc, "warehouse", throw=True)
@@ -750,11 +736,12 @@ def submit_in_background_job(kwargs):
     is_payment_entry = kwargs.get("is_payment_entry")
     total_cash = kwargs.get("total_cash")
     cash_account = kwargs.get("cash_account")
+    payments = kwargs.get("payments")
 
     invoice_doc = frappe.get_doc("Sales Invoice", invoice)
     invoice_doc.submit()
     redeeming_customer_credit(
-        invoice_doc, data, is_payment_entry, total_cash, cash_account
+        invoice_doc, data, is_payment_entry, total_cash, cash_account, payments
     )
 
 
