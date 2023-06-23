@@ -188,8 +188,6 @@ export default {
     couponsCount: 0,
     appliedCouponsCount: 0,
     customer_price_list: null,
-    float_precision: 2,
-    currency_precision: 2,
     new_line: false,
     qty: 1,
   }),
@@ -384,11 +382,7 @@ export default {
       if (this.flags.batch_no) {
         new_item.to_set_batch_no = this.flags.batch_no;
       }
-      if (
-        match ||
-        (!this.pos_profile.posa_search_serial_no &&
-          !this.pos_profile.search_batch_no)
-      ) {
+      if (match) {
         this.add_item(new_item);
         this.search = null;
         this.first_search = null;
@@ -614,10 +608,6 @@ export default {
       this.pos_profile = data.pos_profile;
       this.get_items();
       this.get_items_groups();
-      this.float_precision =
-        frappe.defaults.get_default('float_precision') || 2;
-      this.currency_precision =
-        frappe.defaults.get_default('currency_precision') || 2;
       this.items_view = this.pos_profile.posa_default_card_view
         ? 'card'
         : 'list';

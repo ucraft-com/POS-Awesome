@@ -364,6 +364,9 @@ export default {
     evntBus.$on('register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
     });
+    evntBus.$on('payments_register_pos_profile', (data) => {
+      this.pos_profile = data.pos_profile;
+    });
     this.getCustomerGroups();
     this.getCustomerTerritorys();
     this.getGenders();

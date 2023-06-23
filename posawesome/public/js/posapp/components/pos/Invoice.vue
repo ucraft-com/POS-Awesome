@@ -175,7 +175,12 @@
             >
             <template v-slot:item.amount="{ item }"
               >{{ currencySymbol(pos_profile.currency) }}
-              {{ formtCurrency(flt(item.qty) * flt(item.rate)) }}</template
+              {{
+                formtCurrency(
+                  flt(item.qty, float_precision) *
+                    flt(item.rate, currency_precision)
+                )
+              }}</template
             >
             <template v-slot:item.posa_is_offer="{ item }">
               <v-simple-checkbox
@@ -243,7 +248,7 @@
                       :value="formtFloat(item.qty)"
                       @change="
                         [
-                          setFormatedCurrency(item, 'qty', null, false, $event),
+                          setFormatedFloat(item, 'qty', null, false, $event),
                           calc_stock_qty(item, $event),
                         ]
                       "
@@ -2547,7 +2552,7 @@ export default {
     },
   },
 
-  created() {
+  mounted() {
     evntBus.$on('register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
       this.customer = data.pos_profile.customer;
@@ -2608,6 +2613,17 @@ export default {
     document.addEventListener('keydown', this.shortDeleteFirstItem.bind(this));
     document.addEventListener('keydown', this.shortOpenFirstItem.bind(this));
     document.addEventListener('keydown', this.shortSelectDiscount.bind(this));
+  },
+  beforeDestroy() {
+    evntBus.$off('register_pos_profile');
+    evntBus.$off('add_item');
+    evntBus.$off('update_customer');
+    evntBus.$off('fetch_customer_details');
+    evntBus.$off('new_invoice');
+    evntBus.$off('set_offers');
+    evntBus.$off('update_invoice_offers');
+    evntBus.$off('update_invoice_coupons');
+    evntBus.$off('set_all_items');
   },
   destroyed() {
     document.removeEventListener('keydown', this.shortOpenPayment);

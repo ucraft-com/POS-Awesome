@@ -1,5 +1,5 @@
 <template>
-  <div fluid>
+  <div fluid class="mt-2">
     <ClosingDialog></ClosingDialog>
     <Drafts></Drafts>
     <Returns></Returns>
@@ -180,7 +180,7 @@ export default {
     },
   },
 
-  created: function () {
+  mounted: function () {
     this.$nextTick(function () {
       this.check_opening_entry();
       this.get_pos_setting();
@@ -216,6 +216,15 @@ export default {
         this.submit_closing_pos(data);
       });
     });
+  },
+  beforeDestroy() {
+    evntBus.$off('close_opening_dialog');
+    evntBus.$off('register_pos_data');
+    evntBus.$off('LoadPosProfile');
+    evntBus.$off('show_offers');
+    evntBus.$off('show_coupons');
+    evntBus.$off('open_closing_dialog');
+    evntBus.$off('submit_closing_pos');
   },
 };
 </script>

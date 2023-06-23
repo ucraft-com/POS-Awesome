@@ -294,6 +294,19 @@
               :prefix="currencySymbol(invoice_doc.currency)"
             ></v-text-field>
           </v-col>
+          <v-col v-if="invoice_doc.rounded_total" cols="6">
+            <v-text-field
+              dense
+              outlined
+              color="primary"
+              :label="frappe._('Rounded Total')"
+              background-color="white"
+              hide-details
+              :value="formtCurrency(invoice_doc.rounded_total)"
+              disabled
+              :prefix="currencySymbol(invoice_doc.currency)"
+            ></v-text-field>
+          </v-col>
           <v-col
             cols="6"
             v-if="pos_profile.posa_allow_sales_order && invoiceType == 'Order'"
@@ -715,8 +728,6 @@ export default {
     pos_settings: '',
     customer_info: '',
     mpesa_modes: [],
-    float_precision: 2,
-    currency_precision: 2,
   }),
 
   methods: {
@@ -759,7 +770,8 @@ export default {
 
       if (
         !this.pos_profile.posa_allow_partial_payment &&
-        this.total_payments < this.invoice_doc.grand_total
+        this.total_payments <
+          (this.invoice_doc.rounded_total || this.invoice_doc.grand_total)
       ) {
         evntBus.$emit('show_mesage', {
           text: `The amount paid is not complete`,
@@ -807,8 +819,8 @@ export default {
       }
 
       let credit_calc_check = this.customer_credit_dict.filter((row) => {
-        if (row.credit_to_redeem)
-          return row.credit_to_redeem > row.total_credit;
+        if (flt(row.credit_to_redeem))
+          return flt(row.credit_to_redeem) > flt(row.total_credit);
         else return false;
       });
 
@@ -823,7 +835,8 @@ export default {
 
       if (
         !this.invoice_doc.is_return &&
-        this.redeemed_customer_credit > this.invoice_doc.grand_total
+        this.redeemed_customer_credit >
+          (this.invoice_doc.rounded_total || this.invoice_doc.grand_total)
       ) {
         evntBus.$emit('show_mesage', {
           text: `can not redeam customer credit more than invoice total`,
@@ -843,6 +856,14 @@ export default {
       this.back_to_invoice();
     },
     submit_invoice(print) {
+      this.invoice_doc.payments.forEach((payment) => {
+        payment.amount = flt(payment.amount);
+      });
+      if (this.customer_credit_dict.length) {
+        this.customer_credit_dict.forEach((row) => {
+          row.credit_to_redeem = flt(row.credit_to_redeem);
+        });
+      }
       let data = {};
       data['total_change'] = -this.diff_payment;
       data['paid_change'] = this.paid_change;
@@ -877,7 +898,10 @@ export default {
     },
     set_full_amount(idx) {
       this.invoice_doc.payments.forEach((payment) => {
-        payment.amount = payment.idx == idx ? this.invoice_doc.grand_total : 0;
+        payment.amount =
+          payment.idx == idx
+            ? this.invoice_doc.rounded_total || this.invoice_doc.grand_total
+            : 0;
       });
     },
     set_rest_amount(idx) {
@@ -1063,7 +1087,9 @@ export default {
       evntBus.$emit('freeze', {
         title: __(`Waiting for payment... `),
       });
-
+      this.invoice_doc.payments.forEach((payment) => {
+        payment.amount = flt(payment.amount);
+      });
       let formData = { ...this.invoice_doc };
       formData['total_change'] = -this.diff_payment;
       formData['paid_change'] = this.paid_change;
@@ -1181,8 +1207,8 @@ export default {
       const advance = {
         type: 'Advance',
         credit_origin: payment.name,
-        total_credit: payment.unallocated_amount,
-        credit_to_redeem: payment.unallocated_amount,
+        total_credit: flt(payment.unallocated_amount),
+        credit_to_redeem: flt(payment.unallocated_amount),
       };
       this.clear_all_amounts();
       this.customer_credit_dict.push(advance);
@@ -1206,7 +1232,8 @@ export default {
     },
     diff_payment() {
       let diff_payment = this.flt(
-        this.invoice_doc.grand_total - this.total_payments,
+        (this.invoice_doc.rounded_total || this.invoice_doc.grand_total) -
+          this.total_payments,
         this.currency_precision
       );
       this.paid_change = -diff_payment;
@@ -1241,7 +1268,7 @@ export default {
     redeemed_customer_credit() {
       let total = 0;
       this.customer_credit_dict.map((row) => {
-        if (row.credit_to_redeem) total += this.flt(row.credit_to_redeem);
+        if (flt(row.credit_to_redeem)) total += flt(row.credit_to_redeem);
         else row.credit_to_redeem = 0;
       });
 
@@ -1279,7 +1306,7 @@ export default {
     },
   },
 
-  created: function () {
+  mounted: function () {
     this.$nextTick(function () {
       evntBus.$on('send_invoice_doc_payment', (invoice_doc) => {
         this.invoice_doc = invoice_doc;
@@ -1290,7 +1317,7 @@ export default {
         this.is_write_off_change = 0;
         if (default_payment) {
           default_payment.amount = this.flt(
-            invoice_doc.grand_total,
+            invoice_doc.rounded_total || invoice_doc.grand_total,
             this.currency_precision
           );
         }
@@ -1301,10 +1328,6 @@ export default {
       evntBus.$on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
         this.get_mpesa_modes();
-        this.float_precision =
-          frappe.defaults.get_default('float_precision') || 2;
-        this.currency_precision =
-          frappe.defaults.get_default('currency_precision') || 2;
       });
       evntBus.$on('add_the_new_address', (data) => {
         this.addresses.push(data);
@@ -1336,6 +1359,17 @@ export default {
       this.set_mpesa_payment(data);
     });
     document.addEventListener('keydown', this.shortPay.bind(this));
+  },
+  beforeDestroy() {
+    evntBus.$off('send_invoice_doc_payment');
+    evntBus.$off('register_pos_profile');
+    evntBus.$off('add_the_new_address');
+    evntBus.$off('update_invoice_type');
+    evntBus.$off('update_customer');
+    evntBus.$off('set_pos_settings');
+    evntBus.$off('set_customer_info_to_edit');
+    evntBus.$off('update_invoice_coupons');
+    evntBus.$off('set_mpesa_payment');
   },
 
   destroyed() {

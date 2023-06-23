@@ -30,6 +30,31 @@
                 </p>
               </v-col>
             </v-row>
+            <v-row align="center" no-gutters class="mb-1">
+              <v-col md="4" cols="12">
+                <v-select
+                  dense
+                  outlined
+                  hide-details
+                  clearable
+                  background-color="white"
+                  v-model="pos_profile_search"
+                  :items="pos_profiles_list"
+                  item-value="name"
+                  label="Select POS Profile"
+                ></v-select>
+              </v-col>
+              <v-col> </v-col>
+              <v-col md="3" cols="12">
+                <v-btn
+                  block
+                  color="warning"
+                  dark
+                  @click="get_outstanding_invoices"
+                  >{{ __('Search') }}</v-btn
+                >
+              </v-col>
+            </v-row>
             <v-data-table
               :headers="invoices_headers"
               :items="outstanding_invoices"
@@ -39,6 +64,7 @@
               v-model="selected_invoices"
               :loading="invoices_loading"
               checkbox-color="primary"
+              @item-selected="onInvoiceSelected"
             >
               <template v-slot:item.grand_total="{ item }">
                 {{ currencySymbol(item.currency) }}
@@ -53,7 +79,12 @@
             </v-data-table>
             <v-divider></v-divider>
           </div>
-          <div v-if="unallocated_payments.length">
+          <div
+            v-if="
+              pos_profile.posa_allow_reconcile_payments &&
+              unallocated_payments.length
+            "
+          >
             <v-row>
               <v-col md="7" cols="12">
                 <p>
@@ -99,7 +130,7 @@
             </v-data-table>
             <v-divider></v-divider>
           </div>
-          <div>
+          <div v-if="pos_profile.posa_allow_mpesa_reconcile_payments">
             <v-row>
               <v-col md="8" cols="12">
                 <p>
@@ -243,32 +274,34 @@
             </v-row>
 
             <v-divider v-if="payment_methods.length"></v-divider>
-            <h4 class="primary--text">Make New Payment</h4>
-            <v-row
-              v-if="payment_methods.length"
-              v-for="method in payment_methods"
-              :key="method.row_id"
-            >
-              <v-col md="7"
-                ><span class="mt-1">{{ __(method.mode_of_payment) }}:</span>
-              </v-col>
-              <v-col md="5"
-                ><v-text-field
-                  class="p-0 m-0"
-                  dense
-                  color="primary"
-                  background-color="white"
-                  hide-details
-                  :value="formtCurrency(method.amount)"
-                  @change="
-                    setFormatedCurrency(method, 'amount', null, true, $event)
-                  "
-                  payments_methods
-                  flat
-                  :prefix="currencySymbol(pos_profile.currency)"
-                ></v-text-field
-              ></v-col>
-            </v-row>
+            <div v-if="pos_profile.posa_allow_make_new_payments">
+              <h4 class="primary--text">Make New Payment</h4>
+              <v-row
+                v-if="payment_methods.length"
+                v-for="method in payment_methods"
+                :key="method.row_id"
+              >
+                <v-col md="7"
+                  ><span class="mt-1">{{ __(method.mode_of_payment) }}:</span>
+                </v-col>
+                <v-col md="5"
+                  ><v-text-field
+                    class="p-0 m-0"
+                    dense
+                    color="primary"
+                    background-color="white"
+                    hide-details
+                    :value="formtCurrency(method.amount)"
+                    @change="
+                      setFormatedCurrency(method, 'amount', null, true, $event)
+                    "
+                    payments_methods
+                    flat
+                    :prefix="currencySymbol(pos_profile.currency)"
+                  ></v-text-field
+                ></v-col>
+              </v-row>
+            </div>
 
             <v-divider></v-divider>
             <v-row>
@@ -321,8 +354,6 @@ export default {
       customer_name: '',
       customer_info: '',
       company: '',
-      float_precision: 2,
-      currency_precision: 2,
       singleSelect: false,
       invoices_loading: false,
       unallocated_payments_loading: false,
@@ -334,6 +365,9 @@ export default {
       selected_invoices: [],
       selected_payments: [],
       selected_mpesa_payments: [],
+      pos_profiles_list: [],
+      pos_profile_search: '',
+      payment_methods_list: [],
       mpesa_searchname: '',
       mpesa_search_mobile: '',
       invoices_headers: [
@@ -342,6 +376,12 @@ export default {
           align: 'start',
           sortable: true,
           value: 'name',
+        },
+        {
+          text: __('Customer'),
+          align: 'start',
+          sortable: true,
+          value: 'customer_name',
         },
         {
           text: __('Date'),
@@ -374,6 +414,12 @@ export default {
           align: 'start',
           sortable: true,
           value: 'name',
+        },
+        {
+          text: __('Customer'),
+          align: 'start',
+          sortable: true,
+          value: 'customer_name',
         },
         {
           text: __('Date'),
@@ -451,11 +497,36 @@ export default {
             this.pos_profile = r.message.pos_profile;
             this.pos_opening_shift = r.message.pos_opening_shift;
             this.company = r.message.company.name;
-            evntBus.$emit('register_pos_profile', r.message);
+            evntBus.$emit('payments_register_pos_profile', r.message);
             evntBus.$emit('set_company', r.message.company);
             this.set_payment_methods();
+            this.pos_profile_search = r.message.pos_profile.name;
+            this.pos_profiles_list.push(this.pos_profile_search);
+            this.payment_methods_list = [];
+            this.pos_profile.payments.forEach((element) => {
+              this.payment_methods_list.push(element.mode_of_payment);
+            });
+            this.get_available_pos_profiles();
+            this.get_outstanding_invoices();
+            this.get_draft_mpesa_payments_register();
           } else {
             this.create_opening_voucher();
+          }
+        });
+    },
+    get_available_pos_profiles() {
+      if (!this.pos_profile.posa_allow_mpesa_reconcile_payments) return;
+      return frappe
+        .call(
+          'posawesome.posawesome.api.payment_entry.get_available_pos_profiles',
+          {
+            company: this.company,
+            currency: this.pos_profile.currency,
+          }
+        )
+        .then((r) => {
+          if (r.message) {
+            this.pos_profiles_list = r.message;
           }
         });
     },
@@ -478,27 +549,25 @@ export default {
                 ...message,
               };
               vm.set_mpesa_search_params();
-              vm.get_draft_mpesa_payments_register();
               evntBus.$emit('set_customer_info_to_edit', vm.customer_info);
             }
           },
         });
       }
     },
-    get_outsanding_invoices() {
+    onInvoiceSelected(event) {
+      evntBus.$emit('set_customer', event.item.customer);
+    },
+    get_outstanding_invoices() {
       this.invoices_loading = true;
-      if (!this.customer_name) {
-        this.outstanding_invoices = [];
-        this.invoices_loading = false;
-        return;
-      }
       return frappe
         .call(
-          'posawesome.posawesome.api.payment_entry.get_outsanding_invoices',
+          'posawesome.posawesome.api.payment_entry.get_outstanding_invoices',
           {
             customer: this.customer_name,
             company: this.company,
             currency: this.pos_profile.currency,
+            pos_profile_name: this.pos_profile_search,
           }
         )
         .then((r) => {
@@ -509,6 +578,7 @@ export default {
         });
     },
     get_unallocated_payments() {
+      if (!this.pos_profile.posa_allow_reconcile_payments) return;
       this.unallocated_payments_loading = true;
       if (!this.customer_name) {
         this.unallocated_payments = [];
@@ -532,6 +602,7 @@ export default {
         });
     },
     set_mpesa_search_params() {
+      if (!this.pos_profile.posa_allow_mpesa_reconcile_payments) return;
       if (!this.customer_name) return;
       this.mpesa_search_name = this.customer_info.customer_name.split(' ')[0];
       if (this.customer_info.mobile_no) {
@@ -542,21 +613,16 @@ export default {
       }
     },
     get_draft_mpesa_payments_register() {
+      if (!this.pos_profile.posa_allow_mpesa_reconcile_payments) return;
       const vm = this;
       this.mpesa_payments_loading = true;
-      const customer_name = this.mpesa_search_name;
-      let mobile_no = this.mpesa_search_mobile;
-      if (!mobile_no && !customer_name) {
-        this.mpesa_payments = [];
-        this.selected_mpesa_payments = [];
-        this.mpesa_payments_loading = false;
-        return;
-      }
       return frappe
         .call('posawesome.posawesome.api.m_pesa.get_mpesa_draft_payments', {
           company: vm.company,
-          full_name: customer_name,
-          mobile_no: mobile_no,
+          mode_of_payment: null,
+          full_name: vm.mpesa_search_name || null,
+          mobile_no: vm.mpesa_search_mobile || null,
+          payment_methods_list: vm.payment_methods_list,
         })
         .then((r) => {
           if (r.message) {
@@ -569,6 +635,7 @@ export default {
     },
     set_payment_methods() {
       // get payment methods from pos profile
+      if (!this.pos_profile.posa_allow_make_new_payments) return;
       this.payment_methods = [];
       this.pos_profile.payments.forEach((method) => {
         this.payment_methods.push({
@@ -617,6 +684,10 @@ export default {
         return;
       }
 
+      this.payment_methods.forEach((payment) => {
+        payment.amount = flt(payment.amount);
+      });
+
       const payload = {};
       payload.customer = customer;
       payload.company = this.company;
@@ -627,12 +698,13 @@ export default {
       payload.payment_methods = this.payment_methods;
       payload.selected_invoices = this.selected_invoices;
       payload.selected_payments = this.selected_payments;
-      payload.total_selected_invoices = this.total_selected_invoices;
+      payload.total_selected_invoices = flt(this.total_selected_invoices);
       payload.selected_mpesa_payments = this.selected_mpesa_payments;
-      payload.total_selected_payments = this.total_selected_payments;
-      payload.total_payment_methods = this.total_payment_methods;
-      payload.total_selected_mpesa_payments =
-        this.total_selected_mpesa_payments;
+      payload.total_selected_payments = flt(this.total_selected_payments);
+      payload.total_payment_methods = flt(this.total_payment_methods);
+      payload.total_selected_mpesa_payments = flt(
+        this.total_selected_mpesa_payments
+      );
 
       frappe.call({
         method: 'posawesome.posawesome.api.payment_entry.process_pos_payment',
@@ -641,9 +713,10 @@ export default {
         freeze_message: __('Processing Payment'),
         callback: function (r) {
           if (r.message) {
+            frappe.utils.play_sound('submit');
             vm.clear_all(false);
             vm.customer_name = customer;
-            vm.get_outsanding_invoices();
+            vm.get_outstanding_invoices();
             vm.get_unallocated_payments();
             vm.set_mpesa_search_params();
             vm.get_draft_mpesa_payments_register();
@@ -700,21 +773,25 @@ export default {
     },
   },
 
-  created: function () {
+  mounted: function () {
     this.$nextTick(function () {
-      this.float_precision =
-        frappe.defaults.get_default('float_precision') || 2;
-      this.currency_precision =
-        frappe.defaults.get_default('currency_precision') || 2;
       this.check_opening_entry();
       evntBus.$on('update_customer', (customer_name) => {
         this.clear_all(true);
         this.customer_name = customer_name;
         this.fetch_customer_details();
-        this.get_outsanding_invoices();
+        this.get_outstanding_invoices();
         this.get_unallocated_payments();
+        this.get_draft_mpesa_payments_register();
+      });
+      evntBus.$on('fetch_customer_details', () => {
+        this.fetch_customer_details();
       });
     });
+  },
+  beforeDestroy() {
+    evntBus.$off('update_customer');
+    evntBus.$off('fetch_customer_details');
   },
 };
 </script>
