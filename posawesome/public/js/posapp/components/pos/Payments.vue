@@ -294,6 +294,19 @@
               :prefix="currencySymbol(invoice_doc.currency)"
             ></v-text-field>
           </v-col>
+          <v-col v-if="invoice_doc.rounded_total" cols="6">
+            <v-text-field
+              dense
+              outlined
+              color="primary"
+              :label="frappe._('Rounded Total')"
+              background-color="white"
+              hide-details
+              :value="formtCurrency(invoice_doc.rounded_total)"
+              disabled
+              :prefix="currencySymbol(invoice_doc.currency)"
+            ></v-text-field>
+          </v-col>
           <v-col
             cols="6"
             v-if="pos_profile.posa_allow_sales_order && invoiceType == 'Order'"
@@ -757,7 +770,8 @@ export default {
 
       if (
         !this.pos_profile.posa_allow_partial_payment &&
-        this.total_payments < this.invoice_doc.grand_total
+        this.total_payments <
+          (this.invoice_doc.rounded_total || this.invoice_doc.grand_total)
       ) {
         evntBus.$emit('show_mesage', {
           text: `The amount paid is not complete`,
@@ -821,7 +835,8 @@ export default {
 
       if (
         !this.invoice_doc.is_return &&
-        this.redeemed_customer_credit > this.invoice_doc.grand_total
+        this.redeemed_customer_credit >
+          (this.invoice_doc.rounded_total || this.invoice_doc.grand_total)
       ) {
         evntBus.$emit('show_mesage', {
           text: `can not redeam customer credit more than invoice total`,
@@ -883,7 +898,10 @@ export default {
     },
     set_full_amount(idx) {
       this.invoice_doc.payments.forEach((payment) => {
-        payment.amount = payment.idx == idx ? this.invoice_doc.grand_total : 0;
+        payment.amount =
+          payment.idx == idx
+            ? this.invoice_doc.rounded_total || this.invoice_doc.grand_total
+            : 0;
       });
     },
     set_rest_amount(idx) {
@@ -1214,7 +1232,8 @@ export default {
     },
     diff_payment() {
       let diff_payment = this.flt(
-        this.invoice_doc.grand_total - this.total_payments,
+        (this.invoice_doc.rounded_total || this.invoice_doc.grand_total) -
+          this.total_payments,
         this.currency_precision
       );
       this.paid_change = -diff_payment;
@@ -1298,7 +1317,7 @@ export default {
         this.is_write_off_change = 0;
         if (default_payment) {
           default_payment.amount = this.flt(
-            invoice_doc.grand_total,
+            invoice_doc.rounded_total || invoice_doc.grand_total,
             this.currency_precision
           );
         }
