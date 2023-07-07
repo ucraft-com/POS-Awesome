@@ -11,7 +11,7 @@ assignees: ''
 
 **IMPORTANT** Before reporting a bug:
 
-A properly detailed bug report can save a LOT of time and help fixing issues as soon as possible.
+A properly detailed bug report can save a LOT of time and help fix issues as soon as possible.
 - ->
 
 ### Versions
@@ -31,7 +31,7 @@ A properly detailed bug report can save a LOT of time and help fixing issues as 
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
-4. See error
+4. See the error
 
 ### What is Expected?
 
@@ -44,4 +44,4 @@ Add any other context about the problem here.
 
 
 ### Screenshots
-If applicable, add screenshots to help explain your problem.
+If applicable, could you add screenshots to help explain your problem?
