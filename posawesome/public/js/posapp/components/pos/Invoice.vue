@@ -1708,13 +1708,11 @@ export default {
     },
 
     set_batch_qty(item, value, update = true) {
-      console.info('set_batch_qty', item, value, update);
       const existing_items = this.items.filter(
         (element) =>
           element.item_code == item.item_code &&
           element.posa_row_id != item.posa_row_id
       );
-      // console.info('existing_items', existing_items);
       const used_batches = {};
       item.batch_no_data.forEach((batch) => {
         used_batches[batch.batch_no] = {
