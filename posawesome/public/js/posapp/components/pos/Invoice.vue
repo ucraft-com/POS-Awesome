@@ -947,7 +947,7 @@ export default {
         item.uom = item.stock_uom;
       }
       let index = -1;
-      if (!this.new_item) {
+      if (!this.new_line) {
         index = this.items.findIndex(
           (el) =>
             el.item_code === item.item_code &&
@@ -1501,13 +1501,15 @@ export default {
         callback: function (r) {
           if (r.message) {
             const data = r.message;
+            if (data.batch_no_data) {
+              item.batch_no_data = data.batch_no_data;
+            }
             if (
               item.has_batch_no &&
               vm.pos_profile.posa_auto_set_batch &&
               !item.batch_no &&
               data.batch_no
             ) {
-              item.batch_no = data.batch_no;
               vm.set_batch_qty(item, item.batch_no, false);
             }
             if (data.has_pricing_rule) {
@@ -1706,19 +1708,80 @@ export default {
     },
 
     set_batch_qty(item, value, update = true) {
-      const batch_no = item.batch_no_data.find(
-        (element) => element.batch_no == value
+      console.info('set_batch_qty', item, value, update);
+      const existing_items = this.items.filter(
+        (element) =>
+          element.item_code == item.item_code &&
+          element.posa_row_id != item.posa_row_id
       );
-      item.actual_batch_qty = batch_no.batch_qty;
-      item.batch_no_expiry_date = batch_no.expiry_date;
-      if (batch_no.batch_price) {
-        item.batch_price = batch_no.batch_price;
-        item.price_list_rate = batch_no.batch_price;
-        item.rate = batch_no.batch_price;
-      } else if (update) {
+      // console.info('existing_items', existing_items);
+      const used_batches = {};
+      item.batch_no_data.forEach((batch) => {
+        used_batches[batch.batch_no] = {
+          ...batch,
+          used_qty: 0,
+          remaining_qty: batch.batch_qty,
+        };
+        existing_items.forEach((element) => {
+          if (element.batch_no && element.batch_no == batch.batch_no) {
+            used_batches[batch.batch_no].used_qty += element.qty;
+            used_batches[batch.batch_no].remaining_qty -= element.qty;
+            used_batches[batch.batch_no].batch_qty -= element.qty;
+          }
+        });
+      });
+
+      // set item batch_no based on:
+      // 1. if batch has expiry_date we should use the batch with the nearest expiry_date
+      // 2. if batch has no expiry_date we should use the batch with the earliest manufacturing_date
+      // 3. we should not use batch with remaining_qty = 0
+      // 4. we should the highest remaining_qty
+      const batch_no_data = Object.values(used_batches)
+        .filter((batch) => batch.remaining_qty > 0)
+        .sort((a, b) => {
+          if (a.expiry_date && b.expiry_date) {
+            return a.expiry_date - b.expiry_date;
+          } else if (a.expiry_date) {
+            return -1;
+          } else if (b.expiry_date) {
+            return 1;
+          } else if (a.manufacturing_date && b.manufacturing_date) {
+            return a.manufacturing_date - b.manufacturing_date;
+          } else if (a.manufacturing_date) {
+            return -1;
+          } else if (b.manufacturing_date) {
+            return 1;
+          } else {
+            return b.remaining_qty - a.remaining_qty;
+          }
+        });
+      if (batch_no_data.length > 0) {
+        let batch_to_use = null;
+        if (value) {
+          batch_to_use = batch_no_data.find((batch) => batch.batch_no == value);
+        }
+        if (!batch_to_use) {
+          batch_to_use = batch_no_data[0];
+        }
+        item.batch_no = batch_to_use.batch_no;
+        item.actual_batch_qty = batch_to_use.batch_qty;
+        item.batch_no_expiry_date = batch_to_use.expiry_date;
+        if (batch_to_use.batch_price) {
+          item.batch_price = batch_to_use.batch_price;
+          item.price_list_rate = batch_to_use.batch_price;
+          item.rate = batch_to_use.batch_price;
+        } else if (update) {
+          item.batch_price = null;
+          this.update_item_detail(item);
+        }
+      } else {
+        item.batch_no = null;
+        item.actual_batch_qty = null;
+        item.batch_no_expiry_date = null;
         item.batch_price = null;
-        this.update_item_detail(item);
       }
+      // update item batch_no_data from batch_no_data
+      item.batch_no_data = batch_no_data;
     },
 
     shortOpenPayment(e) {
@@ -2642,7 +2705,7 @@ export default {
       evntBus.$emit('set_customer_info_to_edit', this.customer_info);
     },
     expanded(data_value) {
-      this.update_items_details(data_value);
+      // this.update_items_details(data_value);
       if (data_value.length > 0) {
         this.update_item_detail(data_value[0]);
       }
