@@ -1282,6 +1282,26 @@ export default {
     validate() {
       let value = true;
       this.items.forEach((item) => {
+        if (this.pos_profile.posa_max_discount_allowed) {
+          if (item.discount_amount && this.flt(item.discount_amount) > 0) {
+            // calc discount percentage
+            const discount_percentage =
+              (this.flt(item.discount_amount) * 100) /
+              this.flt(item.price_list_rate);
+            if (
+              discount_percentage > this.pos_profile.posa_max_discount_allowed
+            ) {
+              evntBus.$emit('show_mesage', {
+                text: __(
+                  `Discount percentage for item '{0}' cannot be greater than {1}%`,
+                  [item.item_name, this.pos_profile.posa_max_discount_allowed]
+                ),
+                color: 'error',
+              });
+              value = false;
+            }
+          }
+        }
         if (this.stock_settings.allow_negative_stock != 1) {
           if (
             this.invoiceType == 'Invoice' &&
