@@ -35,7 +35,7 @@ from frappe.utils.caching import redis_cache
 @frappe.whitelist()
 def get_opening_dialog_data():
     data = {}
-    data["companys"] = frappe.get_list("Company", limit_page_length=0, order_by="name")
+    data["companies"] = frappe.get_list("Company", limit_page_length=0, order_by="name")
     data["pos_profiles_data"] = frappe.get_list(
         "POS Profile",
         filters={"disabled": 0},
