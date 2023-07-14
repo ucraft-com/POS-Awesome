@@ -2690,10 +2690,6 @@ export default {
     evntBus.$on('set_new_line', (data) => {
       this.new_line = data;
     });
-    document.addEventListener('keydown', this.shortOpenPayment.bind(this));
-    document.addEventListener('keydown', this.shortDeleteFirstItem.bind(this));
-    document.addEventListener('keydown', this.shortOpenFirstItem.bind(this));
-    document.addEventListener('keydown', this.shortSelectDiscount.bind(this));
   },
   beforeDestroy() {
     evntBus.$off('register_pos_profile');
@@ -2705,6 +2701,12 @@ export default {
     evntBus.$off('update_invoice_offers');
     evntBus.$off('update_invoice_coupons');
     evntBus.$off('set_all_items');
+  },
+  created() {
+    document.addEventListener('keydown', this.shortOpenPayment.bind(this));
+    document.addEventListener('keydown', this.shortDeleteFirstItem.bind(this));
+    document.addEventListener('keydown', this.shortOpenFirstItem.bind(this));
+    document.addEventListener('keydown', this.shortSelectDiscount.bind(this));
   },
   destroyed() {
     document.removeEventListener('keydown', this.shortOpenPayment);

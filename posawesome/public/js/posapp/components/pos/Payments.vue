@@ -1358,6 +1358,8 @@ export default {
     evntBus.$on('set_mpesa_payment', (data) => {
       this.set_mpesa_payment(data);
     });
+  },
+  created() {
     document.addEventListener('keydown', this.shortPay.bind(this));
   },
   beforeDestroy() {
