@@ -856,17 +856,24 @@ export default {
       this.back_to_invoice();
     },
     submit_invoice(print) {
+      let totalPayedAmount = 0;
       this.invoice_doc.payments.forEach((payment) => {
         payment.amount = flt(payment.amount);
+        totalPayedAmount += payment.amount;
       });
+      if (this.invoice_doc.is_return && totalPayedAmount == 0) {
+        this.invoice_doc.is_pos = 0;
+      }
       if (this.customer_credit_dict.length) {
         this.customer_credit_dict.forEach((row) => {
           row.credit_to_redeem = flt(row.credit_to_redeem);
         });
       }
       let data = {};
-      data["total_change"] = -this.diff_payment;
-      data["paid_change"] = this.paid_change;
+      data["total_change"] = !this.invoice_doc.is_return
+        ? -this.diff_payment
+        : 0;
+      data["paid_change"] = !this.invoice_doc.is_return ? this.paid_change : 0;
       data["credit_change"] = -this.credit_change;
       data["redeemed_customer_credit"] = this.redeemed_customer_credit;
       data["customer_credit_dict"] = this.customer_credit_dict;
@@ -1333,11 +1340,18 @@ export default {
         );
         this.is_credit_sale = 0;
         this.is_write_off_change = 0;
-        if (default_payment) {
+        if (default_payment && !invoice_doc.is_return) {
           default_payment.amount = this.flt(
             invoice_doc.rounded_total || invoice_doc.grand_total,
             this.currency_precision
           );
+        }
+        if (invoice_doc.is_return) {
+          this.is_return = true;
+          invoice_doc.payments.forEach((payment) => {
+            payment.amount = 0;
+            payment.base_amount = 0;
+          });
         }
         this.loyalty_amount = 0;
         this.get_addresses();
