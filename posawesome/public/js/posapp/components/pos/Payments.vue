@@ -925,25 +925,79 @@ export default {
         this.pos_profile.print_format_for_online ||
         this.pos_profile.print_format;
       const letter_head = this.pos_profile.letter_head || 0;
-      const url =
-        frappe.urllib.get_base_url() +
-        '/printview?doctype=Sales%20Invoice&name=' +
-        this.invoice_doc.name +
-        '&trigger_print=1' +
-        '&format=' +
-        print_format +
-        '&no_letterhead=' +
-        letter_head;
-      const printWindow = window.open(url, 'Print');
-      printWindow.addEventListener(
-        'load',
-        function () {
-          printWindow.print();
-          // printWindow.close();
-          // NOTE : uncomoent this to auto closing printing window
+
+      // Initiate request to get the HTML format of the invoice
+      frappe.call({
+        method: 'pos_custom.pos_print.pos_print',
+        args: {
+          doctype: 'Sales Invoice', // Replace with your doctype
+          name: this.invoice_doc.name,
+          print_format: print_format,
+          no_letterhead: letter_head
         },
-        true
-      );
+        callback: (response) => {
+          if (response.message) {
+            console.log('PDF path response:', response.message);
+            // Once you receive the HTML response, pass it to QZ Tray for printing
+            // Prepend the site URL to the file_url
+            const siteUrl = frappe.urllib.get_base_url();
+            const fullUrl = siteUrl + response.message.file_url;
+            this.print_with_qz(fullUrl);
+
+            // After 5 seconds, call the custom method to delete the File document
+            setTimeout(() => {
+              this.delete_file(response.message.file_name);
+            }, 5000); // 5000 milliseconds = 5 seconds
+
+          } else {
+            console.error('Failed to get HTML for printing:', response);
+          }
+        },
+      });
+    },
+    delete_file(file_name) {
+      // Call the custom method to delete the File document by its file name
+      frappe.call({
+        method: 'pos_custom.pos_print.delete_file_by_name',
+        args: {
+          file_name: file_name,
+        },
+        callback: (response) => {
+          if (response.message && response.message === true) {
+            console.log('File deleted successfully.');
+          } else {
+            console.error('Failed to delete the file:', response);
+          }
+        },
+      });
+    },
+    print_with_qz(pdfData) {
+      frappe.ui.form
+        .qz_connect()
+        .then(function () {
+          return qz.printers.find();
+        })
+        .then((data) => {
+          var config = qz.configs.create(data[2]);
+
+          var data_1 = [
+            {
+              type: 'pixel',
+              format: 'pdf',
+              flavor: 'file',
+              data: pdfData, // Use the received HTML data here
+            },
+          ];
+
+          // Print the receipt using QZ Tray
+          return qz.print(config, data_1);
+        })
+        .then(() => {
+          console.log('Receipt printed successfully.');
+        })
+        .catch((err) => {
+          frappe.ui.form.qz_fail(err);
+        });
     },
     validate_due_date() {
       const today = frappe.datetime.now_date();
