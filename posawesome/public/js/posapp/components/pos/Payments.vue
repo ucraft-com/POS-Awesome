@@ -972,25 +972,49 @@ export default {
       });
     },
     print_with_qz(pdfData) {
-      frappe.ui.form
-        .qz_connect()
+      frappe.ui.form.qz_connect()
         .then(function () {
-          return qz.printers.find();
-        })
-        .then((data) => {
-          var config = qz.configs.create(data[2]);
-
-          var data_1 = [
-            {
-              type: 'pixel',
-              format: 'pdf',
-              flavor: 'file',
-              data: pdfData, // Use the received HTML data here
+          return frappe.call({
+            method: 'frappe.client.get_value',
+            args: {
+              doctype: 'Printer Settings',
+              fieldname: 'default_printer'
             },
-          ];
+          });
+        })
+        .then((response) => {
+          const defaultPrinter = response.message.default_printer;
+          console.log('Found default printer:', defaultPrinter);
 
-          // Print the receipt using QZ Tray
-          return qz.print(config, data_1);
+          return frappe.ui.form.qz_connect()
+            .then(function () {
+              return qz.printers.find();
+            })
+            .then((data) => {
+              console.log('Found available printers:', data);
+
+              // Find the selected default printer in the list of available printers
+              const selectedPrinter = data.find((printer) => printer === defaultPrinter);
+
+              if (!selectedPrinter) {
+                throw new Error('Default printer not found in available printers.');
+              }
+
+              // Create the QZ Tray configuration with the selected default printer
+              var config = qz.configs.create(selectedPrinter);
+
+              var data_1 = [
+                {
+                  type: 'pixel',
+                  format: 'pdf',
+                  flavor: 'file',
+                  data: pdfData, // Use the received HTML data here
+                },
+              ];
+
+              // Print the receipt using QZ Tray
+              return qz.print(config, data_1);
+            });
         })
         .then(() => {
           console.log('Receipt printed successfully.');
