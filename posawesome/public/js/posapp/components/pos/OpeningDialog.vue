@@ -1,6 +1,6 @@
 <template>
   <v-row justify="center">
-    <v-dialog v-model="dialog" persistent max-width="600px">
+    <v-dialog v-model="isOpen" persistent max-width="600px">
       <!-- <template v-slot:activator="{ on, attrs }">
         <v-btn color="primary" dark v-bind="attrs" v-on="on">Open Dialog</v-btn>
       </template>-->
@@ -15,7 +15,7 @@
             <v-row>
               <v-col cols="12">
                 <v-autocomplete
-                  :items="companys"
+                  :items="companies"
                   :label="frappe._('Company')"
                   v-model="company"
                   required
@@ -83,37 +83,40 @@ import format from '../../format';
 export default {
   mixins: [format],
   props: ['dialog'],
-  data: () => ({
-    dialog_data: {},
-    is_loading: false,
-    companys: [],
-    company: '',
-    pos_profiles_data: [],
-    pos_profiles: [],
-    pos_profile: '',
-    payments_method_data: [],
-    payments_methods: [],
-    payments_methods_headers: [
-      {
-        text: __('Mode of Payment'),
-        align: 'start',
-        sortable: false,
-        value: 'mode_of_payment',
-      },
-      {
-        text: __('Opening Amount'),
-        value: 'amount',
-        align: 'center',
-        sortable: false,
-      },
-    ],
-    itemsPerPage: 100,
-    max25chars: (v) => v.length <= 12 || 'Input too long!', // TODO : should validate as number
-    pagination: {},
-    snack: false, // TODO : need to remove
-    snackColor: '', // TODO : need to remove
-    snackText: '', // TODO : need to remove
-  }),
+  data() {
+    return {
+      isOpen: this.dialog ? this.dialog : false,
+      dialog_data: {},
+      is_loading: false,
+      companies: [],
+      company: '',
+      pos_profiles_data: [],
+      pos_profiles: [],
+      pos_profile: '',
+      payments_method_data: [],
+      payments_methods: [],
+      payments_methods_headers: [
+        {
+          text: __('Mode of Payment'),
+          align: 'start',
+          sortable: false,
+          value: 'mode_of_payment',
+        },
+        {
+          text: __('Opening Amount'),
+          value: 'amount',
+          align: 'center',
+          sortable: false,
+        },
+      ],
+      itemsPerPage: 100,
+      max25chars: (v) => v.length <= 12 || 'Input too long!', // TODO : should validate as number
+      pagination: {},
+      snack: false, // TODO : need to remove
+      snackColor: '', // TODO : need to remove
+      snackText: '', // TODO : need to remove
+    };
+  },
   watch: {
     company(val) {
       this.pos_profiles = [];
@@ -152,11 +155,10 @@ export default {
         args: {},
         callback: function (r) {
           if (r.message) {
-            console.info(r.message);
-            r.message.companys.forEach((element) => {
-              vm.companys.push(element.name);
+            r.message.companies.forEach((element) => {
+              vm.companies.push(element.name);
             });
-            vm.company = vm.companys[0];
+            vm.company = vm.companies[0];
             vm.pos_profiles_data = r.message.pos_profiles_data;
             vm.payments_method_data = r.message.payments_method;
           }
