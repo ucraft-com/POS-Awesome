@@ -143,6 +143,10 @@ doc_events = {
 # 	"Task": "posawesome.task.get_dashboard_data"
 # }
 
+override_doctype_class = {
+    "Sales Invoice": "posawesome.posawesome.api.taxes.customSalesInvoice",
+}
+
 # exempt linked doctypes from being automatically cancelled
 #
 # auto_cancel_exempted_doctypes = ["Auto Repeat"]
