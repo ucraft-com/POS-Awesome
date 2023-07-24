@@ -30,7 +30,6 @@ from posawesome.posawesome.doctype.delivery_charges.delivery_charges import (
     get_applicable_delivery_charges as _get_applicable_delivery_charges,
 )
 from frappe.utils.caching import redis_cache
-from posawesome.posawesome.api.taxes import calculate_taxes
 
 
 @frappe.whitelist()
@@ -493,7 +492,6 @@ def update_invoice(data):
             for tax in invoice_doc.taxes:
                 tax.included_in_print_rate = 1
 
-    calculate_taxes(invoice_doc)
     invoice_doc.save()
     return invoice_doc
 
