@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.journal_entry.journal_entry import (
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.doctype.bank_account.bank_account import get_party_bank_account
 from posawesome.posawesome.api.m_pesa import submit_mpesa_payment
+from erpnext.accounts.utils import QueryPaymentLedger, get_outstanding_invoices as _get_outstanding_invoices
 
 
 def create_payment_entry(
@@ -23,6 +24,7 @@ def create_payment_entry(
     reference_date=None,
     reference_no=None,
     posting_date=None,
+    cost_center=None,
     submit=0,
 ):
     # TODO : need to have a better way to handle currency
@@ -48,7 +50,7 @@ def create_payment_entry(
     pe = frappe.new_doc("Payment Entry")
     pe.payment_type = payment_type
     pe.company = company
-    pe.cost_center = erpnext.get_default_cost_center(company)
+    pe.cost_center = cost_center or erpnext.get_default_cost_center(company)
     pe.posting_date = date
     pe.mode_of_payment = mode_of_payment
     pe.party_type = party_type
@@ -127,34 +129,66 @@ def set_paid_amount_and_received_amount(
 
 @frappe.whitelist()
 def get_outstanding_invoices(company, currency, customer=None, pos_profile_name=None):
-    filters = {
-        "company": company,
-        "outstanding_amount": (">", 0),
-        "docstatus": 1,
-        "is_return": 0,
-        "currency": currency,
-    }
     if customer:
-        filters.update({"customer": customer})
-    if pos_profile_name:
-        filters.update({"pos_profile": pos_profile_name})
-    invoices = frappe.get_all(
-        "Sales Invoice",
-        filters=filters,
-        fields=[
-            "name",
-            "customer",
-            "customer_name",
-            "outstanding_amount",
-            "grand_total",
-            "due_date",
-            "posting_date",
-            "currency",
-            "pos_profile",
-        ],
-        order_by="due_date asc",
-    )
-    return invoices
+        precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
+        outstanding_invoices = _get_outstanding_invoices(
+            party_type="Customer",
+            party=customer,
+            account=get_party_account("Customer", customer, company),
+        )
+        invoices_list = []
+        customer_name = frappe.get_cached_value("Customer", customer, "customer_name")
+        for invoice in outstanding_invoices:
+            if invoice.get("currency") == currency:
+                if pos_profile_name and frappe.get_cached_value(
+                    "Sales Invoice", invoice.get("voucher_no"), "pos_profile"
+                ) != pos_profile_name:
+                    continue
+                outstanding_amount = invoice.outstanding_amount
+                if outstanding_amount > 0.5 / (10**precision):
+                    invoice_dict = {
+                        "name": invoice.get("voucher_no"),
+                        "customer": customer,
+                        "customer_name": customer_name,
+                        "outstanding_amount": invoice.get("outstanding_amount"),
+                        "grand_total": invoice.get("invoice_amount"),
+                        "due_date": invoice.get("due_date"),
+                        "posting_date": invoice.get("posting_date"),
+                        "currency": invoice.get("currency"),
+                        "pos_profile": pos_profile_name,
+
+                    }
+                    invoices_list.append(invoice_dict)
+        return invoices_list
+    else:
+        filters = {
+            "company": company,
+            "outstanding_amount": (">", 0),
+            "docstatus": 1,
+            "is_return": 0,
+            "currency": currency,
+        }
+        if customer:
+            filters.update({"customer": customer})
+        if pos_profile_name:
+            filters.update({"pos_profile": pos_profile_name})
+        invoices = frappe.get_all(
+            "Sales Invoice",
+            filters=filters,
+            fields=[
+                "name",
+                "customer",
+                "customer_name",
+                "outstanding_amount",
+                "grand_total",
+                "due_date",
+                "posting_date",
+                "currency",
+                "pos_profile",
+            ],
+            order_by="due_date asc",
+        )
+        return invoices
 
 
 @frappe.whitelist()
@@ -258,6 +292,7 @@ def process_pos_payment(payload):
                     posting_date=today,
                     reference_no=pos_opening_shift_name,
                     reference_date=today,
+                    cost_center=data.pos_profile.get("cost_center"),
                     submit=1,
                 )
                 new_payments_entry.append(new_payment_entry)

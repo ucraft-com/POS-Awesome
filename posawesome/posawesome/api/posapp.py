@@ -35,7 +35,7 @@ from frappe.utils.caching import redis_cache
 @frappe.whitelist()
 def get_opening_dialog_data():
     data = {}
-    data["companys"] = frappe.get_list("Company", limit_page_length=0, order_by="name")
+    data["companies"] = frappe.get_list("Company", limit_page_length=0, order_by="name")
     data["pos_profiles_data"] = frappe.get_list(
         "POS Profile",
         filters={"disabled": 0},
@@ -266,6 +266,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                                             "batch_qty": batch.qty,
                                             "expiry_date": batch_doc.expiry_date,
                                             "batch_price": batch_doc.posa_batch_price,
+                                            "manufacturing_date": batch_doc.manufacturing_date,
                                         }
                                     )
                 serial_no_data = []
@@ -884,6 +885,7 @@ def get_items_details(pos_profile, items_data):
                                         "batch_qty": batch.qty,
                                         "expiry_date": batch_doc.expiry_date,
                                         "batch_price": batch_doc.posa_batch_price,
+                                        "manufacturing_date": batch_doc.manufacturing_date,
                                     }
                                 )
 
@@ -913,12 +915,31 @@ def get_items_details(pos_profile, items_data):
 @frappe.whitelist()
 def get_item_detail(item, doc=None, warehouse=None, price_list=None):
     item = json.loads(item)
+    today = nowdate()
     item_code = item.get("item_code")
-    if warehouse and item.get("has_batch_no") and not item.get("batch_no"):
-        item["batch_no"] = get_batch_no(
-            item_code, warehouse, item.get("qty"), False, item.get("d")
-        )
+    batch_no_data = []
+    if warehouse and item.get("has_batch_no"):
+        batch_list = get_batch_qty(warehouse=warehouse, item_code=item_code)
+        if batch_list:
+            for batch in batch_list:
+                if batch.qty > 0 and batch.batch_no:
+                    batch_doc = frappe.get_cached_doc("Batch", batch.batch_no)
+                    if (
+                        str(batch_doc.expiry_date) > str(today)
+                        or batch_doc.expiry_date in ["", None]
+                    ) and batch_doc.disabled == 0:
+                        batch_no_data.append(
+                            {
+                                "batch_no": batch.batch_no,
+                                "batch_qty": batch.qty,
+                                "expiry_date": batch_doc.expiry_date,
+                                "batch_price": batch_doc.posa_batch_price,
+                                "manufacturing_date": batch_doc.manufacturing_date,
+                            }
+                        )
+
     item["selling_price_list"] = price_list
+
     max_discount = frappe.get_value("Item", item_code, "max_discount")
     res = get_item_details(
         item,
@@ -928,6 +949,7 @@ def get_item_detail(item, doc=None, warehouse=None, price_list=None):
     if item.get("is_stock_item") and warehouse:
         res["actual_qty"] = get_stock_availability(item_code, warehouse)
     res["max_discount"] = max_discount
+    res["batch_no_data"] = batch_no_data
     return res
 
 
