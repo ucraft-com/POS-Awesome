@@ -482,10 +482,6 @@ def add_taxes_from_tax_template(item, parent_doc):
                 tax_row.db_insert()
 
 
-def get_taxes_fieldname_for_item():
-    return "taxes"
-
-
 @frappe.whitelist()
 def update_invoice(data):
     data = json.loads(data)
