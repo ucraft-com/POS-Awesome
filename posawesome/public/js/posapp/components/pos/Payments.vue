@@ -1229,11 +1229,18 @@ export default {
     set_mpesa_payment(payment) {
       this.pos_profile.use_customer_credit = 1;
       this.redeem_customer_credit = true;
+      const invoiceAmount =
+        this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+      let amount =
+        payment.unallocated_amount > invoiceAmount
+          ? invoiceAmount
+          : payment.unallocated_amount;
+      if (amount < 0 || !amount) amount = 0;
       const advance = {
         type: "Advance",
         credit_origin: payment.name,
         total_credit: flt(payment.unallocated_amount),
-        credit_to_redeem: flt(payment.unallocated_amount),
+        credit_to_redeem: flt(amount),
       };
       this.clear_all_amounts();
       this.customer_credit_dict.push(advance);

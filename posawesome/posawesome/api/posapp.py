@@ -21,7 +21,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
     get_dummy_message,
     get_existing_payment_request_amount,
 )
-from erpnext.controllers.accounts_controller import add_taxes_from_tax_template
+
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
     get_loyalty_program_details_with_points,
 )
@@ -225,7 +225,13 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                     "item_code": ["in", items],
                     "currency": pos_profile.get("currency"),
                     "selling": 1,
+                    "valid_from": ["<=", today],
                 },
+                or_filters=[
+                    ["valid_upto", ">=", today],
+                    ["valid_upto", "in", ["", None]],
+                ],
+                order_by="valid_from ASC, valid_upto DESC",
             )
 
             item_prices = {}
@@ -442,6 +448,38 @@ def get_sales_person_names():
         as_dict=1,
     )
     return sales_persons
+
+
+def add_taxes_from_tax_template(item, parent_doc):
+    accounts_settings = frappe.get_cached_doc("Accounts Settings")
+    add_taxes_from_item_tax_template = (
+        accounts_settings.add_taxes_from_item_tax_template
+    )
+    if item.get("item_tax_template") and add_taxes_from_item_tax_template:
+        item_tax_template = item.get("item_tax_template")
+        taxes_template_details = frappe.get_all(
+            "Item Tax Template Detail",
+            filters={"parent": item_tax_template},
+            fields=["tax_type"],
+        )
+
+        for tax_detail in taxes_template_details:
+            tax_type = tax_detail.get("tax_type")
+
+            found = any(tax.account_head == tax_type for tax in parent_doc.taxes)
+            if not found:
+                tax_row = parent_doc.append("taxes", {})
+                tax_row.update(
+                    {
+                        "description": str(tax_type).split(" - ")[0],
+                        "charge_type": "On Net Total",
+                        "account_head": tax_type,
+                    }
+                )
+
+                if parent_doc.doctype == "Purchase Order":
+                    tax_row.update({"category": "Total", "add_deduct_tax": "Add"})
+                tax_row.db_insert()
 
 
 @frappe.whitelist()
