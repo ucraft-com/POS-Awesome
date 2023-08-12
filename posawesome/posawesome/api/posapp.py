@@ -225,7 +225,13 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                     "item_code": ["in", items],
                     "currency": pos_profile.get("currency"),
                     "selling": 1,
+                    "valid_from": ["<=", today],
                 },
+                or_filters=[
+                    ["valid_upto", ">=", today],
+                    ["valid_upto", "in", ["", None]],
+                ],
+                order_by="valid_from ASC, valid_upto DESC",
             )
 
             item_prices = {}
