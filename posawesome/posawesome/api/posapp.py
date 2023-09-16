@@ -153,15 +153,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value="", attr
 
         limit = ""
         condition = ""
-
-        if pos_profile.get("posa_use_attribute_filter_one"):
-            condition += " AND b.attribute = '{attribute_name}'".format(
-                attribute_name=pos_profile.get("posa_attribute_filter_one")
-            )
-        if pos_profile.get("posa_use_attribute_filter_two"):
-            condition += " AND c.attribute = '{attribute_name}'".format(
-                attribute_name=pos_profile.get("posa_attribute_filter_two")
-            )
+        sql_join = ""
         condition += get_item_group_condition(pos_profile.get("name"))
 
         if use_limit_search:
@@ -179,12 +171,21 @@ def get_items(pos_profile, price_list=None, item_group="", search_value="", attr
             condition += get_seearch_items_conditions(
                 item_code, serial_no, batch_no, barcode
             )
-            if(attribute_one):
-                condition += """ AND b.attribute_value like '%{attribute_one}%' 
-                    """.format(attribute_one=attribute_one)
-            if(attribute_two):
-                condition += """ AND c.attribute_value like '%{attribute_two}%' 
-                                """.format(attribute_two=attribute_two)
+            if(attribute_one and pos_profile.get("posa_use_attribute_filter_one")):
+                sql_join += " , `tabItem Variant Attribute` b"
+                condition += """ 
+                                AND i.item_code = b.parent 
+                                AND b.attribute_value like '%{attribute_one}%' 
+                                AND b.attribute = '{attribute_name}'
+                    """.format(attribute_one=attribute_one,
+                               attribute_name=pos_profile.get("posa_attribute_filter_one"))
+            if(attribute_two and pos_profile.get("posa_use_attribute_filter_two")):
+                sql_join += " , `tabItem Variant Attribute` c"
+                condition += """ AND i.item_code = c.parent 
+                                AND c.attribute_value like '%{attribute_two}%' 
+                                AND c.attribute = '{attribute_name}'
+                                """.format(attribute_two=attribute_two,
+                                           attribute_name=pos_profile.get("posa_attribute_filter_two"))
             if item_group:
                 condition += " AND i.item_group like '%{item_group}%'".format(
                     item_group=item_group
@@ -210,24 +211,20 @@ def get_items(pos_profile, price_list=None, item_group="", search_value="", attr
                 i.has_batch_no,
                 i.has_serial_no,
                 i.max_discount,
-                i.brand,
-                b.attribute_value as attribute_one,
-                c.attribute_value as attribute_two
+                i.brand
             FROM
-                `tabItem` i , `tabItem Variant Attribute` b , `tabItem Variant Attribute` c
+                `tabItem` i {sql_join}
             WHERE
                     i.disabled = 0
                     AND i.is_sales_item = 1
                     AND i.is_fixed_asset = 0
-                    AND i.item_code = b.parent
-                    AND i.item_code = c.parent
                     {condition} 
              Group BY i.item_code
              ORDER BY
                 i.item_name asc
             {limit}
                 """.format(
-                condition=condition, limit=limit
+                condition=condition, limit=limit, sql_join=sql_join
             ), as_dict=1,)
 
         if items_data:
@@ -310,11 +307,12 @@ def get_items(pos_profile, price_list=None, item_group="", search_value="", attr
                 if pos_profile.get("posa_show_template_items") and item.has_variants:
                     attributes = get_item_attributes(item.item_code)
                 item_attributes = ""
-                if pos_profile.get("posa_show_template_items") and item.variant_of:
+                if item.variant_of:
                     item_attributes = frappe.get_all(
                         "Item Variant Attribute",
-                        fields=["attribute", "attribute_value"],
+                        fields=["attribute_value"],
                         filters={"parent": item.item_code, "parentfield": "attributes"},
+                        pluck="attribute_value"
                     )
                 if posa_display_items_in_stock and (
                     not item_stock_qty or item_stock_qty < 0

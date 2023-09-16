@@ -560,23 +560,22 @@ export default {
         let gr = "";
         let afo = "";
         let aft = "";
-
+        
         if(this.item_group != 'ALL'){
           gr = this.item_group.toLowerCase();
         }
         if(this.attribute_one != 'ALL'){
-          afo = this.attribute_one.toLowerCase();
+          afo = this.attribute_one;
         }
         if(this.attribute_two != 'ALL'){
-          aft = this.attribute_two.toLowerCase();
+          aft = this.attribute_two;
         }
 
         filtred_group_list = this.items.filter((item) =>
           item.item_group.toLowerCase().includes(gr) && 
-          item.attribute_one.toLowerCase().includes(afo) &&
-          item.attribute_two.toLowerCase().includes(aft)
+          (afo ? item.item_attributes.includes(afo) : true) &&
+          (aft ? item.item_attributes.includes(aft) : true)
         );
-
         if (!this.search || this.search.length < 3) {
           if (
             this.pos_profile.posa_show_template_items &&
