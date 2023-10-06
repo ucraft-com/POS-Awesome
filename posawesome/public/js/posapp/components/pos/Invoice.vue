@@ -1282,7 +1282,10 @@ export default {
     validate() {
       let value = true;
       this.items.forEach((item) => {
-        if (this.pos_profile.posa_max_discount_allowed) {
+        if (
+          this.pos_profile.posa_max_discount_allowed &&
+          !item.posa_offer_applied
+        ) {
           if (item.discount_amount && this.flt(item.discount_amount) > 0) {
             // calc discount percentage
             const discount_percentage =
