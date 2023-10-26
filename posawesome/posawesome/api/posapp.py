@@ -126,36 +126,57 @@ def update_opening_shift_data(data, pos_profile):
 
 
 @frappe.whitelist()
-def get_items(pos_profile, price_list=None, item_group="", search_value=""):
+def get_items(pos_profile, price_list=None, item_group="", search_value="", attribute_one = "", attribute_two = ""):
     _pos_profile = json.loads(pos_profile)
     ttl = _pos_profile.get("posa_server_cache_duration")
     if ttl:
         ttl = int(ttl) * 30
 
     @redis_cache(ttl=ttl or 1800)
-    def __get_items(pos_profile, price_list, item_group, search_value):
-        return _get_items(pos_profile, price_list, item_group, search_value)
+    def __get_items(pos_profile, price_list, item_group, search_value, attribute_one = "", attribute_two = ""):
+        return _get_items(pos_profile, price_list, item_group, search_value, attribute_one, attribute_two)
 
-    def _get_items(pos_profile, price_list, item_group, search_value):
+    def _get_items(pos_profile, price_list, item_group, search_value, attribute_one, attribute_two):
         pos_profile = json.loads(pos_profile)
         today = nowdate()
         data = dict()
-        posa_display_items_in_stock = pos_profile.get("posa_display_items_in_stock")
         search_serial_no = pos_profile.get("posa_search_serial_no")
         search_batch_no = pos_profile.get("posa_search_batch_no")
         posa_show_template_items = pos_profile.get("posa_show_template_items")
+        posa_hide_variants_items = pos_profile.get("posa_hide_variants_items")
         warehouse = pos_profile.get("warehouse")
-        use_limit_search = pos_profile.get("pose_use_limit_search")
+        use_limit_search = pos_profile.get("posa_use_limit_search")
+        hide_unavailable_items = pos_profile.get("posa_display_items_in_stock")
         search_limit = 0
 
         if not price_list:
             price_list = pos_profile.get("selling_price_list")
+        allowed_item_groups = get_item_groups(pos_profile.get("name"))
+        item_doc = frappe.qb.DocType("Item")
 
-        limit = ""
-
-        condition = ""
-        condition += get_item_group_condition(pos_profile.get("name"))
-
+        items_data_qb = (frappe.qb
+                         .from_(item_doc)
+                         .select(item_doc.name.as_("item_code"),
+                                item_doc.item_name,
+                                item_doc.description,
+                                item_doc.stock_uom,
+                                item_doc.image,
+                                item_doc.is_stock_item,
+                                item_doc.has_variants,
+                                item_doc.variant_of,
+                                item_doc.item_group,
+                                item_doc.idx,
+                                item_doc.has_batch_no,
+                                item_doc.has_serial_no,
+                                item_doc.max_discount,
+                                item_doc.brand)
+                        .where(item_doc.disabled == 0)
+                        .where(item_doc.is_fixed_asset == 0)
+                        .where(item_doc.is_sales_item == 1)
+                        .groupby(item_doc.item_code)
+                        .orderby(item_doc.item_name)
+                        )
+        
         if use_limit_search:
             search_limit = pos_profile.get("posa_search_limit") or 500
             if search_value:
@@ -168,52 +189,56 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
             batch_no = data.get("batch_no") if data.get("batch_no") else ""
             barcode = data.get("barcode") if data.get("barcode") else ""
 
-            condition += get_seearch_items_conditions(
-                item_code, serial_no, batch_no, barcode
-            )
-            if item_group:
-                condition += " AND item_group like '%{item_group}%'".format(
-                    item_group=item_group
+            if serial_no or batch_no or barcode:
+                items_data_qb = items_data_qb.where(item_doc.name == frappe.db.escape(item_code))
+            elif item_code:
+                like_state = ("%"+ item_code +"%")
+                items_data_qb = items_data_qb.where(
+                    item_doc.name.like(like_state) | item_doc.item_name.like(like_state)  
+                    )
+            if(attribute_one and pos_profile.get("posa_use_attribute_filter_one")):
+                attribute_one_doc = frappe.qb.DocType("Item Variant Attribute").as_("b")
+                items_data_qb = items_data_qb.from_(attribute_one_doc)
+                items_data_qb = items_data_qb.where(
+                    item_doc.name == attribute_one_doc.parent)
+                items_data_qb = items_data_qb.where(
+                    attribute_one_doc.attribute == pos_profile.get("posa_attribute_filter_one"))
+                items_data_qb = items_data_qb.where(
+                    attribute_one_doc.attribute_value.like("%"+attribute_one+"%")
                 )
-            limit = " LIMIT {search_limit}".format(search_limit=search_limit)
+            
+            if(attribute_two and pos_profile.get("posa_use_attribute_filter_two")):
+                attribute_two_doc = frappe.qb.DocType("Item Variant Attribute").as_("c")
+            
+                items_data_qb = items_data_qb.from_(attribute_two_doc)
+                items_data_qb = items_data_qb.where(
+                    item_doc.name == attribute_two_doc.parent)
+                items_data_qb = items_data_qb.where(
+                    attribute_two_doc.attribute == pos_profile.get("posa_attribute_filter_two"))
+                items_data_qb = items_data_qb.where(
+                    attribute_two_doc.attribute_value.like("%"+attribute_two+"%")
+                )
+            
+            if item_group:
+                items_data_qb = items_data_qb.where(item_doc.item_group.like("%"+item_group+"%"))
+            items_data_qb = items_data_qb.limit(search_limit)
 
-        if not posa_show_template_items:
-            condition += " AND has_variants = 0"
+        if allowed_item_groups:
+            items_data_qb = items_data_qb.where(item_doc.item_group.isin(allowed_item_groups))
+        
+        if posa_hide_variants_items and posa_show_template_items:
+            items_data_qb = items_data_qb.where(item_doc.has_variants == 1)
+        if not posa_show_template_items and posa_hide_variants_items:
+            items_data_qb = items_data_qb.where(item_doc.has_variants == 0)
+        if hide_unavailable_items:
+            bin_doc = frappe.qb.DocType("Bin").as_("bin")
+            items_data_qb = items_data_qb.from_(bin_doc)
+            items_data_qb = items_data_qb.where(bin_doc.warehouse == warehouse)
+            items_data_qb = items_data_qb.where(bin_doc.item_code == item_doc.name)
+            items_data_qb = items_data_qb.where(bin_doc.actual_qty > 0)
 
         result = []
-
-        items_data = frappe.db.sql(
-            """
-            SELECT
-                name AS item_code,
-                item_name,
-                description,
-                stock_uom,
-                image,
-                is_stock_item,
-                has_variants,
-                variant_of,
-                item_group,
-                idx as idx,
-                has_batch_no,
-                has_serial_no,
-                max_discount,
-                brand
-            FROM
-                `tabItem`
-            WHERE
-                disabled = 0
-                    AND is_sales_item = 1
-                    AND is_fixed_asset = 0
-                    {condition}
-            ORDER BY
-                item_name asc
-            {limit}
-                """.format(
-                condition=condition, limit=limit
-            ),
-            as_dict=1,
-        )
+        items_data = items_data_qb.run(as_dict=1)
 
         if items_data:
             items = [d.item_code for d in items_data]
@@ -287,56 +312,45 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                         fields=["name as serial_no"],
                     )
                 item_stock_qty = 0
-                if pos_profile.get("posa_display_items_in_stock") or use_limit_search:
+                if hide_unavailable_items or use_limit_search:
                     item_stock_qty = get_stock_availability(
                         item_code, pos_profile.get("warehouse")
                     )
                 attributes = ""
-                if pos_profile.get("posa_show_template_items") and item.has_variants:
+                if posa_show_template_items and item.has_variants:
                     attributes = get_item_attributes(item.item_code)
                 item_attributes = ""
-                if pos_profile.get("posa_show_template_items") and item.variant_of:
+                if item.variant_of:
                     item_attributes = frappe.get_all(
                         "Item Variant Attribute",
-                        fields=["attribute", "attribute_value"],
+                        fields=["attribute_value"],
                         filters={"parent": item.item_code, "parentfield": "attributes"},
+                        pluck="attribute_value"
                     )
-                if posa_display_items_in_stock and (
-                    not item_stock_qty or item_stock_qty < 0
-                ):
-                    pass
-                else:
-                    row = {}
-                    row.update(item)
-                    row.update(
-                        {
-                            "rate": item_price.get("price_list_rate") or 0,
-                            "currency": item_price.get("currency")
-                            or pos_profile.get("currency"),
-                            "item_barcode": item_barcode or [],
-                            "actual_qty": item_stock_qty or 0,
-                            "serial_no_data": serial_no_data or [],
-                            "batch_no_data": batch_no_data or [],
-                            "attributes": attributes or "",
-                            "item_attributes": item_attributes or "",
-                        }
-                    )
-                    result.append(row)
+
+                row = {}
+                row.update(item)
+                row.update(
+                    {
+                        "rate": item_price.get("price_list_rate") or 0,
+                        "currency": item_price.get("currency")
+                        or pos_profile.get("currency"),
+                        "item_barcode": item_barcode or [],
+                        "actual_qty": item_stock_qty or 0,
+                        "serial_no_data": serial_no_data or [],
+                        "batch_no_data": batch_no_data or [],
+                        "attributes": attributes or "",
+                        "item_attributes": item_attributes or "",
+                    }
+                )
+                result.append(row)
+        
         return result
 
     if _pos_profile.get("posa_use_server_cache"):
-        return __get_items(pos_profile, price_list, item_group, search_value)
+        return __get_items(pos_profile, price_list, item_group, search_value, attribute_one, attribute_two)
     else:
-        return _get_items(pos_profile, price_list, item_group, search_value)
-
-
-def get_item_group_condition(pos_profile):
-    cond = " and 1=1"
-    item_groups = get_item_groups(pos_profile)
-    if item_groups:
-        cond = " and item_group in (%s)" % (", ".join(["%s"] * len(item_groups)))
-
-    return cond % tuple(item_groups)
+        return _get_items(pos_profile, price_list, item_group, search_value, attribute_one, attribute_two)
 
 
 def get_root_of(doctype):
@@ -1738,10 +1752,22 @@ def search_serial_or_batch_or_barcode_number(search_value, search_serial_no):
         return batch_no_data
     return {}
 
+@frappe.whitelist()
+def get_attributes_values(pos_profile):
+    _pos_profile = json.loads(pos_profile)
+    values_one = None
+    values_two = None
 
-def get_seearch_items_conditions(item_code, serial_no, batch_no, barcode):
-    if serial_no or batch_no or barcode:
-        return " and name = {0}".format(frappe.db.escape(item_code))
-    return """ and (name like {item_code} or item_name like {item_code})""".format(
-        item_code=frappe.db.escape("%" + item_code + "%")
-    )
+    if _pos_profile.get("posa_use_attribute_filter_one"):
+        values_one = frappe.db.get_all("Item Attribute Value",
+					filters={'parent':_pos_profile.get("posa_attribute_filter_one")},
+					fields=['attribute_value'],
+					order_by="attribute_value")
+    
+    if _pos_profile.get("posa_use_attribute_filter_two"):
+        values_two = frappe.db.get_all("Item Attribute Value",
+					filters={'parent':_pos_profile.get("posa_attribute_filter_two")},
+					fields=['attribute_value'],
+					order_by="attribute_value")
+        
+    return {"values_one":values_one,"values_two":values_two}

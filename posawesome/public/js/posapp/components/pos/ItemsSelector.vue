@@ -2,7 +2,7 @@
   <div>
     <v-card
       class="selection mx-auto grey lighten-5 mt-3"
-      style="max-height: 75vh; height: 75vh"
+      style="max-height: 90vh; height: 80vh"
     >
       <v-progress-linear
         :active="loading"
@@ -12,7 +12,7 @@
         color="info"
       ></v-progress-linear>
       <v-row class="items px-2 py-1">
-        <v-col class="pb-0 mb-2">
+        <v-col cols="8" class="pb-0 mb-2">
           <v-text-field
             dense
             clearable
@@ -29,7 +29,7 @@
             ref="debounce_search"
           ></v-text-field>
         </v-col>
-        <v-col cols="3" class="pb-0 mb-2" v-if="pos_profile.posa_input_qty">
+        <v-col class="pb-0 mb-2" v-if="pos_profile.posa_input_qty">
           <v-text-field
             dense
             outlined
@@ -43,7 +43,7 @@
             @keydown.esc="esc_event"
           ></v-text-field>
         </v-col>
-        <v-col cols="2" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
+        <v-col class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
           <v-checkbox
             v-model="new_line"
             color="accent"
@@ -53,6 +53,29 @@
             hide-details
           ></v-checkbox>
         </v-col>
+        <v-row class="px-3 py-1 pb-0 mb-2">
+          <v-col class="pb-0 mb-2">
+            <v-select
+              :items="items_group"
+              :label="frappe._('Items Group')"
+              dense
+              outlined
+              hide-details
+              v-model="item_group"
+              v-on:change="search_onchange"
+            ></v-select>
+        </v-col>
+        <v-col class="pb-0 mb-2" v-if="pos_profile.posa_use_attribute_filter_one">
+          <v-select :items="attributes_one" :label="pos_profile.posa_attribute_filter_one" 
+          dense outlined hide-details v-model="attribute_one" v-on:change="search_onchange">
+              </v-select>
+        </v-col>
+        <v-col class="pb-0 mb-2" v-if="pos_profile.posa_use_attribute_filter_two">
+            <v-select :items="attributes_two" :label="pos_profile.posa_attribute_filter_two" 
+            dense outlined hide-details v-model="attribute_two" v-on:change="search_onchange">
+              </v-select>
+        </v-col>
+        </v-row>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">
             <v-row dense class="overflow-y-auto" style="max-height: 67vh">
@@ -126,18 +149,7 @@
       </v-row>
     </v-card>
     <v-card class="cards mb-0 mt-3 pa-2 grey lighten-5">
-      <v-row no-gutters align="center" justify="center">
-        <v-col cols="12">
-          <v-select
-            :items="items_group"
-            :label="frappe._('Items Group')"
-            dense
-            outlined
-            hide-details
-            v-model="item_group"
-            v-on:change="search_onchange"
-          ></v-select>
-        </v-col>
+      <v-row no-gutters align="center" justify="center" class="items px-2 py-1">        
         <v-col cols="3" class="mt-1">
           <v-btn-toggle
             v-model="items_view"
@@ -177,8 +189,12 @@ export default {
     flags: {},
     items_view: 'list',
     item_group: 'ALL',
+    attribute_one: 'ALL',
+    attribute_two: 'ALL',
     loading: false,
     items_group: ['ALL'],
+    attributes_one: ['ALL'],
+    attributes_two: ['ALL'],
     items: [],
     search: '',
     first_search: '',
@@ -194,7 +210,7 @@ export default {
 
   watch: {
     filtred_items(new_value, old_value) {
-      if (!this.pos_profile.pose_use_limit_search) {
+      if (!this.pos_profile.posa_use_limit_search) {
         if (new_value.length != old_value.length) {
           this.update_items_details(new_value);
         }
@@ -225,16 +241,25 @@ export default {
       let search = this.get_search(this.first_search);
       let gr = '';
       let sr = '';
+      let afo = '';
+      let aft = '';
+
       if (search) {
         sr = search;
       }
       if (vm.item_group != 'ALL') {
         gr = vm.item_group.toLowerCase();
       }
+      if(vm.attribute_one != 'ALL'){
+        afo = vm.attribute_one;
+      }
+      if(vm.attribute_two != 'ALL'){
+        aft = vm.attribute_two;
+      }
       if (
         vm.pos_profile.posa_local_storage &&
         localStorage.items_storage &&
-        !vm.pos_profile.pose_use_limit_search
+        !vm.pos_profile.posa_use_limit_search
       ) {
         vm.items = JSON.parse(localStorage.getItem('items_storage'));
         evntBus.$emit('set_all_items', vm.items);
@@ -247,6 +272,8 @@ export default {
           price_list: vm.customer_price_list,
           item_group: gr,
           search_value: sr,
+          attribute_one: afo,
+          attribute_two: aft
         },
         callback: function (r) {
           if (r.message) {
@@ -256,7 +283,7 @@ export default {
             console.info('Items Loaded');
             if (
               vm.pos_profile.posa_local_storage &&
-              !vm.pos_profile.pose_use_limit_search
+              !vm.pos_profile.posa_use_limit_search
             ) {
               localStorage.setItem('items_storage', '');
               try {
@@ -268,7 +295,7 @@ export default {
                 console.error(e);
               }
             }
-            if (vm.pos_profile.pose_use_limit_search) {
+            if (vm.pos_profile.posa_use_limit_search) {
               vm.enter_event();
             }
           }
@@ -300,6 +327,31 @@ export default {
           },
         });
       }
+    },
+    get_attributes_values() {
+      if (!this.pos_profile) {
+        console.log('No POS Profile');
+        return;
+      }
+      const vm = this;
+      frappe.call({
+        method: 'posawesome.posawesome.api.posapp.get_attributes_values',
+        args: {pos_profile:vm.pos_profile},
+        callback: function (r) {
+          if (r.message.values_one) {
+              r.message.values_one.forEach((element) => {
+              vm.attributes_one.push(element.attribute_value);
+            });
+          
+          }
+          if (r.message.values_two) {
+              r.message.values_two.forEach((element) => {
+              vm.attributes_two.push(element.attribute_value);
+            });
+          
+          }
+        },
+        });
     },
     getItmesHeaders() {
       const items_headers = [
@@ -395,7 +447,7 @@ export default {
     },
     search_onchange() {
       const vm = this;
-      if (vm.pos_profile.pose_use_limit_search) {
+      if (vm.pos_profile.posa_use_limit_search) {
         vm.get_items();
       } else {
         vm.enter_event();
@@ -501,18 +553,29 @@ export default {
   computed: {
     filtred_items() {
       this.search = this.get_search(this.first_search);
-      if (!this.pos_profile.pose_use_limit_search) {
+      if (!this.pos_profile.posa_use_limit_search) {
         let filtred_list = [];
         let filtred_group_list = [];
-        if (this.item_group != 'ALL') {
-          filtred_group_list = this.items.filter((item) =>
-            item.item_group
-              .toLowerCase()
-              .includes(this.item_group.toLowerCase())
-          );
-        } else {
-          filtred_group_list = this.items;
+
+        let gr = "";
+        let afo = "";
+        let aft = "";
+        
+        if(this.item_group != 'ALL'){
+          gr = this.item_group.toLowerCase();
         }
+        if(this.attribute_one != 'ALL'){
+          afo = this.attribute_one;
+        }
+        if(this.attribute_two != 'ALL'){
+          aft = this.attribute_two;
+        }
+
+        filtred_group_list = this.items.filter((item) =>
+          item.item_group.toLowerCase().includes(gr) && 
+          (afo ? item.item_attributes.includes(afo) : true) &&
+          (aft ? item.item_attributes.includes(aft) : true)
+        );
         if (!this.search || this.search.length < 3) {
           if (
             this.pos_profile.posa_show_template_items &&
@@ -608,6 +671,7 @@ export default {
       this.pos_profile = data.pos_profile;
       this.get_items();
       this.get_items_groups();
+      this.get_attributes_values();
       this.items_view = this.pos_profile.posa_default_card_view
         ? 'card'
         : 'list';
