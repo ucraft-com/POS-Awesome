@@ -1280,8 +1280,52 @@ export default {
     },
 
     validate() {
-      let value = true;
-      this.items.forEach((item) => {
+      if (this.invoice_doc.is_return) {
+          if (this.subtotal >= 0) {
+            evntBus.$emit("show_mesage", {
+              text: __(`Return Invoice Total Not Correct`),
+              color: "error",
+            });
+            return false;
+          }
+          if (this.subtotal * -1 > this.return_doc.total) {
+            evntBus.$emit("show_mesage", {
+              text: __(`Return Invoice Total should not be higher than {0}`, [
+                this.return_doc.total,
+              ]),
+              color: "error",
+            });
+            return false;
+          }
+          this.items.forEach((item) => {
+            const return_item = this.return_doc.items.find(
+              (element) => element.item_code == item.item_code
+            );
+
+            if (!return_item) {
+              evntBus.$emit("show_mesage", {
+                text: __(
+                  `The item {0} cannot be returned because it is not in the invoice {1}`,
+                  [item.item_name, this.return_doc.name]
+                ),
+                color: "error",
+              });
+              return false;
+            } else if (item.qty * -1 > return_item.qty || item.qty >= 0) {
+              evntBus.$emit("show_mesage", {
+                text: __(`The QTY of the item {0} cannot be greater than {1}`, [
+                  item.item_name,
+                  return_item.qty,
+                ]),
+                color: "error",
+              });
+              return false;
+            }
+          });
+          return true;
+        }
+      else{
+        this.items.forEach((item) => {
         if (
           this.pos_profile.posa_max_discount_allowed &&
           !item.posa_offer_applied
@@ -1301,7 +1345,7 @@ export default {
                 ),
                 color: "error",
               });
-              value = false;
+              return false;
             }
           }
         }
@@ -1318,7 +1362,7 @@ export default {
               ),
               color: "error",
             });
-            value = false;
+            return false;
           }
         }
         if (item.qty == 0) {
@@ -1328,7 +1372,7 @@ export default {
             ]),
             color: "error",
           });
-          value = false;
+          return false;
         }
         if (
           item.max_discount > 0 &&
@@ -1341,7 +1385,7 @@ export default {
             ]),
             color: "error",
           });
-          value = false;
+          return false;
         }
         if (item.has_serial_no) {
           if (
@@ -1355,7 +1399,7 @@ export default {
               ]),
               color: "error",
             });
-            value = false;
+            return false;
           }
         }
         if (item.has_batch_no) {
@@ -1367,10 +1411,12 @@ export default {
               ),
               color: "error",
             });
-            value = false;
+            return false;
           }
         }
-        if (this.pos_profile.posa_allow_user_to_edit_additional_discount) {
+        });
+      }
+      if (this.pos_profile.posa_allow_user_to_edit_additional_discount) {
           const clac_percentage = (this.discount_amount / this.Total) * 100;
           if (clac_percentage > this.pos_profile.posa_max_discount_allowed) {
             evntBus.$emit("show_mesage", {
@@ -1379,58 +1425,10 @@ export default {
               ]),
               color: "error",
             });
-            value = false;
+            return false;
           }
         }
-        if (this.invoice_doc.is_return) {
-          if (this.subtotal >= 0) {
-            evntBus.$emit("show_mesage", {
-              text: __(`Return Invoice Total Not Correct`),
-              color: "error",
-            });
-            value = false;
-            return value;
-          }
-          if (this.subtotal * -1 > this.return_doc.total) {
-            evntBus.$emit("show_mesage", {
-              text: __(`Return Invoice Total should not be higher than {0}`, [
-                this.return_doc.total,
-              ]),
-              color: "error",
-            });
-            value = false;
-            return value;
-          }
-          this.items.forEach((item) => {
-            const return_item = this.return_doc.items.find(
-              (element) => element.item_code == item.item_code
-            );
-
-            if (!return_item) {
-              evntBus.$emit("show_mesage", {
-                text: __(
-                  `The item {0} cannot be returned because it is not in the invoice {1}`,
-                  [item.item_name, this.return_doc.name]
-                ),
-                color: "error",
-              });
-              value = false;
-              return value;
-            } else if (item.qty * -1 > return_item.qty || item.qty >= 0) {
-              evntBus.$emit("show_mesage", {
-                text: __(`The QTY of the item {0} cannot be greater than {1}`, [
-                  item.item_name,
-                  return_item.qty,
-                ]),
-                color: "error",
-              });
-              value = false;
-              return value;
-            }
-          });
-        }
-      });
-      return value;
+      return true;
     },
 
     get_draft_invoices() {
