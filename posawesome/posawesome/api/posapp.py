@@ -859,7 +859,7 @@ def get_draft_invoices(pos_opening_shift):
 def delete_invoice(invoice):
     if frappe.get_value("Sales Invoice", invoice, "posa_is_printed"):
         frappe.throw(_("This invoice {0} cannot be deleted").format(invoice))
-    frappe.delete_doc("Sales Invoice", invoice, force=1)
+    frappe.delete_doc("Sales Invoice", invoice, force=1, ignore_permissions=True)
     return _("Invoice {0} Deleted").format(invoice)
 
 
