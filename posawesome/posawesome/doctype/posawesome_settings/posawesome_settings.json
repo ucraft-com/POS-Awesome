@@ -1,0 +1,55 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-11-07 18:44:10.965838",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "payment_entry_settings_section",
+  "receive_payment_series",
+  "pay_payment_series"
+ ],
+ "fields": [
+  {
+   "fieldname": "receive_payment_series",
+   "fieldtype": "Select",
+   "label": "Receive Payment Entry Series"
+  },
+  {
+   "fieldname": "pay_payment_series",
+   "fieldtype": "Select",
+   "label": "Pay Payment Entry Series"
+  },
+  {
+   "fieldname": "payment_entry_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Entry Settings"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2023-11-07 20:14:01.912036",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "POSAwesome Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

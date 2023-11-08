@@ -39,13 +39,18 @@ def create_payment_entry(
             ).format(party_account_currency=party_account_currency, currency=currency)
         )
     payment_type = "Receive"
-
+    naming_series = None
     bank = get_bank_cash_account(company, mode_of_payment)
     company_currency = frappe.get_value("Company", company, "default_currency")
     conversion_rate = get_exchange_rate(currency, company_currency, date, "for_selling")
     paid_amount, received_amount = set_paid_amount_and_received_amount(
         party_account_currency, bank, amount, payment_type, None, conversion_rate
     )
+    if(payment_type == "Receive"):
+        naming_series = frappe.db.get_single_value('POSAwesome Settings', 'receive_payment_series')
+    if(payment_type == "Pay"):
+        naming_series = frappe.db.get_single_value('POSAwesome Settings', 'pay_payment_series')
+
 
     pe = frappe.new_doc("Payment Entry")
     pe.payment_type = payment_type
@@ -73,7 +78,9 @@ def create_payment_entry(
         bank_account = get_party_bank_account(pe.party_type, pe.party)
         pe.set("bank_account", bank_account)
         pe.set_bank_account_data()
-
+    
+    if naming_series and naming_series != "":
+        pe.naming_series = naming_series
     pe.setup_party_account_field()
     pe.set_missing_values()
 
