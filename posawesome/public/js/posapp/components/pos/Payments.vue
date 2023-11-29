@@ -534,7 +534,7 @@
           </v-col>
           <v-col
             cols="6"
-            v-if="!invoice_doc.is_return && pos_profile.use_customer_credit"
+            v-if="!invoice_doc.is_return && pos_profile.use_customer_credit && customer_credit_dict.length!=0"
           >
             <v-switch
               v-model="redeem_customer_credit"
@@ -980,6 +980,41 @@ export default {
         this.credit_change = 0;
       }
     },
+    validate_customer_credit(){
+        frappe
+          .call("posawesome.posawesome.api.posapp.get_available_credit", {
+            customer: this.invoice_doc.customer,
+            company: this.pos_profile.company,
+          })
+          .then((r) => {
+            const data = r.message;
+            if (data.length) {
+              const amount =
+                this.invoice_doc.rounded_total || this.invoice_doc.grand_total;
+              let remainAmount = amount;
+
+              data.forEach((row) => {
+                if (remainAmount > 0) {
+                  if (remainAmount >= row.total_credit) {
+                    row.credit_to_redeem = row.total_credit;
+                    remainAmount = remainAmount - row.total_credit;
+                  } else {
+                    row.credit_to_redeem = remainAmount;
+                    remainAmount = 0;
+                  }
+                } else {
+                  row.credit_to_redeem = 0;
+                }
+              });
+
+              this.customer_credit_dict = data;
+              this.redeem_customer_credit = true
+              console.info(this.customer_credit_dict)
+            } else {
+              this.customer_credit_dict = [];
+            }
+          });
+    },
     get_available_credit(e) {
       this.clear_all_amounts();
       if (e) {
@@ -1342,6 +1377,7 @@ export default {
     this.$nextTick(function () {
       evntBus.$on("send_invoice_doc_payment", (invoice_doc) => {
         this.invoice_doc = invoice_doc;
+        this.validate_customer_credit();
         const default_payment = this.invoice_doc.payments.find(
           (payment) => payment.default == 1
         );
