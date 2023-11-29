@@ -764,6 +764,7 @@
                 >{{ __("Return") }}</v-btn
               >
             </v-col>
+            <!-- 
             <v-col cols="6" class="pa-1">
               <v-btn
                 block
@@ -774,6 +775,7 @@
                 >{{ __("Cancel") }}</v-btn
               >
             </v-col>
+            -->
             <v-col cols="6" class="pa-1">
               <v-btn
                 block
@@ -783,7 +785,7 @@
                 @click="new_invoice"
                 >{{ __("Save/New") }}</v-btn
               >
-            </v-col>
+            </v-col> 
             <v-col class="pa-1">
               <v-btn
                 block
@@ -1257,6 +1259,16 @@ export default {
     },
 
     show_payment() {
+    this.redeem_customer_credit = false;
+    if(!frappe.user_roles.includes("POS Cash"))
+    {
+
+        evntBus.$emit("show_mesage", {
+          text: __(`Access Restricted`),
+          color: "error",
+        });
+        return;
+    }
       if (!this.customer) {
         evntBus.$emit("show_mesage", {
           text: __(`There is no Customer !`),
