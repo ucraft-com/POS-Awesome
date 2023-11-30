@@ -182,7 +182,16 @@ export default {
       win.focus();
     },
     close_shift_dialog() {
-      evntBus.$emit('open_closing_dialog');
+      if(!frappe.user_roles.includes("POS Cash"))
+    {
+
+        evntBus.$emit("show_mesage", {
+          text: __(`Access Restricted`),
+          color: "error",
+        });
+        return;
+    }
+    evntBus.$emit('open_closing_dialog');
     },
     show_mesage(data) {
       this.snack = true;
