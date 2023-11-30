@@ -1093,6 +1093,14 @@ export default {
 
     new_invoice(data = {}) {
       let old_invoice = null;
+       if(!data.customer)
+    {
+        evntBus.$emit("show_mesage", {
+          text: __(`Kindly Select Customer`),
+          color: "error",
+        });
+        return;
+    }
       evntBus.$emit("set_customer_readonly", false);
       this.expanded = [];
       this.posa_offers = [];

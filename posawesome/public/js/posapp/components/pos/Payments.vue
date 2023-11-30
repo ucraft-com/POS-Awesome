@@ -540,6 +540,7 @@
               v-model="redeem_customer_credit"
               flat
               :label="frappe._('Use Customer Credit')"
+              :disabled="readonly"
               class="my-0 py-0"
               @change="get_available_credit($event)"
             ></v-switch>
