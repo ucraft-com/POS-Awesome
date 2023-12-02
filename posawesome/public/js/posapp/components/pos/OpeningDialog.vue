@@ -166,15 +166,6 @@ export default {
       });
     },
     submit_dialog() {
-       if(!frappe.user_roles.includes("POS Cash"))
-    {
-
-        evntBus.$emit("show_mesage", {
-          text: __(`Access Restricted`),
-          color: "error",
-        });
-        return;
-    }
       if (!this.payments_methods.length || !this.company || !this.pos_profile) {
         return;
       }
