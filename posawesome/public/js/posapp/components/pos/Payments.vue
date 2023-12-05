@@ -888,7 +888,6 @@ export default {
         },
         async: true,
         callback: function (r) {
-          var response = r.message;
           if (r.message) {
             if (print) {
               vm.load_print_page();
@@ -1342,7 +1341,6 @@ export default {
   mounted: function () {
     this.$nextTick(function () {
       evntBus.$on("send_invoice_doc_payment", (invoice_doc) => {
-        // console.log(invoice_doc.items, "mbsg");
         this.invoice_doc = invoice_doc;
         const default_payment = this.invoice_doc.payments.find(
           (payment) => payment.default == 1

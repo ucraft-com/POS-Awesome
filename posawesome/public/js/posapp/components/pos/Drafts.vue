@@ -7,7 +7,7 @@
       <v-card>
         <v-card-title>
           <span class="headline primary--text">{{
-            __("Select Hold Invoice")
+            __('Select Hold Invoice')
           }}</span>
         </v-card-title>
         <v-card-text class="pa-0">
@@ -25,7 +25,7 @@
                     v-model="selected"
                   >
                     <template v-slot:item.posting_time="{ item }">
-                      {{ item.posting_time.split(".")[0] }}
+                      {{ item.posting_time.split('.')[0] }}
                     </template>
                     <template v-slot:item.grand_total="{ item }">
                       {{ currencySymbol(item.currency) }}
@@ -48,8 +48,8 @@
 </template>
 
 <script>
-import { evntBus } from "../../bus";
-import format from "../../format";
+import { evntBus } from '../../bus';
+import format from '../../format';
 export default {
   // props: ["draftsDialog"],
   mixins: [format],
@@ -60,33 +60,33 @@ export default {
     dialog_data: {},
     headers: [
       {
-        text: __("Customer"),
-        value: "customer_name",
-        align: "start",
+        text: __('Customer'),
+        value: 'customer_name',
+        align: 'start',
         sortable: true,
       },
       {
-        text: __("Date"),
-        align: "start",
+        text: __('Date'),
+        align: 'start',
         sortable: true,
-        value: "posting_date",
+        value: 'posting_date',
       },
       {
-        text: __("Time"),
-        align: "start",
+        text: __('Time'),
+        align: 'start',
         sortable: true,
-        value: "posting_time",
+        value: 'posting_time',
       },
       {
-        text: __("Invoice"),
-        value: "name",
-        align: "start",
+        text: __('Invoice'),
+        value: 'name',
+        align: 'start',
         sortable: true,
       },
       {
-        text: __("Amount"),
-        value: "grand_total",
-        align: "end",
+        text: __('Amount'),
+        value: 'grand_total',
+        align: 'end',
         sortable: false,
       },
     ],
@@ -99,13 +99,13 @@ export default {
 
     submit_dialog() {
       if (this.selected.length > 0) {
-        evntBus.$emit("load_invoice", this.selected[0]);
+        evntBus.$emit('load_invoice', this.selected[0]);
         this.draftsDialog = false;
       }
     },
   },
   created: function () {
-    evntBus.$on("open_drafts", (data) => {
+    evntBus.$on('open_drafts', (data) => {
       this.draftsDialog = true;
       this.dialog_data = data;
     });
