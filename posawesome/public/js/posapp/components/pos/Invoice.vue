@@ -753,6 +753,20 @@
                 >{{ __("Held") }}</v-btn
               >
             </v-col>
+            <v-col
+              v-if="pos_profile.custom_allow_select_sales_order === 1"
+              cols="6"
+              class="pa-1"
+            >
+              <v-btn
+                block
+                class="pa-0"
+                color="info"
+                dark
+                @click="get_draft_orders"
+                >{{ __("Select S.O") }}</v-btn
+              >
+            </v-col>
             <v-col cols="6" class="pa-1">
               <v-btn
                 block
@@ -1154,6 +1168,62 @@ export default {
       return old_invoice;
     },
 
+    async new_order(data = {}) {
+      let old_invoice = null;
+      evntBus.$emit("set_customer_readonly", false);
+      this.expanded = [];
+      this.posa_offers = [];
+      evntBus.$emit("set_pos_coupons", []);
+      this.posa_coupons = [];
+      this.return_doc = "";
+      const doc = this.get_order_doc();
+      if (!data.name && !data.is_return) {
+        this.items = [];
+        this.customer = this.pos_profile.customer;
+        this.invoice_doc = "";
+        this.discount_amount = 0;
+        this.additional_discount_percentage = 0;
+        this.invoiceType = "Invoice";
+        this.invoiceTypes = ["Invoice", "Order"];
+      } else {
+        if (data.is_return) {
+          evntBus.$emit("set_customer_readonly", true);
+          this.invoiceType = "Return";
+          this.invoiceTypes = ["Return"];
+        }
+        this.invoice_doc = data;
+        this.items = data.items;
+        this.update_items_details(this.items);
+        this.posa_offers = data.posa_offers || [];
+        this.items.forEach((item) => {
+          if (!item.posa_row_id) {
+            item.posa_row_id = this.makeid(20);
+          }
+          if (item.batch_no) {
+            this.set_batch_qty(item, item.batch_no);
+          }
+        });
+        this.customer = data.customer;
+        this.posting_date = data.posting_date || frappe.datetime.nowdate();
+        this.discount_amount = data.discount_amount;
+        this.additional_discount_percentage =
+          data.additional_discount_percentage;
+        this.items.forEach((item) => {
+          if (item.serial_no) {
+            item.serial_no_selected = [];
+            const serial_list = item.serial_no.split("\n");
+            serial_list.forEach((element) => {
+              if (element.length) {
+                item.serial_no_selected.push(element);
+              }
+            });
+            item.serial_no_selected_count = item.serial_no_selected.length;
+          }
+        });
+      }
+      return old_invoice;
+    },
+
     get_invoice_doc() {
       let doc = {};
       if (this.invoice_doc.name) {
@@ -1187,6 +1257,103 @@ export default {
       return doc;
     },
 
+    async get_invoice_from_order_doc() {
+      let doc = {};
+      if (this.invoice_doc.doctype == "Sales Order") {
+        await frappe.call({
+          method: "posawesome.posawesome.api.posapp.create_sales_invoice",
+          args: {
+            sales_order: this.invoice_doc.name,
+          },
+          // async: false,
+          callback: function (r) {
+            if (r.message) {
+              doc = r.message;
+            }
+          },
+        });
+      } else {
+        doc = this.invoice_doc;
+      }
+      const Items = [];
+      const updatedItemsData = this.get_invoice_items();
+      doc.items.forEach((item) => {
+        const updatedData = updatedItemsData.find(
+          (updatedItem) => updatedItem.item_code === item.item_code
+        );
+        if (updatedData) {
+          item.item_code = updatedData.item_code;
+          item.posa_row_id = updatedData.posa_row_id;
+          item.posa_offers = updatedData.posa_offers;
+          item.posa_offer_applied = updatedData.posa_offer_applied;
+          item.posa_is_offer = updatedData.posa_is_offer;
+          item.posa_is_replace = updatedData.posa_is_replace;
+          item.is_free_item = updatedData.is_free_item;
+          item.qty = flt(updatedData.qty);
+          item.rate = flt(updatedData.rate);
+          item.uom = updatedData.uom;
+          item.amount = flt(updatedData.qty) * flt(updatedData.rate);
+          item.conversion_factor = updatedData.conversion_factor;
+          item.serial_no = updatedData.serial_no;
+          item.discount_percentage = flt(updatedData.discount_percentage);
+          item.discount_amount = flt(updatedData.discount_amount);
+          item.batch_no = updatedData.batch_no;
+          item.posa_notes = updatedData.posa_notes;
+          item.posa_delivery_date = updatedData.posa_delivery_date;
+          item.price_list_rate = updatedData.price_list_rate;
+          Items.push(item);
+        }
+      });
+
+      doc.items = Items;
+      const newItems = [...doc.items];
+      const existingItemCodes = new Set(newItems.map((item) => item.item_code));
+      updatedItemsData.forEach((updatedItem) => {
+        if (!existingItemCodes.has(updatedItem.item_code)) {
+          newItems.push(updatedItem);
+        }
+      });
+      doc.items = newItems;
+      doc.update_stock = 1;
+      doc.is_pos = 1;
+      doc.payments = this.get_payments();
+      return doc;
+    },
+
+    get_order_doc() {
+      let doc = {};
+      if (this.invoice_doc.name) {
+        doc = { ...this.invoice_doc };
+      }
+      doc.doctype = "Sales Order";
+      doc.is_pos = 1;
+      doc.ignore_pricing_rule = 1;
+      doc.company = doc.company || this.pos_profile.company;
+      doc.pos_profile = doc.pos_profile || this.pos_profile.name;
+      doc.campaign = doc.campaign || this.pos_profile.campaign;
+      doc.currency = doc.currency || this.pos_profile.currency;
+      doc.naming_series = doc.naming_series || this.pos_profile.naming_series;
+      doc.customer = this.customer;
+      doc.items = this.get_order_items();
+      doc.total = this.subtotal;
+      doc.discount_amount = flt(this.discount_amount);
+      doc.additional_discount_percentage = flt(
+        this.additional_discount_percentage
+      );
+      doc.posa_pos_opening_shift = this.pos_opening_shift.name;
+      // doc.payments = this.get_payments();
+      doc.taxes = [];
+      doc.is_return = this.invoice_doc.is_return;
+      doc.return_against = this.invoice_doc.return_against;
+      doc.posa_offers = this.posa_offers;
+      doc.posa_coupons = this.posa_coupons;
+      doc.posa_delivery_charges = this.selcted_delivery_charges.name;
+      doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
+      doc.posting_date = this.posting_date;
+      return doc;
+    },
+
+
     get_invoice_items() {
       const items_list = [];
       this.items.forEach((item) => {
@@ -1216,6 +1383,37 @@ export default {
 
       return items_list;
     },
+
+    get_order_items() {
+      const items_list = [];
+      this.items.forEach((item) => {
+        const new_item = {
+          item_code: item.item_code,
+          posa_row_id: item.posa_row_id,
+          posa_offers: item.posa_offers,
+          posa_offer_applied: item.posa_offer_applied,
+          posa_is_offer: item.posa_is_offer,
+          posa_is_replace: item.posa_is_replace,
+          is_free_item: item.is_free_item,
+          qty: flt(item.qty),
+          rate: flt(item.rate),
+          uom: item.uom,
+          amount: flt(item.qty) * flt(item.rate),
+          conversion_factor: item.conversion_factor,
+          serial_no: item.serial_no,
+          discount_percentage: flt(item.discount_percentage),
+          discount_amount: flt(item.discount_amount),
+          batch_no: item.batch_no,
+          posa_notes: item.posa_notes,
+          posa_delivery_date: item.posa_delivery_date,
+          price_list_rate: item.price_list_rate,
+        };
+        items_list.push(new_item);
+      });
+
+      return items_list;
+    },
+
 
     get_payments() {
       const payments = [];
@@ -1247,6 +1445,24 @@ export default {
       return this.invoice_doc;
     },
 
+    update_invoice_from_order(doc) {
+        const vm = this;
+        frappe.call({
+          method: "posawesome.posawesome.api.posapp.update_invoice_from_order",
+          args: {
+            data: doc,
+          },
+          async: false,
+          callback: function (r) {
+            if (r.message) {
+              vm.invoice_doc = r.message;
+              this.invoice_doc = r.message;
+            }
+          },
+        });
+        return this.invoice_doc;
+      },
+
     proces_invoice() {
       const doc = this.get_invoice_doc();
       if (doc.name) {
@@ -1256,7 +1472,18 @@ export default {
       }
     },
 
-    show_payment() {
+    async proces_invoice_from_order() {
+      const doc = await this.get_invoice_from_order_doc();
+      var up_invoice;
+      if (doc.name) {
+        up_invoice = await this.update_invoice_from_order(doc);
+        return up_invoice;
+      } else {
+        return this.update_invoice_from_order(doc);
+      }
+    },
+
+    async show_payment() {
       if (!this.customer) {
         evntBus.$emit("show_mesage", {
           text: __(`There is no Customer !`),
@@ -1274,9 +1501,41 @@ export default {
       if (!this.validate()) {
         return;
       }
-      evntBus.$emit("show_payment", "true");
-      const invoice_doc = this.proces_invoice();
-      evntBus.$emit("send_invoice_doc_payment", invoice_doc);
+      if (this.invoice_doc.doctype == "Sales Order") {
+        evntBus.$emit("show_payment", "true");
+        const invoice_doc = await this.proces_invoice_from_order();
+        evntBus.$emit("send_invoice_doc_payment", invoice_doc);
+      } else if (this.invoice_doc.doctype == "Sales Invoice") {
+        const sales_invoice_item = this.invoice_doc.items[0];
+        var sales_invoice_item_doc = {};
+        frappe.call({
+          method:
+            "posawesome.posawesome.api.posapp.get_sales_invoice_child_table",
+          args: {
+            sales_invoice: this.invoice_doc.name,
+            sales_invoice_item: sales_invoice_item.name,
+          },
+          async: false,
+          callback: function (r) {
+            if (r.message) {
+              sales_invoice_item_doc = r.message;
+            }
+          },
+        });
+        if (sales_invoice_item_doc.sales_order) {
+          evntBus.$emit("show_payment", "true");
+          const invoice_doc = await this.proces_invoice_from_order();
+          evntBus.$emit("send_invoice_doc_payment", invoice_doc);
+        } else {
+          evntBus.$emit("show_payment", "true");
+          const invoice_doc = this.proces_invoice();
+          evntBus.$emit("send_invoice_doc_payment", invoice_doc);
+        }
+      } else {
+        evntBus.$emit("show_payment", "true");
+        const invoice_doc = this.proces_invoice();
+        evntBus.$emit("send_invoice_doc_payment", invoice_doc);
+      }
     },
 
     validate() {
@@ -1441,6 +1700,22 @@ export default {
         callback: function (r) {
           if (r.message) {
             evntBus.$emit("open_drafts", r.message);
+          }
+        },
+      });
+    },
+
+    get_draft_orders() {
+      const vm = this;
+      frappe.call({
+        method: "posawesome.posawesome.api.posapp.get_draft_orders",
+        args: {
+          pos_opening_shift: this.pos_opening_shift.name,
+        },
+        async: false,
+        callback: function (r) {
+          if (r.message) {
+            evntBus.$emit("open_orders", r.message);
           }
         },
       });
@@ -2664,6 +2939,10 @@ export default {
     evntBus.$on("load_invoice", (data) => {
       this.new_invoice(data);
       evntBus.$emit("set_pos_coupons", data.posa_coupons);
+    });
+    evntBus.$on("load_order", (data) => {
+      this.new_order(data);
+      // evntBus.$emit("set_pos_coupons", data.posa_coupons);
     });
     evntBus.$on("set_offers", (data) => {
       this.posOffers = data;
