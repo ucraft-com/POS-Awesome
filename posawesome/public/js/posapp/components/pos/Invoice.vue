@@ -776,16 +776,6 @@
               >
             </v-col>
             -->
-            <v-col cols="6" class="pa-1">
-              <v-btn
-                block
-                class="pa-0"
-                color="accent"
-                dark
-                @click="new_invoice"
-                >{{ __("Save/New") }}</v-btn
-              >
-            </v-col> 
             <v-col class="pa-1">
               <v-btn
                 block
@@ -807,7 +797,7 @@
                 color="primary"
                 @click="print_draft_invoice"
                 dark
-                >{{ __("Print Draft") }}</v-btn
+                >{{ __("Save & Print") }}</v-btn
               >
             </v-col>
           </v-row>
@@ -1095,14 +1085,12 @@ export default {
 
     new_invoice(data = {}) {
       let old_invoice = null;
-      if(!this.customer)
-        {
-        evntBus.$emit("show_mesage", {
-          text: __(`Kindly Select Customer`),
-          color: "error",
-        });
+      if (!data.is_load_invoice)
+      {
+      if (!this.validate()) {
         return;
-    }
+      }
+      }
       evntBus.$emit("set_customer_readonly", false);
       this.expanded = [];
       this.posa_offers = [];
@@ -1301,6 +1289,20 @@ export default {
 
     validate() {
       let value = true;
+      if (!this.customer) {
+        evntBus.$emit("show_mesage", {
+          text: __(`There is no Customer !`),
+          color: "error",
+        });
+        return;
+      }
+      if (!this.items.length) {
+        evntBus.$emit("show_mesage", {
+          text: __(`There is no Items !`),
+          color: "error",
+        });
+        return;
+      }
       this.items.forEach((item) => {
         if (
           this.pos_profile.posa_max_discount_allowed &&
@@ -2685,6 +2687,7 @@ export default {
       this.cancel_invoice();
     });
     evntBus.$on("load_invoice", (data) => {
+      data["is_load_invoice"] = 1
       this.new_invoice(data);
       evntBus.$emit("set_pos_coupons", data.posa_coupons);
     });
