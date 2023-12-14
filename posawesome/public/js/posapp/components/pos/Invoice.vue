@@ -521,6 +521,8 @@
                     cols="8"
                     v-if="item.has_batch_no == 1 || item.batch_no"
                   >
+                  <!-- Customization
+                  Start  -->
                     <v-autocomplete
                       v-model="item.batch_no"
                       :items="item.batch_no_data"
@@ -528,9 +530,11 @@
                       outlined
                       dense
                       color="primary"
+                      :disabled="item.has_serial_no"
                       :label="frappe._('Batch No')"
                       @change="set_batch_qty(item, $event)"
                     >
+                    <!-- End -->
                       <template v-slot:item="data">
                         <template>
                           <v-list-item-content>
@@ -764,18 +768,16 @@
                 >{{ __("Return") }}</v-btn
               >
             </v-col>
-            <!-- 
             <v-col cols="6" class="pa-1">
               <v-btn
                 block
                 class="pa-0"
-                color="error"
+                color="accent"
                 dark
-                @click="cancel_dialog = true"
-                >{{ __("Cancel") }}</v-btn
+                @click="new_invoice"
+                >{{ __("Save/New") }}</v-btn
               >
             </v-col>
-            -->
             <v-col class="pa-1">
               <v-btn
                 block
@@ -797,7 +799,7 @@
                 color="primary"
                 @click="print_draft_invoice"
                 dark
-                >{{ __("Save & Print") }}</v-btn
+                >{{ __("Print Draft") }}</v-btn
               >
             </v-col>
           </v-row>
@@ -954,6 +956,15 @@ export default {
         if (item.has_serial_no && item.to_set_serial_no) {
           new_item.serial_no_selected = [];
           new_item.serial_no_selected.push(item.to_set_serial_no);
+          // Customization
+          // Start
+          var vm = this;
+          
+          frappe.db.get_value("Serial No", item.to_set_serial_no, "batch_no", (r) => {
+            new_item.batch_no = r.batch_no
+            vm.set_batch_qty(new_item, new_item.batch_no, false);
+          })
+          // End
           item.to_set_serial_no = null;
         }
         if (item.has_batch_no && item.to_set_batch_no) {
@@ -1751,6 +1762,25 @@ export default {
         this.calc_stock_qty(item, item.qty);
         this.$forceUpdate();
       }
+      // Customization
+      // Start
+      if(item.serial_no_selected_count > 0){
+
+        var vm = this
+        var item = item
+
+        frappe.db.get_value("Serial No", item.serial_no_selected[0], "batch_no", (r) => {
+          item.batch_no = r.batch_no
+          vm.set_batch_qty(item, item.batch_no, false);
+        })
+      }
+
+      else{
+        item.batch_no = ""
+        item.actual_batch_qty = 0
+        item.batch_no_expiry_date = ""
+      }
+      // End
     },
 
     set_batch_qty(item, value, update = true) {
