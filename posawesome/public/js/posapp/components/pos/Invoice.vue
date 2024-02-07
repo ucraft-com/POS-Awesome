@@ -1391,7 +1391,7 @@ export default {
             value = false;
             return value;
           }
-          if (this.subtotal * -1 > this.return_doc.total) {
+          if (Math.abs(this.subtotal) > Math.abs(this.return_doc.total)) {
             evntBus.$emit("show_mesage", {
               text: __(`Return Invoice Total should not be higher than {0}`, [
                 this.return_doc.total,
@@ -1416,7 +1416,10 @@ export default {
               });
               value = false;
               return value;
-            } else if (item.qty * -1 > return_item.qty || item.qty >= 0) {
+            } else if (
+              Math.abs(item.qty) > Math.abs(return_item.qty) ||
+              Math.abs(item.qty) == 0
+            ) {
               evntBus.$emit("show_mesage", {
                 text: __(`The QTY of the item {0} cannot be greater than {1}`, [
                   item.item_name,
@@ -2666,7 +2669,15 @@ export default {
     });
     evntBus.$on("load_invoice", (data) => {
       this.new_invoice(data);
-      evntBus.$emit("set_pos_coupons", data.posa_coupons);
+
+      if (this.invoice_doc.is_return) {
+        this.discount_amount = -data.discount_amount;
+        this.additional_discount_percentage =
+          -data.additional_discount_percentage;
+        this.return_doc = data;
+      } else {
+        evntBus.$emit("set_pos_coupons", data.posa_coupons);
+      }
     });
     evntBus.$on("set_offers", (data) => {
       this.posOffers = data;
