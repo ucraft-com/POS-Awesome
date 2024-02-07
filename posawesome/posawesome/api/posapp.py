@@ -126,17 +126,19 @@ def update_opening_shift_data(data, pos_profile):
 
 
 @frappe.whitelist()
-def get_items(pos_profile, price_list=None, item_group="", search_value=""):
+def get_items(
+    pos_profile, price_list=None, item_group="", search_value="", customer=None
+):
     _pos_profile = json.loads(pos_profile)
     ttl = _pos_profile.get("posa_server_cache_duration")
     if ttl:
         ttl = int(ttl) * 30
 
     @redis_cache(ttl=ttl or 1800)
-    def __get_items(pos_profile, price_list, item_group, search_value):
-        return _get_items(pos_profile, price_list, item_group, search_value)
+    def __get_items(pos_profile, price_list, item_group, search_value, customer=None):
+        return _get_items(pos_profile, price_list, item_group, search_value, customer)
 
-    def _get_items(pos_profile, price_list, item_group, search_value):
+    def _get_items(pos_profile, price_list, item_group, search_value, customer=None):
         pos_profile = json.loads(pos_profile)
         today = nowdate()
         data = dict()
@@ -226,6 +228,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                     "currency": pos_profile.get("currency"),
                     "selling": 1,
                     "valid_from": ["<=", today],
+                    "customer": ["in", ["", None, customer]],
                 },
                 or_filters=[
                     ["valid_upto", ">=", today],
@@ -325,9 +328,9 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
         return result
 
     if _pos_profile.get("posa_use_server_cache"):
-        return __get_items(pos_profile, price_list, item_group, search_value)
+        return __get_items(pos_profile, price_list, item_group, search_value, customer)
     else:
-        return _get_items(pos_profile, price_list, item_group, search_value)
+        return _get_items(pos_profile, price_list, item_group, search_value, customer)
 
 
 def get_item_group_condition(pos_profile):
@@ -531,9 +534,12 @@ def update_invoice(data):
                 tax.included_in_print_rate = 1
 
     today_date = getdate()
-    if invoice_doc.get("posting_date") and getdate(invoice_doc.posting_date) != today_date:
+    if (
+        invoice_doc.get("posting_date")
+        and getdate(invoice_doc.posting_date) != today_date
+    ):
         invoice_doc.set_posting_time = 1
-        
+
     invoice_doc.save()
     return invoice_doc
 

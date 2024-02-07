@@ -188,6 +188,7 @@ export default {
     couponsCount: 0,
     appliedCouponsCount: 0,
     customer_price_list: null,
+    customer: null,
     new_line: false,
     qty: 1,
   }),
@@ -201,6 +202,9 @@ export default {
       }
     },
     customer_price_list() {
+      this.get_items();
+    },
+    customer() {
       this.get_items();
     },
     new_line() {
@@ -247,6 +251,7 @@ export default {
           price_list: vm.customer_price_list,
           item_group: gr,
           search_value: sr,
+          customer: vm.customer,
         },
         callback: function (r) {
           if (r.message) {
@@ -661,6 +666,9 @@ export default {
     });
     evntBus.$on("update_customer_price_list", (data) => {
       this.customer_price_list = data;
+    });
+    evntBus.$on("update_customer", (data) => {
+      this.customer = data;
     });
   },
 
