@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import json
 import frappe
-from frappe.utils import nowdate, flt, cstr
+from frappe.utils import nowdate, flt, cstr, getdate
 from frappe import _
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.stock.get_item_details import get_item_details
@@ -530,6 +530,10 @@ def update_invoice(data):
             for tax in invoice_doc.taxes:
                 tax.included_in_print_rate = 1
 
+    today_date = getdate()
+    if invoice_doc.get("posting_date") and getdate(invoice_doc.posting_date) != today_date:
+        invoice_doc.set_posting_time = 1
+        
     invoice_doc.save()
     return invoice_doc
 
