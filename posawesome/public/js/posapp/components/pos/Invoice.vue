@@ -1058,7 +1058,9 @@ export default {
 
     cancel_invoice() {
       const doc = this.get_invoice_doc();
-      this.invoiceType = "Invoice";
+      this.invoiceType = this.pos_profile.posa_default_sales_order
+        ? "Order"
+        : "Invoice";
       this.invoiceTypes = ["Invoice", "Order"];
       this.posting_date = frappe.datetime.nowdate();
       if (doc.name && this.pos_profile.posa_allow_delete) {
@@ -1113,7 +1115,9 @@ export default {
         this.invoice_doc = "";
         this.discount_amount = 0;
         this.additional_discount_percentage = 0;
-        this.invoiceType = "Invoice";
+        this.invoiceType = this.pos_profile.posa_default_sales_order
+          ? "Order"
+          : "Invoice";
         this.invoiceTypes = ["Invoice", "Order"];
       } else {
         if (data.is_return) {
