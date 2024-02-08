@@ -22,6 +22,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
     get_existing_payment_request_amount,
 )
 
+from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
     get_loyalty_program_details_with_points,
 )
@@ -481,6 +482,13 @@ def add_taxes_from_tax_template(item, parent_doc):
                     tax_row.update({"category": "Total", "add_deduct_tax": "Add"})
                 tax_row.db_insert()
 
+@frappe.whitelist()
+def update_invoice_from_order(data):
+    data = json.loads(data)
+    invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))  
+    invoice_doc.update(data)      
+    invoice_doc.save()
+    return invoice_doc
 
 @frappe.whitelist()
 def update_invoice(data):
@@ -871,6 +879,24 @@ def get_draft_invoices(pos_opening_shift):
     return data
 
 
+
+@frappe.whitelist()
+def get_draft_orders():
+    orders_list = frappe.get_list(
+        "Sales Order",
+        filters={
+            "docstatus": 1,
+            "billing_status": ["in", ["Not Billed", "Partly Billed"]],
+        },
+        fields=["name"],
+        limit_page_length=0,
+        order_by="modified desc",
+    )
+    data = []
+    for order in orders_list:
+        data.append(frappe.get_cached_doc("Sales Order", order["name"]))
+    return data
+
 @frappe.whitelist()
 def delete_invoice(invoice):
     if frappe.get_value("Sales Invoice", invoice, "posa_is_printed"):
@@ -1225,6 +1251,25 @@ def search_invoices_for_return(invoice_name, company):
     for invoice in invoices_list:
         data.append(frappe.get_doc("Sales Invoice", invoice["name"]))
     return data
+
+
+@frappe.whitelist()
+def search_orders(order_name):
+    orders_list = frappe.get_list(
+        "Sales Order",
+        filters={
+            "name": ["like", f"%{order_name}%"],
+            "billing_status": ["in", ["Not Billed", "Partly Billed"]],
+            "docstatus": 1,
+        },
+        fields=["name"],
+        limit_page_length=0,
+        order_by="customer",
+    )
+    data = []
+    for order in orders_list:
+        data.append(frappe.get_doc("Sales Order", order["name"]))
+    return data 
 
 
 def get_version():
@@ -1761,3 +1806,20 @@ def get_seearch_items_conditions(item_code, serial_no, batch_no, barcode):
     return """ and (name like {item_code} or item_name like {item_code})""".format(
         item_code=frappe.db.escape("%" + item_code + "%")
     )
+
+@frappe.whitelist()
+def create_sales_invoice(sales_order):
+    sales_invoice = make_sales_invoice(sales_order, ignore_permissions=True)
+    sales_invoice.save()
+    return sales_invoice
+
+@frappe.whitelist()
+def delete_sales_invoice(sales_invoice):
+    frappe.delete_doc('Sales Invoice', sales_invoice)
+
+
+@frappe.whitelist()
+def get_sales_invoice_child_table(sales_invoice, sales_invoice_item):
+    parent_doc = frappe.get_doc("Sales Invoice", sales_invoice)
+    child_doc = frappe.get_doc("Sales Invoice Item", {"parent": parent_doc.name, "name": sales_invoice_item})
+    return child_doc
