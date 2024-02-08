@@ -201,9 +201,6 @@ export default {
         }
       }
     },
-    customer_price_list() {
-      this.get_items();
-    },
     customer() {
       this.get_items();
     },
