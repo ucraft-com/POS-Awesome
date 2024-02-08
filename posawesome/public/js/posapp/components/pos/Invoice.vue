@@ -1180,7 +1180,6 @@ export default {
       evntBus.$emit("set_pos_coupons", []);
       this.posa_coupons = [];
       this.return_doc = "";
-      const doc = this.get_order_doc();
       if (!data.name && !data.is_return) {
         this.items = [];
         this.customer = this.pos_profile.customer;
@@ -1265,7 +1264,8 @@ export default {
       let doc = {};
       if (this.invoice_doc.doctype == "Sales Order") {
         await frappe.call({
-          method: "posawesome.posawesome.api.posapp.create_sales_invoice",
+          method:
+            "posawesome.posawesome.api.posapp.create_sales_invoice_from_order",
           args: {
             sales_order: this.invoice_doc.name,
           },
@@ -1323,40 +1323,6 @@ export default {
       doc.payments = this.get_payments();
       return doc;
     },
-
-    get_order_doc() {
-      let doc = {};
-      if (this.invoice_doc.name) {
-        doc = { ...this.invoice_doc };
-      }
-      doc.doctype = "Sales Order";
-      doc.is_pos = 1;
-      doc.ignore_pricing_rule = 1;
-      doc.company = doc.company || this.pos_profile.company;
-      doc.pos_profile = doc.pos_profile || this.pos_profile.name;
-      doc.campaign = doc.campaign || this.pos_profile.campaign;
-      doc.currency = doc.currency || this.pos_profile.currency;
-      doc.naming_series = doc.naming_series || this.pos_profile.naming_series;
-      doc.customer = this.customer;
-      doc.items = this.get_order_items();
-      doc.total = this.subtotal;
-      doc.discount_amount = flt(this.discount_amount);
-      doc.additional_discount_percentage = flt(
-        this.additional_discount_percentage
-      );
-      doc.posa_pos_opening_shift = this.pos_opening_shift.name;
-      // doc.payments = this.get_payments();
-      doc.taxes = [];
-      doc.is_return = this.invoice_doc.is_return;
-      doc.return_against = this.invoice_doc.return_against;
-      doc.posa_offers = this.posa_offers;
-      doc.posa_coupons = this.posa_coupons;
-      doc.posa_delivery_charges = this.selcted_delivery_charges.name;
-      doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
-      doc.posting_date = this.posting_date;
-      return doc;
-    },
-
 
     get_invoice_items() {
       const items_list = [];
@@ -1418,7 +1384,6 @@ export default {
       return items_list;
     },
 
-
     get_payments() {
       const payments = [];
       this.pos_profile.payments.forEach((payment) => {
@@ -1450,24 +1415,23 @@ export default {
     },
 
     update_invoice_from_order(doc) {
-        const vm = this;
-        frappe.call({
-          method: "posawesome.posawesome.api.posapp.update_invoice_from_order",
-          args: {
-            data: doc,
-          },
-          async: false,
-          callback: function (r) {
-            if (r.message) {
-              vm.invoice_doc = r.message;
-              this.invoice_doc = r.message;
-            }
-          },
-        });
-        return this.invoice_doc;
-      },
+      const vm = this;
+      frappe.call({
+        method: "posawesome.posawesome.api.posapp.update_invoice_from_order",
+        args: {
+          data: doc,
+        },
+        async: false,
+        callback: function (r) {
+          if (r.message) {
+            vm.invoice_doc = r.message;
+          }
+        },
+      });
+      return this.invoice_doc;
+    },
 
-    proces_invoice() {
+    process_invoice() {
       const doc = this.get_invoice_doc();
       if (doc.name) {
         return this.update_invoice(doc);
@@ -1476,7 +1440,7 @@ export default {
       }
     },
 
-    async proces_invoice_from_order() {
+    async process_invoice_from_order() {
       const doc = await this.get_invoice_from_order_doc();
       var up_invoice;
       if (doc.name) {
@@ -1507,7 +1471,7 @@ export default {
       }
       if (this.invoice_doc.doctype == "Sales Order") {
         evntBus.$emit("show_payment", "true");
-        const invoice_doc = await this.proces_invoice_from_order();
+        const invoice_doc = await this.process_invoice_from_order();
         evntBus.$emit("send_invoice_doc_payment", invoice_doc);
       } else if (this.invoice_doc.doctype == "Sales Invoice") {
         const sales_invoice_item = this.invoice_doc.items[0];
@@ -1528,16 +1492,16 @@ export default {
         });
         if (sales_invoice_item_doc.sales_order) {
           evntBus.$emit("show_payment", "true");
-          const invoice_doc = await this.proces_invoice_from_order();
+          const invoice_doc = await this.process_invoice_from_order();
           evntBus.$emit("send_invoice_doc_payment", invoice_doc);
         } else {
           evntBus.$emit("show_payment", "true");
-          const invoice_doc = this.proces_invoice();
+          const invoice_doc = this.process_invoice();
           evntBus.$emit("send_invoice_doc_payment", invoice_doc);
         }
       } else {
         evntBus.$emit("show_payment", "true");
-        const invoice_doc = this.proces_invoice();
+        const invoice_doc = this.process_invoice();
         evntBus.$emit("send_invoice_doc_payment", invoice_doc);
       }
     },
@@ -1718,9 +1682,10 @@ export default {
     get_draft_orders() {
       const vm = this;
       frappe.call({
-        method: "posawesome.posawesome.api.posapp.get_draft_orders",
+        method: "posawesome.posawesome.api.posapp.search_orders",
         args: {
-          pos_opening_shift: this.pos_opening_shift.name,
+          company: this.pos_profile.company,
+          currency: this.pos_profile.currency,
         },
         async: false,
         callback: function (r) {
