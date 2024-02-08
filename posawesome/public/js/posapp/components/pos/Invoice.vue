@@ -1496,6 +1496,9 @@ export default {
     },
 
     update_item_detail(item) {
+      if (!item.item_code || this.invoice_doc.is_return) {
+        return;
+      }
       const vm = this;
       frappe.call({
         method: "posawesome.posawesome.api.posapp.get_item_detail",
