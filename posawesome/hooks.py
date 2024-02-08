@@ -68,6 +68,8 @@ doctype_js = {
 
 # before_install = "posawesome.install.before_install"
 # after_install = "posawesome.install.after_install"
+# before_uninstall = "posawesome.uninstall.before_uninstall"
+after_uninstall = "posawesome.uninstall.after_uninstall"
 
 # Desk Notifications
 # ------------------
