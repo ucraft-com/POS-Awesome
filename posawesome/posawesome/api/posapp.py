@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import json
 import frappe
-from frappe.utils import nowdate, flt, cstr
+from frappe.utils import nowdate, flt, cstr, getdate
 from frappe import _
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 from erpnext.stock.get_item_details import get_item_details
@@ -22,6 +22,7 @@ from erpnext.accounts.doctype.payment_request.payment_request import (
     get_existing_payment_request_amount,
 )
 
+from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
     get_loyalty_program_details_with_points,
 )
@@ -126,17 +127,19 @@ def update_opening_shift_data(data, pos_profile):
 
 
 @frappe.whitelist()
-def get_items(pos_profile, price_list=None, item_group="", search_value=""):
+def get_items(
+    pos_profile, price_list=None, item_group="", search_value="", customer=None
+):
     _pos_profile = json.loads(pos_profile)
     ttl = _pos_profile.get("posa_server_cache_duration")
     if ttl:
         ttl = int(ttl) * 30
 
     @redis_cache(ttl=ttl or 1800)
-    def __get_items(pos_profile, price_list, item_group, search_value):
-        return _get_items(pos_profile, price_list, item_group, search_value)
+    def __get_items(pos_profile, price_list, item_group, search_value, customer=None):
+        return _get_items(pos_profile, price_list, item_group, search_value, customer)
 
-    def _get_items(pos_profile, price_list, item_group, search_value):
+    def _get_items(pos_profile, price_list, item_group, search_value, customer=None):
         pos_profile = json.loads(pos_profile)
         today = nowdate()
         data = dict()
@@ -226,6 +229,7 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
                     "currency": pos_profile.get("currency"),
                     "selling": 1,
                     "valid_from": ["<=", today],
+                    "customer": ["in", ["", None, customer]],
                 },
                 or_filters=[
                     ["valid_upto", ">=", today],
@@ -325,9 +329,9 @@ def get_items(pos_profile, price_list=None, item_group="", search_value=""):
         return result
 
     if _pos_profile.get("posa_use_server_cache"):
-        return __get_items(pos_profile, price_list, item_group, search_value)
+        return __get_items(pos_profile, price_list, item_group, search_value, customer)
     else:
-        return _get_items(pos_profile, price_list, item_group, search_value)
+        return _get_items(pos_profile, price_list, item_group, search_value, customer)
 
 
 def get_item_group_condition(pos_profile):
@@ -438,14 +442,11 @@ def get_customer_names(pos_profile):
 
 @frappe.whitelist()
 def get_sales_person_names():
-    sales_persons = frappe.db.sql(
-        """
-        SELECT name, sales_person_name
-        FROM `tabSales Person`
-        ORDER by name
-        LIMIT 0, 10000
-        """,
-        as_dict=1,
+    sales_persons = frappe.get_list(
+        "Sales Person",
+        filters={"enabled": 1},
+        fields=["name", "sales_person_name"],
+        limit_page_length=100000,
     )
     return sales_persons
 
@@ -480,6 +481,15 @@ def add_taxes_from_tax_template(item, parent_doc):
                 if parent_doc.doctype == "Purchase Order":
                     tax_row.update({"category": "Total", "add_deduct_tax": "Add"})
                 tax_row.db_insert()
+
+
+@frappe.whitelist()
+def update_invoice_from_order(data):
+    data = json.loads(data)
+    invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
+    invoice_doc.update(data)
+    invoice_doc.save()
+    return invoice_doc
 
 
 @frappe.whitelist()
@@ -529,6 +539,13 @@ def update_invoice(data):
         if invoice_doc.get("taxes"):
             for tax in invoice_doc.taxes:
                 tax.included_in_print_rate = 1
+
+    today_date = getdate()
+    if (
+        invoice_doc.get("posting_date")
+        and getdate(invoice_doc.posting_date) != today_date
+    ):
+        invoice_doc.set_posting_time = 1
 
     invoice_doc.save()
     return invoice_doc
@@ -605,11 +622,20 @@ def submit_invoice(invoice, data):
     if frappe.get_value("POS Profile", invoice_doc.pos_profile, "posa_auto_set_batch"):
         set_batch_nos(invoice_doc, "warehouse", throw=True)
     set_batch_nos_for_bundels(invoice_doc, "warehouse", throw=True)
-    invoice_doc.due_date = data.get("due_date")
+
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
     invoice_doc.save()
+
+    if data.get("due_date"):
+        frappe.db.set_value(
+            "Sales Invoice",
+            invoice_doc.name,
+            "due_date",
+            data.get("due_date"),
+            update_modified=False,
+        )
 
     if frappe.get_value(
         "POS Profile",
@@ -1211,6 +1237,29 @@ def search_invoices_for_return(invoice_name, company):
     return data
 
 
+@frappe.whitelist()
+def search_orders(company, currency, order_name=None):
+    filters = {
+        "billing_status": ["in", ["Not Billed", "Partly Billed"]],
+        "docstatus": 1,
+        "company": company,
+        "currency": currency,
+    }
+    if order_name:
+        filters["name"] = ["like", f"%{order_name}%"]
+    orders_list = frappe.get_list(
+        "Sales Order",
+        filters=filters,
+        fields=["name"],
+        limit_page_length=0,
+        order_by="customer",
+    )
+    data = []
+    for order in orders_list:
+        data.append(frappe.get_doc("Sales Order", order["name"]))
+    return data
+
+
 def get_version():
     branch_name = get_app_branch("erpnext")
     if "12" in branch_name:
@@ -1745,3 +1794,24 @@ def get_seearch_items_conditions(item_code, serial_no, batch_no, barcode):
     return """ and (name like {item_code} or item_name like {item_code})""".format(
         item_code=frappe.db.escape("%" + item_code + "%")
     )
+
+
+@frappe.whitelist()
+def create_sales_invoice_from_order(sales_order):
+    sales_invoice = make_sales_invoice(sales_order, ignore_permissions=True)
+    sales_invoice.save()
+    return sales_invoice
+
+
+@frappe.whitelist()
+def delete_sales_invoice(sales_invoice):
+    frappe.delete_doc("Sales Invoice", sales_invoice)
+
+
+@frappe.whitelist()
+def get_sales_invoice_child_table(sales_invoice, sales_invoice_item):
+    parent_doc = frappe.get_doc("Sales Invoice", sales_invoice)
+    child_doc = frappe.get_doc(
+        "Sales Invoice Item", {"parent": parent_doc.name, "name": sales_invoice_item}
+    )
+    return child_doc

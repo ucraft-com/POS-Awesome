@@ -68,6 +68,8 @@ doctype_js = {
 
 # before_install = "posawesome.install.before_install"
 # after_install = "posawesome.install.after_install"
+# before_uninstall = "posawesome.uninstall.before_uninstall"
+after_uninstall = "posawesome.uninstall.after_uninstall"
 
 # Desk Notifications
 # ------------------
@@ -203,6 +205,7 @@ fixtures = [
                     "Sales Order-posa_notes",
                     "Sales Order Item-posa_notes",
                     "POS Profile-posa_allow_sales_order",
+                    "POS Profile-custom_allow_select_sales_order",
                     "POS Profile-posa_column_break_112",
                     "POS Profile-posa_show_template_items",
                     "POS Profile-posa_hide_variants_items",
