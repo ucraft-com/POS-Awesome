@@ -3,6 +3,7 @@
     <v-card
       class="selection mx-auto grey lighten-5 mt-3"
       style="max-height: 75vh; height: 75vh"
+      :disabled="is_return==1"
     >
       <v-progress-linear
         :active="loading"
@@ -191,6 +192,7 @@ export default {
     customer: null,
     new_line: false,
     qty: 1,
+    is_return: 0,
   }),
 
   watch: {
@@ -671,6 +673,9 @@ export default {
 
   mounted() {
     this.scan_barcoud();
+    evntBus.$on("disable_items_list", (data) => {
+      this.is_return = data || 0;
+    });
   },
 };
 </script>
