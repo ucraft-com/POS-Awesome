@@ -528,6 +528,7 @@
                       outlined
                       dense
                       color="primary"
+                      :disabled="item.has_serial_no"
                       :label="frappe._('Batch No')"
                       @change="set_batch_qty(item, $event)"
                     >
@@ -976,6 +977,11 @@ export default {
         if (item.has_serial_no && item.to_set_serial_no) {
           new_item.serial_no_selected = [];
           new_item.serial_no_selected.push(item.to_set_serial_no);
+          var vm = this;
+          frappe.db.get_value("Serial No", item.to_set_serial_no, "batch_no", (r) => {
+            new_item.batch_no = r.batch_no
+            vm.set_batch_qty(new_item, new_item.batch_no, false);
+          })
           item.to_set_serial_no = null;
         }
         if (item.has_batch_no && item.to_set_batch_no) {
@@ -1978,6 +1984,23 @@ export default {
         item.qty = item.serial_no_selected_count;
         this.calc_stock_qty(item, item.qty);
         this.$forceUpdate();
+      }
+
+      if(item.serial_no_selected_count > 0){
+
+        var vm = this
+        var item = item
+
+        frappe.db.get_value("Serial No", item.serial_no_selected[0], "batch_no", (r) => {
+          item.batch_no = r.batch_no
+          vm.set_batch_qty(item, item.batch_no, false);
+        })
+      }
+
+      else{
+        item.batch_no = ""
+        item.actual_batch_qty = 0
+        item.batch_no_expiry_date = ""
       }
     },
 
