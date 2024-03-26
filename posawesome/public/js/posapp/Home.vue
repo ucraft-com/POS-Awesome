@@ -70,7 +70,7 @@ export default {
     evntBus.$on('show_loader', (data) => {
       setTimeout(() => {
           return this.showPreloader(JSON.parse(data))
-        }, 1000);
+        }, 10);
 
       });
   },
