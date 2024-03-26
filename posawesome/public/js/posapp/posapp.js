@@ -7,7 +7,7 @@ frappe.PosApp.posapp = class {
     constructor({ parent }) {
         this.$parent = $(document);
         this.page = parent.page;
-        this.make_body();
+       this.make_body();
 
     }
     make_body () {
@@ -38,7 +38,7 @@ frappe.PosApp.posapp = class {
             el: this.$el[0],
             data: {
             },
-            render: h => h(Home),
+          render: h => h(Home),
         });
     }
     setup_header () {

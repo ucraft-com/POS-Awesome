@@ -123,6 +123,7 @@ export default {
             evntBus.$emit('register_pos_profile', r.message);
             evntBus.$emit('set_company', r.message.company);
             console.info('LoadPosProfile');
+         
           } else {
             this.create_opening_voucher();
           }
@@ -190,6 +191,7 @@ export default {
     this.$nextTick(function () {
       this.check_opening_entry();
       this.get_pos_setting();
+
       evntBus.$on('close_opening_dialog', () => {
         this.dialog = false;
       });

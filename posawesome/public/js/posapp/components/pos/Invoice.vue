@@ -709,6 +709,7 @@ import { evntBus } from '../../bus';
 import Customer from './Customer.vue';
 
 export default {
+
   data() {
     return {
       pos_profile: '',
@@ -752,6 +753,8 @@ export default {
         { text: __('Amount'), value: 'amount', align: 'center' },
         { text: __('is Offer'), value: 'posa_is_offer', align: 'center' },
       ],
+
+      receivedDate: frappe.datetime.now_datetime()
     };
   },
 
@@ -1038,6 +1041,7 @@ export default {
       doc.currency = doc.currency || this.pos_profile.currency;
       doc.naming_series = doc.naming_series || this.pos_profile.naming_series;
       doc.customer = this.customer;
+
       doc.items = this.get_invoice_items();
       doc.total = this.subtotal;
       doc.discount_amount = flt(this.discount_amount);
@@ -1100,11 +1104,18 @@ export default {
     },
 
     update_invoice(doc) {
+
       const vm = this;
+      const datetime = new Date(this.receivedDate);
+      const  posting_date = frappe.datetime.obj_to_str(datetime)
+      const  posting_time = datetime.toTimeString().slice(0, 8) + '.' + datetime.getMilliseconds().toString().padStart(3, '0');
+
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.update_invoice',
         args: {
           data: doc,
+          posting_date : posting_date,
+          posting_time : posting_time
         },
         async: false,
         callback: function (r) {
@@ -1126,6 +1137,7 @@ export default {
     },
 
     show_payment() {
+      evntBus.$emit('show_loader', true);
       if (!this.customer) {
         evntBus.$emit('show_mesage', {
           text: __(`There is no Customer !`),
@@ -1143,9 +1155,11 @@ export default {
       if (!this.validate()) {
         return;
       }
+    
       evntBus.$emit('show_payment', 'true');
       const invoice_doc = this.proces_invoice();
       evntBus.$emit('send_invoice_doc_payment', invoice_doc);
+      evntBus.$emit('show_loader', false);
     },
 
     validate() {
@@ -2477,6 +2491,11 @@ export default {
     evntBus.$on('set_new_line', (data) => {
       this.new_line = data;
     });
+  
+    evntBus.$on('dateSelected', (date) => {
+      this.receivedDate = date;
+    });
+    
     document.addEventListener('keydown', this.shortOpenPayment.bind(this));
     document.addEventListener('keydown', this.shortDeleteFirstItem.bind(this));
     document.addEventListener('keydown', this.shortOpenFirstItem.bind(this));
@@ -2529,6 +2548,7 @@ export default {
         this.additional_discount_percentage = 0;
       }
     },
+ 
   },
 };
 </script>

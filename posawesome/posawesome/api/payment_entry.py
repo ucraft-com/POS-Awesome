@@ -24,6 +24,7 @@ def create_payment_entry(
     posting_date=None,
     submit=0,
 ):
+  
     # TODO : need to have a better way to handle currency
     date = nowdate() if not posting_date else posting_date
     party_type = "Customer"

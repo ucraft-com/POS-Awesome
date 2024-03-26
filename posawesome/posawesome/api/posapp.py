@@ -341,8 +341,10 @@ def get_sales_person_names():
     return sales_persons
 
 
+
 @frappe.whitelist()
-def update_invoice(data):
+def update_invoice(data,posting_date,posting_time):
+
     data = json.loads(data)
     if data.get("name"):
         invoice_doc = frappe.get_doc("Sales Invoice", data.get("name"))
@@ -353,6 +355,7 @@ def update_invoice(data):
     invoice_doc.set_missing_values()
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
+    invoice_doc.set_posting_time = 1
 
     if invoice_doc.is_return and invoice_doc.return_against:
         ref_doc = frappe.get_cached_doc(invoice_doc.doctype, invoice_doc.return_against)
@@ -386,7 +389,10 @@ def update_invoice(data):
         if invoice_doc.get("taxes"):
             for tax in invoice_doc.taxes:
                 tax.included_in_print_rate = 1
-
+    
+    invoice_doc.posting_date = posting_date
+    invoice_doc.posting_time = posting_time
+    
     invoice_doc.save()
     return invoice_doc
 
@@ -479,6 +485,7 @@ def submit_invoice(invoice, data):
         set_batch_nos(invoice_doc, "warehouse", throw=True)
     set_batch_nos_for_bundels(invoice_doc, "warehouse", throw=True)
     invoice_doc.due_date = data.get("due_date")
+    
     invoice_doc.flags.ignore_permissions = True
     frappe.flags.ignore_account_permission = True
     invoice_doc.posa_is_printed = 1
@@ -604,6 +611,7 @@ def redeeming_customer_credit(
                 jv_doc.submit()
 
     if is_payment_entry and total_cash > 0:
+   
         payment_entry_doc = frappe.get_doc(
             {
                 "doctype": "Payment Entry",

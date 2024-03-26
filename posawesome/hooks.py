@@ -17,22 +17,24 @@ app_license = "GPLv3"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/posawesome/css/posawesome.css"
 # app_include_js = "/assets/posawesome/js/posawesome.js"
+
 app_include_js = [
     "/assets/posawesome/node_modules/vuetify/dist/vuetify.js",
-    "/assets/js/toConsole.min.js",
-    "/assets/js/posapp.min.js",
+     "/assets/js/toConsole.min.js",
+     "/assets/js/posapp.min.js"
+  
 ]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/posawesome/css/posawesome.css"
-# web_include_js = "/assets/posawesome/js/posawesome.js"
+#web_include_js = "/assets/posawesome/js/posawesome.js"
 
 # include js, css files in header of web form
 # webform_include_js = {"doctype": "public/js/doctype.js"}
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
-# page_js = {"page" : "public/js/file.js"}
+# page_js = {"page" : "/assets/js/posapp.min.js"}
 
 # include js in doctype views
 doctype_js = {

@@ -799,6 +799,8 @@ export default {
       this.back_to_invoice();
     },
     submit_invoice() {
+      evntBus.$emit('show_loader', true);
+
       let data = {};
       data['total_change'] = -this.diff_payment;
       data['paid_change'] = this.paid_change;
@@ -825,9 +827,11 @@ export default {
             });
             frappe.utils.play_sound('submit');
             this.addresses = [];
+            evntBus.$emit('show_loader', false);
           }
         },
       });
+      evntBus.$emit('show_loader', false);
     },
     set_full_amount(idx) {
       this.invoice_doc.payments.forEach((payment) => {
