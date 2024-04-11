@@ -1,5 +1,43 @@
 <template>
   <div>
+    <v-dialog v-model="dialognotSuccessful" max-width="500px">
+      <v-card>
+        <v-card-title>Loan Not Approved</v-card-title>
+        <v-card-actions>
+          <v-btn color="error" @click="closeNotSuccessfulDialog">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    
+    <v-dialog v-model="dialogSuccessful" max-width="500px">
+      <v-card>
+        <v-card-title>Loan Approved</v-card-title>
+        <v-card-actions>
+          <v-btn color="success" @click="closeSuccessfulDialog">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="dialogVisible" max-width="500px">
+      <v-card>
+        <v-card-title>Loan Application</v-card-title>
+        <v-card-text>
+          <!-- Dialog content goes here -->
+          <!-- Add your form fields here -->
+          <v-text-field v-model="formData.pezesha_customer_id" label="Pezesha Customer" readonly></v-text-field>
+          <v-text-field v-model="formData.pezesha_channel_id" label="Pezesha Channel ID" readonly></v-text-field>
+          <v-text-field v-model="formData.amount"  label="Amount" readonly></v-text-field>
+          <v-text-field v-model="formData.fee" label="Fee" readonly></v-text-field>
+          <v-text-field v-model="formData.interest" label="Interest" readonly></v-text-field>
+          <v-text-field v-model="formData.duration" label="Duration" readonly></v-text-field>
+          <v-text-field v-model="formData.rate" label="Rate" readonly></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="success" @click="submitForm">Submit</v-btn>
+          <v-btn color="error" @click="closeDialog">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog> 
     <v-dialog v-model="cancel_dialog" max-width="330">
       <v-card>
         <v-card-title class="text-h5">
@@ -629,7 +667,7 @@
               </td>
             </template>
           </v-data-table>
-        </template>
+        </template>      
       </div>
     </v-card>
     <v-card class="cards mb-0 mt-3 py-0 grey lighten-5">
@@ -744,6 +782,30 @@
         <v-col cols="5">
           <v-row no-gutters class="pa-1 pt-2 pl-0">
             <v-col cols="6" class="pa-1">
+              <v-text-field
+              :value="formtCurrency(pezesha_amount)"
+              :prefix="currencySymbol(pos_profile.currency)"
+              :label="frappe._('Amount of pezesha Utilised')"
+              outlined
+              dense
+              hide-details
+              color="accent"
+            ></v-text-field>
+            </v-col>
+            <!-- // custom button : Apply for pezesha Loan -->
+
+            <v-col cols="6" class="pa-1">
+              <v-btn
+              block
+              class="pa-0"
+              color="success"
+              dark
+              @click="openDialog"
+            >
+              {{ __("Apply For Pezesha Loan") }}
+            </v-btn>
+            </v-col>
+            <v-col cols="6" class="pa-1">
               <v-btn
                 block
                 class="pa-0"
@@ -838,6 +900,15 @@ export default {
   mixins: [format],
   data() {
     return {
+      dialognotSuccessful: false,
+      dialogSuccessful : false,
+      dialogVisible: false,
+      success: true,
+      message: 'Thank you for your Loan Approval.',
+      formData: {
+        field1: '',
+        field2: ''
+      },
       pos_profile: "",
       pos_opening_shift: "",
       stock_settings: "",
@@ -889,6 +960,10 @@ export default {
   },
 
   computed: {
+    pezesha_amount(){
+      let sum = 0;
+      return flt(sum)
+    },
     total_qty() {
       this.close_payments();
       let qty = 0;
@@ -924,6 +999,121 @@ export default {
   },
 
   methods: {
+    openDialog() {
+      if (!this.customer) {
+        evntBus.$emit("show_mesage", {
+          text: __(`There is no Customer!`),
+          color: "error",
+        });
+        return;
+      } else {
+        // Emit a freeze event to indicate that a process is in progress
+        evntBus.$emit("freeze", {
+          title: __("Please wait..."),
+        });
+    
+        // Make the server call
+        frappe.call({
+          method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_offer",
+          args: {
+            customer: this.customer,
+            pos_profile: this.pos_profile.name,
+          },
+          callback: (r) => {
+            st = r.message
+            dt = st.data
+            if(st.status == 200){
+              // Populate formData with fetched values
+              this.formData.pezesha_customer_id = this.customer;
+              this.formData.pezesha_channel_id = this.pos_profile.name;
+              this.formData.amount = dt.amount;
+              this.formData.fee = dt.fee;
+              this.formData.interest = dt.interest;
+              this.formData.duration = dt.duration;
+              this.formData.rate = dt.rate;
+              // Once the server call is completed, emit an unfreeze event
+              evntBus.$emit("unfreeze");
+              // Optionally, update dialog visibility or perform other actions
+              this.dialogVisible = true;
+            }else{
+              evntBus.$emit("unfreeze");
+            }
+          },
+        });
+      }
+    }, 
+    closeDialog() {
+      this.dialogVisible = false;
+    },
+    closeSuccessfulDialog() {
+      this.dialogSuccessful = false;
+    },
+    closeNotSuccessfulDialog() {
+      this.dialognotSuccessful = false;
+    },
+    submitForm() {
+      // Here you can handle form submission
+      console.log('Form submitted:', this.formData);
+      // Emit a freeze event to indicate that a process is in progress
+      evntBus.$emit("freeze", {
+        title: __("Please wait..."),
+      });
+      
+      // Make the server call
+      frappe.call({
+        method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_application",
+        args: {
+          data: this.formData,
+          pos_profile: this.pos_profile.name,
+        },
+        callback: (r) => {
+          // Emit an unfreeze event after receiving the response
+          evntBus.$emit("unfreeze");
+          let s = r.message;
+          if (s.status == 200) {
+            console.log("Thank you for your Loan Approval.")
+            this.dialogSuccessful = true;
+          } else {
+            console.log("Payment failed. Please try again.")
+            this.dialognotSuccessful = true;
+          }
+        }
+      });
+    }, 
+    closeDialog() {
+      this.dialogVisible = false;
+    },
+    submitForm() {
+      // Here you can handle form submission
+      console.log('Form submitted:', this.formData);
+      // Emit a freeze event to indicate that a process is in progress
+      evntBus.$emit("freeze", {
+        title: __("Please wait..."),
+      });
+    
+      // Make the server call
+      frappe.call({
+        method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_application",
+        args: {
+          data: this.formData,
+          pos_profile: this.pos_profile.name,
+        },
+        callback: (r) => {
+          // Emit an unfreeze event after receiving the response
+          evntBus.$emit("unfreeze");
+          let s = r.message;
+          if (s.status == 200) {
+            console.log("Thank you for your Loan Approval.")
+            this.dialogSuccessful = true;
+          } else {
+            console.log("Payment failed. Please try again.")
+            this.dialognotSuccessful = true;
+          }
+          // Close the dialog after form submission
+          this.dialogVisible = false;
+        }
+      });
+    },
     remove_item(item) {
       const index = this.items.findIndex(
         (el) => el.posa_row_id == item.posa_row_id
@@ -1450,7 +1640,6 @@ export default {
         return this.update_invoice_from_order(doc);
       }
     },
-
     async show_payment() {
       if (!this.customer) {
         evntBus.$emit("show_mesage", {

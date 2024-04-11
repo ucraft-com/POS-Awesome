@@ -1,0 +1,64 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-03-28 12:08:55.556406",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enable",
+  "client_id",
+  "client_secret_id",
+  "authorization"
+ ],
+ "fields": [
+  {
+   "fieldname": "client_id",
+   "fieldtype": "Data",
+   "label": "Client ID",
+   "mandatory_depends_on": "eval:doc.enable == 1;"
+  },
+  {
+   "fieldname": "client_secret_id",
+   "fieldtype": "Data",
+   "label": "Client Secret ID",
+   "mandatory_depends_on": "eval:doc.enable == 1;"
+  },
+  {
+   "fieldname": "authorization",
+   "fieldtype": "Small Text",
+   "label": "Authorization",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "enable",
+   "fieldtype": "Check",
+   "label": "Enable"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2024-03-28 14:27:25.725083",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "Pezesha Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
