@@ -13,7 +13,7 @@ class PezeshaSettings(Document):
 		if self.enable:
 			try:
 				response = make_post_request(
-					url="https://dev.api.pezesha.com/oauth/token",
+					url="https://api.pezesha.com/oauth/token",
 					data={
 						"grant_type": "client_credentials",
 	    				"client_id": self.client_id,
