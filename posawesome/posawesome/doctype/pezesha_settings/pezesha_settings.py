@@ -34,8 +34,9 @@ class PezeshaSettings(Document):
 @frappe.whitelist()
 def pezesha_loan_offer(customer, pos_profile):
     pos = frappe.get_doc("POS Profile", pos_profile)
+    print("----------", pos.custom_pezesha_channel_id)
     pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
-    url = 'https://dev.api.pezesha.com/mfi/v1/borrowers/options'
+    url = 'https://api.pezesha.com/mfi/v1/borrowers/options'
     headers = {
         'Authorization': f'Bearer {pz_st}'
     }
@@ -62,7 +63,7 @@ def pezesha_loan_application(data, pos_profile):
 	pos = frappe.get_doc("POS Profile", pos_profile)
 	pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
 
-	url = 'https://dev.api.pezesha.com/mfi/v1/borrowers/options'
+	url = 'https://api.pezesha.com/mfi/v1/borrowers/options'
 	headers = {
 	    'Authorization': f'Bearer {pz_st}'
 	}
