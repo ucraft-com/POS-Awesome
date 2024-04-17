@@ -1146,8 +1146,7 @@ export default {
         this.customer = data.customer;
         this.posting_date = data.posting_date || frappe.datetime.nowdate();
         this.discount_amount = data.discount_amount;
-        this.additional_discount_percentage =
-          data.additional_discount_percentage;
+        this.additional_discount_percentage = data.additional_discount_percentage;
         this.items.forEach((item) => {
           if (item.serial_no) {
             item.serial_no_selected = [];
@@ -1213,7 +1212,6 @@ export default {
           uom: item.uom,
           amount: flt(item.qty) * flt(item.rate),
           conversion_factor: item.conversion_factor,
-          serial_no: item.serial_no,
           discount_percentage: flt(item.discount_percentage),
           discount_amount: flt(item.discount_amount),
           batch_no: item.batch_no,
@@ -1221,6 +1219,11 @@ export default {
           posa_delivery_date: item.posa_delivery_date,
           price_list_rate: item.price_list_rate,
         };
+        if (item.serial_no_selected) {
+          const serial_no_string = item.serial_no_selected.join("\n");
+
+          new_item.serial_no = serial_no_string;
+        }
         items_list.push(new_item);
       });
 
