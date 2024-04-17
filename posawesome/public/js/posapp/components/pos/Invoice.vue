@@ -965,6 +965,7 @@ export default {
             vm.set_batch_qty(new_item, new_item.batch_no, false);
           })
           // End
+          this.set_serial_no(new_item);
           item.to_set_serial_no = null;
         }
         if (item.has_batch_no && item.to_set_batch_no) {
