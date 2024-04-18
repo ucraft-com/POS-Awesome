@@ -2722,6 +2722,9 @@ export default {
     });
     evntBus.$on("load_invoice", (data) => {
       data["is_load_invoice"] = 1
+      data.items.forEach((item) => {
+        this.update_item_detail(item);
+    });
       this.new_invoice(data);
       evntBus.$emit("set_pos_coupons", data.posa_coupons);
     });
