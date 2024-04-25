@@ -51,12 +51,31 @@ One-click installing available if you are hosting on FC from [here](https://frap
 
 #### Self Hosting:
 
-1. `bench get-app branch version-14 https://github.com/yrestom/POS-Awesome.git`
-2. `bench setup requirements`
-3. `bench build --app posawesome`
-4. `bench restart`
-5. `bench --site [your.site.name] install-app posawesome`
-6. `bench --site [your.site.name] migrate`
+- Steps to install app in local
+
+```sh
+bench get-app branch version-14 https://github.com/yrestom/POS-Awesome.git
+```
+
+```sh
+bench setup requirements
+```
+
+```sh
+bench build --app posawesome
+```
+
+```sh
+bench restart
+```
+
+```sh
+bench --site [your.site.name] install-app posawesome
+```
+
+```sh
+bench --site [your.site.name] migrate
+```
 
 ---
 
