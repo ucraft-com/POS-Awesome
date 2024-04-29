@@ -34,6 +34,7 @@ class PezeshaSettings(Document):
 @frappe.whitelist()
 def pezesha_loan_offer(customer, pos_profile):
     pos = frappe.get_doc("POS Profile", pos_profile)
+    print("----------", pos.custom_pezesha_channel_id)
     pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
     url = 'https://api.pezesha.com/mfi/v1/borrowers/options'
     headers = {
@@ -61,13 +62,14 @@ def pezesha_loan_application(data, pos_profile):
 	res = json.loads(data)
 	pos = frappe.get_doc("POS Profile", pos_profile)
 	pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
-	url = 'https://api.pezesha.com/mfi/v1/borrowers/loans'
+
+	url = 'https://api.pezesha.com/mfi/v1/borrowers/options'
 	headers = {
 	    'Authorization': f'Bearer {pz_st}'
 	}
 	data = {
-		'channel': pos.custom_pezesha_channel_id,
-	    'identifier': res.get('pezesha_customer_id'),
+		'channel': 'VICTORY_FARMS_KAWANGWARE',
+	    'identifier': 'VF-CUST-2023-10313',
 	    'amount': res.get('amount'),
 	    'duration': res.get('duration'),
 	    'interest': res.get('interest'),
