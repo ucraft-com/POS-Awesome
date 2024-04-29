@@ -1,5 +1,43 @@
 <template>
   <div>
+    <v-dialog v-model="dialognotSuccessful" max-width="500px">
+      <v-card>
+        <v-card-title>Loan Not Approved</v-card-title>
+        <v-card-actions>
+          <v-btn color="error" @click="closeNotSuccessfulDialog">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    
+    <v-dialog v-model="dialogSuccessful" max-width="500px">
+      <v-card>
+        <v-card-title>Loan Confirmation Request Pending Approval</v-card-title>
+        <v-card-actions>
+          <v-btn color="success" @click="closeSuccessfulDialog">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="dialogVisible" max-width="500px">
+      <v-card>
+        <v-card-title>Loan Application</v-card-title>
+        <v-card-text>
+          <!-- Dialog content goes here -->
+          <!-- Add your form fields here -->
+          <v-text-field v-model="formData.pezesha_customer_id" label="Pezesha Customer" readonly></v-text-field>
+          <v-text-field v-model="formData.pezesha_channel_id" label="Pezesha Channel ID" readonly></v-text-field>
+          <v-text-field v-model="formData.amount" v-on:change="changeHandler" label="Amount"></v-text-field>
+          <v-text-field v-model="formData.fee" label="Fee" readonly></v-text-field>
+          <v-text-field v-model="formData.interest" label="Interest" readonly></v-text-field>
+          <v-text-field v-model="formData.duration" label="Duration" readonly></v-text-field>
+          <v-text-field v-model="formData.rate" readonly label="Rate"></v-text-field>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn color="success" @click="submitForm">Submit</v-btn>
+          <v-btn color="error" @click="closeDialog">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>    
     <v-card
       class="selection mx-auto grey lighten-5 pa-1"
       style="max-height: 76vh; height: 76vh"
@@ -39,9 +77,8 @@
               dense
             ></v-text-field>
           </v-col>
-
           <v-col cols="7" v-if="diff_payment < 0 && !invoice_doc.is_return">
-            <v-text-field
+              <v-text-field
               outlined
               color="primary"
               :label="frappe._('Paid Change')"
@@ -71,13 +108,13 @@
           </v-col>
         </v-row>
         <v-divider></v-divider>
-
         <div v-if="is_cashback">
           <v-row
             class="pyments px-1 py-0"
             v-for="payment in invoice_doc.payments"
             :key="payment.name"
           >
+            <!-- First Column -->
             <v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
               <v-text-field
                 dense
@@ -87,25 +124,18 @@
                 background-color="white"
                 hide-details
                 :value="formtCurrency(payment.amount)"
-                @change="
-                  setFormatedCurrency(payment, 'amount', null, true, $event)
-                "
+                @change="setFormatedCurrency(payment, 'amount', null, true, $event)"
                 :rules="[isNumber]"
                 :prefix="currencySymbol(invoice_doc.currency)"
                 @focus="set_rest_amount(payment.idx)"
                 :readonly="invoice_doc.is_return ? true : false"
               ></v-text-field>
             </v-col>
+        
+            <!-- Second Column -->
             <v-col
               v-if="!is_mpesa_c2b_payment(payment)"
-              :cols="
-                6
-                  ? (payment.type != 'Phone' ||
-                      payment.amount == 0 ||
-                      !request_payment_field) &&
-                    !is_mpesa_c2b_payment(payment)
-                  : 3
-              "
+              :cols="6 ? (payment.type != 'Phone' || payment.amount == 0 || !request_payment_field) && !is_mpesa_c2b_payment(payment) : 3"
             >
               <v-btn
                 block
@@ -113,9 +143,12 @@
                 color="primary"
                 dark
                 @click="set_full_amount(payment.idx)"
-                >{{ payment.mode_of_payment }}</v-btn
               >
+                {{ payment.mode_of_payment }}
+              </v-btn>
             </v-col>
+        
+            <!-- Third Column -->
             <v-col v-if="is_mpesa_c2b_payment(payment)" :cols="12" class="pl-3">
               <v-btn
                 block
@@ -127,6 +160,8 @@
                 {{ __(`Get Payments ${payment.mode_of_payment}`) }}
               </v-btn>
             </v-col>
+        
+            <!-- Fourth Column -->
             <v-col
               v-if="
                 payment.type == 'Phone' &&
@@ -142,17 +177,41 @@
                 color="success"
                 dark
                 :disabled="payment.amount == 0"
-                @click="
-                  (phone_dialog = true),
-                    (payment.amount = flt(payment.amount, 0))
-                "
+                @click="(phone_dialog = true), (payment.amount = flt(payment.amount, 0))"
               >
                 {{ __("Request") }}
               </v-btn>
             </v-col>
           </v-row>
-        </div>
 
+          <!-- Credit Pezesha button -->
+          <v-row v-if="is_cashback">
+            <v-col cols="6">
+              <!-- Add your text field here -->
+              <v-text-field
+                color="primary"
+                :prefix="currencySymbol(pos_profile.currency)"
+                :label="frappe._('Credit Pezesha')"
+                readonly
+                dense
+                outlined
+                background-color="white"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6" class="text-left"> <!-- Adjusted class to align right -->
+              <v-btn
+                block
+                class="pa-0"
+                color="success"
+                dark
+                @click="openDialog"
+              >
+                {{ __("Credit Pezesha") }}
+              </v-btn>
+            </v-col>
+          </v-row>
+        </div>        
         <v-row
           class="pyments px-1 py-0"
           v-if="
@@ -627,6 +686,7 @@
 
     <v-card flat class="cards mb-0 mt-3 py-0">
       <v-row align="start" no-gutters>
+        
         <v-col cols="6">
           <v-btn
             block
@@ -705,6 +765,17 @@ import format from "../../format";
 export default {
   mixins: [format],
   data: () => ({
+    // dialogMessage: '',
+    dialognotSuccessful: false,
+    dialogSuccessful : false,
+    dialogVisible: false,
+    success: true,
+    message: 'Thank you for your Loan Approval.',
+    formData: {
+      amount: 0,
+      rate: 0,
+      interest: 0,
+    },
     loading: false,
     pos_profile: "",
     invoice_doc: "",
@@ -730,7 +801,135 @@ export default {
     mpesa_modes: [],
   }),
 
-  methods: {
+methods: {
+  openDialog() {
+  if (!this.invoice_doc.customer) {
+    evntBus.$emit("show_mesage", {
+      text: __(`There is no Customer!`),
+      color: "error",
+    });
+    return;
+  } else {
+    // Emit a freeze event to indicate that a process is in progress
+    evntBus.$emit("freeze", {
+      title: __("Please wait..."),
+    });
+
+    // Make the server call
+    frappe.call({
+      method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_offer",
+      args: {
+        customer: this.invoice_doc.customer,
+        pos_profile: this.pos_profile.name,
+      },
+      callback: (r) => {
+        st = r.message;
+        dt = st.data;
+        if (st.status == 200) {
+          // Populate formData with fetched values
+          this.formData.pezesha_customer_id = this.invoice_doc.customer;
+          this.formData.pezesha_channel_id = this.pos_profile.name;
+          this.formData.amount = dt.amount;
+          this.formData.fee = dt.fee;
+          this.formData.interest = (dt.amount * dt.rate) / 100;
+          this.formData.duration = dt.duration;
+          this.formData.rate = dt.rate;
+          this.changeHandler(); // Call changeHandler after setting initial values
+          // Once the server call is completed, emit an unfreeze event
+          evntBus.$emit("unfreeze");
+          // Optionally, update dialog visibility or perform other actions
+          this.dialogVisible = true;
+        } else {
+          evntBus.$emit("unfreeze");
+        }
+      },
+    });
+  }
+},
+changeHandler() {
+  this.formData.interest = (this.formData.amount * this.formData.rate) / 100;
+  // change of user input, do something
+},
+    closeDialog() {
+      this.dialogVisible = false;
+    },
+    closeSuccessfulDialog() {
+      this.dialogSuccessful = false;
+    },
+      // frappe.call({
+      //  method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_status",
+        // args: {
+          // customer: this.invoice_doc.customer,
+          // pos_profile: this.pos_profile.name,
+        // },
+      //  callback: (r) => {
+          // Emit an unfreeze event after receiving the response
+
+        //  }  
+      // });
+    // },
+    closeNotSuccessfulDialog() {
+      this.dialognotSuccessful = false;
+    },
+   submitForm() {
+      // Here you can handle form submission
+      // Emit a freeze event to indicate that a process is in progress
+     evntBus.$emit("freeze", {
+       title: __("Please wait..."),
+      });
+      
+      // Make the server call
+     frappe.call({
+       method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_application",
+        args: {
+          data: this.formData,
+         pos_profile: this.pos_profile.name,
+        },
+       callback: (r) => {
+          // Emit an unfreeze event after receiving the response
+         evntBus.$emit("unfreeze");
+         let s = r.message;
+          if (s.status == 200) {
+            this.dialogMessage = JSON.stringify(s);
+           this.dialogSuccessful = true;
+         } else {
+           this.dialognotSuccessful = true;
+         }
+       }
+      });
+    }, 
+    closeDialog() {
+      this.dialogVisible = false;
+    },
+    submitForm() {
+      // Here you can handle form submission
+      // Emit a freeze event to indicate that a process is in progress
+      evntBus.$emit("freeze", {
+        title: __("Please wait..."),
+      });
+    
+      // Make the server call
+      frappe.call({
+        method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_application",
+        args: {
+          data: this.formData,
+          pos_profile: this.pos_profile.name,
+        },
+        callback: (r) => {
+          // Emit an unfreeze event after receiving the response
+          evntBus.$emit("unfreeze");
+          let s = r.message;
+          if (s.status == 200) {
+            // this.dialogMessage = JSON.stringify(s);
+            this.dialogSuccessful = true;
+          } else {
+            this.dialognotSuccessful = true;
+          }
+          // Close the dialog after form submission
+          this.dialogVisible = false;
+        }
+      });
+    },
     back_to_invoice() {
       evntBus.$emit("show_payment", "false");
       evntBus.$emit("set_customer_readonly", false);
