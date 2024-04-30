@@ -67,7 +67,7 @@ def pezesha_loan_application(data, pos_profile):
 	}
 	data = {
 		'channel': pos.custom_pezesha_channel_id,
-	    'identifier': res.get('pezesha_customer_id'),
+	    'pezesha_id': res.get('pezesha_customer_id'),
 	    'amount': res.get('amount'),
 	    'duration': res.get('duration'),
 	    'interest': res.get('interest'),
