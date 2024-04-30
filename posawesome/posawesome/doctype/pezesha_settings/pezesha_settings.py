@@ -97,8 +97,6 @@ def pezesha_loan_status(customer, pos_profile):
         'status':res.get('status')
 
    }
-
-	}
 	
 	response = requests.post(url, headers=headers, data=data)
 	if response.status_code == 200:
