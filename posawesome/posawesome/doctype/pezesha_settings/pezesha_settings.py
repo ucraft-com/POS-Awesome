@@ -57,7 +57,7 @@ def pezesha_loan_offer(customer, pos_profile):
     	return response.status_code
 
 @frappe.whitelist()
-def pezesha_loan_application(data, pos_profile):
+def pezesha_loan_application(data, channel):
 	res = json.loads(data)
 	pos = frappe.get_doc("POS Profile", pos_profile)
 	pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
