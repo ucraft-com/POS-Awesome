@@ -189,7 +189,9 @@
             <v-col cols="6">
               <!-- Add your text field here -->
               <v-text-field
+              v-model="formLoan.loanstatusamount"
                 color="primary"
+                :value="formtCurrency(pezesha_amount)"
                 :prefix="currencySymbol(pos_profile.currency)"
                 :label="frappe._('Credit Pezesha')"
                 readonly
@@ -208,6 +210,17 @@
                 @click="openDialog"
               >
                 {{ __("Credit Pezesha") }}
+              </v-btn>
+            </v-col>
+            <v-col cols="6" class="text-left"> <!-- Adjusted class to align right -->
+              <v-btn
+                block
+                class="pa-0"
+                color="success"
+                dark
+                @click="pezeshaLoanStatus"
+              >
+                {{ __("Pezesha Loan Status") }}
               </v-btn>
             </v-col>
           </v-row>
@@ -771,6 +784,9 @@ export default {
     dialogVisible: false,
     success: true,
     message: 'Thank you for your Loan Approval.',
+    formLoan: {
+        loanstatusamount: null
+      },
     formData: {
       amount: 0,
       rate: 0,
@@ -856,18 +872,25 @@ changeHandler() {
     closeSuccessfulDialog() {
       this.dialogSuccessful = false;
     },
-      // frappe.call({
-      //  method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_status",
-        // args: {
-          // customer: this.invoice_doc.customer,
-          // pos_profile: this.pos_profile.name,
-        // },
-      //  callback: (r) => {
-          // Emit an unfreeze event after receiving the response
+// pezeshaLoanStatus(){ 
 
-        //  }  
-      // });
-    // },
+//     },
+pezeshaLoanStatus(){
+  evntBus.$emit("freeze", {
+        title: __("Please wait..."),
+  }); 
+  frappe.call({
+       method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_status",
+        args: {
+          customer: this.invoice_doc.customer,
+          pos_profile: this.pos_profile.name,
+        },
+       callback: (r) => {
+        this.formLoan.loanstatusamount = r.message;
+        evntBus.$emit("unfreeze");
+         }  
+      });
+},
     closeNotSuccessfulDialog() {
       this.dialognotSuccessful = false;
     },
@@ -890,7 +913,7 @@ changeHandler() {
          evntBus.$emit("unfreeze");
          let s = r.message;
           if (s.status == 200) {
-            this.dialogMessage = JSON.stringify(s);
+          //  this.dialogMessage = JSON.stringify(s);
            this.dialogSuccessful = true;
          } else {
            this.dialognotSuccessful = true;
@@ -1447,6 +1470,10 @@ changeHandler() {
   },
 
   computed: {
+    formattedPezeshaAmount() {
+      // Assuming pezesha_amount is a computed property or data property
+      return this.formtCurrency(this.pezesha_amount);
+    },
     total_payments() {
       let total = parseFloat(this.invoice_doc.loyalty_amount);
       if (this.invoice_doc && this.invoice_doc.payments) {

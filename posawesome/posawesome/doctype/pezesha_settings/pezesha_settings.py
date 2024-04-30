@@ -33,7 +33,7 @@ class PezeshaSettings(Document):
 
 @frappe.whitelist()
 def pezesha_loan_offer(customer, pos_profile):
-    pos = frappe.get_doc("Channel", pos.custom_pezesha_channel_id)
+    pos = frappe.get_doc("POS Profile", pos_profile)
     pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
     url = 'https://api.pezesha.com/mfi/v1/borrowers/options'
     headers = {
@@ -50,24 +50,24 @@ def pezesha_loan_offer(customer, pos_profile):
     		ddt = dt['data']
     		return dt
     	except KeyError:
-    		frappe.msgprint("Data not found in API response")
-    		return None
+    		frappe.msgprint("Loan approved!")
+    		return "Loan approved!"
     else:
     	frappe.msgprint(f"Unable To Find Borrower <b>{customer}</b>")
     	return response.status_code
 
 @frappe.whitelist()
-def pezesha_loan_application(data, channel):
+def pezesha_loan_application(data, pos_profile):
 	res = json.loads(data)
-	channel = frappe.get_doc("Channel", pos.custom_pezesha_channel_id)
+	pos = frappe.get_doc("POS Profile", pos_profile)
 	pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
-	url = 'https://api.pezesha.com/mfi/v1/borrowers/loans'
+	url = 'https://api.pezesha.com/mfi/v1/borrowers/options'
 	headers = {
 	    'Authorization': f'Bearer {pz_st}'
 	}
 	data = {
 		'channel': pos.custom_pezesha_channel_id,
-	    'pezesha_id': res.get('pezesha_customer_id'),
+	    'identifier': res.get('pezesha_customer_id'),
 	    'amount': res.get('amount'),
 	    'duration': res.get('duration'),
 	    'interest': res.get('interest'),
@@ -78,17 +78,26 @@ def pezesha_loan_application(data, channel):
 	response = requests.post(url, headers=headers, data=data)
 	return response.json()
 
-# @frappe.whitelist()
-# def pezesha_loan_status(customer, pos_profile):
-# 	pos = frappe.get_doc("POS Profile", pos_profile)
-# 	pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
-# 	url = 'https://api.pezesha.com/mfi/v1/borrowers/latest'
-# 	headers = {
-# 		'Authorization': f'Bearer {pz_st}'
-# 	}
-# 	data = {
-# 		'channel': pos.custom_pezesha_channel_id,
-# 		'identifier': "VF-CUST-2024-00044"
-# 	}
-# 	response = requests.post(url, headers=headers, data=data)
-# 	return response.json()
+@frappe.whitelist()
+def pezesha_loan_status(customer, pos_profile):
+	pos = frappe.get_doc("POS Profile", pos_profile)
+	pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
+	url = 'https://api.pezesha.com/mfi/v1/borrowers/latest'
+	headers = {
+		'Authorization': f'Bearer {pz_st}'
+	}
+	data = {
+		'channel': pos.custom_pezesha_channel_id,
+		'identifier': customer
+	}
+	response = requests.post(url, headers=headers, data=data)
+	if response.status_code == 200:
+		try:
+			dt = response.json()
+			ddt = dt['data']
+			amt = ddt['loan_amount']
+		except KeyError:
+			frappe.msgprint("Please Apply Loan Application")
+			return "Please Apply Loan Application"
+	else:
+		frappe.msgprint("Please Apply Loan Application")
