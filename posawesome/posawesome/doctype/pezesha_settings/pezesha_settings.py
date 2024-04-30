@@ -88,8 +88,18 @@ def pezesha_loan_status(customer, pos_profile):
 	}
 	data = {
 		'channel': pos.custom_pezesha_channel_id,
-		'identifier': customer
+		'identifier': customer,
+		'loan_id':res.get('loan_id'),
+        'customer_id':res.get('pezesha_customer_id'),
+        'channel': pos.custom_pezesha_channel_id,
+        'loan_amount':res.get('loan_amount'),
+        'interest':res.get('interest'),
+        'status':res.get('status')
+
+   }
+
 	}
+	
 	response = requests.post(url, headers=headers, data=data)
 	if response.status_code == 200:
 		try:
