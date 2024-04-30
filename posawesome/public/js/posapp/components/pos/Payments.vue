@@ -888,6 +888,7 @@ pezeshaLoanStatus(){
        callback: (r) => {
         this.formLoan.loanstatusamount = r.message;
         evntBus.$emit("unfreeze");
+        console.log(r)
          }  
       });
 },
