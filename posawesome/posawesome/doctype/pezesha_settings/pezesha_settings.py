@@ -59,7 +59,7 @@ def pezesha_loan_offer(customer, pos_profile):
 @frappe.whitelist()
 def pezesha_loan_application(data, channel):
 	res = json.loads(data)
-	pos = frappe.get_doc("POS Profile", pos_profile)
+	channel = frappe.get_doc("Channel", pos.custom_pezesha_channel_id)
 	pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
 	url = 'https://api.pezesha.com/mfi/v1/borrowers/loans'
 	headers = {
