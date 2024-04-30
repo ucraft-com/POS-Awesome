@@ -61,7 +61,7 @@ def pezesha_loan_application(data, pos_profile):
 	res = json.loads(data)
 	pos = frappe.get_doc("POS Profile", pos_profile)
 	pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
-	url = 'https://api.pezesha.com/mfi/v1/borrowers/options'
+	url = 'https://api.pezesha.com/mfi/v1/borrowers/loans'
 	headers = {
 	    'Authorization': f'Bearer {pz_st}'
 	}
