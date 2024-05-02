@@ -189,11 +189,37 @@
             <v-col cols="6">
               <!-- Add your text field here -->
               <v-text-field
-              v-model="formLoan.loanstatusamount"
+              v-model="formLoan.loan_amount"
                 color="primary"
                 :value="formtCurrency(pezesha_amount)"
                 :prefix="currencySymbol(pos_profile.currency)"
-                :label="frappe._('Credit Pezesha')"
+                :label="frappe._('Loan Amount')"
+                readonly
+                dense
+                outlined
+                background-color="white"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <!-- Add your text field here -->
+              <v-text-field
+              v-model="formLoan.loan_id"
+                color="primary"
+                :label="frappe._('Loan Id')"
+                readonly
+                dense
+                outlined
+                background-color="white"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <!-- Add your text field here -->
+              <v-text-field
+              v-model="formLoan.loan_status"
+                color="primary"
+                :label="frappe._('Status')"
                 readonly
                 dense
                 outlined
@@ -785,7 +811,9 @@ export default {
     success: true,
     message: 'Thank you for your Loan Approval.',
     formLoan: {
-        loanstatusamount: null
+        loan_amount: null,
+        loan_id:null,
+        loan_status:null
       },
     formData: {
       amount: 0,
@@ -886,9 +914,11 @@ pezeshaLoanStatus(){
           pos_profile: this.pos_profile.name,
         },
        callback: (r) => {
-        this.formLoan.loanstatusamount = r.message;
+        pez = r.message
+        this.formLoan.loan_amount = pez.loan_amount;
+        this.formLoan.loan_id = pez.loan_id;
+        this.formLoan.loan_status = pez.status; 
         evntBus.$emit("unfreeze");
-        console.log(r)
          }  
       });
 },
