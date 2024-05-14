@@ -891,7 +891,11 @@ methods: {
   }
 },
 changeHandler() {
+  // if(dt.amount >= this.formData.amount){
   this.formData.interest = (this.formData.amount * this.formData.rate) / 100;
+  // }else{
+    // frappe.throw("Please ensure that the input value does not exceed the loan amount limit.")
+  // }
   // change of user input, do something
 },
     closeDialog() {
@@ -914,26 +918,24 @@ pezeshaLoanStatus(){
           pos_profile: this.pos_profile.name,
         },
        callback: (r) => {
-        pez = r.message
-        this.formLoan.loan_amount = pez.loan_amount;
-        this.formLoan.loan_id = pez.loan_id;
-        this.formLoan.loan_status = pez.status; 
-        evntBus.$emit("unfreeze");
-         }  
+        if(r.message){
+          pez = r.message
+          this.formLoan.loan_amount = pez.loan_amount;
+          this.formLoan.loan_id = pez.loan_id;
+          this.formLoan.loan_status = pez.status; 
+          evntBus.$emit("unfreeze");
+        }else{
+          evntBus.$emit("unfreeze");
+        }
+        }  
       });
 },
     closeNotSuccessfulDialog() {
       this.dialognotSuccessful = false;
     },
    submitForm() {
-      // Here you can handle form submission
-      // Emit a freeze event to indicate that a process is in progress
-     evntBus.$emit("freeze", {
-       title: __("Please wait..."),
-      });
-      
-      // Make the server call
-     frappe.call({
+    if(this.invoice_doc.grand_total >= this.formData.amount){
+      frappe.call({
        method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_application",
         args: {
           data: this.formData,
@@ -951,17 +953,29 @@ pezeshaLoanStatus(){
          }
        }
       });
+
+    }else{
+      frappe.throw("Please ensure that the input value does not exceed the loan amount limit.")
+    }
+      // Here you can handle form submission
+      // Emit a freeze event to indicate that a process is in progress
+     evntBus.$emit("freeze", {
+       title: __("Please wait..."),
+      });
+      
+      // Make the server call
+
     }, 
     closeDialog() {
       this.dialogVisible = false;
     },
     submitForm() {
+      if(this.invoice_doc.grand_total >= this.formData.amount){
       // Here you can handle form submission
       // Emit a freeze event to indicate that a process is in progress
       evntBus.$emit("freeze", {
         title: __("Please wait..."),
       });
-    
       // Make the server call
       frappe.call({
         method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_application",
@@ -983,6 +997,11 @@ pezeshaLoanStatus(){
           this.dialogVisible = false;
         }
       });
+
+  }else{
+    frappe.throw("Please ensure that the input value does not exceed the loan amount limit.")
+  }
+
     },
     back_to_invoice() {
       evntBus.$emit("show_payment", "false");
