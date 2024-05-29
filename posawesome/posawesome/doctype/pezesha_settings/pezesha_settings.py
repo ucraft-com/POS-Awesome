@@ -102,3 +102,24 @@ def pezesha_loan_status(customer, pos_profile):
 			return "Please Apply Loan Application"
 	else:
 		frappe.msgprint("Please Apply Loan Application")
+		
+def corn():
+	doc = frappe.get_doc('Pezesha Settings')
+	if doc.enable:
+		try:
+			response = make_post_request(
+				url="https://api.pezesha.com/oauth/token",
+				data={
+					"grant_type": "client_credentials",
+					"client_id": doc.client_id,
+					"client_secret": doc.client_secret_id,
+					"provider": "users"				
+				},
+				auth=(
+					doc.client_id,
+					doc.get_password(fieldname="client_secret_id", raise_exception=False),
+					),
+				)
+			doc.db_set('authorization', response['access_token'])
+		except Exception as e:
+			frappe.throw(_("Seems API Key or API Secret is wrong !!!"))
