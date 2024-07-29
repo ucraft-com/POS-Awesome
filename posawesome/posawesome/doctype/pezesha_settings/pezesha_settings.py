@@ -13,12 +13,17 @@ class PezeshaSettings(Document):
 		if self.enable:
 			try:
 				response = make_post_request(
-					url="https://api.pezesha.com/oauth/token",
+					# url = 'https://gateway.pezesha.com',
+					url="https://gateway.pezesha.com/oauth/token",
+					headers = {
+						'pezesha-apikey': '9ea7l6xraTJjDAXU6KYogxcArmlDGE1u',
+						'Accept-Encoding': 'gzip, deflate'
+					},
 					data={
 						"grant_type": "client_credentials",
-	    				"client_id": self.client_id,
-	    				"client_secret": self.client_secret_id,
-	    				"provider": "users"				
+						"client_id": self.client_id,
+						"client_secret": self.client_secret_id,
+						"provider": "users"				
 					},
 					auth=(
 						self.client_id,
@@ -33,46 +38,50 @@ class PezeshaSettings(Document):
 
 @frappe.whitelist()
 def pezesha_loan_offer(customer, pos_profile):
-    pos = frappe.get_doc("POS Profile", pos_profile)
-    pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
-    url = 'https://api.pezesha.com/mfi/v1/borrowers/options'
-    headers = {
-        'Authorization': f'Bearer {pz_st}'
-    }
-    data = {
-        'channel': pos.custom_pezesha_channel_id,
-        'identifier': customer
-    }
-    response = requests.post(url, headers=headers, data=data)
-    if response.status_code == 200:
-    	try:
-    		dt = response.json()
-    		ddt = dt['data']
-    		return dt
-    	except KeyError:
-    		frappe.msgprint("You already have a pending loan. Cannot apply for new loan until current one is cleared")
-    		return "You already have a pending loan. Cannot apply for new loan until current one is cleared"
-    else:
-    	frappe.msgprint(f"Unable To Find Borrower <b>{customer}</b>")
-    	return response.status_code
+	pos = frappe.get_doc("POS Profile", pos_profile)
+	pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
+	url = 'https://gateway.pezesha.com/mfi/v1/borrowers/options'
+	headers = {
+		'Authorization': f'Bearer {pz_st}',
+		'pezesha-apikey': '9ea7l6xraTJjDAXU6KYogxcArmlDGE1u',
+		'Accept-Encoding': 'gzip, deflate'
+	}
+	data = {
+		'channel': pos.custom_pezesha_channel_id,
+		'identifier': customer
+	}
+	response = requests.post(url, headers=headers, data=data)
+	if response.status_code == 200:
+		try:
+			dt = response.json()
+			ddt = dt['data']
+			return dt
+		except KeyError:
+			frappe.msgprint("You already have a pending loan. Cannot apply for new loan until current one is cleared")
+			return "You already have a pending loan. Cannot apply for new loan until current one is cleared"
+	else:
+		frappe.msgprint(f"Unable To Find Borrower <b>{customer}</b>")
+		return response.status_code
 
 @frappe.whitelist()
 def pezesha_loan_application(data, pos_profile):
 	res = json.loads(data)
 	pos = frappe.get_doc("POS Profile", pos_profile)
 	pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
-	url = 'https://api.pezesha.com/mfi/v1/borrowers/loans'
+	url = 'https://gateway.pezesha.com/mfi/v1/borrowers/loans'
 	headers = {
-	    'Authorization': f'Bearer {pz_st}'
+		'Authorization': f'Bearer {pz_st}',
+		'pezesha-apikey': '9ea7l6xraTJjDAXU6KYogxcArmlDGE1u',
+		'Accept-Encoding': 'gzip, deflate'
 	}
 	data = {
 		'channel': pos.custom_pezesha_channel_id,
-	    'pezesha_id': res.get('pezesha_customer_id'),
-	    'amount': res.get('amount'),
-	    'duration': res.get('duration'),
-	    'interest': res.get('interest'),
-	    'rate': res.get('rate'),
-	    'fee': res.get('fee')
+		'pezesha_id': res.get('pezesha_customer_id'),
+		'amount': res.get('amount'),
+		'duration': res.get('duration'),
+		'interest': res.get('interest'),
+		'rate': res.get('rate'),
+		'fee': res.get('fee')
 	}
 
 	response = requests.post(url, headers=headers, data=data)
@@ -82,9 +91,11 @@ def pezesha_loan_application(data, pos_profile):
 def pezesha_loan_status(customer, pos_profile):
 	pos = frappe.get_doc("POS Profile", pos_profile)
 	pz_st = frappe.db.get_single_value('Pezesha Settings', 'authorization')
-	url = 'https://api.pezesha.com/mfi/v1/borrowers/latest'
+	url = 'https://gateway.pezesha.com/mfi/v1/borrowers/latest'
 	headers = {
-		'Authorization': f'Bearer {pz_st}'
+		'Authorization': f'Bearer {pz_st}',
+		'pezesha-apikey': '9ea7l6xraTJjDAXU6KYogxcArmlDGE1u',
+		'Accept-Encoding': 'gzip, deflate'
 	}
 	data = {
 		'channel': pos.custom_pezesha_channel_id,
@@ -108,7 +119,11 @@ def corn():
 	if doc.enable:
 		try:
 			response = make_post_request(
-				url="https://api.pezesha.com/oauth/token",
+				url="https://gateway.pezesha.com/oauth/token",
+				headers = {
+					'pezesha-apikey': '9ea7l6xraTJjDAXU6KYogxcArmlDGE1u',
+					'Accept-Encoding': 'gzip, deflate'
+				},
 				data={
 					"grant_type": "client_credentials",
 					"client_id": doc.client_id,
