@@ -3,6 +3,7 @@
     <v-dialog v-model="dialognotSuccessful" max-width="500px">
       <v-card>
         <v-card-title>Loan Not Approved</v-card-title>
+        <v-card-text>{{ dialogMessage }}</v-card-text>
         <v-card-actions>
           <v-btn color="error" @click="closeNotSuccessfulDialog">Close</v-btn>
         </v-card-actions>
@@ -804,7 +805,7 @@ import format from "../../format";
 export default {
   mixins: [format],
   data: () => ({
-    // dialogMessage: '',
+    dialogMessage: '',
     dialognotSuccessful: false,
     dialogSuccessful : false,
     dialogVisible: false,
@@ -933,42 +934,39 @@ pezeshaLoanStatus(){
     closeNotSuccessfulDialog() {
       this.dialognotSuccessful = false;
     },
-   submitForm() {
-    if(this.invoice_doc.grand_total >= this.formData.amount){
-      frappe.call({
-       method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_application",
-        args: {
-          data: this.formData,
-         pos_profile: this.pos_profile.name,
-        },
-       callback: (r) => {
-          // Emit an unfreeze event after receiving the response
-         evntBus.$emit("unfreeze");
-         let s = r.message;
-          if (s.status == 200) {
-          //  this.dialogMessage = JSON.stringify(s);
-           this.dialogSuccessful = true;
-         } else {
-           this.dialognotSuccessful = true;
-         }
-       }
-      });
+  //  submitForm() {
+  //   if(this.invoice_doc.grand_total >= this.formData.amount){
+  //     frappe.call({
+  //      method: "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.pezesha_loan_application",
+  //       args: {
+  //         data: this.formData,
+  //        pos_profile: this.pos_profile.name,
+  //       },
+  //      callback: (r) => {
+  //         // Emit an unfreeze event after receiving the response
+  //        evntBus.$emit("unfreeze");
+  //        let s = r.message;
+  //         if (s.status == 200) {
+  //          this.dialogMessage = JSON.stringify(s);
+  //          this.dialogSuccessful = true;
+  //        } else {
+  //          this.dialognotSuccessful = true;
+  //        }
+  //      }
+  //     });
 
-    }else{
-      frappe.throw("Please ensure that the input value does not exceed the loan amount limit.")
-    }
-      // Here you can handle form submission
-      // Emit a freeze event to indicate that a process is in progress
-     evntBus.$emit("freeze", {
-       title: __("Please wait..."),
-      });
+  //   }else{
+  //     frappe.throw("Please ensure that the input value does not exceed the loan amount limit.")
+  //   }
+  //     // Here you can handle form submission
+  //     // Emit a freeze event to indicate that a process is in progress
+  //    evntBus.$emit("freeze", {
+  //      title: __("Please wait..."),
+  //     });
       
-      // Make the server call
+  //     // Make the server call
 
-    }, 
-    closeDialog() {
-      this.dialogVisible = false;
-    },
+  //   },
     submitForm() {
       if(this.invoice_doc.grand_total >= this.formData.amount){
       // Here you can handle form submission
@@ -994,6 +992,7 @@ pezeshaLoanStatus(){
             this.dialognotSuccessful = true;
           }
           // Close the dialog after form submission
+          this.dialogMessage = `${s.status} - ${s.message.match(/ERROR:\s*(.*?)\s*CONTEXT:/)}`;
           this.dialogVisible = false;
         }
       });
