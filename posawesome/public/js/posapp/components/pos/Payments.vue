@@ -394,7 +394,7 @@ import format from "../../format";
 export default {
   mixins: [format],
   data: () => ({
-    dialogtitle = '',
+    dialogtitle: '',
     dialogMessage: '',
     dialognotSuccessful: false,
     dialogSuccessful: false,
