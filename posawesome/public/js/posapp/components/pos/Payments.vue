@@ -477,21 +477,21 @@ export default {
             } else {
               this.dialognotSuccessful = true;
               evntBus.$emit("unfreeze");
-              if (st.status == 400) {
+              if (st.status == 400 || st == 400) {
                 dialogtitle = "Invalid Merchant ID";
                 dialogMessage = 'Loan offer request failed: The provided merchant ID is invalid. Please verify your merchant ID and try again.';
               }
-              else if (st.status == 404) {
+              else if (st.status == 404 || st == 404) {
                 dialogtitle = "Merchant not found";
                 dialogMessage = 'Merchant not found.';
               }
-              else if (st.status == 503) {
+              else if (st.status == 503 || st == 503) {
                 dialogtitle = "Loan Offer Unavailable";
                 dialogMessage = 'Loan offer request failed: Unable to retrieve loan offers at this time. Please try again later.';
               }
-              else if (st.status == 401) {
-                dialogtitle = "Missing Authorization Token";
-                dialogMessage = 'The request does not include the required authorization token.';
+              else if (st.status == 401 || st == 401) {
+                this.dialogtitle = "Missing Authorization Token";
+                this.dialogMessage = 'The request does not include the required authorization token.';
               }
             }
           },
@@ -535,15 +535,15 @@ export default {
           } else {
             this.dialognotSuccessful = true;
             evntBus.$emit("unfreeze");
-            if (st.status == 404) {
+            if (st.status == 404 || st == 404) {
               dialogtitle = "Loan Not Found";
               dialogMessage = 'Loan status request failed: No loan found for the given identifier. Please verify your details and try again.';
             }
-            else if (st.status == 400) {
+            else if (st.status == 400 || st == 400) {
               dialogtitle = "Invalid Loan Status Request";
               dialogMessage = 'Loan status request failed: Invalid request parameters. Please ensure you provide a valid channel and identifier.';
             }
-            else if (st.status == 401) {
+            else if (st.status == 401 || st == 401) {
               dialogtitle = "Authorization Token Missing";
               dialogMessage = 'Loan status request failed: Missing authorization token. Please provide a valid token to retrieve loan status.';
             }
@@ -610,11 +610,11 @@ export default {
               this.dialogSuccessful = true;
             } else {
               this.dialognotSuccessful = true;
-              if (st.status == 403) {
+              if (st.status == 403 || st == 403) {
                 dialogtitle = "Loan Application Denied";
                 dialogMessage = 'Loan application failed: Your previous loan is yet to be fully paid or is overdue. Please settle outstanding dues to apply for a new loan.';
               }
-              else if (st.status == 400) {
+              else if (st.status == 400 || st == 400) {
                 dialogtitle = "Invalid Loan Amount";
                 dialogMessage = 'Loan application failed: The requested loan amount exceeds your available credit limit. Please request a lower amount.';
               }

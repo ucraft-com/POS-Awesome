@@ -113,6 +113,7 @@ def pezesha_loan_status(customer, pos_profile):
 			return "Please Apply Loan Application"
 	else:
 		frappe.msgprint("Please Apply Loan Application")
+		return response.status_code
 		
 def corn():
 	doc = frappe.get_doc('Pezesha Settings')
