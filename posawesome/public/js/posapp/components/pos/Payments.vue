@@ -610,11 +610,11 @@ export default {
               this.dialogSuccessful = true;
             } else {
               this.dialognotSuccessful = true;
-              if (st.status == 403 || st == 403) {
+              if (s.status == 403 || s == 403) {
                 dialogtitle = "Loan Application Denied";
                 dialogMessage = 'Loan application failed: Your previous loan is yet to be fully paid or is overdue. Please settle outstanding dues to apply for a new loan.';
               }
-              else if (st.status == 400 || st == 400) {
+              else if (s.status == 400 || s == 400) {
                 dialogtitle = "Invalid Loan Amount";
                 dialogMessage = 'Loan application failed: The requested loan amount exceeds your available credit limit. Please request a lower amount.';
               }
