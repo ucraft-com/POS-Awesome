@@ -633,7 +633,7 @@ export default {
         });
 
       } else {
-        frappe.throw("Please ensure that the input value does not exceed the loan amount limit.")
+        frappe.throw("Please ensure the input value matches the order amount.")
       }
 
     },
