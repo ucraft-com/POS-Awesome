@@ -629,7 +629,7 @@
               </td>
             </template>
           </v-data-table>
-        </template>
+        </template>      
       </div>
     </v-card>
     <v-card class="cards mb-0 mt-3 py-0 grey lighten-5">
@@ -742,7 +742,7 @@
           </v-row>
         </v-col>
         <v-col cols="5">
-          <v-row no-gutters class="pa-1 pt-2 pl-0">
+          <v-row no-gutters class="pa-1 pt-2 pl-0">            
             <v-col cols="6" class="pa-1">
               <v-btn
                 block
@@ -889,6 +889,10 @@ export default {
   },
 
   computed: {
+    pezesha_amount(){
+      let sum = 0;
+      return flt(sum)
+    },
     total_qty() {
       this.close_payments();
       let qty = 0;
@@ -1450,7 +1454,6 @@ export default {
         return this.update_invoice_from_order(doc);
       }
     },
-
     async show_payment() {
       if (!this.customer) {
         evntBus.$emit("show_mesage", {

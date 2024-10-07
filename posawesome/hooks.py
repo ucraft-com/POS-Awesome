@@ -257,6 +257,7 @@ fixtures = [
                     "POS Profile-posa_allow_reconcile_payments",
                     "POS Profile-column_break_uolvm",
                     "POS Profile-posa_allow_mpesa_reconcile_payments",
+                    "POS Profile-custom_pezesha_channel_id",
                 ),
             ]
         ],
@@ -265,4 +266,10 @@ fixtures = [
         "doctype": "Property Setter",
         "filters": [["name", "in", ("Sales Invoice-posa_pos_opening_shift-no_copy")]],
     },
+    
 ]
+scheduler_events = {
+    "daily": [
+        "posawesome.posawesome.doctype.pezesha_settings.pezesha_settings.corn"
+    ]
+}
