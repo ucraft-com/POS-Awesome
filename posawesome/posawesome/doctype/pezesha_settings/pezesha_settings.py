@@ -9,7 +9,7 @@ from frappe import _
 from frappe.integrations.utils import (make_get_request, make_post_request, create_request_log)
 
 class PezeshaSettings(Document):
-	def validate(self):
+	def before_validate(self):
 		if self.enable:
 			try:
 				response = make_post_request(
