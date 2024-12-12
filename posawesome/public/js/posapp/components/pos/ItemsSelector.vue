@@ -1,88 +1,37 @@
 <template>
   <div>
-    <v-card
-      class="selection mx-auto grey lighten-5 mt-3"
-      style="max-height: 75vh; height: 75vh"
-    >
-      <v-progress-linear
-        :active="loading"
-        :indeterminate="loading"
-        absolute
-        top
-        color="info"
-      ></v-progress-linear>
+    <v-card class="selection mx-auto bg-grey-lighten-5 mt-3" style="max-height: 75vh; height: 75vh">
+      <v-progress-linear :active="loading" :indeterminate="loading" absolute :location="top"
+        color="info"></v-progress-linear>
       <v-row class="items px-2 py-1">
         <v-col class="pb-0 mb-2">
-          <v-text-field
-            dense
-            clearable
-            autofocus
-            outlined
-            color="primary"
-            :label="frappe._('Search Items')"
-            hint="Search by item code, serial number, batch no or barcode"
-            background-color="white"
-            hide-details
-            v-model="debounce_search"
-            @keydown.esc="esc_event"
-            @keydown.enter="search_onchange"
-            ref="debounce_search"
-          ></v-text-field>
+          <v-text-field density="compact" clearable autofocus variant="outlined" color="primary"
+            :label="frappe._('Search Items')" hint="Search by item code, serial number, batch no or barcode"
+            bg-color="white" hide-details v-model="debounce_search" @keydown.esc="esc_event"
+            @keydown.enter="search_onchange" ref="debounce_search"></v-text-field>
         </v-col>
         <v-col cols="3" class="pb-0 mb-2" v-if="pos_profile.posa_input_qty">
-          <v-text-field
-            dense
-            outlined
-            color="primary"
-            :label="frappe._('QTY')"
-            background-color="white"
-            hide-details
-            v-model.number="qty"
-            type="number"
-            @keydown.enter="enter_event"
-            @keydown.esc="esc_event"
-          ></v-text-field>
+          <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('QTY')" bg-color="white"
+            hide-details v-model.number="qty" type="number" @keydown.enter="enter_event"
+            @keydown.esc="esc_event"></v-text-field>
         </v-col>
         <v-col cols="2" class="pb-0 mb-2" v-if="pos_profile.posa_new_line">
-          <v-checkbox
-            v-model="new_line"
-            color="accent"
-            value="true"
-            label="NLine"
-            dense
-            hide-details
-          ></v-checkbox>
+          <v-checkbox v-model="new_line" color="accent" value="true" label="NLine" density="default"
+            hide-details></v-checkbox>
         </v-col>
         <v-col cols="12" class="pt-0 mt-0">
           <div fluid class="items" v-if="items_view == 'card'">
-            <v-row dense class="overflow-y-auto" style="max-height: 67vh">
-              <v-col
-                v-for="(item, idx) in filtred_items"
-                :key="idx"
-                xl="2"
-                lg="3"
-                md="6"
-                sm="6"
-                cols="6"
-                min-height="50"
-              >
+            <v-row density="default" class="overflow-y-auto" style="max-height: 67vh">
+              <v-col v-for="(item, idx) in filtred_items" :key="idx" xl="2" lg="3" md="6" sm="6" cols="6"
+                min-height="50">
                 <v-card hover="hover" @click="add_item(item)">
-                  <v-img
-                    :src="
-                      item.image ||
-                      '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'
-                    "
-                    class="white--text align-end"
-                    gradient="to bottom, rgba(0,0,0,0), rgba(0,0,0,0.4)"
-                    height="100px"
-                  >
-                    <v-card-text
-                      v-text="item.item_name"
-                      class="text-caption px-1 pb-0"
-                    ></v-card-text>
+                  <v-img :src="item.image ||
+                    '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'
+                    " class="text-white align-end" gradient="to bottom, rgba(0,0,0,0), rgba(0,0,0,0.4)" height="100px">
+                    <v-card-text v-text="item.item_name" class="text-caption px-1 pb-0"></v-card-text>
                   </v-img>
                   <v-card-text class="text--primary pa-1">
-                    <div class="text-caption primary--text">
+                    <div class="text-caption text-primary">
                       {{ currencySymbol(item.currency) || "" }}
                       {{ formtCurrency(item.rate) || 0 }}
                     </div>
@@ -98,20 +47,11 @@
           <div fluid class="items" v-if="items_view == 'list'">
             <div class="my-0 py-0 overflow-y-auto" style="max-height: 65vh">
               <template>
-                <v-data-table
-                  :headers="getItmesHeaders()"
-                  :items="filtred_items"
-                  item-key="item_code"
-                  class="elevation-1"
-                  :items-per-page="itemsPerPage"
-                  hide-default-footer
-                  @click:row="add_item"
-                >
+                <v-data-table :headers="getItmesHeaders()" :items="filtred_items" item-key="item_code"
+                  class="elevation-1" :items-per-page="itemsPerPage" hide-default-footer @click:row="add_item">
                   <template v-slot:item.rate="{ item }">
-                    <span class="primary--text"
-                      >{{ currencySymbol(item.currency) }}
-                      {{ formtCurrency(item.rate) }}</span
-                    >
+                    <span class="text-primary">{{ currencySymbol(item.currency) }}
+                      {{ formtCurrency(item.rate) }}</span>
                   </template>
                   <template v-slot:item.actual_qty="{ item }">
                     <span class="golden--text">{{
@@ -125,41 +65,28 @@
         </v-col>
       </v-row>
     </v-card>
-    <v-card class="cards mb-0 mt-3 pa-2 grey lighten-5">
+    <v-card class="cards mb-0 mt-3 pa-2 bg-grey-lighten-5">
       <v-row no-gutters align="center" justify="center">
         <v-col cols="12">
-          <v-select
-            :items="items_group"
-            :label="frappe._('Items Group')"
-            dense
-            outlined
-            hide-details
-            v-model="item_group"
-            v-on:change="search_onchange"
-          ></v-select>
+          <v-select :items="items_group" :label="frappe._('Items Group')" density="compact" variant="outlined"
+            hide-details v-model="item_group" v-on:update:model-value="search_onchange"></v-select>
         </v-col>
         <v-col cols="3" class="mt-1">
-          <v-btn-toggle
-            v-model="items_view"
-            color="primary"
-            group
-            dense
-            rounded
-          >
-            <v-btn small value="list">{{ __("List") }}</v-btn>
-            <v-btn small value="card">{{ __("Card") }}</v-btn>
+          <v-btn-toggle v-model="items_view" color="primary" group density="compact" rounded>
+            <v-btn size="small" value="list">{{ __("List") }}</v-btn>
+            <v-btn size="small" value="card">{{ __("Card") }}</v-btn>
           </v-btn-toggle>
         </v-col>
         <v-col cols="4" class="mt-2">
-          <v-btn small block color="primary" text @click="show_coupons"
-            >{{ couponsCount }} {{ __("Coupons") }}</v-btn
-          >
+          <v-btn size="small" block color="primary" variant="text" @click="show_coupons">{{ couponsCount }} {{
+            __("Coupons")
+          }}</v-btn>
         </v-col>
         <v-col cols="5" class="mt-2">
-          <v-btn small block color="primary" text @click="show_offers"
-            >{{ offersCount }} {{ __("Offers") }} : {{ appliedOffersCount }}
-            {{ __("Applied") }}</v-btn
-          >
+          <v-btn size="small" block color="primary" variant="text" @click="show_offers">{{ offersCount }} {{
+            __("Offers") }}
+            : {{ appliedOffersCount }}
+            {{ __("Applied") }}</v-btn>
         </v-col>
       </v-row>
     </v-card>
@@ -167,7 +94,7 @@
 </template>
 
 <script>
-import { evntBus } from "../../bus";
+
 import format from "../../format";
 import _ from "lodash";
 export default {
@@ -205,16 +132,16 @@ export default {
       this.get_items();
     },
     new_line() {
-      evntBus.$emit("set_new_line", this.new_line);
+      this.$eventBus.emit("set_new_line", this.new_line);
     },
   },
 
   methods: {
     show_offers() {
-      evntBus.$emit("show_offers", "true");
+      this.$eventBus.emit("show_offers", "true");
     },
     show_coupons() {
-      evntBus.$emit("show_coupons", "true");
+      this.$eventBus.emit("show_coupons", "true");
     },
     get_items() {
       if (!this.pos_profile) {
@@ -238,7 +165,7 @@ export default {
         !vm.pos_profile.pose_use_limit_search
       ) {
         vm.items = JSON.parse(localStorage.getItem("items_storage"));
-        evntBus.$emit("set_all_items", vm.items);
+        this.$eventBus.emit("set_all_items", vm.items);
         vm.loading = false;
       }
       frappe.call({
@@ -253,7 +180,7 @@ export default {
         callback: function (r) {
           if (r.message) {
             vm.items = r.message;
-            evntBus.$emit("set_all_items", vm.items);
+            this.$eventBus.emit("set_all_items", vm.items);
             vm.loading = false;
             console.info("Items Loaded");
             if (
@@ -330,12 +257,12 @@ export default {
     add_item(item) {
       item = { ...item };
       if (item.has_variants) {
-        evntBus.$emit("open_variants_model", item, this.items);
+        this.$eventBus.emit("open_variants_model", item, this.items);
       } else {
         if (!item.qty || item.qty === 1) {
           item.qty = Math.abs(this.qty);
         }
-        evntBus.$emit("add_item", item);
+        this.$eventBus.emit("add_item", item);
         this.qty = 1;
       }
     },
@@ -487,7 +414,7 @@ export default {
     },
     trigger_onscan(sCode) {
       if (this.filtred_items.length == 0) {
-        evntBus.$emit("show_mesage", {
+        this.$eventBus.emit("show_mesage", {
           text: `No Item has this barcode "${sCode}"`,
           color: "error",
         });
@@ -641,8 +568,8 @@ export default {
   },
 
   created: function () {
-    this.$nextTick(function () {});
-    evntBus.$on("register_pos_profile", (data) => {
+    this.$nextTick(function () { });
+    this.$eventBus.on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
       this.get_items();
       this.get_items_groups();
@@ -650,21 +577,21 @@ export default {
         ? "card"
         : "list";
     });
-    evntBus.$on("update_cur_items_details", () => {
+    this.$eventBus.on("update_cur_items_details", () => {
       this.update_cur_items_details();
     });
-    evntBus.$on("update_offers_counters", (data) => {
+    this.$eventBus.on("update_offers_counters", (data) => {
       this.offersCount = data.offersCount;
       this.appliedOffersCount = data.appliedOffersCount;
     });
-    evntBus.$on("update_coupons_counters", (data) => {
+    this.$eventBus.on("update_coupons_counters", (data) => {
       this.couponsCount = data.couponsCount;
       this.appliedCouponsCount = data.appliedCouponsCount;
     });
-    evntBus.$on("update_customer_price_list", (data) => {
+    this.$eventBus.on("update_customer_price_list", (data) => {
       this.customer_price_list = data;
     });
-    evntBus.$on("update_customer", (data) => {
+    this.$eventBus.on("update_customer", (data) => {
       this.customer = data;
     });
   },
