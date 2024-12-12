@@ -21,7 +21,7 @@
                 <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1"
                   :single-select="singleSelect" show-select v-model="selected">
                   <template v-slot:item.amount="{ item }">{{
-                    formtCurrency(item.amount)
+                    formatCurrency(item.amount)
                     }}</template>
                   <template v-slot:item.posting_date="{ item }">{{
                     item.posting_date.slice(0, 16)
@@ -56,25 +56,25 @@ export default {
     mobile_no: '',
     headers: [
       {
-        text: __('Full Name'),
+        title: __('Full Name'),
         value: 'full_name',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Mobile No'),
+        title: __('Mobile No'),
         value: 'mobile_no',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Amount'),
+        title: __('Amount'),
         value: 'amount',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Date'),
+        title: __('Date'),
         align: 'start',
         sortable: true,
         value: 'posting_date',
@@ -122,20 +122,20 @@ export default {
           async: false,
           callback: function (r) {
             if (!r.exc) {
-              this.$eventBus.emit('set_mpesa_payment', r.message);
+              this.eventBus.emit('set_mpesa_payment', r.message);
               vm.dialog = false;
             }
           },
         });
       }
     },
-    formtCurrency(value) {
+    formatCurrency(value) {
       value = parseFloat(value);
       return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
   },
   created: function () {
-    this.$eventBus.on('open_mpesa_payments', (data) => {
+    this.eventBus.on('open_mpesa_payments', (data) => {
       this.dialog = true;
       this.full_name = '';
       this.mobile_no = '';

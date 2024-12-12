@@ -5,7 +5,7 @@
       bg-color="white" :no-data-text="__('Customer not found')" hide-details :customFilter="customFilter"
       :disabled="readonly" append-icon="mdi-plus" @click:append="new_customer" prepend-inner-icon="mdi-account-edit"
       @click:prepend-inner="edit_customer">
-      <template v-slot:item="data">
+      <template v-slot:default="data">
         <template>
 
           <v-list-item-title class="text-primary text-subtitle-1">
@@ -26,6 +26,7 @@
           <v-list-item-subtitle v-if="data.item.primary_address">
             <div v-html="`Primary Address: ${data.item.primary_address}`"></div>
           </v-list-item-subtitle>
+
 
         </template>
       </template>
@@ -54,13 +55,14 @@ export default {
 
   methods: {
     get_customer_names() {
-      const vm = this;
+      var vm = this;
       if (this.customers.length > 0) {
         return;
       }
       if (vm.pos_profile.posa_local_storage && localStorage.customer_storage) {
         vm.customers = JSON.parse(localStorage.getItem('customer_storage'));
       }
+
       frappe.call({
         method: 'posawesome.posawesome.api.posapp.get_customer_names',
         args: {
@@ -68,8 +70,9 @@ export default {
         },
         callback: function (r) {
           if (r.message) {
+
             vm.customers = r.message;
-            console.info('loadCustomers');
+
             if (vm.pos_profile.posa_local_storage) {
               localStorage.setItem('customer_storage', '');
               localStorage.setItem(
@@ -77,17 +80,19 @@ export default {
                 JSON.stringify(r.message)
               );
             }
+
           }
         },
       });
     },
     new_customer() {
-      this.$eventBus.emit('open_update_customer', null);
+      this.eventBus.emit('open_update_customer', null);
     },
     edit_customer() {
-      this.$eventBus.emit('open_update_customer', this.customer_info);
+      this.eventBus.emit('open_update_customer', this.customer_info);
     },
-    customFilter(item, queryText, itemText) {
+    customFilter(itemText, queryText, itemRow) {
+      const item = itemRow.raw;
       const textOne = item.customer_name
         ? item.customer_name.toLowerCase()
         : '';
@@ -111,27 +116,27 @@ export default {
 
   created: function () {
     this.$nextTick(function () {
-      this.$eventBus.on('register_pos_profile', (pos_profile) => {
+      this.eventBus.on('register_pos_profile', (pos_profile) => {
         this.pos_profile = pos_profile;
         this.get_customer_names();
       });
-      this.$eventBus.on('payments_register_pos_profile', (pos_profile) => {
+      this.eventBus.on('payments_register_pos_profile', (pos_profile) => {
         this.pos_profile = pos_profile;
         this.get_customer_names();
       });
-      this.$eventBus.on('set_customer', (customer) => {
+      this.eventBus.on('set_customer', (customer) => {
         this.customer = customer;
       });
-      this.$eventBus.on('add_customer_to_list', (customer) => {
+      this.eventBus.on('add_customer_to_list', (customer) => {
         this.customers.push(customer);
       });
-      this.$eventBus.on('set_customer_readonly', (value) => {
+      this.eventBus.on('set_customer_readonly', (value) => {
         this.readonly = value;
       });
-      this.$eventBus.on('set_customer_info_to_edit', (data) => {
+      this.eventBus.on('set_customer_info_to_edit', (data) => {
         this.customer_info = data;
       });
-      this.$eventBus.on('fetch_customer_details', () => {
+      this.eventBus.on('fetch_customer_details', () => {
         this.get_customer_names();
       });
     });
@@ -139,7 +144,7 @@ export default {
 
   watch: {
     customer() {
-      this.$eventBus.emit('update_customer', this.customer);
+      this.eventBus.emit('update_customer', this.customer);
     },
   },
 };

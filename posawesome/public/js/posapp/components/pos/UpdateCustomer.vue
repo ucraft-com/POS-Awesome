@@ -184,22 +184,22 @@ export default {
     submit_dialog() {
       // validate if all required fields are filled
       if (!this.customer_name) {
-        this.$eventBus.emit('show_mesage', {
-          text: __('Customer name is required.'),
+        this.eventBus.emit('show_mesage', {
+          title: __('Customer name is required.'),
           color: 'error',
         });
         return;
       }
       if (!this.group) {
-        this.$eventBus.emit('show_mesage', {
-          text: __('Customer group is required.'),
+        this.eventBus.emit('show_mesage', {
+          title: __('Customer group is required.'),
           color: 'error',
         });
         return;
       }
       if (!this.territory) {
-        this.$eventBus.emit('show_mesage', {
-          text: __('Customer territory is required.'),
+        this.eventBus.emit('show_mesage', {
+          title: __('Customer territory is required.'),
           color: 'error',
         });
         return;
@@ -231,20 +231,20 @@ export default {
               if (vm.customer_id) {
                 text = __('Customer updated successfully.');
               }
-              this.$eventBus.emit('show_mesage', {
+              this.eventBus.emit('show_mesage', {
                 text: text,
                 color: 'success',
               });
               args.name = r.message.name;
               frappe.utils.play_sound('submit');
-              this.$eventBus.emit('add_customer_to_list', args);
-              this.$eventBus.emit('set_customer', r.message.name);
-              this.$eventBus.emit('fetch_customer_details');
+              this.eventBus.emit('add_customer_to_list', args);
+              this.eventBus.emit('set_customer', r.message.name);
+              this.eventBus.emit('fetch_customer_details');
               this.close_dialog();
             } else {
               frappe.utils.play_sound('error');
-              this.$eventBus.emit('show_mesage', {
-                text: __('Customer creation failed.'),
+              this.eventBus.emit('show_mesage', {
+                title: __('Customer creation failed.'),
                 color: 'error',
               });
             }
@@ -255,7 +255,7 @@ export default {
     },
   },
   created: function () {
-    this.$eventBus.on('open_update_customer', (data) => {
+    this.eventBus.on('open_update_customer', (data) => {
       this.customerDialog = true;
       if (data) {
         this.customer_name = data.customer_name;
@@ -272,10 +272,10 @@ export default {
         this.gender = data.gender;
       }
     });
-    this.$eventBus.on('register_pos_profile', (data) => {
+    this.eventBus.on('register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
     });
-    this.$eventBus.on('payments_register_pos_profile', (data) => {
+    this.eventBus.on('payments_register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
     });
     this.getCustomerGroups();

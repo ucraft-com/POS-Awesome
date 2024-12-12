@@ -155,7 +155,7 @@ export default {
       win.focus();
     },
     close_shift_dialog() {
-      this.$eventBus.emit('open_closing_dialog');
+      this.eventBus.emit('open_closing_dialog');
     },
     show_mesage(data) {
       this.snack = true;
@@ -203,17 +203,17 @@ export default {
   },
   created: function () {
     this.$nextTick(function () {
-      this.$eventBus.on('show_mesage', (data) => {
+      this.eventBus.on('show_mesage', (data) => {
         console.log("GOT Something: <s>")
         this.show_mesage(data);
       });
-      this.$eventBus.on('set_company', (data) => {
+      this.eventBus.on('set_company', (data) => {
         this.company = data.name;
         this.company_img = data.company_logo
           ? data.company_logo
           : this.company_img;
       });
-      this.$eventBus.on('register_pos_profile', (data) => {
+      this.eventBus.on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
         const payments = { text: 'Payments', icon: 'mdi-cash-register' };
         if (
@@ -223,15 +223,15 @@ export default {
           this.items.push(payments);
         }
       });
-      this.$eventBus.on('set_last_invoice', (data) => {
+      this.eventBus.on('set_last_invoice', (data) => {
         this.last_invoice = data;
       });
-      this.$eventBus.on('freeze', (data) => {
+      this.eventBus.on('freeze', (data) => {
         this.freeze = true;
         this.freezeTitle = data.title;
         this.freezeMsg = data.msg;
       });
-      this.$eventBus.on('unfreeze', () => {
+      this.eventBus.on('unfreeze', () => {
         this.freeze = false;
         this.freezTitle = '';
         this.freezeMsg = '';

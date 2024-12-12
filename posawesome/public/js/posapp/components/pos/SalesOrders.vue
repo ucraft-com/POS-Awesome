@@ -20,7 +20,6 @@
             </v-row>
             <v-row no-gutters>
               <v-col cols="12" class="pa-1">
-                <template>
                   <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1"
                     :single-select="singleSelect" show-select v-model="selected">
                     <!-- <template v-slot:item.posting_time="{ item }">
@@ -28,10 +27,9 @@
                         </template> -->
                     <template v-slot:item.grand_total="{ item }">
                       {{ currencySymbol(item.currency) }}
-                      {{ formtCurrency(item.grand_total) }}
+                      {{ formatCurrency(item.grand_total) }}
                     </template>
                   </v-data-table>
-                </template>
               </v-col>
             </v-row>
           </v-container>
@@ -61,32 +59,32 @@ export default {
     order_name: "",
     headers: [
       {
-        text: __("Customer"),
-        value: "customer_name",
+        title: __("Customer"),
+        key: "customer_name",
         align: "start",
         sortable: true,
       },
       {
-        text: __("Date"),
+        title: __("Date"),
         align: "start",
         sortable: true,
-        value: "transaction_date",
+        key: "transaction_date",
       },
       //   {
-      //     text: __("Time"),
+      //     title: __("Time"),
       //     align: "start",
       //     sortable: true,
-      //     value: "posting_time",
+      //     key: "posting_time",
       //   },
       {
-        text: __("Order"),
-        value: "name",
+        title: __("Order"),
+        key: "name",
         align: "start",
         sortable: true,
       },
       {
-        text: __("Amount"),
-        value: "grand_total",
+        title: __("Amount"),
+        key: "grand_total",
         align: "end",
         sortable: false,
       },
@@ -163,7 +161,7 @@ export default {
             }
           }
         }
-        this.$eventBus.emit("load_order", this.selected[0]);
+        this.eventBus.emit("load_order", this.selected[0]);
         this.draftsDialog = false;
         frappe.call({
           method: "posawesome.posawesome.api.posapp.delete_sales_invoice",
@@ -180,7 +178,7 @@ export default {
     },
   },
   created: function () {
-    this.$eventBus.on("open_orders", (data) => {
+    this.eventBus.on("open_orders", (data) => {
       this.clearSelected();
       this.draftsDialog = true;
       this.dialog_data = data;
@@ -188,7 +186,7 @@ export default {
     });
   },
   mounted() {
-    this.$eventBus.on("register_pos_profile", (data) => {
+    this.eventBus.on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
     });
   },

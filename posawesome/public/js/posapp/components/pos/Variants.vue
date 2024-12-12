@@ -72,7 +72,7 @@ export default {
     close_dialog() {
       this.varaintsDialog = false;
     },
-    formtCurrency(value) {
+    formatCurrency(value) {
       value = parseFloat(value);
       return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
@@ -109,13 +109,13 @@ export default {
       });
     },
     add_item(item) {
-      this.$eventBus.emit('add_item', item);
+      this.eventBus.emit('add_item', item);
       this.close_dialog();
     },
   },
 
   created: function () {
-    this.$eventBus.on('open_variants_model', (item, items) => {
+    this.eventBus.on('open_variants_model', (item, items) => {
       this.varaintsDialog = true;
       this.parentItem = item || null;
       this.items = items;

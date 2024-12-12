@@ -15,16 +15,14 @@
           </v-col>
         </v-row>
       </v-card-title>
-      <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh">
-        <template @mouseover="style = 'cursor: pointer'">
-          <v-data-table :headers="items_headers" :items="posa_coupons" :single-expand="singleExpand"
-            v-model:expanded="expanded" item-key="coupon" class="elevation-1" :items-per-page="itemsPerPage"
-            hide-default-footer>
-            <template v-slot:item.applied="{ item }">
-              <v-checkbox-btn v-model="item.applied" disabled></v-checkbox-btn>
-            </template>
-          </v-data-table>
-        </template>
+      <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh" @mouseover="style = 'cursor: pointer'" >
+        <v-data-table :headers="items_headers" :items="posa_coupons" :single-expand="singleExpand"
+          v-model:expanded="expanded" item-key="coupon" class="elevation-1" :items-per-page="itemsPerPage"
+          hide-default-footer>
+          <template v-slot:item.applied="{ item }">
+            <v-checkbox-btn v-model="item.applied" disabled></v-checkbox-btn>
+          </template>
+        </v-data-table>
       </div>
     </v-card>
 
@@ -51,10 +49,10 @@ export default {
     itemsPerPage: 1000,
     singleExpand: true,
     items_headers: [
-      { text: __('Coupon'), value: 'coupon_code', align: 'start' },
-      { text: __('Type'), value: 'type', align: 'start' },
-      { text: __('Offer'), value: 'pos_offer', align: 'start' },
-      { text: __('Applied'), value: 'applied', align: 'start' },
+      { title: __('Coupon'), value: 'coupon_code', align: 'start' },
+      { title: __('Type'), value: 'type', align: 'start' },
+      { title: __('Offer'), value: 'pos_offer', align: 'start' },
+      { title: __('Applied'), value: 'applied', align: 'start' },
     ],
   }),
 
@@ -69,7 +67,7 @@ export default {
 
   methods: {
     back_to_invoice() {
-      this.$eventBus.emit('show_coupons', 'false');
+      this.eventBus.emit('show_coupons', 'false');
     },
     add_coupon(new_coupon) {
       if (!this.customer || !new_coupon) return;
@@ -77,8 +75,8 @@ export default {
         (el) => el.coupon_code == new_coupon
       );
       if (exist) {
-        this.$eventBus.emit('show_mesage', {
-          text: __('This coupon already used !'),
+        this.eventBus.emit('show_mesage', {
+          title: __('This coupon already used !'),
           color: 'error',
         });
         return;
@@ -95,7 +93,7 @@ export default {
           if (r.message) {
             const res = r.message;
             if (res.msg != 'Apply' || !res.coupon) {
-              this.$eventBus.emit('show_mesage', {
+              this.eventBus.emit('show_mesage', {
                 text: res.msg,
                 color: 'error',
               });
@@ -154,10 +152,10 @@ export default {
       );
     },
     updateInvoice() {
-      this.$eventBus.emit('update_invoice_coupons', this.posa_coupons);
+      this.eventBus.emit('update_invoice_coupons', this.posa_coupons);
     },
     updateCounters() {
-      this.$eventBus.emit('update_coupons_counters', {
+      this.eventBus.emit('update_coupons_counters', {
         couponsCount: this.couponsCount,
         appliedCouponsCount: this.appliedCouponsCount,
       });
@@ -176,11 +174,11 @@ export default {
 
   created: function () {
     this.$nextTick(function () {
-      this.$eventBus.on('register_pos_profile', (data) => {
+      this.eventBus.on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
       });
     });
-    this.$eventBus.on('update_customer', (customer) => {
+    this.eventBus.on('update_customer', (customer) => {
       if (this.customer != customer) {
         const to_remove = [];
         this.posa_coupons.forEach((el) => {
@@ -197,10 +195,10 @@ export default {
       }
       this.setActiveGiftCoupons();
     });
-    this.$eventBus.on('update_pos_coupons', (data) => {
+    this.eventBus.on('update_pos_coupons', (data) => {
       this.updatePosCoupons(data);
     });
-    this.$eventBus.on('set_pos_coupons', (data) => {
+    this.eventBus.on('set_pos_coupons', (data) => {
       this.posa_coupons = data;
     });
   },

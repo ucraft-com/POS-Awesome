@@ -11,34 +11,32 @@
           <v-container>
             <v-row>
               <v-col cols="12" class="pa-1">
-                <template>
-                  <v-data-table :headers="headers" :items="dialog_data.payment_reconciliation"
-                    item-key="mode_of_payment" class="elevation-1" :items-per-page="itemsPerPage" hide-default-footer>
-                    <template v-slot:item.closing_amount="props">
-                      <v-confirm-edit v-model:return-value="props.item.closing_amount">
-                        {{ currencySymbol(pos_profile.currency) }}
-                        {{ formtCurrency(props.item.closing_amount) }}
-                        <template v-slot:input>
-                          <v-text-field v-model="props.item.closing_amount" :rules="[max25chars]"
-                            :label="frappe._('Edit')" single-line counter type="number"></v-text-field>
-                        </template>
-                      </v-confirm-edit>
-                    </template>
-                    <template v-slot:item.difference="{ item }">
+                <v-data-table :headers="headers" :items="dialog_data.payment_reconciliation"
+                  item-key="mode_of_payment" class="elevation-1" :items-per-page="itemsPerPage" hide-default-footer>
+                  <template v-slot:item.closing_amount="props">
+                    <v-confirm-edit v-model:return-value="props.item.closing_amount">
                       {{ currencySymbol(pos_profile.currency) }}
-                      {{
-                        (item.difference = formtCurrency(
-                          item.expected_amount - item.closing_amount
-                        ))
-                      }}</template>
-                    <template v-slot:item.opening_amount="{ item }">
-                      {{ currencySymbol(pos_profile.currency) }}
-                      {{ formtCurrency(item.opening_amount) }}</template>
-                    <template v-slot:item.expected_amount="{ item }">
-                      {{ currencySymbol(pos_profile.currency) }}
-                      {{ formtCurrency(item.expected_amount) }}</template>
-                  </v-data-table>
-                </template>
+                      {{ formatCurrency(props.item.closing_amount) }}
+                      <template v-slot:input>
+                        <v-text-field v-model="props.item.closing_amount" :rules="[max25chars]"
+                          :label="frappe._('Edit')" single-line counter type="number"></v-text-field>
+                      </template>
+                    </v-confirm-edit>
+                  </template>
+                  <template v-slot:item.difference="{ item }">
+                    {{ currencySymbol(pos_profile.currency) }}
+                    {{
+                      (item.difference = formatCurrency(
+                        item.expected_amount - item.closing_amount
+                      ))
+                    }}</template>
+                  <template v-slot:item.opening_amount="{ item }">
+                    {{ currencySymbol(pos_profile.currency) }}
+                    {{ formatCurrency(item.opening_amount) }}</template>
+                  <template v-slot:item.expected_amount="{ item }">
+                    {{ currencySymbol(pos_profile.currency) }}
+                    {{ formatCurrency(item.expected_amount) }}</template>
+                </v-data-table>
               </v-col>
             </v-row>
           </v-container>
@@ -69,19 +67,19 @@ export default {
     pos_profile: '',
     headers: [
       {
-        text: __('Mode of Payment'),
+        title: __('Mode of Payment'),
         value: 'mode_of_payment',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Opening Amount'),
+        title: __('Opening Amount'),
         align: 'end',
         sortable: true,
         value: 'opening_amount',
       },
       {
-        text: __('Closing Amount'),
+        title: __('Closing Amount'),
         value: 'closing_amount',
         align: 'end',
         sortable: true,
@@ -97,27 +95,27 @@ export default {
       this.closingDialog = false;
     },
     submit_dialog() {
-      this.$eventBus.emit('submit_closing_pos', this.dialog_data);
+      this.eventBus.emit('submit_closing_pos', this.dialog_data);
       this.closingDialog = false;
     },
   },
 
   created: function () {
-    this.$eventBus.on('open_ClosingDialog', (data) => {
+    this.eventBus.on('open_ClosingDialog', (data) => {
       this.closingDialog = true;
       this.dialog_data = data;
     });
-    this.$eventBus.on('register_pos_profile', (data) => {
+    this.eventBus.on('register_pos_profile', (data) => {
       this.pos_profile = data.pos_profile;
       if (!this.pos_profile.hide_expected_amount) {
         this.headers.push({
-          text: __('Expected Amount'),
+          title: __('Expected Amount'),
           value: 'expected_amount',
           align: 'end',
           sortable: false,
         });
         this.headers.push({
-          text: __('Difference'),
+          title: __('Difference'),
           value: 'difference',
           align: 'end',
           sortable: false,

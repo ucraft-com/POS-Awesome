@@ -72,8 +72,8 @@ export default {
         },
         callback: (r) => {
           if (!r.exc) {
-            this.$eventBus.emit('add_the_new_address', r.message);
-            this.$eventBus.emit('show_mesage', {
+            this.eventBus.emit('add_the_new_address', r.message);
+            this.eventBus.emit('show_mesage', {
               text: 'Customer Address created successfully.',
               color: 'success',
             });
@@ -86,7 +86,7 @@ export default {
     },
   },
   created: function () {
-    this.$eventBus.on('open_new_address', (data) => {
+    this.eventBus.on('open_new_address', (data) => {
       this.addressDialog = true;
       this.customer = data;
     });

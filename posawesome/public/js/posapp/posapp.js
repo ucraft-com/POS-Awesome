@@ -45,8 +45,8 @@ frappe.PosApp.posapp = class {
             }
         );
         const app = createApp(Home)
-        app.use(vuetify)
         app.use(eventBus);
+        app.use(vuetify)
         app.mount(this.$el[0]);
     }
     setup_header() {

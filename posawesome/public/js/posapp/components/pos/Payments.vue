@@ -7,12 +7,12 @@
         <v-row v-if="invoice_doc" class="px-1 py-0">
           <v-col cols="7">
             <v-text-field variant="outlined" color="primary" :label="frappe._('Paid Amount')" bg-color="white"
-              hide-details :model-value="formtCurrency(total_payments)" readonly
+              hide-details :model-value="formatCurrency(total_payments)" readonly
               :prefix="currencySymbol(invoice_doc.currency)" density="compact"></v-text-field>
           </v-col>
           <v-col cols="5">
             <v-text-field variant="outlined" color="primary" :label="frappe._(diff_lable)" bg-color="white" hide-details
-              :model-value="formtCurrency(diff_payment)" readonly :prefix="currencySymbol(invoice_doc.currency)"
+              :model-value="formatCurrency(diff_payment)" readonly :prefix="currencySymbol(invoice_doc.currency)"
               density="compact"></v-text-field>
           </v-col>
 
@@ -25,7 +25,7 @@
 
           <v-col cols="5" v-if="diff_payment < 0 && !invoice_doc.is_return">
             <v-text-field variant="outlined" color="primary" :label="frappe._('Credit Change')" bg-color="white"
-              hide-details :model-value="formtCurrency(credit_change)" readonly
+              hide-details :model-value="formatCurrency(credit_change)" readonly
               :prefix="currencySymbol(invoice_doc.currency)" density="compact"></v-text-field>
           </v-col>
         </v-row>
@@ -36,7 +36,7 @@
             <v-col cols="6" v-if="!is_mpesa_c2b_payment(payment)">
               <v-text-field density="compact" variant="outlined" color="primary"
                 :label="frappe._(payment.mode_of_payment)" bg-color="white" hide-details
-                :model-value="formtCurrency(payment.amount)" @change="
+                :model-value="formatCurrency(payment.amount)" @change="
                   setFormatedCurrency(payment, 'amount', null, true, $event)
                   " :rules="[isNumber]" :prefix="currencySymbol(invoice_doc.currency)"
                 @focus="set_rest_amount(payment.idx)" :readonly="invoice_doc.is_return ? true : false"></v-text-field>
@@ -83,7 +83,7 @@
           </v-col>
           <v-col cols="5">
             <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('You can redeem upto')"
-              bg-color="white" hide-details :model-value="formtFloat(available_pioints_amount)"
+              bg-color="white" hide-details :model-value="formatFloat(available_pioints_amount)"
               :prefix="currencySymbol(invoice_doc.currency)" disabled></v-text-field>
           </v-col>
         </v-row>
@@ -103,7 +103,7 @@
           <v-col cols="5">
             <v-text-field density="compact" variant="outlined" color="primary"
               :label="frappe._('You can redeem credit upto')" bg-color="white" hide-details
-              :model-value="formtCurrency(available_customer_credit)" :prefix="currencySymbol(invoice_doc.currency)"
+              :model-value="formatCurrency(available_customer_credit)" :prefix="currencySymbol(invoice_doc.currency)"
               disabled></v-text-field>
           </v-col>
         </v-row>
@@ -112,32 +112,32 @@
         <v-row class="px-1 py-0">
           <v-col cols="6">
             <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Net Total')"
-              bg-color="white" hide-details :model-value="formtCurrency(invoice_doc.net_total)" disabled
+              bg-color="white" hide-details :model-value="formatCurrency(invoice_doc.net_total)" disabled
               :prefix="currencySymbol(invoice_doc.currency)"></v-text-field>
           </v-col>
           <v-col cols="6">
             <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Tax and Charges')"
-              bg-color="white" hide-details :model-value="formtCurrency(invoice_doc.total_taxes_and_charges)" disabled
+              bg-color="white" hide-details :model-value="formatCurrency(invoice_doc.total_taxes_and_charges)" disabled
               :prefix="currencySymbol(invoice_doc.currency)"></v-text-field>
           </v-col>
           <v-col cols="6">
             <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Total Amount')"
-              bg-color="white" hide-details :model-value="formtCurrency(invoice_doc.total)" disabled
+              bg-color="white" hide-details :model-value="formatCurrency(invoice_doc.total)" disabled
               :prefix="currencySymbol(invoice_doc.currency)"></v-text-field>
           </v-col>
           <v-col cols="6">
             <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Discount Amount')"
-              bg-color="white" hide-details :model-value="formtCurrency(invoice_doc.discount_amount)" disabled
+              bg-color="white" hide-details :model-value="formatCurrency(invoice_doc.discount_amount)" disabled
               :prefix="currencySymbol(invoice_doc.currency)"></v-text-field>
           </v-col>
           <v-col cols="6">
             <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Grand Total')"
-              bg-color="white" hide-details :model-value="formtCurrency(invoice_doc.grand_total)" disabled
+              bg-color="white" hide-details :model-value="formatCurrency(invoice_doc.grand_total)" disabled
               :prefix="currencySymbol(invoice_doc.currency)"></v-text-field>
           </v-col>
           <v-col v-if="invoice_doc.rounded_total" cols="6">
             <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Rounded Total')"
-              bg-color="white" hide-details :model-value="formtCurrency(invoice_doc.rounded_total)" disabled
+              bg-color="white" hide-details :model-value="formatCurrency(invoice_doc.rounded_total)" disabled
               :prefix="currencySymbol(invoice_doc.currency)"></v-text-field>
           </v-col>
           <v-col cols="6" v-if="pos_profile.posa_allow_sales_order && invoiceType == 'Order'">
@@ -259,7 +259,7 @@
             </v-col>
             <v-col cols="4">
               <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Available Credit')"
-                bg-color="white" hide-details :model-value="formtCurrency(row.total_credit)" disabled
+                bg-color="white" hide-details :model-value="formatCurrency(row.total_credit)" disabled
                 :prefix="currencySymbol(invoice_doc.currency)"></v-text-field>
             </v-col>
             <v-col cols="4">
@@ -374,12 +374,12 @@ export default {
 
   methods: {
     back_to_invoice() {
-      this.$eventBus.emit("show_payment", "false");
-      this.$eventBus.emit("set_customer_readonly", false);
+      this.eventBus.emit("show_payment", "false");
+      this.eventBus.emit("set_customer_readonly", false);
     },
     submit(event, payment_received = false, print = false) {
       if (!this.invoice_doc.is_return && this.total_payments < 0) {
-        this.$eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_mesage", {
           text: `Payments not correct`,
           color: "error",
         });
@@ -398,8 +398,8 @@ export default {
           }
         });
         if (!phone_payment_is_valid) {
-          this.$eventBus.emit("show_mesage", {
-            text: __(
+          this.eventBus.emit("show_mesage", {
+            title: __(
               "Please request phone payment or use other payment method"
             ),
             color: "error",
@@ -415,7 +415,7 @@ export default {
         this.total_payments <
         (this.invoice_doc.rounded_total || this.invoice_doc.grand_total)
       ) {
-        this.$eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_mesage", {
           text: `The amount paid is not complete`,
           color: "error",
         });
@@ -428,7 +428,7 @@ export default {
         !this.pos_profile.posa_allow_credit_sale &&
         this.total_payments == 0
       ) {
-        this.$eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_mesage", {
           text: `Please enter the amount paid`,
           color: "error",
         });
@@ -439,7 +439,7 @@ export default {
       if (!this.paid_change) this.paid_change = 0;
 
       if (this.paid_change > -this.diff_payment) {
-        this.$eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_mesage", {
           text: `Paid change can not be greater than total change!`,
           color: "error",
         });
@@ -452,7 +452,7 @@ export default {
       );
 
       if (this.is_cashback && total_change != -this.diff_payment) {
-        this.$eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_mesage", {
           text: `Error in change calculations!`,
           color: "error",
         });
@@ -467,7 +467,7 @@ export default {
       });
 
       if (credit_calc_check.length > 0) {
-        this.$eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_mesage", {
           text: `redeamed credit can not greater than its total.`,
           color: "error",
         });
@@ -480,7 +480,7 @@ export default {
         this.redeemed_customer_credit >
         (this.invoice_doc.rounded_total || this.invoice_doc.grand_total)
       ) {
-        this.$eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_mesage", {
           text: `can not redeam customer credit more than invoice total`,
           color: "error",
         });
@@ -494,7 +494,7 @@ export default {
       this.is_cashback = true;
       this.sales_person = "";
 
-      this.$eventBus.emit("new_invoice", "false");
+      this.eventBus.emit("new_invoice", "false");
       this.back_to_invoice();
     },
     submit_invoice(print) {
@@ -534,8 +534,8 @@ export default {
             if (print) {
               vm.load_print_page();
             }
-            this.$eventBus.emit("set_last_invoice", vm.invoice_doc.name);
-            this.$eventBus.emit("show_mesage", {
+            this.eventBus.emit("set_last_invoice", vm.invoice_doc.name);
+            this.eventBus.emit("show_mesage", {
               text: `Invoice ${r.message.name} is Submited`,
               color: "success",
             });
@@ -700,7 +700,7 @@ export default {
       );
     },
     new_address() {
-      this.$eventBus.emit("open_new_address", this.invoice_doc.customer);
+      this.eventBus.emit("open_new_address", this.invoice_doc.customer);
     },
     get_sales_person_names() {
       const vm = this;
@@ -743,15 +743,15 @@ export default {
       this.phone_dialog = false;
       const vm = this;
       if (!this.invoice_doc.contact_mobile) {
-        this.$eventBus.emit("show_mesage", {
-          text: __(`Pleas Set Customer Mobile Number`),
+        this.eventBus.emit("show_mesage", {
+          title: __(`Pleas Set Customer Mobile Number`),
           color: "error",
         });
-        this.$eventBus.emit("open_edit_customer");
+        this.eventBus.emit("open_edit_customer");
         this.back_to_invoice();
         return;
       }
-      this.$eventBus.emit("freeze", {
+      this.eventBus.emit("freeze", {
         title: __(`Waiting for payment... `),
       });
       this.invoice_doc.payments.forEach((payment) => {
@@ -787,9 +787,9 @@ export default {
               },
             })
             .fail(() => {
-              this.$eventBus.emit("unfreeze");
-              this.$eventBus.emit("show_mesage", {
-                text: __(`Payment request failed`),
+              this.eventBus.emit("unfreeze");
+              this.eventBus.emit("show_mesage", {
+                title: __(`Payment request failed`),
                 color: "error",
               });
             })
@@ -803,18 +803,18 @@ export default {
                   ])
                   .then(({ message }) => {
                     if (message.status != "Paid") {
-                      this.$eventBus.emit("unfreeze");
-                      this.$eventBus.emit("show_mesage", {
-                        text: __(
+                      this.eventBus.emit("unfreeze");
+                      this.eventBus.emit("show_mesage", {
+                        title: __(
                           `Payment Request took too long to respond. Please try requesting for payment again`
                         ),
                         color: "error",
                       });
                     } else {
-                      this.$eventBus.emit("unfreeze");
-                      this.$eventBus.emit("show_mesage", {
-                        text: __("Payment of {0} received successfully.", [
-                          vm.formtCurrency(
+                      this.eventBus.emit("unfreeze");
+                      this.eventBus.emit("show_mesage", {
+                        title: __("Payment of {0} received successfully.", [
+                          vm.formatCurrency(
                             message.grand_total,
                             vm.invoice_doc.currency,
                             0
@@ -866,7 +866,7 @@ export default {
         mode_of_payment: payment.mode_of_payment,
         customer: this.invoice_doc.customer,
       };
-      this.$eventBus.emit("open_mpesa_payments", data);
+      this.eventBus.emit("open_mpesa_payments", data);
     },
     set_mpesa_payment(payment) {
       this.pos_profile.use_customer_credit = 1;
@@ -982,7 +982,7 @@ export default {
 
   mounted: function () {
     this.$nextTick(function () {
-      this.$eventBus.on("send_invoice_doc_payment", (invoice_doc) => {
+      this.eventBus.on("send_invoice_doc_payment", (invoice_doc) => {
         this.invoice_doc = invoice_doc;
         const default_payment = this.invoice_doc.payments.find(
           (payment) => payment.default == 1
@@ -1006,15 +1006,15 @@ export default {
         this.get_addresses();
         this.get_sales_person_names();
       });
-      this.$eventBus.on("register_pos_profile", (data) => {
+      this.eventBus.on("register_pos_profile", (data) => {
         this.pos_profile = data.pos_profile;
         this.get_mpesa_modes();
       });
-      this.$eventBus.on("add_the_new_address", (data) => {
+      this.eventBus.on("add_the_new_address", (data) => {
         this.addresses.push(data);
         this.$forceUpdate();
       });
-      this.$eventBus.on("update_invoice_type", (data) => {
+      this.eventBus.on("update_invoice_type", (data) => {
         this.invoiceType = data;
         if (this.invoice_doc && data != "Order") {
           this.invoice_doc.posa_delivery_date = null;
@@ -1023,20 +1023,20 @@ export default {
         }
       });
     });
-    this.$eventBus.on("update_customer", (customer) => {
+    this.eventBus.on("update_customer", (customer) => {
       if (this.customer != customer) {
         this.customer_credit_dict = [];
         this.redeem_customer_credit = false;
         this.is_cashback = true;
       }
     });
-    this.$eventBus.on("set_pos_settings", (data) => {
+    this.eventBus.on("set_pos_settings", (data) => {
       this.pos_settings = data;
     });
-    this.$eventBus.on("set_customer_info_to_edit", (data) => {
+    this.eventBus.on("set_customer_info_to_edit", (data) => {
       this.customer_info = data;
     });
-    this.$eventBus.on("set_mpesa_payment", (data) => {
+    this.eventBus.on("set_mpesa_payment", (data) => {
       this.set_mpesa_payment(data);
     });
   },
@@ -1065,7 +1065,7 @@ export default {
         this.invoice_doc.loyalty_amount = 0;
         this.invoice_doc.redeem_loyalty_points = 0;
         this.invoice_doc.loyalty_points = 0;
-        this.$eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_mesage", {
           text: `Loyalty Amount can not be more then ${this.available_pioints_amount}`,
           color: "error",
         });
@@ -1095,7 +1095,7 @@ export default {
     },
     redeemed_customer_credit(value) {
       if (value > this.available_customer_credit) {
-        this.$eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_mesage", {
           text: `You can redeem customer credit upto ${this.available_customer_credit}`,
           color: "error",
         });

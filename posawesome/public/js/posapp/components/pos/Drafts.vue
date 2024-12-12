@@ -14,18 +14,16 @@
           <v-container>
             <v-row no-gutters>
               <v-col cols="12" class="pa-1">
-                <template>
-                  <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1"
-                    :single-select="singleSelect" show-select v-model="selected">
-                    <template v-slot:item.posting_time="{ item }">
-                      {{ item.posting_time.split('.')[0] }}
-                    </template>
-                    <template v-slot:item.grand_total="{ item }">
-                      {{ currencySymbol(item.currency) }}
-                      {{ formtCurrency(item.grand_total) }}
-                    </template>
-                  </v-data-table>
-                </template>
+                <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1"
+                  :single-select="singleSelect" show-select v-model="selected">
+                  <template v-slot:item.posting_time="{ item }">
+                    {{ item.posting_time.split('.')[0] }}
+                  </template>
+                  <template v-slot:item.grand_total="{ item }">
+                    {{ currencySymbol(item.currency) }}
+                    {{ formatCurrency(item.grand_total) }}
+                  </template>
+                </v-data-table>
               </v-col>
             </v-row>
           </v-container>
@@ -53,31 +51,31 @@ export default {
     dialog_data: {},
     headers: [
       {
-        text: __('Customer'),
+        title: __('Customer'),
         value: 'customer_name',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Date'),
+        title: __('Date'),
         align: 'start',
         sortable: true,
         value: 'posting_date',
       },
       {
-        text: __('Time'),
+        title: __('Time'),
         align: 'start',
         sortable: true,
         value: 'posting_time',
       },
       {
-        text: __('Invoice'),
+        title: __('Invoice'),
         value: 'name',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Amount'),
+        title: __('Amount'),
         value: 'grand_total',
         align: 'end',
         sortable: false,
@@ -92,13 +90,13 @@ export default {
 
     submit_dialog() {
       if (this.selected.length > 0) {
-        this.$eventBus.emit('load_invoice', this.selected[0]);
+        this.eventBus.emit('load_invoice', this.selected[0]);
         this.draftsDialog = false;
       }
     },
   },
   created: function () {
-    this.$eventBus.on('open_drafts', (data) => {
+    this.eventBus.on('open_drafts', (data) => {
       this.draftsDialog = true;
       this.dialog_data = data;
     });

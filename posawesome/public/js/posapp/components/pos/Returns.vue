@@ -16,14 +16,12 @@
           </v-row>
           <v-row>
             <v-col cols="12" class="pa-1" v-if="dialog_data">
-              <template>
-                <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1"
-                  :single-select="singleSelect" show-select v-model="selected">
-                  <template v-slot:item.grand_total="{ item }">
-                    {{ currencySymbol(item.currency) }}
-                    {{ formtCurrency(item.grand_total) }}</template>
-                </v-data-table>
-              </template>
+              <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1"
+                :single-select="singleSelect" show-select v-model="selected">
+                <template v-slot:item.grand_total="{ item }">
+                  {{ currencySymbol(item.currency) }}
+                  {{ formatCurrency(item.grand_total) }}</template>
+              </v-data-table>
             </v-col>
           </v-row>
         </v-container>
@@ -51,25 +49,25 @@ export default {
     invoice_name: '',
     headers: [
       {
-        text: __('Customer'),
+        title: __('Customer'),
         value: 'customer',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Date'),
+        title: __('Date'),
         align: 'start',
         sortable: true,
         value: 'posting_date',
       },
       {
-        text: __('Invoice'),
+        title: __('Invoice'),
         value: 'name',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Amount'),
+        title: __('Amount'),
         value: 'grand_total',
         align: 'end',
         sortable: false,
@@ -119,13 +117,13 @@ export default {
         invoice_doc.return_against = return_doc.name;
         invoice_doc.customer = return_doc.customer;
         const data = { invoice_doc, return_doc };
-        this.$eventBus.emit('load_return_invoice', data);
+        this.eventBus.emit('load_return_invoice', data);
         this.invoicesDialog = false;
       }
     },
   },
   created: function () {
-    this.$eventBus.on('open_returns', (data) => {
+    this.eventBus.on('open_returns', (data) => {
       this.invoicesDialog = true;
       this.company = data;
       this.invoice_name = '';

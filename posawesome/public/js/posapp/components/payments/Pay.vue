@@ -13,7 +13,7 @@
                   <strong>{{ __("Invoices") }}</strong>
                   <span v-if="total_outstanding_amount" class="text-primary">{{ __("- Total Outstanding") }} :
                     {{ currencySymbol(pos_profile.currency) }}
-                    {{ formtCurrency(total_outstanding_amount) }}</span>
+                    {{ formatCurrency(total_outstanding_amount) }}</span>
                 </p>
               </v-col>
               <v-col md="5" cols="12">
@@ -21,7 +21,7 @@
                   <span>{{ __("Total Selected :") }}</span>
                   <span>
                     {{ currencySymbol(pos_profile.currency) }}
-                    {{ formtCurrency(total_selected_invoices) }}
+                    {{ formatCurrency(total_selected_invoices) }}
                   </span>
                 </p>
               </v-col>
@@ -42,11 +42,11 @@
               checkbox-color="primary" @item-selected="onInvoiceSelected">
               <template v-slot:item.grand_total="{ item }">
                 {{ currencySymbol(item.currency) }}
-                {{ formtCurrency(item.grand_total) }}
+                {{ formatCurrency(item.grand_total) }}
               </template>
               <template v-slot:item.outstanding_amount="{ item }">
                 <span class="text-primary">{{ currencySymbol(item.currency) }}
-                  {{ formtCurrency(item.outstanding_amount) }}</span>
+                  {{ formatCurrency(item.outstanding_amount) }}</span>
               </template>
             </v-data-table>
             <v-divider></v-divider>
@@ -62,7 +62,7 @@
                   <span v-if="total_unallocated_amount" class="text-primary">
                     {{ __("- Total Unallocated") }} :
                     {{ currencySymbol(pos_profile.currency) }}
-                    {{ formtCurrency(total_unallocated_amount) }}
+                    {{ formatCurrency(total_unallocated_amount) }}
                   </span>
                 </p>
               </v-col>
@@ -71,7 +71,7 @@
                   <span>{{ __("Total Selected :") }}</span>
                   <span>
                     {{ currencySymbol(pos_profile.currency) }}
-                    {{ formtCurrency(total_selected_payments) }}
+                    {{ formatCurrency(total_selected_payments) }}
                   </span>
                 </p>
               </v-col>
@@ -81,11 +81,11 @@
               :loading="unallocated_payments_loading" checkbox-color="primary">
               <template v-slot:item.paid_amount="{ item }">
                 {{ currencySymbol(item.currency) }}
-                {{ formtCurrency(item.paid_amount) }}
+                {{ formatCurrency(item.paid_amount) }}
               </template>
               <template v-slot:item.unallocated_amount="{ item }">
                 <span class="text-primary">{{ currencySymbol(item.currency) }}
-                  {{ formtCurrency(item.unallocated_amount) }}</span>
+                  {{ formatCurrency(item.unallocated_amount) }}</span>
               </template>
             </v-data-table>
             <v-divider></v-divider>
@@ -102,7 +102,7 @@
                   <span>{{ __("Total Selected :") }}</span>
                   <span>
                     {{ currencySymbol(pos_profile.currency) }}
-                    {{ formtCurrency(total_selected_mpesa_payments) }}
+                    {{ formatCurrency(total_selected_mpesa_payments) }}
                   </span>
                 </p>
               </v-col>
@@ -128,7 +128,7 @@
               <template v-slot:item.amount="{ item }">
                 <span class="text-primary">
                   {{ currencySymbol(item.currency) }}
-                  {{ formtCurrency(item.amount) }}
+                  {{ formatCurrency(item.amount) }}
                 </span>
               </template>
             </v-data-table>
@@ -145,7 +145,7 @@
               </v-col>
               <v-col md="5">
                 <v-text-field class="p-0 m-0" density="compact" color="primary" bg-color="white" hide-details
-                  :model-value="formtCurrency(total_selected_invoices)" total_selected_invoices readonly flat
+                  :model-value="formatCurrency(total_selected_invoices)" total_selected_invoices readonly flat
                   :prefix="currencySymbol(pos_profile.currency)"></v-text-field>
               </v-col>
             </v-row>
@@ -154,7 +154,7 @@
               <v-col md="7" class="mt-1"><span>{{ __("Total Payments:") }}</span></v-col>
               <v-col md="5">
                 <v-text-field class="p-0 m-0" density="compact" color="primary" bg-color="white" hide-details
-                  :model-value="formtCurrency(total_selected_payments)" total_selected_payments readonly flat
+                  :model-value="formatCurrency(total_selected_payments)" total_selected_payments readonly flat
                   :prefix="currencySymbol(pos_profile.currency)"></v-text-field>
               </v-col>
             </v-row>
@@ -163,7 +163,7 @@
               <v-col md="7" class="mt-1"><span>{{ __("Total Mpesa:") }}</span></v-col>
               <v-col md="5">
                 <v-text-field class="p-0 m-0" density="compact" color="primary" bg-color="white" hide-details
-                  :model-value="formtCurrency(total_selected_mpesa_payments)" total_selected_mpesa_payments readonly
+                  :model-value="formatCurrency(total_selected_mpesa_payments)" total_selected_mpesa_payments readonly
                   flat :prefix="currencySymbol(pos_profile.currency)"></v-text-field>
               </v-col>
             </v-row>
@@ -175,7 +175,7 @@
                 <v-col md="7"><span class="mt-1">{{ __(method.mode_of_payment) }}:</span>
                 </v-col>
                 <v-col md="5"><v-text-field class="p-0 m-0" density="compact" color="primary" bg-color="white"
-                    hide-details :model-value="formtCurrency(method.amount)" @change="
+                    hide-details :model-value="formatCurrency(method.amount)" @change="
                       setFormatedCurrency(method, 'amount', null, true, $event)
                       " payments_methods flat :prefix="currencySymbol(pos_profile.currency)"></v-text-field></v-col>
               </v-row>
@@ -188,7 +188,7 @@
               </v-col>
               <v-col md="5">
                 <v-text-field class="p-0 m-0" density="compact" color="primary" bg-color="white" hide-details
-                  :model-value="formtCurrency(total_of_diff)" total_of_diff flat readonly
+                  :model-value="formatCurrency(total_of_diff)" total_of_diff flat readonly
                   :prefix="currencySymbol(pos_profile.currency)"></v-text-field>
               </v-col>
             </v-row>
@@ -238,110 +238,110 @@ export default {
       mpesa_search_mobile: "",
       invoices_headers: [
         {
-          text: __("Invoice"),
+          title: __("Invoice"),
           align: "start",
           sortable: true,
-          value: "name",
+          key: "name",
         },
         {
-          text: __("Customer"),
+          title: __("Customer"),
           align: "start",
           sortable: true,
-          value: "customer_name",
+          key: "customer_name",
         },
         {
-          text: __("Date"),
+          title: __("Date"),
           align: "start",
           sortable: true,
-          value: "posting_date",
+          key: "posting_date",
         },
         {
-          text: __("Due Date"),
+          title: __("Due Date"),
           align: "start",
           sortable: true,
-          value: "due_date",
+          key: "due_date",
         },
         {
-          text: __("Total"),
+          title: __("Total"),
           align: "end",
           sortable: true,
-          value: "grand_total",
+          key: "grand_total",
         },
         {
-          text: __("Outstanding"),
+          title: __("Outstanding"),
           align: "end",
           sortable: true,
-          value: "outstanding_amount",
+          key: "outstanding_amount",
         },
       ],
       unallocated_payments_headers: [
         {
-          text: __("Payment ID"),
+          title: __("Payment ID"),
           align: "start",
           sortable: true,
-          value: "name",
+          key: "name",
         },
         {
-          text: __("Customer"),
+          title: __("Customer"),
           align: "start",
           sortable: true,
-          value: "customer_name",
+          key: "customer_name",
         },
         {
-          text: __("Date"),
+          title: __("Date"),
           align: "start",
           sortable: true,
-          value: "posting_date",
+          key: "posting_date",
         },
         {
-          text: __("Mode"),
+          title: __("Mode"),
           align: "start",
           sortable: true,
-          value: "mode_of_payment",
+          key: "mode_of_payment",
         },
         {
-          text: __("Paid"),
+          title: __("Paid"),
           align: "end",
           sortable: true,
-          value: "paid_amount",
+          key: "paid_amount",
         },
         {
-          text: __("Unallocated"),
+          title: __("Unallocated"),
           align: "end",
           sortable: true,
-          value: "unallocated_amount",
+          key: "unallocated_amount",
         },
       ],
       mpesa_payment_headers: [
         {
-          text: __("Payment ID"),
+          title: __("Payment ID"),
           align: "start",
           sortable: true,
-          value: "transid",
+          key: "transid",
         },
         {
-          text: __("Full Name"),
+          title: __("Full Name"),
           align: "start",
           sortable: true,
-          value: "full_name",
+          key: "full_name",
         },
         {
-          text: __("Nobile Number"),
+          title: __("Nobile Number"),
           align: "start",
           sortable: true,
-          value: "mobile_no",
+          key: "mobile_no",
         },
         {
-          text: __("Date"),
+          title: __("Date"),
           align: "start",
           sortable: true,
-          value: "posting_date",
+          key: "posting_date",
         },
         {
-          text: __("Amount"),
+          title: __("Amount"),
           align: "end",
           sortable: true,
-          value: "amount",
+          key: "amount",
         },
       ],
     };
@@ -363,8 +363,8 @@ export default {
             this.pos_profile = r.message.pos_profile;
             this.pos_opening_shift = r.message.pos_opening_shift;
             this.company = r.message.company.name;
-            this.$eventBus.emit("payments_register_pos_profile", r.message);
-            this.$eventBus.emit("set_company", r.message.company);
+            this.eventBus.emit("payments_register_pos_profile", r.message);
+            this.eventBus.emit("set_company", r.message.company);
             this.set_payment_methods();
             this.pos_profile_search = r.message.pos_profile.name;
             this.pos_profiles_list.push(this.pos_profile_search);
@@ -415,14 +415,14 @@ export default {
                 ...message,
               };
               vm.set_mpesa_search_params();
-              this.$eventBus.emit("set_customer_info_to_edit", vm.customer_info);
+              this.eventBus.emit("set_customer_info_to_edit", vm.customer_info);
             }
           },
         });
       }
     },
     onInvoiceSelected(event) {
-      this.$eventBus.emit("set_customer", event.item.customer);
+      this.eventBus.emit("set_customer", event.item.customer);
     },
     get_outstanding_invoices() {
       this.invoices_loading = true;
@@ -642,7 +642,7 @@ export default {
   mounted: function () {
     this.$nextTick(function () {
       this.check_opening_entry();
-      this.$eventBus.on("update_customer", (customer_name) => {
+      this.eventBus.on("update_customer", (customer_name) => {
         this.clear_all(true);
         this.customer_name = customer_name;
         this.fetch_customer_details();
@@ -650,7 +650,7 @@ export default {
         this.get_unallocated_payments();
         this.get_draft_mpesa_payments_register();
       });
-      this.$eventBus.on("fetch_customer_details", () => {
+      this.eventBus.on("fetch_customer_details", () => {
         this.fetch_customer_details();
       });
     });

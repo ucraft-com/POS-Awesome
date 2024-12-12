@@ -22,13 +22,12 @@
                   required></v-autocomplete>
               </v-col>
               <v-col cols="12">
-                <template>
                   <v-data-table :headers="payments_methods_headers" :items="payments_methods" item-key="mode_of_payment"
                     class="elevation-1" :items-per-page="itemsPerPage" hide-default-footer>
                     <template v-slot:item.amount="props">
                       <v-confirm-edit v-model:return-value="props.item.amount">
                         {{ currencySymbol(props.item.currency) }}
-                        {{ formtCurrency(props.item.amount) }}
+                        {{ formatCurrency(props.item.amount) }}
                         <template v-slot:input>
                           <v-text-field v-model="props.item.amount" :rules="[max25chars]" :label="frappe._('Edit')"
                             single-line counter type="number"></v-text-field>
@@ -36,7 +35,6 @@
                       </v-confirm-edit>
                     </template>
                   </v-data-table>
-                </template>
               </v-col>
             </v-row>
           </v-container>
@@ -71,13 +69,13 @@ export default {
       payments_methods: [],
       payments_methods_headers: [
         {
-          text: __('Mode of Payment'),
+          title: __('Mode of Payment'),
           align: 'start',
           sortable: false,
           value: 'mode_of_payment',
         },
         {
-          text: __('Opening Amount'),
+          title: __('Opening Amount'),
           value: 'amount',
           align: 'center',
           sortable: false,
@@ -120,7 +118,7 @@ export default {
   },
   methods: {
     close_opening_dialog() {
-      this.$eventBus.emit('close_opening_dialog');
+      this.eventBus.emit('close_opening_dialog');
     },
     get_opening_dialog_data() {
       const vm = this;
@@ -153,8 +151,8 @@ export default {
         })
         .then((r) => {
           if (r.message) {
-            this.$eventBus.emit('register_pos_data', r.message);
-            this.$eventBus.emit('set_company', r.message.company);
+            this.eventBus.emit('register_pos_data', r.message);
+            this.eventBus.emit('set_company', r.message.company);
             vm.close_opening_dialog();
             is_loading = false;
           }

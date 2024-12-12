@@ -65,10 +65,10 @@ export default {
     expanded: [],
     singleExpand: true,
     items_headers: [
-      { text: __('Name'), value: 'name', align: 'start' },
-      { text: __('Apply On'), value: 'apply_on', align: 'start' },
-      { text: __('Offer'), value: 'offer', align: 'start' },
-      { text: __('Applied'), value: 'offer_applied', align: 'start' },
+      { title: __('Name'), value: 'name', align: 'start' },
+      { title: __('Apply On'), value: 'apply_on', align: 'start' },
+      { title: __('Offer'), value: 'offer', align: 'start' },
+      { title: __('Applied'), value: 'offer_applied', align: 'start' },
     ],
   }),
 
@@ -83,7 +83,7 @@ export default {
 
   methods: {
     back_to_invoice() {
-      this.$eventBus.emit('show_offers', 'false');
+      this.eventBus.emit('show_offers', 'false');
     },
     forceUpdateItem() {
       let list_offers = [];
@@ -161,8 +161,8 @@ export default {
             newOffer.give_item = this.get_give_items(newOffer)[0].item_code;
           }
           this.pos_offers.push(newOffer);
-          this.$eventBus.emit('show_mesage', {
-            text: __('New Offer Available'),
+          this.eventBus.emit('show_mesage', {
+            title: __('New Offer Available'),
             color: 'warning',
           });
         }
@@ -177,7 +177,7 @@ export default {
       const applyedOffers = this.pos_offers.filter(
         (offer) => offer.offer_applied
       );
-      this.$eventBus.emit('update_invoice_offers', applyedOffers);
+      this.eventBus.emit('update_invoice_offers', applyedOffers);
     },
     handleNewLine(str) {
       if (str) {
@@ -208,7 +208,7 @@ export default {
       }
     },
     updateCounters() {
-      this.$eventBus.emit('update_offers_counters', {
+      this.eventBus.emit('update_offers_counters', {
         offersCount: this.offersCount,
         appliedOffersCount: this.appliedOffersCount,
       });
@@ -217,7 +217,7 @@ export default {
       const applyedOffers = this.pos_offers.filter(
         (offer) => offer.offer_applied && offer.coupon_based
       );
-      this.$eventBus.emit('update_pos_coupons', applyedOffers);
+      this.eventBus.emit('update_pos_coupons', applyedOffers);
     },
   },
 
@@ -234,22 +234,22 @@ export default {
 
   created: function () {
     this.$nextTick(function () {
-      this.$eventBus.on('register_pos_profile', (data) => {
+      this.eventBus.on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
       });
     });
-    this.$eventBus.on('update_customer', (customer) => {
+    this.eventBus.on('update_customer', (customer) => {
       if (this.customer != customer) {
         this.offers = [];
       }
     });
-    this.$eventBus.on('update_pos_offers', (data) => {
+    this.eventBus.on('update_pos_offers', (data) => {
       this.updatePosOffers(data);
     });
-    this.$eventBus.on('update_discount_percentage_offer_name', (data) => {
+    this.eventBus.on('update_discount_percentage_offer_name', (data) => {
       this.discount_percentage_offer_name = data.value;
     });
-    this.$eventBus.on('set_all_items', (data) => {
+    this.eventBus.on('set_all_items', (data) => {
       this.allItems = data;
     });
   },
