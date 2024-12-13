@@ -354,6 +354,7 @@ export default {
 
   methods: {
     check_opening_entry() {
+      var vm = this;
       return frappe
         .call("posawesome.posawesome.api.posapp.check_opening_shift", {
           user: frappe.session.user,
@@ -363,8 +364,8 @@ export default {
             this.pos_profile = r.message.pos_profile;
             this.pos_opening_shift = r.message.pos_opening_shift;
             this.company = r.message.company.name;
-            this.eventBus.emit("payments_register_pos_profile", r.message);
-            this.eventBus.emit("set_company", r.message.company);
+            vm.eventBus.emit("payments_register_pos_profile", r.message);
+            vm.eventBus.emit("set_company", r.message.company);
             this.set_payment_methods();
             this.pos_profile_search = r.message.pos_profile.name;
             this.pos_profiles_list.push(this.pos_profile_search);
@@ -400,7 +401,7 @@ export default {
       this.dialog = true;
     },
     fetch_customer_details() {
-      const vm = this;
+      var vm = this;
       if (this.customer_name) {
         frappe.call({
           method: "posawesome.posawesome.api.posapp.get_customer_info",
@@ -415,7 +416,7 @@ export default {
                 ...message,
               };
               vm.set_mpesa_search_params();
-              this.eventBus.emit("set_customer_info_to_edit", vm.customer_info);
+              vm.eventBus.emit("set_customer_info_to_edit", vm.customer_info);
             }
           },
         });

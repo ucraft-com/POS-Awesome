@@ -184,28 +184,28 @@ export default {
     submit_dialog() {
       // validate if all required fields are filled
       if (!this.customer_name) {
-        this.eventBus.emit('show_mesage', {
+        this.eventBus.emit('show_message', {
           title: __('Customer name is required.'),
           color: 'error',
         });
         return;
       }
       if (!this.group) {
-        this.eventBus.emit('show_mesage', {
+        this.eventBus.emit('show_message', {
           title: __('Customer group is required.'),
           color: 'error',
         });
         return;
       }
       if (!this.territory) {
-        this.eventBus.emit('show_mesage', {
+        this.eventBus.emit('show_message', {
           title: __('Customer territory is required.'),
           color: 'error',
         });
         return;
       }
       if (this.customer_name) {
-        const vm = this;
+        var vm = this;
         const args = {
           customer_id: this.customer_id,
           customer_name: this.customer_name,
@@ -231,19 +231,19 @@ export default {
               if (vm.customer_id) {
                 text = __('Customer updated successfully.');
               }
-              this.eventBus.emit('show_mesage', {
+              vm.eventBus.emit('show_message', {
                 text: text,
                 color: 'success',
               });
               args.name = r.message.name;
               frappe.utils.play_sound('submit');
-              this.eventBus.emit('add_customer_to_list', args);
-              this.eventBus.emit('set_customer', r.message.name);
-              this.eventBus.emit('fetch_customer_details');
-              this.close_dialog();
+              vm.eventBus.emit('add_customer_to_list', args);
+              vm.eventBus.emit('set_customer', r.message.name);
+              vm.eventBus.emit('fetch_customer_details');
+              vm.close_dialog();
             } else {
               frappe.utils.play_sound('error');
-              this.eventBus.emit('show_mesage', {
+              vm.eventBus.emit('show_message', {
                 title: __('Customer creation failed.'),
                 color: 'error',
               });

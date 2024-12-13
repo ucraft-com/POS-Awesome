@@ -122,8 +122,8 @@ export default {
         )
         .then((r) => {
           if (r.message) {
-            this.eventBus.emit('show_mesage', {
-              text: `POS Shift Closed`,
+            this.eventBus.emit('show_message', {
+              title: `POS Shift Closed`,
               color: 'success',
             });
             this.check_opening_entry();

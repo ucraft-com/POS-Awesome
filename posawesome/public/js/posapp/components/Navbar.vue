@@ -28,7 +28,7 @@
 
                 <v-list-item-title>{{
                   __('Close Shift')
-                }}</v-list-item-title>
+                  }}</v-list-item-title>
 
               </v-list-item>
               <v-list-item @click="print_last_invoice" v-if="
@@ -41,7 +41,7 @@
 
                 <v-list-item-title>{{
                   __('Print Last Invoice')
-                }}</v-list-item-title>
+                  }}</v-list-item-title>
 
               </v-list-item>
               <v-divider class="my-0"></v-divider>
@@ -157,10 +157,10 @@ export default {
     close_shift_dialog() {
       this.eventBus.emit('open_closing_dialog');
     },
-    show_mesage(data) {
+    show_message(data) {
       this.snack = true;
       this.snackColor = data.color;
-      this.snackText = data.text;
+      this.snackText = data.title;
     },
     logOut() {
       var me = this;
@@ -203,9 +203,9 @@ export default {
   },
   created: function () {
     this.$nextTick(function () {
-      this.eventBus.on('show_mesage', (data) => {
+      this.eventBus.on('show_message', (data) => {
         console.log("GOT Something: <s>")
-        this.show_mesage(data);
+        this.show_message(data);
       });
       this.eventBus.on('set_company', (data) => {
         this.company = data.name;

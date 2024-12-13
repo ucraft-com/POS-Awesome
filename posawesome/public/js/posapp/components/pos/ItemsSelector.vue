@@ -55,7 +55,7 @@
                 <template v-slot:item.actual_qty="{ item }">
                   <span class="golden--text">{{
                     formatFloat(item.actual_qty)
-                  }}</span>
+                    }}</span>
                 </template>
               </v-data-table>
             </div>
@@ -78,7 +78,7 @@
         <v-col cols="4" class="mt-2">
           <v-btn size="small" block color="primary" variant="text" @click="show_coupons">{{ couponsCount }} {{
             __("Coupons")
-          }}</v-btn>
+            }}</v-btn>
         </v-col>
         <v-col cols="5" class="mt-2">
           <v-btn size="small" block color="primary" variant="text" @click="show_offers">{{ offersCount }} {{
@@ -252,7 +252,7 @@ export default {
 
       return items_headers;
     },
-    click_item_row(event, {item}) {
+    click_item_row(event, { item }) {
       this.add_item(item)
     },
     add_item(item) {
@@ -415,8 +415,8 @@ export default {
     },
     trigger_onscan(sCode) {
       if (this.filtered_items.length == 0) {
-        this.eventBus.emit("show_mesage", {
-          text: `No Item has this barcode "${sCode}"`,
+        this.eventBus.emit("show_message", {
+          title: `No Item has this barcode "${sCode}"`,
           color: "error",
         });
         frappe.utils.play_sound("error");

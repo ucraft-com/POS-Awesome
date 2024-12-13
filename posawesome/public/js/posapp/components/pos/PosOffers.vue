@@ -4,38 +4,36 @@
       <v-card-title>
         <span class="text-h6 text-primary">{{ __('Offers') }}</span>
       </v-card-title>
-      <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh">
-        <template @mouseover="style = 'cursor: pointer'">
-          <v-data-table :headers="items_headers" :items="pos_offers" :single-expand="singleExpand"
-            v-model:expanded="expanded" show-expand item-key="row_id" class="elevation-1" :items-per-page="itemsPerPage"
-            hide-default-footer>
-            <template v-slot:item.offer_applied="{ item }">
-              <v-checkbox-btn @click="forceUpdateItem" v-model="item.offer_applied" :disabled="(item.offer == 'Give Product' &&
-                !item.give_item &&
-                (!offer.replace_cheapest_item || !offer.replace_item)) ||
-                (item.offer == 'Grand Total' &&
-                  discount_percentage_offer_name &&
-                  discount_percentage_offer_name != item.name)
-                "></v-checkbox-btn>
-            </template>
-            <template v-slot:expanded-item="{ headers, item }">
-              <td :colspan="headers.length">
-                <v-row class="mt-2">
-                  <v-col v-if="item.description">
-                    <div class="text-primary" v-html="handleNewLine(item.description)"></div>
-                  </v-col>
-                  <v-col v-if="item.offer == 'Give Product'">
-                    <v-autocomplete v-model="item.give_item" :items="get_give_items(item)" item-title="item_code"
-                      variant="outlined" density="compact" color="primary" :label="frappe._('Give Item')" :disabled="item.apply_type != 'Item Group' ||
-                        item.replace_item ||
-                        item.replace_cheapest_item
-                        "></v-autocomplete>
-                  </v-col>
-                </v-row>
-              </td>
-            </template>
-          </v-data-table>
-        </template>
+      <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh" @mouseover="style = 'cursor: pointer'">
+        <v-data-table :headers="items_headers" :items="pos_offers" :single-expand="singleExpand"
+          v-model:expanded="expanded" show-expand item-key="row_id" class="elevation-1" :items-per-page="itemsPerPage"
+          hide-default-footer>
+          <template v-slot:item.offer_applied="{ item }">
+            <v-checkbox-btn @click="forceUpdateItem" v-model="item.offer_applied" :disabled="(item.offer == 'Give Product' &&
+              !item.give_item &&
+              (!offer.replace_cheapest_item || !offer.replace_item)) ||
+              (item.offer == 'Grand Total' &&
+                discount_percentage_offer_name &&
+                discount_percentage_offer_name != item.name)
+              "></v-checkbox-btn>
+          </template>
+          <template v-slot:expanded-item="{ headers, item }">
+            <td :colspan="headers.length">
+              <v-row class="mt-2">
+                <v-col v-if="item.description">
+                  <div class="text-primary" v-html="handleNewLine(item.description)"></div>
+                </v-col>
+                <v-col v-if="item.offer == 'Give Product'">
+                  <v-autocomplete v-model="item.give_item" :items="get_give_items(item)" item-title="item_code"
+                    variant="outlined" density="compact" color="primary" :label="frappe._('Give Item')" :disabled="item.apply_type != 'Item Group' ||
+                      item.replace_item ||
+                      item.replace_cheapest_item
+                      "></v-autocomplete>
+                </v-col>
+              </v-row>
+            </td>
+          </template>
+        </v-data-table>
       </div>
     </v-card>
 
@@ -161,7 +159,7 @@ export default {
             newOffer.give_item = this.get_give_items(newOffer)[0].item_code;
           }
           this.pos_offers.push(newOffer);
-          this.eventBus.emit('show_mesage', {
+          this.eventBus.emit('show_message', {
             title: __('New Offer Available'),
             color: 'warning',
           });

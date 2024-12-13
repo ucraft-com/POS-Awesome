@@ -8,7 +8,7 @@
         <v-card-title>
           <span class="text-h5 text-primary">{{
             __("Select Sales Orders")
-            }}</span>
+          }}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -20,16 +20,16 @@
             </v-row>
             <v-row no-gutters>
               <v-col cols="12" class="pa-1">
-                  <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1"
-                    :single-select="singleSelect" show-select v-model="selected">
-                    <!-- <template v-slot:item.posting_time="{ item }">
+                <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1" show-select
+                  v-model="selected" return-object select-strategy="single">
+                  <!-- <template v-slot:item.posting_time="{ item }">
                           {{ item.posting_time.split(".")[0] }}
                         </template> -->
-                    <template v-slot:item.grand_total="{ item }">
-                      {{ currencySymbol(item.currency) }}
-                      {{ formatCurrency(item.grand_total) }}
-                    </template>
-                  </v-data-table>
+                  <template v-slot:item.grand_total="{ item }">
+                    {{ currencySymbol(item.currency) }}
+                    {{ formatCurrency(item.grand_total) }}
+                  </template>
+                </v-data-table>
               </v-col>
             </v-row>
           </v-container>

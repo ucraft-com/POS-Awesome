@@ -5,7 +5,7 @@
         <v-card-title>
           <span class="text-h5 text-primary">{{
             __('Select Return Invoice')
-            }}</span>
+          }}</span>
         </v-card-title>
         <v-container>
           <v-row class="mb-4">
@@ -16,8 +16,8 @@
           </v-row>
           <v-row>
             <v-col cols="12" class="pa-1" v-if="dialog_data">
-              <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1"
-                :single-select="singleSelect" show-select v-model="selected">
+              <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1" show-select
+                v-model="selected" select-strategy="single" return-object>
                 <template v-slot:item.grand_total="{ item }">
                   {{ currencySymbol(item.currency) }}
                   {{ formatCurrency(item.grand_total) }}</template>

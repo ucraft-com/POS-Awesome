@@ -11,8 +11,8 @@
           <v-container>
             <v-row>
               <v-col cols="12" class="pa-1">
-                <v-data-table :headers="headers" :items="dialog_data.payment_reconciliation"
-                  item-key="mode_of_payment" class="elevation-1" :items-per-page="itemsPerPage" hide-default-footer>
+                <v-data-table :headers="headers" :items="dialog_data.payment_reconciliation" item-key="mode_of_payment"
+                  class="elevation-1" :items-per-page="itemsPerPage" hide-default-footer>
                   <template v-slot:item.closing_amount="props">
                     <v-confirm-edit v-model:return-value="props.item.closing_amount">
                       {{ currencySymbol(pos_profile.currency) }}

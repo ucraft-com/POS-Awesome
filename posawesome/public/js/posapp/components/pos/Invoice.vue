@@ -4,13 +4,17 @@
       <v-card>
         <v-card-title class="text-h5">
           <span class="text-h5 text-primary">{{
-            __("Cancel Current Invoice ?")
-          }}</span>
+            __("Cancel Sale ?")
+            }}</span>
         </v-card-title>
+        <v-card-text>
+          This would cancel and delete the current sale. To save it as Draft, click the "Save and Clear" instead.
+        </v-card-text>
+        <!-- <v-card- -->
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="error" @click="cancel_invoice">
-            {{ __("Cancel") }}
+            {{ __("Yes, Cancel sale") }}
           </v-btn>
           <v-btn color="warning" @click="cancel_dialog = false">
             {{ __("Back") }}
@@ -39,13 +43,11 @@
             :label="frappe._('Delivery Charges')" v-model="selcted_delivery_charges" :items="delivery_charges"
             item-title="name" return-object bg-color="white" :no-data-text="__('Charges not found')" hide-details
             :customFilter="deliveryChargesFilter" :disabled="readonly" @update:model-value="update_delivery_charges()">
-            <template v-slot:item="data">
-              <template>
-
-                <v-list-item-title class="text-primary text-subtitle-1" v-html="data.item.name"></v-list-item-title>
-                <v-list-item-subtitle v-html="`Rate: ${data.item.rate}`"></v-list-item-subtitle>
-
-              </template>
+            <template v-slot:item="{ props, item }">
+              <v-list-item v-bind="props">
+                <v-list-item-title class="text-primary text-subtitle-1" v-html="item.raw.name"></v-list-item-title>
+                <v-list-item-subtitle v-html="`Rate: ${item.raw.rate}`"></v-list-item-subtitle>
+              </v-list-item>
             </template>
           </v-autocomplete>
         </v-col>
@@ -72,244 +74,240 @@
       </v-row>
 
       <div class="my-0 py-0 overflow-y-auto" style="max-height: 60vh">
-          <v-data-table :headers="items_headers" :items="items" :single-expand="singleExpand"
-            v-model:expanded="expanded" show-expand item-key="posa_row_id" class="elevation-1"
-            :items-per-page="itemsPerPage" hide-default-footer>
-            <template v-slot:item.qty="{ item }">{{
-              formatFloat(item.qty)
+        <v-data-table :headers="items_headers" :items="items" :single-expand="singleExpand" v-model:expanded="expanded"
+          show-expand item-key="posa_row_id" item-value="posa_row_id" class="elevation-1" :items-per-page="itemsPerPage"
+          hide-default-footer>
+          <template v-slot:item.qty="{ item }">{{
+            formatFloat(item.qty)
+          }}</template>
+          <template v-slot:item.rate="{ item }">{{ currencySymbol(pos_profile.currency) }}
+            {{ formatCurrency(item.rate) }}</template>
+          <template v-slot:item.amount="{ item }">{{ currencySymbol(pos_profile.currency) }}
+            {{
+              formatCurrency(
+                flt(item.qty, float_precision) *
+                flt(item.rate, currency_precision)
+              )
             }}</template>
-            <template v-slot:item.rate="{ item }">{{ currencySymbol(pos_profile.currency) }}
-              {{ formatCurrency(item.rate) }}</template>
-            <template v-slot:item.amount="{ item }">{{ currencySymbol(pos_profile.currency) }}
-              {{
-                formatCurrency(
-                  flt(item.qty, float_precision) *
-                  flt(item.rate, currency_precision)
-                )
-              }}</template>
-            <template v-slot:item.posa_is_offer="{ item }">
-              <v-checkbox-btn :value="!!item.posa_is_offer || !!item.posa_is_replace" disabled></v-checkbox-btn>
-            </template>
+          <template v-slot:item.posa_is_offer="{ item }">
+            <v-checkbox-btn :value="!!item.posa_is_offer || !!item.posa_is_replace" disabled></v-checkbox-btn>
+          </template>
 
-            <template v-slot:expanded-item="{ headers, item }">
-              <td :colspan="headers.length" class="ma-0 pa-0">
-                <v-row class="ma-0 pa-0">
-                  <v-col cols="1">
-                    <v-btn :disabled="!!item.posa_is_offer || !!item.posa_is_replace" icon color="error"
-                      @click.stop="remove_item(item)">
-                      <v-icon icon="mdi-delete"></v-icon>
-                    </v-btn>
-                  </v-col>
-                  <v-spacer></v-spacer>
-                  <v-col cols="1">
-                    <v-btn :disabled="!!item.posa_is_offer || !!item.posa_is_replace" icon color="secondary"
-                      @click.stop="subtract_one(item)">
-                      <v-icon icon="mdi-minus-circle-outline"></v-icon>
-                    </v-btn>
-                  </v-col>
-                  <v-col cols="1">
-                    <v-btn :disabled="!!item.posa_is_offer || !!item.posa_is_replace" icon color="secondary"
-                      @click.stop="add_one(item)">
-                      <v-icon icon="mdi-plus-circle-outline"></v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-                <v-row class="ma-0 pa-0">
-                  <v-col cols="4">
-                    <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Item Code')"
-                      bg-color="white" hide-details v-model="item.item_code" disabled></v-text-field>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('QTY')"
-                      bg-color="white" hide-details :model-value="formatFloat(item.qty)" @change="
+          <template v-slot:expanded-row="{ columns: headers, item }">
+            <td :colspan="headers.length" class="ma-0 pa-0">
+              <v-row class="ma-0 pa-0">
+                <v-col cols="1">
+                  <v-btn :disabled="!!item.posa_is_offer || !!item.posa_is_replace" icon color="error"
+                    @click.stop="remove_item(item)">
+                    <v-icon icon="mdi-delete">mdi-delete</v-icon>
+                  </v-btn>
+                </v-col>
+                <v-spacer></v-spacer>
+                <v-col cols="1">
+                  <v-btn :disabled="!!item.posa_is_offer || !!item.posa_is_replace" icon color="secondary"
+                    @click.stop="subtract_one(item)">
+                    <v-icon icon="mdi-minus-circle-outline"></v-icon>
+                  </v-btn>
+                </v-col>
+                <v-col cols="1">
+                  <v-btn :disabled="!!item.posa_is_offer || !!item.posa_is_replace" icon color="secondary"
+                    @click.stop="add_one(item)">
+                    <v-icon icon="mdi-plus-circle-outline"></v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+              <v-row class="ma-0 pa-0">
+                <v-col cols="4">
+                  <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Item Code')"
+                    bg-color="white" hide-details v-model="item.item_code" disabled></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('QTY')"
+                    bg-color="white" hide-details :model-value="formatFloat(item.qty)" @change="
+                      [
+                        setFormatedFloat(item, 'qty', null, false, $event),
+                        calc_stock_qty(item, $event),
+                      ]
+                      " :rules="[isNumber]" :disabled="!!item.posa_is_offer || !!item.posa_is_replace"></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-select density="compact" bg-color="white" :label="frappe._('UOM')" v-model="item.uom"
+                    :items="item.item_uoms" variant="outlined" item-title="uom" item-value="uom" hide-details
+                    @update:model-value="calc_uom(item, $event)" :disabled="!!invoice_doc.is_return ||
+                      !!item.posa_is_offer ||
+                      !!item.posa_is_replace
+                      ">
+                  </v-select>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Rate')"
+                    bg-color="white" hide-details :prefix="currencySymbol(pos_profile.currency)"
+                    :model-value="formatCurrency(item.rate)" @change="
+                      [
+                        setFormatedCurrency(
+                          item,
+                          'rate',
+                          null,
+                          false,
+                          $event
+                        ),
+                        calc_prices(item, $event),
+                      ]
+                      " :rules="[isNumber]" id="rate" :disabled="!!item.posa_is_offer ||
+                        !!item.posa_is_replace ||
+                        !!item.posa_offer_applied ||
+                        !pos_profile.posa_allow_user_to_edit_rate ||
+                        !!invoice_doc.is_return
+                        ? true
+                        : false
+                        "></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field density="compact" variant="outlined" color="primary"
+                    :label="frappe._('Discount Percentage')" bg-color="white" hide-details
+                    :model-value="formatFloat(item.discount_percentage)" @change="
+                      [
+                        setFormatedCurrency(
+                          item,
+                          'discount_percentage',
+                          null,
+                          true,
+                          $event
+                        ),
+                        calc_prices(item, $event),
+                      ]
+                      " :rules="[isNumber]" id="discount_percentage" :disabled="!!item.posa_is_offer ||
+                        !!item.posa_is_replace ||
+                        item.posa_offer_applied ||
+                        !pos_profile.posa_allow_user_to_edit_item_discount ||
+                        !!invoice_doc.is_return
+                        ? true
+                        : false
+                        " suffix="%"></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field density="compact" variant="outlined" color="primary"
+                    :label="frappe._('Discount Amount')" bg-color="white" hide-details
+                    :model-value="formatCurrency(item.discount_amount)" :rules="[isNumber]" @change="
+                      [
+                        setFormatedCurrency(
+                          item,
+                          'discount_amount',
+                          null,
+                          true,
+                          $event
+                        ),
+                        ,
+                        calc_prices(item, $event),
+                      ]
+                      " :prefix="currencySymbol(pos_profile.currency)" id="discount_amount" :disabled="!!item.posa_is_offer ||
+                        !!item.posa_is_replace ||
+                        !!item.posa_offer_applied ||
+                        !pos_profile.posa_allow_user_to_edit_item_discount ||
+                        !!invoice_doc.is_return
+                        ? true
+                        : false
+                        "></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field density="compact" variant="outlined" color="primary"
+                    :label="frappe._('Price list Rate')" bg-color="white" hide-details
+                    :model-value="formatCurrency(item.price_list_rate)" disabled
+                    :prefix="currencySymbol(pos_profile.currency)"></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Available QTY')"
+                    bg-color="white" hide-details :model-value="formatFloat(item.actual_qty)" disabled></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Group')"
+                    bg-color="white" hide-details v-model="item.item_group" disabled></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Stock QTY')"
+                    bg-color="white" hide-details :model-value="formatFloat(item.stock_qty)" disabled></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Stock UOM')"
+                    bg-color="white" hide-details v-model="item.stock_uom" disabled></v-text-field>
+                </v-col>
+                <v-col align="center" cols="4" v-if="item.posa_offer_applied">
+                  <v-checkbox density="default" :label="frappe._('Offer Applied')" v-model="item.posa_offer_applied"
+                    readonly hide-details class="shrink mr-2 mt-0"></v-checkbox>
+                </v-col>
+                <v-col cols="4" v-if="item.has_serial_no == 1 || item.serial_no">
+                  <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Serial No QTY')"
+                    bg-color="white" hide-details v-model="item.serial_no_selected_count" type="number"
+                    disabled></v-text-field>
+                </v-col>
+                <v-col cols="12" v-if="item.has_serial_no == 1 || item.serial_no">
+                  <v-autocomplete v-model="item.serial_no_selected" :items="item.serial_no_data" item-title="serial_no"
+                    variant="outlined" density="compact" chips color="primary" small-chips
+                    :label="frappe._('Serial No')" multiple @update:model-value="set_serial_no(item)"></v-autocomplete>
+                </v-col>
+                <v-col cols="4" v-if="item.has_batch_no == 1 || item.batch_no">
+                  <v-text-field density="compact" variant="outlined" color="primary"
+                    :label="frappe._('Batch No. Available QTY')" bg-color="white" hide-details
+                    :model-value="formatFloat(item.actual_batch_qty)" disabled></v-text-field>
+                </v-col>
+                <v-col cols="4" v-if="item.has_batch_no == 1 || item.batch_no">
+                  <v-text-field density="compact" variant="outlined" color="primary"
+                    :label="frappe._('Batch No Expiry Date')" bg-color="white" hide-details
+                    v-model="item.batch_no_expiry_date" disabled></v-text-field>
+                </v-col>
+                <v-col cols="8" v-if="item.has_batch_no == 1 || item.batch_no">
+                  <v-autocomplete v-model="item.batch_no" :items="item.batch_no_data" item-title="batch_no"
+                    variant="outlined" density="compact" color="primary" :label="frappe._('Batch No')"
+                    @update:model-value="set_batch_qty(item, $event)">
+                    <template v-slot:item="{ props, item }">
+                      <v-list-item v-bind="props">
+                        <v-list-item-title v-html="item.raw.batch_no"></v-list-item-title>
+                        <v-list-item-subtitle v-html="`Available QTY  '${item.raw.batch_qty}' - Expiry Date ${item.raw.expiry_date}`
+                          "></v-list-item-subtitle>
+
+                      </v-list-item>
+                    </template>
+                  </v-autocomplete>
+                </v-col>
+                <v-col cols="4" v-if="
+                  pos_profile.posa_allow_sales_order &&
+                  invoiceType == 'Order'
+                ">
+                  <v-menu ref="item_delivery_date" v-model="item.item_delivery_date" :close-on-content-click="false"
+                    v-model:return-value="item.posa_delivery_date" transition="scale-transition" density="default">
+                    <template v-slot:activator="{ props }">
+                      <v-text-field v-model="item.posa_delivery_date" :label="frappe._('Delivery Date')" readonly
+                        variant="outlined" density="compact" clearable color="primary" hide-details
+                        v-bind="props"></v-text-field>
+                    </template>
+                    <v-date-picker v-model="item.posa_delivery_date" no-title scrollable color="primary"
+                      :min="frappe.datetime.now_date()">
+                      <v-spacer></v-spacer>
+                      <v-btn variant="text" color="primary" @click="item.item_delivery_date = false">
+                        Cancel
+                      </v-btn>
+                      <v-btn variant="text" color="primary" @click="
                         [
-                          setFormatedFloat(item, 'qty', null, false, $event),
-                          calc_stock_qty(item, $event),
+                          $refs.item_delivery_date.save(
+                            item.posa_delivery_date
+                          ),
+                          validate_due_date(item),
                         ]
-                        " :rules="[isNumber]"
-                      :disabled="!!item.posa_is_offer || !!item.posa_is_replace"></v-text-field>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-select density="compact" bg-color="white" :label="frappe._('UOM')" v-model="item.uom"
-                      :items="item.item_uoms" variant="outlined" item-title="uom" item-value="uom" hide-details
-                      @update:model-value="calc_uom(item, $event)" :disabled="!!invoice_doc.is_return ||
-                        !!item.posa_is_offer ||
-                        !!item.posa_is_replace
                         ">
-                    </v-select>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Rate')"
-                      bg-color="white" hide-details :prefix="currencySymbol(pos_profile.currency)"
-                      :model-value="formatCurrency(item.rate)" @change="
-                        [
-                          setFormatedCurrency(
-                            item,
-                            'rate',
-                            null,
-                            false,
-                            $event
-                          ),
-                          calc_prices(item, $event),
-                        ]
-                        " :rules="[isNumber]" id="rate" :disabled="!!item.posa_is_offer ||
-                          !!item.posa_is_replace ||
-                          !!item.posa_offer_applied ||
-                          !pos_profile.posa_allow_user_to_edit_rate ||
-                          !!invoice_doc.is_return
-                          ? true
-                          : false
-                          "></v-text-field>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-text-field density="compact" variant="outlined" color="primary"
-                      :label="frappe._('Discount Percentage')" bg-color="white" hide-details
-                      :model-value="formatFloat(item.discount_percentage)" @change="
-                        [
-                          setFormatedCurrency(
-                            item,
-                            'discount_percentage',
-                            null,
-                            true,
-                            $event
-                          ),
-                          calc_prices(item, $event),
-                        ]
-                        " :rules="[isNumber]" id="discount_percentage" :disabled="!!item.posa_is_offer ||
-                          !!item.posa_is_replace ||
-                          item.posa_offer_applied ||
-                          !pos_profile.posa_allow_user_to_edit_item_discount ||
-                          !!invoice_doc.is_return
-                          ? true
-                          : false
-                          " suffix="%"></v-text-field>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-text-field density="compact" variant="outlined" color="primary"
-                      :label="frappe._('Discount Amount')" bg-color="white" hide-details
-                      :model-value="formatCurrency(item.discount_amount)" :rules="[isNumber]" @change="
-                        [
-                          setFormatedCurrency(
-                            item,
-                            'discount_amount',
-                            null,
-                            true,
-                            $event
-                          ),
-                          ,
-                          calc_prices(item, $event),
-                        ]
-                        " :prefix="currencySymbol(pos_profile.currency)" id="discount_amount" :disabled="!!item.posa_is_offer ||
-                          !!item.posa_is_replace ||
-                          !!item.posa_offer_applied ||
-                          !pos_profile.posa_allow_user_to_edit_item_discount ||
-                          !!invoice_doc.is_return
-                          ? true
-                          : false
-                          "></v-text-field>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-text-field density="compact" variant="outlined" color="primary"
-                      :label="frappe._('Price list Rate')" bg-color="white" hide-details
-                      :model-value="formatCurrency(item.price_list_rate)" disabled
-                      :prefix="currencySymbol(pos_profile.currency)"></v-text-field>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-text-field density="compact" variant="outlined" color="primary"
-                      :label="frappe._('Available QTY')" bg-color="white" hide-details
-                      :model-value="formatFloat(item.actual_qty)" disabled></v-text-field>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Group')"
-                      bg-color="white" hide-details v-model="item.item_group" disabled></v-text-field>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Stock QTY')"
-                      bg-color="white" hide-details :model-value="formatFloat(item.stock_qty)" disabled></v-text-field>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Stock UOM')"
-                      bg-color="white" hide-details v-model="item.stock_uom" disabled></v-text-field>
-                  </v-col>
-                  <v-col align="center" cols="4" v-if="item.posa_offer_applied">
-                    <v-checkbox density="default" :label="frappe._('Offer Applied')" v-model="item.posa_offer_applied"
-                      readonly hide-details class="shrink mr-2 mt-0"></v-checkbox>
-                  </v-col>
-                  <v-col cols="4" v-if="item.has_serial_no == 1 || item.serial_no">
-                    <v-text-field density="compact" variant="outlined" color="primary"
-                      :label="frappe._('Serial No QTY')" bg-color="white" hide-details
-                      v-model="item.serial_no_selected_count" type="number" disabled></v-text-field>
-                  </v-col>
-                  <v-col cols="12" v-if="item.has_serial_no == 1 || item.serial_no">
-                    <v-autocomplete v-model="item.serial_no_selected" :items="item.serial_no_data"
-                      item-title="serial_no" variant="outlined" density="compact" chips color="primary" small-chips
-                      :label="frappe._('Serial No')" multiple
-                      @update:model-value="set_serial_no(item)"></v-autocomplete>
-                  </v-col>
-                  <v-col cols="4" v-if="item.has_batch_no == 1 || item.batch_no">
-                    <v-text-field density="compact" variant="outlined" color="primary"
-                      :label="frappe._('Batch No. Available QTY')" bg-color="white" hide-details
-                      :model-value="formatFloat(item.actual_batch_qty)" disabled></v-text-field>
-                  </v-col>
-                  <v-col cols="4" v-if="item.has_batch_no == 1 || item.batch_no">
-                    <v-text-field density="compact" variant="outlined" color="primary"
-                      :label="frappe._('Batch No Expiry Date')" bg-color="white" hide-details
-                      v-model="item.batch_no_expiry_date" disabled></v-text-field>
-                  </v-col>
-                  <v-col cols="8" v-if="item.has_batch_no == 1 || item.batch_no">
-                    <v-autocomplete v-model="item.batch_no" :items="item.batch_no_data" item-title="batch_no"
-                      variant="outlined" density="compact" color="primary" :label="frappe._('Batch No')"
-                      @update:model-value="set_batch_qty(item, $event)">
-                      <template v-slot:item="data">
-                        <template>
-
-                          <v-list-item-title v-html="data.item.batch_no"></v-list-item-title>
-                          <v-list-item-subtitle v-html="`Available QTY  '${data.item.batch_qty}' - Expiry Date ${data.item.expiry_date}`
-                            "></v-list-item-subtitle>
-
-                        </template>
-                      </template>
-                    </v-autocomplete>
-                  </v-col>
-                  <v-col cols="4" v-if="
-                    pos_profile.posa_allow_sales_order &&
-                    invoiceType == 'Order'
-                  ">
-                    <v-menu ref="item_delivery_date" v-model="item.item_delivery_date" :close-on-content-click="false"
-                      v-model:return-value="item.posa_delivery_date" transition="scale-transition" density="default">
-                      <template v-slot:activator="{ props }">
-                        <v-text-field v-model="item.posa_delivery_date" :label="frappe._('Delivery Date')" readonly
-                          variant="outlined" density="compact" clearable color="primary" hide-details
-                          v-bind="props"></v-text-field>
-                      </template>
-                      <v-date-picker v-model="item.posa_delivery_date" no-title scrollable color="primary"
-                        :min="frappe.datetime.now_date()">
-                        <v-spacer></v-spacer>
-                        <v-btn variant="text" color="primary" @click="item.item_delivery_date = false">
-                          Cancel
-                        </v-btn>
-                        <v-btn variant="text" color="primary" @click="
-                          [
-                            $refs.item_delivery_date.save(
-                              item.posa_delivery_date
-                            ),
-                            validate_due_date(item),
-                          ]
-                          ">
-                          OK
-                        </v-btn>
-                      </v-date-picker>
-                    </v-menu>
-                  </v-col>
-                  <v-col cols="8" v-if="pos_profile.posa_display_additional_notes">
-                    <v-textarea class="pa-0" variant="outlined" density="compact" clearable color="primary" auto-grow
-                      rows="1" :label="frappe._('Additional Notes')" v-model="item.posa_notes"
-                      :model-value="item.posa_notes"></v-textarea>
-                  </v-col>
-                </v-row>
-              </td>
-            </template>
-          </v-data-table>
+                        OK
+                      </v-btn>
+                    </v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col cols="8" v-if="pos_profile.posa_display_additional_notes">
+                  <v-textarea class="pa-0" variant="outlined" density="compact" clearable color="primary" auto-grow
+                    rows="1" :label="frappe._('Additional Notes')" v-model="item.posa_notes"
+                    :model-value="item.posa_notes"></v-textarea>
+                </v-col>
+              </v-row>
+            </td>
+          </template>
+        </v-data-table>
       </div>
     </v-card>
     <v-card class="cards mb-0 mt-3 py-0 bg-grey-lighten-5">
@@ -371,7 +369,8 @@
         <v-col cols="5">
           <v-row no-gutters class="pa-1 pt-2 pl-0">
             <v-col cols="6" class="pa-1">
-              <v-btn block class="pa-0" color="warning" theme="dark" @click="get_draft_invoices">{{ __("Held")
+              <v-btn block class="pa-0" color="warning" theme="dark" @click="get_draft_invoices">{{
+                __("Load Draft sales")
                 }}</v-btn>
             </v-col>
             <v-col v-if="pos_profile.custom_allow_select_sales_order === 1" cols="6" class="pa-1">
@@ -387,7 +386,8 @@
                 }}</v-btn>
             </v-col>
             <v-col cols="6" class="pa-1">
-              <v-btn block class="pa-0" color="accent" theme="dark" @click="new_invoice">{{ __("Save/New") }}</v-btn>
+              <v-btn block class="pa-0" color="accent" theme="dark" @click="new_invoice">{{ __("Save and Clear")
+                }}</v-btn>
             </v-col>
             <v-col class="pa-1">
               <v-btn block class="pa-0" color="success" @click="show_payment" theme="dark">{{ __("PAY") }}</v-btn>
@@ -565,7 +565,7 @@ export default {
         this.update_items_details([cur_item]);
         if (item.has_serial_no && item.to_set_serial_no) {
           if (cur_item.serial_no_selected.includes(item.to_set_serial_no)) {
-            this.eventBus.emit("show_mesage", {
+            this.eventBus.emit("show_message", {
               title: __(`This Serial Number {0} has already been added!`, [
                 item.to_set_serial_no,
               ]),
@@ -651,6 +651,7 @@ export default {
         : "Invoice";
       this.invoiceTypes = ["Invoice", "Order"];
       this.posting_date = frappe.datetime.nowdate();
+      var vm = this;
       if (doc.name && this.pos_profile.posa_allow_delete) {
         frappe.call({
           method: "posawesome.posawesome.api.posapp.delete_invoice",
@@ -658,7 +659,7 @@ export default {
           async: true,
           callback: function (r) {
             if (r.message) {
-              this.eventBus.emit("show_mesage", {
+              vm.eventBus.emit("show_message", {
                 text: r.message,
                 color: "warning",
               });
@@ -682,6 +683,7 @@ export default {
     },
 
     new_invoice(data = {}) {
+
       let old_invoice = null;
       this.eventBus.emit("set_customer_readonly", false);
       this.expanded = [];
@@ -972,7 +974,7 @@ export default {
     },
 
     update_invoice(doc) {
-      const vm = this;
+      var vm = this;
       frappe.call({
         method: "posawesome.posawesome.api.posapp.update_invoice",
         args: {
@@ -989,7 +991,7 @@ export default {
     },
 
     update_invoice_from_order(doc) {
-      const vm = this;
+      var vm = this;
       frappe.call({
         method: "posawesome.posawesome.api.posapp.update_invoice_from_order",
         args: {
@@ -1027,14 +1029,14 @@ export default {
 
     async show_payment() {
       if (!this.customer) {
-        this.eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_message", {
           title: __(`There is no Customer !`),
           color: "error",
         });
         return;
       }
       if (!this.items.length) {
-        this.eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_message", {
           title: __(`There is no Items !`),
           color: "error",
         });
@@ -1082,6 +1084,7 @@ export default {
 
     validate() {
       let value = true;
+      var vm = this;
       this.items.forEach((item) => {
         if (
           this.pos_profile.posa_max_discount_allowed &&
@@ -1095,7 +1098,7 @@ export default {
             if (
               discount_percentage > this.pos_profile.posa_max_discount_allowed
             ) {
-              this.eventBus.emit("show_mesage", {
+              vm.eventBus.emit("show_message", {
                 title: __(
                   `Discount percentage for item '{0}' cannot be greater than {1}%`,
                   [item.item_name, this.pos_profile.posa_max_discount_allowed]
@@ -1112,7 +1115,7 @@ export default {
             ((item.is_stock_item && item.stock_qty && !item.actual_qty) ||
               (item.is_stock_item && item.stock_qty > item.actual_qty))
           ) {
-            this.eventBus.emit("show_mesage", {
+            vm.eventBus.emit("show_message", {
               title: __(
                 `The existing quantity '{0}' for item '{1}' is not enough`,
                 [item.actual_qty, item.item_name]
@@ -1123,7 +1126,7 @@ export default {
           }
         }
         if (item.qty == 0) {
-          this.eventBus.emit("show_mesage", {
+          vm.eventBus.emit("show_message", {
             title: __(`Quantity for item '{0}' cannot be Zero (0)`, [
               item.item_name,
             ]),
@@ -1135,7 +1138,7 @@ export default {
           item.max_discount > 0 &&
           item.discount_percentage > item.max_discount
         ) {
-          this.eventBus.emit("show_mesage", {
+          vm.eventBus.emit("show_message", {
             title: __(`Maximum discount for Item {0} is {1}%`, [
               item.item_name,
               item.max_discount,
@@ -1150,7 +1153,7 @@ export default {
             (!item.serial_no_selected ||
               item.stock_qty != item.serial_no_selected.length)
           ) {
-            this.eventBus.emit("show_mesage", {
+            vm.eventBus.emit("show_message", {
               title: __(`Selected serial numbers of item {0} is incorrect`, [
                 item.item_name,
               ]),
@@ -1161,7 +1164,7 @@ export default {
         }
         if (item.has_batch_no) {
           if (item.stock_qty > item.actual_batch_qty) {
-            this.eventBus.emit("show_mesage", {
+            vm.eventBus.emit("show_message", {
               title: __(
                 `The existing batch quantity of item {0} is not enough`,
                 [item.item_name]
@@ -1174,7 +1177,7 @@ export default {
         if (this.pos_profile.posa_allow_user_to_edit_additional_discount) {
           const clac_percentage = (this.discount_amount / this.Total) * 100;
           if (clac_percentage > this.pos_profile.posa_max_discount_allowed) {
-            this.eventBus.emit("show_mesage", {
+            vm.eventBus.emit("show_message", {
               title: __(`The discount should not be higher than {0}%`, [
                 this.pos_profile.posa_max_discount_allowed,
               ]),
@@ -1185,7 +1188,7 @@ export default {
         }
         if (this.invoice_doc.is_return) {
           if (this.subtotal >= 0) {
-            this.eventBus.emit("show_mesage", {
+            vm.eventBus.emit("show_message", {
               title: __(`Return Invoice Total Not Correct`),
               color: "error",
             });
@@ -1193,7 +1196,7 @@ export default {
             return value;
           }
           if (Math.abs(this.subtotal) > Math.abs(this.return_doc.total)) {
-            this.eventBus.emit("show_mesage", {
+            vm.eventBus.emit("show_message", {
               title: __(`Return Invoice Total should not be higher than {0}`, [
                 this.return_doc.total,
               ]),
@@ -1208,7 +1211,7 @@ export default {
             );
 
             if (!return_item) {
-              this.eventBus.emit("show_mesage", {
+              vm.eventBus.emit("show_message", {
                 title: __(
                   `The item {0} cannot be returned because it is not in the invoice {1}`,
                   [item.item_name, this.return_doc.name]
@@ -1221,7 +1224,7 @@ export default {
               Math.abs(item.qty) > Math.abs(return_item.qty) ||
               Math.abs(item.qty) == 0
             ) {
-              this.eventBus.emit("show_mesage", {
+              vm.eventBus.emit("show_message", {
                 title: __(`The QTY of the item {0} cannot be greater than {1}`, [
                   item.item_name,
                   return_item.qty,
@@ -1238,7 +1241,7 @@ export default {
     },
 
     get_draft_invoices() {
-      const vm = this;
+      var vm = this;
       frappe.call({
         method: "posawesome.posawesome.api.posapp.get_draft_invoices",
         args: {
@@ -1247,14 +1250,14 @@ export default {
         async: false,
         callback: function (r) {
           if (r.message) {
-            this.eventBus.emit("open_drafts", r.message);
+            vm.eventBus.emit("open_drafts", r.message);
           }
         },
       });
     },
 
     get_draft_orders() {
-      const vm = this;
+      var vm = this;
       frappe.call({
         method: "posawesome.posawesome.api.posapp.search_orders",
         args: {
@@ -1264,7 +1267,7 @@ export default {
         async: false,
         callback: function (r) {
           if (r.message) {
-            this.eventBus.emit("open_orders", r.message);
+            vm.eventBus.emit("open_orders", r.message);
           }
         },
       });
@@ -1282,7 +1285,7 @@ export default {
       if (!items.length > 0) {
         return;
       }
-      const vm = this;
+      var vm = this;
       if (!vm.pos_profile) return;
       frappe.call({
         method: "posawesome.posawesome.api.posapp.get_items_details",
@@ -1313,7 +1316,7 @@ export default {
       if (!item.item_code || this.invoice_doc.is_return) {
         return;
       }
-      const vm = this;
+      var vm = this;
       frappe.call({
         method: "posawesome.posawesome.api.posapp.get_item_detail",
         args: {
@@ -1406,7 +1409,7 @@ export default {
     },
 
     fetch_customer_details() {
-      const vm = this;
+      var vm = this;
       if (this.customer) {
         frappe.call({
           method: "posawesome.posawesome.api.posapp.get_customer_info",
@@ -1542,6 +1545,7 @@ export default {
     },
 
     set_serial_no(item) {
+      console.log(item)
       if (!item.has_serial_no) return;
       item.serial_no = "";
       item.serial_no_selected.forEach((element) => {
@@ -1556,6 +1560,7 @@ export default {
     },
 
     set_batch_qty(item, value, update = true) {
+      console.log(item, value)
       const existing_items = this.items.filter(
         (element) =>
           element.item_code == item.item_code &&
@@ -2179,7 +2184,7 @@ export default {
         this.ApplyOnTotal(offer);
       }
       if (offer.offer === "Loyalty Point") {
-        this.eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_message", {
           title: __("Loyalty Point Offer Applied"),
           color: "success",
         });
@@ -2400,7 +2405,7 @@ export default {
 
     print_draft_invoice() {
       if (!this.pos_profile.posa_allow_print_draft_invoices) {
-        this.eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_message", {
           title: __(`You are not allowed to print draft invoices`),
           color: "error",
         });
@@ -2418,7 +2423,7 @@ export default {
       ]);
     },
     set_delivery_charges() {
-      const vm = this;
+      var vm = this;
       if (
         !this.pos_profile ||
         !this.customer ||
@@ -2489,6 +2494,7 @@ export default {
       this.cancel_invoice();
     });
     this.eventBus.on("load_invoice", (data) => {
+      console.log(data)
       this.new_invoice(data);
 
       if (this.invoice_doc.is_return) {

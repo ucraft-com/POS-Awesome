@@ -17,17 +17,15 @@
           </v-row>
           <v-row>
             <v-col cols="12" class="pa-1" v-if="dialog_data">
-              <template>
-                <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1"
-                  :single-select="singleSelect" show-select v-model="selected">
-                  <template v-slot:item.amount="{ item }">{{
-                    formatCurrency(item.amount)
-                    }}</template>
-                  <template v-slot:item.posting_date="{ item }">{{
-                    item.posting_date.slice(0, 16)
-                    }}</template>
-                </v-data-table>
-              </template>
+              <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1" show-select
+                v-model="selected" return-object select-strategy="single">
+                <template v-slot:item.amount="{ item }">{{
+                  formatCurrency(item.amount)
+                  }}</template>
+                <template v-slot:item.posting_date="{ item }">{{
+                  item.posting_date.slice(0, 16)
+                  }}</template>
+              </v-data-table>
             </v-col>
           </v-row>
         </v-container>
@@ -110,7 +108,7 @@ export default {
       });
     },
     submit_dialog() {
-      const vm = this;
+      var vm = this;
       if (this.selected.length > 0) {
         const selected_payment = this.selected[0].name;
         frappe.call({
@@ -122,7 +120,7 @@ export default {
           async: false,
           callback: function (r) {
             if (!r.exc) {
-              this.eventBus.emit('set_mpesa_payment', r.message);
+              vm.eventBus.emit('set_mpesa_payment', r.message);
               vm.dialog = false;
             }
           },

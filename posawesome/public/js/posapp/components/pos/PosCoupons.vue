@@ -15,7 +15,7 @@
           </v-col>
         </v-row>
       </v-card-title>
-      <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh" @mouseover="style = 'cursor: pointer'" >
+      <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh" @mouseover="style = 'cursor: pointer'">
         <v-data-table :headers="items_headers" :items="posa_coupons" :single-expand="singleExpand"
           v-model:expanded="expanded" item-key="coupon" class="elevation-1" :items-per-page="itemsPerPage"
           hide-default-footer>
@@ -70,12 +70,18 @@ export default {
       this.eventBus.emit('show_coupons', 'false');
     },
     add_coupon(new_coupon) {
-      if (!this.customer || !new_coupon) return;
+      if (!this.customer || !new_coupon) {
+        this.eventBus.emit('show_message', {
+          title: __('Select a customer to use coupon'),
+          color: 'error',
+        });
+        return;
+      };
       const exist = this.posa_coupons.find(
         (el) => el.coupon_code == new_coupon
       );
       if (exist) {
-        this.eventBus.emit('show_mesage', {
+        this.eventBus.emit('show_message', {
           title: __('This coupon already used !'),
           color: 'error',
         });
@@ -93,7 +99,7 @@ export default {
           if (r.message) {
             const res = r.message;
             if (res.msg != 'Apply' || !res.coupon) {
-              this.eventBus.emit('show_mesage', {
+              this.eventBus.emit('show_message', {
                 text: res.msg,
                 color: 'error',
               });

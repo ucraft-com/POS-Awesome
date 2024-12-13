@@ -5,7 +5,7 @@
         <v-card-title>
           <span class="text-h5 text-primary">{{
             __('Add New Address')
-          }}</span>
+            }}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -37,10 +37,10 @@
           <v-spacer></v-spacer>
           <v-btn color="error" theme="dark" @click="close_dialog">{{
             __('Close')
-          }}</v-btn>
+            }}</v-btn>
           <v-btn color="success" theme="dark" @click="submit_dialog">{{
             __('Submit')
-          }}</v-btn>
+            }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -62,7 +62,7 @@ export default {
     },
 
     submit_dialog() {
-      const vm = this;
+      var vm = this;
       this.address.customer = this.customer;
       this.address.doctype = 'Customer';
       frappe.call({
@@ -72,8 +72,8 @@ export default {
         },
         callback: (r) => {
           if (!r.exc) {
-            this.eventBus.emit('add_the_new_address', r.message);
-            this.eventBus.emit('show_mesage', {
+            vm.eventBus.emit('add_the_new_address', r.message);
+            vm.eventBus.emit('show_message', {
               text: 'Customer Address created successfully.',
               color: 'success',
             });

@@ -2,35 +2,30 @@
   <div>
     <v-autocomplete density="compact" clearable auto-select-first variant="outlined" color="primary"
       :label="frappe._('Customer')" v-model="customer" :items="customers" item-title="customer_name" item-value="name"
-      bg-color="white" :no-data-text="__('Customer not found')" hide-details :customFilter="customFilter"
+      bg-color="white" :no-data-text="__('Customers not found')" hide-details :customFilter="customFilter"
       :disabled="readonly" append-icon="mdi-plus" @click:append="new_customer" prepend-inner-icon="mdi-account-edit"
       @click:prepend-inner="edit_customer">
-      <template v-slot:default="data">
-        <template>
-
-          <v-list-item-title class="text-primary text-subtitle-1">
-            <div v-html="data.item.customer_name"></div>
-          </v-list-item-title>
-          <v-list-item-subtitle v-if="data.item.customer_name != data.item.name">
-            <div v-html="`ID: ${data.item.name}`"></div>
+      <template v-slot:item="{ props, item }">
+        <v-list-item v-bind="props">
+          <v-list-item-subtitle v-if="item.raw.customer_name != item.raw.name">
+            <div v-html="`ID: ${item.raw.name}`"></div>
           </v-list-item-subtitle>
-          <v-list-item-subtitle v-if="data.item.tax_id">
-            <div v-html="`TAX ID: ${data.item.tax_id}`"></div>
+          <v-list-item-subtitle v-if="item.raw.tax_id">
+            <div v-html="`TAX ID: ${item.raw.tax_id}`"></div>
           </v-list-item-subtitle>
-          <v-list-item-subtitle v-if="data.item.email_id">
-            <div v-html="`Email: ${data.item.email_id}`"></div>
+          <v-list-item-subtitle v-if="item.raw.email_id">
+            <div v-html="`Email: ${item.raw.email_id}`"></div>
           </v-list-item-subtitle>
-          <v-list-item-subtitle v-if="data.item.mobile_no">
-            <div v-html="`Mobile No: ${data.item.mobile_no}`"></div>
+          <v-list-item-subtitle v-if="item.raw.mobile_no">
+            <div v-html="`Mobile No: ${item.raw.mobile_no}`"></div>
           </v-list-item-subtitle>
-          <v-list-item-subtitle v-if="data.item.primary_address">
-            <div v-html="`Primary Address: ${data.item.primary_address}`"></div>
+          <v-list-item-subtitle v-if="item.raw.primary_address">
+            <div v-html="`Primary Address: ${item.raw.primary_address}`"></div>
           </v-list-item-subtitle>
-
-
-        </template>
+        </v-list-item>
       </template>
     </v-autocomplete>
+    {{ console.log("my ccustomers", customers) }}
     <div class="mb-8">
       <UpdateCustomer></UpdateCustomer>
     </div>
@@ -70,9 +65,9 @@ export default {
         },
         callback: function (r) {
           if (r.message) {
-
+            console.log(vm.customers)
             vm.customers = r.message;
-
+            console.log(vm.customers)
             if (vm.pos_profile.posa_local_storage) {
               localStorage.setItem('customer_storage', '');
               localStorage.setItem(

@@ -158,32 +158,32 @@
               :label="frappe._('Address')" v-model="invoice_doc.shipping_address_name" :items="addresses"
               item-title="address_title" item-value="name" bg-color="white" no-data-text="Address not found"
               hide-details :customFilter="addressFilter" append-icon="mdi-plus" @click:append="new_address">
-              <template v-slot:item="data">
-                <template>
+              <template v-slot:item="{ props, item }">
+                <v-list-item v-bind="props">
 
                   <v-list-item-title class="text-primary text-subtitle-1">
-                    <div v-html="data.item.address_title"></div>
+                    <div v-html="item.raw.address_title"></div>
                   </v-list-item-title>
                   <v-list-item-title>
-                    <div v-html="data.item.address_line1"></div>
+                    <div v-html="item.raw.address_line1"></div>
                   </v-list-item-title>
-                  <v-list-item-subtitle v-if="data.item.custoaddress_line2mer_name">
-                    <div v-html="data.item.address_line2"></div>
+                  <v-list-item-subtitle v-if="item.raw.custoaddress_line2mer_name">
+                    <div v-html="item.raw.address_line2"></div>
                   </v-list-item-subtitle>
-                  <v-list-item-subtitle v-if="data.item.city">
-                    <div v-html="data.item.city"></div>
+                  <v-list-item-subtitle v-if="item.raw.city">
+                    <div v-html="item.raw.city"></div>
                   </v-list-item-subtitle>
-                  <v-list-item-subtitle v-if="data.item.state">
-                    <div v-html="data.item.state"></div>
+                  <v-list-item-subtitle v-if="item.raw.state">
+                    <div v-html="item.raw.state"></div>
                   </v-list-item-subtitle>
-                  <v-list-item-subtitle v-if="data.item.country">
-                    <div v-html="data.item.mobile_no"></div>
+                  <v-list-item-subtitle v-if="item.raw.country">
+                    <div v-html="item.raw.mobile_no"></div>
                   </v-list-item-subtitle>
-                  <v-list-item-subtitle v-if="data.item.address_type">
-                    <div v-html="data.item.address_type"></div>
+                  <v-list-item-subtitle v-if="item.raw.address_type">
+                    <div v-html="item.raw.address_type"></div>
                   </v-list-item-subtitle>
 
-                </template>
+                </v-list-item>
               </template>
             </v-autocomplete>
           </v-col>
@@ -277,17 +277,15 @@
               item-title="sales_person_name" item-value="name" bg-color="white"
               :no-data-text="__('Sales Person not found')" hide-details :customFilter="salesPersonFilter"
               :disabled="readonly">
-              <template v-slot:item="data">
-                <template>
-
+              <template v-slot:item="{ props, item }">
+                <v-list-item v-bind="props">
                   <v-list-item-title class="text-primary text-subtitle-1">
-                    <div v-html="data.item.sales_person_name"></div>
+                    <div v-html="item.raw.sales_person_name"></div>
                   </v-list-item-title>
-                  <v-list-item-subtitle v-if="data.item.sales_person_name != data.item.name">
-                    <div v-html="`ID: ${data.item.name}`"></div>
+                  <v-list-item-subtitle v-if="item.raw.sales_person_name != item.raw.name">
+                    <div v-html="`ID: ${item.raw.name}`"></div>
                   </v-list-item-subtitle>
-
-                </template>
+                </v-list-item>
               </template>
             </v-autocomplete>
           </v-col>
@@ -379,8 +377,8 @@ export default {
     },
     submit(event, payment_received = false, print = false) {
       if (!this.invoice_doc.is_return && this.total_payments < 0) {
-        this.eventBus.emit("show_mesage", {
-          text: `Payments not correct`,
+        this.eventBus.emit("show_message", {
+          title: `Payments not correct`,
           color: "error",
         });
         frappe.utils.play_sound("error");
@@ -398,7 +396,7 @@ export default {
           }
         });
         if (!phone_payment_is_valid) {
-          this.eventBus.emit("show_mesage", {
+          this.eventBus.emit("show_message", {
             title: __(
               "Please request phone payment or use other payment method"
             ),
@@ -415,8 +413,8 @@ export default {
         this.total_payments <
         (this.invoice_doc.rounded_total || this.invoice_doc.grand_total)
       ) {
-        this.eventBus.emit("show_mesage", {
-          text: `The amount paid is not complete`,
+        this.eventBus.emit("show_message", {
+          title: `The amount paid is not complete`,
           color: "error",
         });
         frappe.utils.play_sound("error");
@@ -428,8 +426,8 @@ export default {
         !this.pos_profile.posa_allow_credit_sale &&
         this.total_payments == 0
       ) {
-        this.eventBus.emit("show_mesage", {
-          text: `Please enter the amount paid`,
+        this.eventBus.emit("show_message", {
+          title: `Please enter the amount paid`,
           color: "error",
         });
         frappe.utils.play_sound("error");
@@ -439,8 +437,8 @@ export default {
       if (!this.paid_change) this.paid_change = 0;
 
       if (this.paid_change > -this.diff_payment) {
-        this.eventBus.emit("show_mesage", {
-          text: `Paid change can not be greater than total change!`,
+        this.eventBus.emit("show_message", {
+          title: `Paid change can not be greater than total change!`,
           color: "error",
         });
         frappe.utils.play_sound("error");
@@ -452,8 +450,8 @@ export default {
       );
 
       if (this.is_cashback && total_change != -this.diff_payment) {
-        this.eventBus.emit("show_mesage", {
-          text: `Error in change calculations!`,
+        this.eventBus.emit("show_message", {
+          title: `Error in change calculations!`,
           color: "error",
         });
         frappe.utils.play_sound("error");
@@ -467,8 +465,8 @@ export default {
       });
 
       if (credit_calc_check.length > 0) {
-        this.eventBus.emit("show_mesage", {
-          text: `redeamed credit can not greater than its total.`,
+        this.eventBus.emit("show_message", {
+          title: `redeamed credit can not greater than its total.`,
           color: "error",
         });
         frappe.utils.play_sound("error");
@@ -480,8 +478,8 @@ export default {
         this.redeemed_customer_credit >
         (this.invoice_doc.rounded_total || this.invoice_doc.grand_total)
       ) {
-        this.eventBus.emit("show_mesage", {
-          text: `can not redeam customer credit more than invoice total`,
+        this.eventBus.emit("show_message", {
+          title: `can not redeam customer credit more than invoice total`,
           color: "error",
         });
         frappe.utils.play_sound("error");
@@ -535,8 +533,8 @@ export default {
               vm.load_print_page();
             }
             this.eventBus.emit("set_last_invoice", vm.invoice_doc.name);
-            this.eventBus.emit("show_mesage", {
-              text: `Invoice ${r.message.name} is Submited`,
+            this.eventBus.emit("show_message", {
+              title: `Invoice ${r.message.name} is Submited`,
               color: "success",
             });
             frappe.utils.play_sound("submit");
@@ -743,7 +741,7 @@ export default {
       this.phone_dialog = false;
       const vm = this;
       if (!this.invoice_doc.contact_mobile) {
-        this.eventBus.emit("show_mesage", {
+        this.eventBus.emit("show_message", {
           title: __(`Pleas Set Customer Mobile Number`),
           color: "error",
         });
@@ -788,7 +786,7 @@ export default {
             })
             .fail(() => {
               this.eventBus.emit("unfreeze");
-              this.eventBus.emit("show_mesage", {
+              this.eventBus.emit("show_message", {
                 title: __(`Payment request failed`),
                 color: "error",
               });
@@ -804,7 +802,7 @@ export default {
                   .then(({ message }) => {
                     if (message.status != "Paid") {
                       this.eventBus.emit("unfreeze");
-                      this.eventBus.emit("show_mesage", {
+                      this.eventBus.emit("show_message", {
                         title: __(
                           `Payment Request took too long to respond. Please try requesting for payment again`
                         ),
@@ -812,7 +810,7 @@ export default {
                       });
                     } else {
                       this.eventBus.emit("unfreeze");
-                      this.eventBus.emit("show_mesage", {
+                      this.eventBus.emit("show_message", {
                         title: __("Payment of {0} received successfully.", [
                           vm.formatCurrency(
                             message.grand_total,
@@ -1065,8 +1063,8 @@ export default {
         this.invoice_doc.loyalty_amount = 0;
         this.invoice_doc.redeem_loyalty_points = 0;
         this.invoice_doc.loyalty_points = 0;
-        this.eventBus.emit("show_mesage", {
-          text: `Loyalty Amount can not be more then ${this.available_pioints_amount}`,
+        this.eventBus.emit("show_message", {
+          title: `Loyalty Amount can not be more then ${this.available_pioints_amount}`,
           color: "error",
         });
       } else {
@@ -1095,8 +1093,8 @@ export default {
     },
     redeemed_customer_credit(value) {
       if (value > this.available_customer_credit) {
-        this.eventBus.emit("show_mesage", {
-          text: `You can redeem customer credit upto ${this.available_customer_credit}`,
+        this.eventBus.emit("show_message", {
+          title: `You can redeem customer credit upto ${this.available_customer_credit}`,
           color: "error",
         });
       }

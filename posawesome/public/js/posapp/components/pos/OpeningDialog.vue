@@ -8,7 +8,7 @@
         <v-card-title>
           <span class="text-h5 text-primary">{{
             __('Create POS Opening Shift')
-            }}</span>
+          }}</span>
         </v-card-title>
         <v-card-text>
           <v-container>
@@ -22,19 +22,19 @@
                   required></v-autocomplete>
               </v-col>
               <v-col cols="12">
-                  <v-data-table :headers="payments_methods_headers" :items="payments_methods" item-key="mode_of_payment"
-                    class="elevation-1" :items-per-page="itemsPerPage" hide-default-footer>
-                    <template v-slot:item.amount="props">
-                      <v-confirm-edit v-model:return-value="props.item.amount">
-                        {{ currencySymbol(props.item.currency) }}
-                        {{ formatCurrency(props.item.amount) }}
-                        <template v-slot:input>
-                          <v-text-field v-model="props.item.amount" :rules="[max25chars]" :label="frappe._('Edit')"
-                            single-line counter type="number"></v-text-field>
-                        </template>
-                      </v-confirm-edit>
-                    </template>
-                  </v-data-table>
+                <v-data-table :headers="payments_methods_headers" :items="payments_methods" item-key="mode_of_payment"
+                  class="elevation-1" :items-per-page="itemsPerPage" hide-default-footer>
+                  <template v-slot:item.amount="props">
+                    <v-confirm-edit v-model:return-value="props.item.amount">
+                      {{ currencySymbol(props.item.currency) }}
+                      {{ formatCurrency(props.item.amount) }}
+                      <template v-slot:input>
+                        <v-text-field v-model="props.item.amount" :rules="[max25chars]" :label="frappe._('Edit')"
+                          single-line counter type="number"></v-text-field>
+                      </template>
+                    </v-confirm-edit>
+                  </template>
+                </v-data-table>
               </v-col>
             </v-row>
           </v-container>
@@ -142,7 +142,7 @@ export default {
         return;
       }
       this.is_loading = true;
-      const vm = this;
+      var vm = this;
       return frappe
         .call('posawesome.posawesome.api.posapp.create_opening_voucher', {
           pos_profile: this.pos_profile,
@@ -151,8 +151,8 @@ export default {
         })
         .then((r) => {
           if (r.message) {
-            this.eventBus.emit('register_pos_data', r.message);
-            this.eventBus.emit('set_company', r.message.company);
+            vm.eventBus.emit('register_pos_data', r.message);
+            vm.eventBus.emit('set_company', r.message.company);
             vm.close_opening_dialog();
             is_loading = false;
           }
