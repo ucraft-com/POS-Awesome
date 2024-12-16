@@ -5,7 +5,7 @@
         <v-card-title class="text-h5">
           <span class="text-h5 text-primary">{{
             __("Cancel Sale ?")
-            }}</span>
+          }}</span>
         </v-card-title>
         <v-card-text>
           This would cancel and delete the current sale. To save it as Draft, click the "Save and Clear" instead.
@@ -79,7 +79,7 @@
           hide-default-footer>
           <template v-slot:item.qty="{ item }">{{
             formatFloat(item.qty)
-          }}</template>
+            }}</template>
           <template v-slot:item.rate="{ item }">{{ currencySymbol(pos_profile.currency) }}
             {{ formatCurrency(item.rate) }}</template>
           <template v-slot:item.amount="{ item }">{{ currencySymbol(pos_profile.currency) }}
@@ -376,7 +376,7 @@
             <v-col cols="6" class="pa-1">
               <v-btn block class="pa-0" color="warning" theme="dark" @click="get_draft_invoices">{{
                 __("Load Draft sales")
-                }}</v-btn>
+              }}</v-btn>
             </v-col>
             <v-col v-if="pos_profile.custom_allow_select_sales_order === 1" cols="6" class="pa-1">
               <v-btn block class="pa-0" color="info" theme="dark" @click="get_draft_orders">{{ __("Select S.O")
@@ -747,9 +747,24 @@ export default {
         if (doc.items.length) {
           old_invoice = this.update_invoice(doc);
         }
+        else {
+          this.eventBus.emit("show_message", {
+            title: `Nothing to save`,
+            color: "error",
+          });
+        }
       }
-      this.clear_invoice()
-      return old_invoice;
+      if (!old_invoice) {
+        this.eventBus.emit("show_message", {
+          title: `Error saving the current invoice`,
+          color: "error",
+        });
+      }
+      else {
+        this.clear_invoice();
+        return old_invoice;
+      }
+
     },
 
     async new_order(data = {}) {
