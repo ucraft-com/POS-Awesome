@@ -9,7 +9,7 @@
           v-model:expanded="expanded" show-expand item-key="row_id" class="elevation-1" :items-per-page="itemsPerPage"
           hide-default-footer>
           <template v-slot:item.offer_applied="{ item }">
-            <v-checkbox-btn @click="forceUpdateItem" v-model="item.offer_applied" :disabled="(item.offer == 'Give Product' &&
+            <v-checkbox-btn @click="forceUpdateItem" :v-model="item.offer_applied" :disabled="(item.offer == 'Give Product' &&
               !item.give_item &&
               (!offer.replace_cheapest_item || !offer.replace_item)) ||
               (item.offer == 'Grand Total' &&

@@ -74,8 +74,8 @@
       </v-row>
 
       <div class="my-0 py-0 overflow-y-auto" style="max-height: 60vh">
-        <v-data-table :headers="items_headers" :items="items" :single-expand="singleExpand" v-model:expanded="expanded"
-          show-expand item-key="posa_row_id" item-value="posa_row_id" class="elevation-1" :items-per-page="itemsPerPage"
+        <v-data-table :headers="items_headers" :items="items" v-model:expanded="expanded" show-expand
+          item-value="posa_row_id" class="elevation-1" :items-per-page="itemsPerPage" expand-on-click
           hide-default-footer>
           <template v-slot:item.qty="{ item }">{{
             formatFloat(item.qty)
@@ -90,7 +90,8 @@
               )
             }}</template>
           <template v-slot:item.posa_is_offer="{ item }">
-            <v-checkbox-btn :value="!!item.posa_is_offer || !!item.posa_is_replace" disabled></v-checkbox-btn>
+            <v-checkbox-btn :model-value="!!item.posa_is_offer || !!item.posa_is_replace" class="center"
+              disabled></v-checkbox-btn>
           </template>
 
           <template v-slot:expanded-row="{ columns: headers, item }">
@@ -369,6 +370,10 @@
         <v-col cols="5">
           <v-row no-gutters class="pa-1 pt-2 pl-0">
             <v-col cols="6" class="pa-1">
+              <v-btn block class="pa-0" color="accent" theme="dark" @click="save_and_clear_invoice">
+                {{ __("Save and Clear") }}</v-btn>
+            </v-col>
+            <v-col cols="6" class="pa-1">
               <v-btn block class="pa-0" color="warning" theme="dark" @click="get_draft_invoices">{{
                 __("Load Draft sales")
                 }}</v-btn>
@@ -378,17 +383,14 @@
                 }}</v-btn>
             </v-col>
             <v-col cols="6" class="pa-1">
+              <v-btn block class="pa-0" color="error" theme="dark" @click="cancel_dialog = true">{{ __("Cancel Sale")
+                }}</v-btn>
+            </v-col>
+            <v-col v-if="pos_profile.posa_allow_return == 1" cols="6" class="pa-1">
               <v-btn block class="pa-0" :class="{ 'disable-events': !pos_profile.posa_allow_return }" color="secondary"
-                theme="dark" @click="open_returns">{{ __("Return") }}</v-btn>
+                theme="dark" @click="open_returns">{{ __("Sales Return") }}</v-btn>
             </v-col>
-            <v-col cols="6" class="pa-1">
-              <v-btn block class="pa-0" color="error" theme="dark" @click="cancel_dialog = true">{{ __("Cancel")
-                }}</v-btn>
-            </v-col>
-            <v-col cols="6" class="pa-1">
-              <v-btn block class="pa-0" color="accent" theme="dark" @click="new_invoice">{{ __("Save and Clear")
-                }}</v-btn>
-            </v-col>
+
             <v-col class="pa-1">
               <v-btn block class="pa-0" color="success" @click="show_payment" theme="dark">{{ __("PAY") }}</v-btn>
             </v-col>
@@ -644,7 +646,28 @@ export default {
       return new_item;
     },
 
-    cancel_invoice() {
+    clear_invoice() {
+      this.items = [];
+      this.posa_offers = [];
+      this.expanded = [];
+      this.posa_offers = [];
+      this.eventBus.emit("set_pos_coupons", []);
+      this.posa_coupons = [];
+      this.customer = this.pos_profile.customer;
+      this.invoice_doc = "";
+      this.return_doc = "";
+      this.discount_amount = 0;
+      this.additional_discount_percentage = 0;
+      this.delivery_charges_rate = 0;
+      this.selcted_delivery_charges = {};
+      this.eventBus.emit("set_customer_readonly", false);
+      this.invoiceType = this.pos_profile.posa_default_sales_order
+        ? "Order"
+        : "Invoice";
+      this.invoiceTypes = ["Invoice", "Order"];
+    },
+
+    async cancel_invoice() {
       const doc = this.get_invoice_doc();
       this.invoiceType = this.pos_profile.posa_default_sales_order
         ? "Order"
@@ -653,7 +676,7 @@ export default {
       this.posting_date = frappe.datetime.nowdate();
       var vm = this;
       if (doc.name && this.pos_profile.posa_allow_delete) {
-        frappe.call({
+        await frappe.call({
           method: "posawesome.posawesome.api.posapp.delete_invoice",
           args: { invoice: doc.name },
           async: true,
@@ -667,30 +690,56 @@ export default {
           },
         });
       }
-      this.items = [];
-      this.posa_offers = [];
-      this.eventBus.emit("set_pos_coupons", []);
-      this.posa_coupons = [];
-      this.customer = this.pos_profile.customer;
-      this.invoice_doc = "";
-      this.return_doc = "";
-      this.discount_amount = 0;
-      this.additional_discount_percentage = 0;
-      this.delivery_charges_rate = 0;
-      this.selcted_delivery_charges = {};
-      this.eventBus.emit("set_customer_readonly", false);
+      this.clear_invoice()
       this.cancel_dialog = false;
     },
 
-    new_invoice(data = {}) {
-
-      let old_invoice = null;
-      this.eventBus.emit("set_customer_readonly", false);
-      this.expanded = [];
-      this.posa_offers = [];
-      this.eventBus.emit("set_pos_coupons", []);
-      this.posa_coupons = [];
-      this.return_doc = "";
+    async load_invoice(data = {}) {
+      this.clear_invoice()
+      if (data.is_return) {
+        this.eventBus.emit("set_customer_readonly", true);
+        this.invoiceType = "Return";
+        this.invoiceTypes = ["Return"];
+      }
+      this.invoice_doc = data;
+      this.items = data.items;
+      this.update_items_details(this.items);
+      this.posa_offers = data.posa_offers || [];
+      this.items.forEach((item) => {
+        if (!item.posa_row_id) {
+          item.posa_row_id = this.makeid(20);
+        }
+        if (item.batch_no) {
+          this.set_batch_qty(item, item.batch_no);
+        }
+      });
+      this.customer = data.customer;
+      this.posting_date = data.posting_date || frappe.datetime.nowdate();
+      this.discount_amount = data.discount_amount;
+      this.additional_discount_percentage =
+        data.additional_discount_percentage;
+      this.items.forEach((item) => {
+        if (item.serial_no) {
+          item.serial_no_selected = [];
+          const serial_list = item.serial_no.split("\n");
+          serial_list.forEach((element) => {
+            if (element.length) {
+              item.serial_no_selected.push(element);
+            }
+          });
+          item.serial_no_selected_count = item.serial_no_selected.length;
+        }
+      });
+      if (data.is_return) {
+        this.discount_amount = -data.discount_amount;
+        this.additional_discount_percentage =
+          -data.additional_discount_percentage;
+        this.return_doc = data;
+      } else {
+        this.eventBus.emit("set_pos_coupons", data.posa_coupons);
+      }
+    },
+    save_and_clear_invoice() {
       const doc = this.get_invoice_doc();
       if (doc.name) {
         old_invoice = this.update_invoice(doc);
@@ -699,52 +748,7 @@ export default {
           old_invoice = this.update_invoice(doc);
         }
       }
-      if (!data.name && !data.is_return) {
-        this.items = [];
-        this.customer = this.pos_profile.customer;
-        this.invoice_doc = "";
-        this.discount_amount = 0;
-        this.additional_discount_percentage = 0;
-        this.invoiceType = this.pos_profile.posa_default_sales_order
-          ? "Order"
-          : "Invoice";
-        this.invoiceTypes = ["Invoice", "Order"];
-      } else {
-        if (data.is_return) {
-          this.eventBus.emit("set_customer_readonly", true);
-          this.invoiceType = "Return";
-          this.invoiceTypes = ["Return"];
-        }
-        this.invoice_doc = data;
-        this.items = data.items;
-        this.update_items_details(this.items);
-        this.posa_offers = data.posa_offers || [];
-        this.items.forEach((item) => {
-          if (!item.posa_row_id) {
-            item.posa_row_id = this.makeid(20);
-          }
-          if (item.batch_no) {
-            this.set_batch_qty(item, item.batch_no);
-          }
-        });
-        this.customer = data.customer;
-        this.posting_date = data.posting_date || frappe.datetime.nowdate();
-        this.discount_amount = data.discount_amount;
-        this.additional_discount_percentage =
-          data.additional_discount_percentage;
-        this.items.forEach((item) => {
-          if (item.serial_no) {
-            item.serial_no_selected = [];
-            const serial_list = item.serial_no.split("\n");
-            serial_list.forEach((element) => {
-              if (element.length) {
-                item.serial_no_selected.push(element);
-              }
-            });
-            item.serial_no_selected_count = item.serial_no_selected.length;
-          }
-        });
-      }
+      this.clear_invoice()
       return old_invoice;
     },
 
@@ -2414,7 +2418,7 @@ export default {
       let invoice_name = this.invoice_doc.name;
       frappe.run_serially([
         () => {
-          const invoice_doc = this.new_invoice();
+          const invoice_doc = this.save_and_clear_invoice();
           invoice_name = invoice_doc.name ? invoice_doc.name : invoice_name;
         },
         () => {
@@ -2489,22 +2493,11 @@ export default {
     this.eventBus.on("fetch_customer_details", () => {
       this.fetch_customer_details();
     });
-    this.eventBus.on("new_invoice", () => {
-      this.invoice_doc = "";
-      this.cancel_invoice();
+    this.eventBus.on("clear_invoice", () => {
+      this.clear_invoice();
     });
     this.eventBus.on("load_invoice", (data) => {
-      console.log(data)
-      this.new_invoice(data);
-
-      if (this.invoice_doc.is_return) {
-        this.discount_amount = -data.discount_amount;
-        this.additional_discount_percentage =
-          -data.additional_discount_percentage;
-        this.return_doc = data;
-      } else {
-        this.eventBus.emit("set_pos_coupons", data.posa_coupons);
-      }
+      this.load_invoice(data);
     });
     this.eventBus.on("load_order", (data) => {
       this.new_order(data);
@@ -2527,7 +2520,7 @@ export default {
       });
     });
     this.eventBus.on("load_return_invoice", (data) => {
-      this.new_invoice(data.invoice_doc);
+      this.load_invoice(data.invoice_doc);
       this.discount_amount = -data.return_doc.discount_amount;
       this.additional_discount_percentage =
         -data.return_doc.additional_discount_percentage;
@@ -2542,7 +2535,7 @@ export default {
     evntBus.$off("add_item");
     evntBus.$off("update_customer");
     evntBus.$off("fetch_customer_details");
-    evntBus.$off("new_invoice");
+    evntBus.$off("clear_invoice");
     evntBus.$off("set_offers");
     evntBus.$off("update_invoice_offers");
     evntBus.$off("update_invoice_coupons");

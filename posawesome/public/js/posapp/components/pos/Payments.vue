@@ -492,7 +492,7 @@ export default {
       this.is_cashback = true;
       this.sales_person = "";
 
-      this.eventBus.emit("new_invoice", "false");
+      this.eventBus.emit("clear_invoice");
       this.back_to_invoice();
     },
     submit_invoice(print) {

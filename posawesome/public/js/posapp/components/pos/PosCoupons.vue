@@ -20,7 +20,7 @@
           v-model:expanded="expanded" item-key="coupon" class="elevation-1" :items-per-page="itemsPerPage"
           hide-default-footer>
           <template v-slot:item.applied="{ item }">
-            <v-checkbox-btn v-model="item.applied" disabled></v-checkbox-btn>
+            <v-checkbox-btn :v-model="item.applied" disabled></v-checkbox-btn>
           </template>
         </v-data-table>
       </div>
