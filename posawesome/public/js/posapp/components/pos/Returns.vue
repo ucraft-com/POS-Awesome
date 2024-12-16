@@ -3,62 +3,32 @@
     <v-dialog v-model="invoicesDialog" max-width="800px" min-width="800px">
       <v-card>
         <v-card-title>
-          <span class="headline primary--text">{{
+          <span class="text-h5 text-primary">{{
             __('Select Return Invoice')
           }}</span>
         </v-card-title>
         <v-container>
           <v-row class="mb-4">
-            <v-text-field
-              color="primary"
-              :label="frappe._('Invoice ID')"
-              background-color="white"
-              hide-details
-              v-model="invoice_name"
-              dense
-              clearable
-              class="mx-4"
-            ></v-text-field>
-            <v-btn
-              text
-              class="ml-2"
-              color="primary"
-              dark
-              @click="search_invoices"
-              >{{ __('Search') }}</v-btn
-            >
+            <v-text-field color="primary" :label="frappe._('Invoice ID')" bg-color="white" hide-details
+              v-model="invoice_name" density="compact" clearable class="mx-4"></v-text-field>
+            <v-btn variant="text" class="ml-2" color="primary" theme="dark" @click="search_invoices">{{ __('Search')
+              }}</v-btn>
           </v-row>
           <v-row>
             <v-col cols="12" class="pa-1" v-if="dialog_data">
-              <template>
-                <v-data-table
-                  :headers="headers"
-                  :items="dialog_data"
-                  item-key="name"
-                  class="elevation-1"
-                  :single-select="singleSelect"
-                  show-select
-                  v-model="selected"
-                >
-                  <template v-slot:item.grand_total="{ item }">
-                    {{ currencySymbol(item.currency) }}
-                    {{ formtCurrency(item.grand_total) }}</template
-                  >
-                </v-data-table>
-              </template>
+              <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1" show-select
+                v-model="selected" select-strategy="single" return-object>
+                <template v-slot:item.grand_total="{ item }">
+                  {{ currencySymbol(item.currency) }}
+                  {{ formatCurrency(item.grand_total) }}</template>
+              </v-data-table>
             </v-col>
           </v-row>
         </v-container>
         <v-card-actions class="mt-4">
           <v-spacer></v-spacer>
-          <v-btn color="error mx-2" dark @click="close_dialog">Close</v-btn>
-          <v-btn
-            v-if="selected.length"
-            color="success"
-            dark
-            @click="submit_dialog"
-            >{{ __('Select') }}</v-btn
-          >
+          <v-btn color="error mx-2" theme="dark" @click="close_dialog">Close</v-btn>
+          <v-btn v-if="selected.length" color="success" theme="dark" @click="submit_dialog">{{ __('Select') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -66,7 +36,7 @@
 </template>
 
 <script>
-import { evntBus } from '../../bus';
+
 import format from '../../format';
 export default {
   mixins: [format],
@@ -79,25 +49,25 @@ export default {
     invoice_name: '',
     headers: [
       {
-        text: __('Customer'),
+        title: __('Customer'),
         value: 'customer',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Date'),
+        title: __('Date'),
         align: 'start',
         sortable: true,
         value: 'posting_date',
       },
       {
-        text: __('Invoice'),
+        title: __('Invoice'),
         value: 'name',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Amount'),
+        title: __('Amount'),
         value: 'grand_total',
         align: 'end',
         sortable: false,
@@ -147,13 +117,13 @@ export default {
         invoice_doc.return_against = return_doc.name;
         invoice_doc.customer = return_doc.customer;
         const data = { invoice_doc, return_doc };
-        evntBus.$emit('load_return_invoice', data);
+        this.eventBus.emit('load_return_invoice', data);
         this.invoicesDialog = false;
       }
     },
   },
   created: function () {
-    evntBus.$on('open_returns', (data) => {
+    this.eventBus.on('open_returns', (data) => {
       this.invoicesDialog = true;
       this.company = data;
       this.invoice_name = '';

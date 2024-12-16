@@ -1,12 +1,12 @@
 export default {
-    data () {
+    data() {
         return {
             float_precision: 2,
             currency_precision: 2
         };
     },
     methods: {
-        flt (value, precision, number_format, rounding_method) {
+        flt(value, precision, number_format, rounding_method) {
             if (!precision && precision != 0) {
                 precision = this.currency_precision || 2;
             }
@@ -15,7 +15,7 @@ export default {
             }
             return flt(value, precision, number_format, rounding_method);
         },
-        formtCurrency (value, precision) {
+        formatCurrency(value, precision) {
             const format = get_number_format(this.pos_profile?.currency);
             value = format_number(
                 value,
@@ -24,12 +24,12 @@ export default {
             );
             return value;
         },
-        formtFloat (value, precision) {
+        formatFloat(value, precision) {
             const format = get_number_format(this.pos_profile.currency);
             value = format_number(value, format, precision || this.float_precision || 2);
             return value;
         },
-        setFormatedCurrency (el, field_name, precision, no_negative = false, $event) {
+        setFormatedCurrency(el, field_name, precision, no_negative = false, $event) {
             let value = 0;
             try {
                 // make sure it is a number and positive
@@ -40,7 +40,7 @@ export default {
                 if (no_negative && value < 0) {
                     value = value * -1;
                 }
-                value = this.formtCurrency($event, precision);
+                value = this.formatCurrency($event, precision);
             } catch (e) {
                 console.error(e);
                 value = 0;
@@ -56,7 +56,7 @@ export default {
 
             return value;
         },
-        setFormatedFloat (el, field_name, precision, no_negative = false, $event) {
+        setFormatedFloat(el, field_name, precision, no_negative = false, $event) {
             let value = 0;
             try {
                 // make sure it is a number and positive
@@ -66,7 +66,7 @@ export default {
                 } else if (no_negative && value < 0) {
                     value = value * -1;
                 }
-                value = this.formtFloat($event, precision);
+                value = this.formatFloat($event, precision);
             } catch (e) {
                 console.error(e);
                 value = 0;
@@ -80,16 +80,16 @@ export default {
             }
             return value;
         },
-        currencySymbol (currency) {
+        currencySymbol(currency) {
             return get_currency_symbol(currency);
         },
-        isNumber (value) {
+        isNumber(value) {
             const pattern = /^-?(\d+|\d{1,3}(\.\d{3})*)(,\d+)?$/;
             return pattern.test(value) || "invalid number";
 
         }
     },
-    mounted () {
+    mounted() {
         this.float_precision =
             frappe.defaults.get_default('float_precision') || 2;
         this.currency_precision =

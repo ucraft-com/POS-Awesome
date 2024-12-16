@@ -3,60 +3,34 @@
     <v-dialog v-model="varaintsDialog" max-width="600px">
       <v-card min-height="500px">
         <v-card-title>
-          <span class="headline primary--text">Select Item</span>
+          <span class="text-h5 text-primary">Select Item</span>
           <v-spacer></v-spacer>
-          <v-btn color="error" dark @click="close_dialog">Close</v-btn>
+          <v-btn color="error" theme="dark" @click="close_dialog">Close</v-btn>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container v-if="parentItem">
             <div v-for="attr in parentItem.attributes" :key="attr.attribute">
-              <v-chip-group
-                v-model="filters[attr.attribute]"
-                active-class="green--text text--accent-4"
-                column
-              >
-                <v-chip
-                  v-for="value in attr.values"
-                  :key="value.abbr"
-                  :value="value.attribute_value"
-                  outlined
-                  label
-                  @click="updateFiltredItems"
-                >
+              <v-chip-group v-model="filters[attr.attribute]" selected-class="green--text text--accent-4" column>
+                <v-chip v-for="value in attr.values" :key="value.abbr" :value="value.attribute_value" variant="outlined"
+                  label @click="updateFiltredItems">
                   {{ value.attribute_value }}
                 </v-chip>
               </v-chip-group>
               <v-divider class="p-0 m-0"></v-divider>
             </div>
             <div>
-              <v-row dense class="overflow-y-auto" style="max-height: 500px">
-                <v-col
-                  v-for="(item, idx) in filterdItems"
-                  :key="idx"
-                  xl="2"
-                  lg="3"
-                  md="4"
-                  sm="4"
-                  cols="6"
-                  min-height="50"
-                >
+              <v-row density="default" class="overflow-y-auto" style="max-height: 500px">
+                <v-col v-for="(item, idx) in filterdItems" :key="idx" xl="2" lg="3" md="4" sm="4" cols="6"
+                  min-height="50">
                   <v-card hover="hover" @click="add_item(item)">
-                    <v-img
-                      :src="
-                        item.image ||
-                        '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'
-                      "
-                      class="white--text align-end"
-                      gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
-                      height="100px"
-                    >
-                      <v-card-text
-                        v-text="item.item_name"
-                        class="text-subtitle-2 px-1 pb-2"
-                      ></v-card-text>
+                    <v-img :src="item.image ||
+                      '/assets/posawesome/js/posapp/components/pos/placeholder-image.png'
+                      " class="text-white align-end" gradient="to bottom, rgba(0,0,0,.2), rgba(0,0,0,.7)"
+                      height="100px">
+                      <v-card-text v-text="item.item_name" class="text-subtitle-2 px-1 pb-2"></v-card-text>
                     </v-img>
                     <v-card-text class="text--primary pa-1">
-                      <div class="text-caption primary--text accent-3">
+                      <div class="text-caption text-primary accent-3">
                         {{ item.rate || 0 }} {{ item.currency || '' }}
                       </div>
                     </v-card-text>
@@ -72,7 +46,7 @@
 </template>
 
 <script>
-import { evntBus } from '../../bus';
+
 export default {
   data: () => ({
     varaintsDialog: false,
@@ -98,7 +72,7 @@ export default {
     close_dialog() {
       this.varaintsDialog = false;
     },
-    formtCurrency(value) {
+    formatCurrency(value) {
       value = parseFloat(value);
       return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
@@ -135,13 +109,13 @@ export default {
       });
     },
     add_item(item) {
-      evntBus.$emit('add_item', item);
+      this.eventBus.emit('add_item', item);
       this.close_dialog();
     },
   },
 
   created: function () {
-    evntBus.$on('open_variants_model', (item, items) => {
+    this.eventBus.on('open_variants_model', (item, items) => {
       this.varaintsDialog = true;
       this.parentItem = item || null;
       this.items = items;

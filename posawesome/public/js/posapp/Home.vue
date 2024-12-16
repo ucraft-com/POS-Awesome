@@ -37,7 +37,7 @@ export default {
   mounted() {
     this.remove_frappe_nav();
   },
-  updated() {},
+  updated() { },
   created: function () {
     setTimeout(() => {
       this.remove_frappe_nav();
