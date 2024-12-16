@@ -5,8 +5,8 @@
       <v-img src="/assets/posawesome/js/posapp/components/pos/pos.png" alt="POS Awesome" max-width="32" class="mr-2"
         color="primary"></v-img>
       <v-toolbar-title @click="go_desk" style="cursor: pointer" class="text-uppercase text-primary">
-        <span class="font-weight-light">ASA</span>
-        <span>Pay</span>
+        <span class="font-weight-light">POS</span>
+        <span>Awesome</span>
       </v-toolbar-title>
 
       <v-spacer></v-spacer>

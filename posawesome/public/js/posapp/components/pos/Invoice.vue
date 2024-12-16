@@ -40,9 +40,10 @@
       <v-row align="center" class="items px-2 py-1 mt-0 pt-0" v-if="pos_profile.posa_use_delivery_charges">
         <v-col cols="8" class="pb-0 mb-0 pr-0 pt-0">
           <v-autocomplete density="compact" clearable auto-select-first variant="outlined" color="primary"
-            :label="frappe._('Delivery Charges')" v-model="selcted_delivery_charges" :items="delivery_charges"
-            item-title="name" return-object bg-color="white" :no-data-text="__('Charges not found')" hide-details
-            :customFilter="deliveryChargesFilter" :disabled="readonly" @update:model-value="update_delivery_charges()">
+            :label="frappe._('Delivery Charges')" v-model="selected_delivery_charge" :items="delivery_charges"
+            item-title="name" item-value="name" return-object bg-color="white" :no-data-text="__('Charges not found')"
+            hide-details :customFilter="deliveryChargesFilter" :disabled="readonly"
+            @update:model-value="update_delivery_charges()">
             <template v-slot:item="{ props, item }">
               <v-list-item v-bind="props">
                 <v-list-item-title class="text-primary text-subtitle-1" v-html="item.raw.name"></v-list-item-title>
@@ -441,7 +442,7 @@ export default {
       new_line: false,
       delivery_charges: [],
       delivery_charges_rate: 0,
-      selcted_delivery_charges: {},
+      selected_delivery_charge: {},
       invoice_posting_date: false,
       posting_date: frappe.datetime.nowdate(),
       items_headers: [
@@ -659,7 +660,7 @@ export default {
       this.discount_amount = 0;
       this.additional_discount_percentage = 0;
       this.delivery_charges_rate = 0;
-      this.selcted_delivery_charges = {};
+      this.selected_delivery_charge = {};
       this.eventBus.emit("set_customer_readonly", false);
       this.invoiceType = this.pos_profile.posa_default_sales_order
         ? "Order"
@@ -849,7 +850,7 @@ export default {
       doc.return_against = this.invoice_doc.return_against;
       doc.posa_offers = this.posa_offers;
       doc.posa_coupons = this.posa_coupons;
-      doc.posa_delivery_charges = this.selcted_delivery_charges.name;
+      doc.posa_delivery_charges = this.selected_delivery_charge.name;
       doc.posa_delivery_charges_rate = this.delivery_charges_rate || 0;
       doc.posting_date = this.posting_date;
       return doc;
@@ -2450,11 +2451,11 @@ export default {
       ) {
         this.delivery_charges = [];
         this.delivery_charges_rate = 0;
-        this.selcted_delivery_charges = {};
+        this.selected_delivery_charge = {};
         return;
       }
       this.delivery_charges_rate = 0;
-      this.selcted_delivery_charges = {};
+      this.selected_delivery_charge = {};
       frappe.call({
         method:
           "posawesome.posawesome.api.posapp.get_applicable_delivery_charges",
@@ -2463,10 +2464,12 @@ export default {
           pos_profile: this.pos_profile.name,
           customer: this.customer,
         },
-        async: true,
+        async: false,
         callback: function (r) {
           if (r.message) {
-            vm.delivery_charges = r.message;
+            if (r.message?.length) {
+              vm.delivery_charges = r.message;
+            }
           }
         },
       });
@@ -2478,8 +2481,9 @@ export default {
       return textOne.indexOf(searchText) > -1;
     },
     update_delivery_charges() {
-      if (this.selcted_delivery_charges) {
-        this.delivery_charges_rate = this.selcted_delivery_charges.rate;
+      console.log(this.selected_delivery_charge)
+      if (this.selected_delivery_charge) {
+        this.delivery_charges_rate = this.selected_delivery_charge.rate;
       } else {
         this.delivery_charges_rate = 0;
       }

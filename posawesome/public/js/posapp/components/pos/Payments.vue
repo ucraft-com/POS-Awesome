@@ -298,7 +298,7 @@
         <v-col cols="6">
           <v-btn block size="large" color="primary" theme="dark" @click="submit" :disabled="vaildatPayment">{{
             __("Submit")
-            }}</v-btn>
+          }}</v-btn>
         </v-col>
         <v-col cols="6" class="pl-1">
           <v-btn block size="large" color="success" theme="dark" @click="submit(undefined, false, true)"
@@ -316,7 +316,7 @@
           <v-card-title>
             <span class="text-h5 text-primary">{{
               __("Confirm Mobile Number")
-            }}</span>
+              }}</span>
           </v-card-title>
           <v-card-text class="pa-0">
             <v-container>
@@ -328,10 +328,10 @@
             <v-spacer></v-spacer>
             <v-btn color="error" theme="dark" @click="phone_dialog = false">{{
               __("Close")
-            }}</v-btn>
+              }}</v-btn>
             <v-btn color="primary" theme="dark" @click="request_payment">{{
               __("Request")
-            }}</v-btn>
+              }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -486,15 +486,9 @@ export default {
         frappe.utils.play_sound("error");
         return;
       }
+      this.is_sucessful_invoice = this.submit_invoice(print);
 
-      this.submit_invoice(print);
-      this.customer_credit_dict = [];
-      this.redeem_customer_credit = false;
-      this.is_cashback = true;
-      this.sales_person = "";
 
-      this.eventBus.emit("clear_invoice");
-      this.back_to_invoice();
     },
     submit_invoice(print) {
       let totalPayedAmount = 0;
@@ -527,22 +521,37 @@ export default {
           data: data,
           invoice: this.invoice_doc,
         },
-        async: true,
+        async: false,
         callback: function (r) {
-          if (r.message) {
-            if (print) {
-              vm.load_print_page();
-            }
-            this.eventBus.emit("set_last_invoice", vm.invoice_doc.name);
-            this.eventBus.emit("show_message", {
-              title: `Invoice ${r.message.name} is Submited`,
-              color: "success",
+          if (!r?.message) {
+            vm.eventBus.emit("show_message", {
+              title: `Error submitting invoice`,
+              color: "error",
             });
-            frappe.utils.play_sound("submit");
-            this.addresses = [];
+            return;
           }
-        },
+          if (print) {
+            vm.load_print_page();
+          }
+          vm.customer_credit_dict = [];
+          vm.redeem_customer_credit = false;
+          vm.is_cashback = true;
+          vm.sales_person = "";
+
+          vm.eventBus.emit("set_last_invoice", vm.invoice_doc.name);
+          vm.eventBus.emit("show_message", {
+            title: `Invoice ${r.message.name} is Submited`,
+            color: "success",
+          });
+          //s
+          frappe.utils.play_sound("submit");
+          vm.addresses = [];
+          vm.eventBus.emit("clear_invoice");
+          vm.back_to_invoice();
+          return;
+        }
       });
+      console.log(this.is_sucessful_invoice)
     },
     set_full_amount(idx) {
       this.invoice_doc.payments.forEach((payment) => {
