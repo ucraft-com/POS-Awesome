@@ -99,7 +99,7 @@ export default {
           if (r.message) {
             const res = r.message;
             if (res.msg != 'Apply' || !res.coupon) {
-              this.eventBus.emit('show_message', {
+              vm.eventBus.emit('show_message', {
                 text: res.msg,
                 color: 'error',
               });

@@ -28,7 +28,7 @@
 
                 <v-list-item-title>{{
                   __('Close Shift')
-                  }}</v-list-item-title>
+                }}</v-list-item-title>
 
               </v-list-item>
               <v-list-item @click="print_last_invoice" v-if="
@@ -41,7 +41,7 @@
 
                 <v-list-item-title>{{
                   __('Print Last Invoice')
-                  }}</v-list-item-title>
+                }}</v-list-item-title>
 
               </v-list-item>
               <v-divider class="my-0"></v-divider>
