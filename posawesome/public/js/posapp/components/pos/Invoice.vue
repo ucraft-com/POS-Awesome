@@ -5,7 +5,7 @@
         <v-card-title class="text-h5">
           <span class="text-h5 text-primary">{{
             __("Cancel Sale ?")
-          }}</span>
+            }}</span>
         </v-card-title>
         <v-card-text>
           This would cancel and delete the current sale. To save it as Draft, click the "Save and Clear" instead.
@@ -80,7 +80,7 @@
           hide-default-footer>
           <template v-slot:item.qty="{ item }">{{
             formatFloat(item.qty)
-            }}</template>
+          }}</template>
           <template v-slot:item.rate="{ item }">{{ currencySymbol(pos_profile.currency) }}
             {{ formatCurrency(item.rate) }}</template>
           <template v-slot:item.amount="{ item }">{{ currencySymbol(pos_profile.currency) }}
@@ -377,7 +377,7 @@
             <v-col cols="6" class="pa-1">
               <v-btn block class="pa-0" color="warning" theme="dark" @click="get_draft_invoices">{{
                 __("Load Draft sales")
-              }}</v-btn>
+                }}</v-btn>
             </v-col>
             <v-col v-if="pos_profile.custom_allow_select_sales_order === 1" cols="6" class="pa-1">
               <v-btn block class="pa-0" color="info" theme="dark" @click="get_draft_orders">{{ __("Select S.O")
@@ -442,7 +442,7 @@ export default {
       new_line: false,
       delivery_charges: [],
       delivery_charges_rate: 0,
-      selected_delivery_charge: {},
+      selected_delivery_charge: "",
       invoice_posting_date: false,
       posting_date: frappe.datetime.nowdate(),
       items_headers: [
@@ -660,7 +660,7 @@ export default {
       this.discount_amount = 0;
       this.additional_discount_percentage = 0;
       this.delivery_charges_rate = 0;
-      this.selected_delivery_charge = {};
+      this.selected_delivery_charge = "";
       this.eventBus.emit("set_customer_readonly", false);
       this.invoiceType = this.pos_profile.posa_default_sales_order
         ? "Order"
@@ -2451,11 +2451,11 @@ export default {
       ) {
         this.delivery_charges = [];
         this.delivery_charges_rate = 0;
-        this.selected_delivery_charge = {};
+        this.selected_delivery_charge = "";
         return;
       }
       this.delivery_charges_rate = 0;
-      this.selected_delivery_charge = {};
+      this.selected_delivery_charge = "";
       frappe.call({
         method:
           "posawesome.posawesome.api.posapp.get_applicable_delivery_charges",
@@ -2468,6 +2468,7 @@ export default {
         callback: function (r) {
           if (r.message) {
             if (r.message?.length) {
+              console.log(r.message)
               vm.delivery_charges = r.message;
             }
           }
@@ -2476,12 +2477,13 @@ export default {
     },
     deliveryChargesFilter(itemText, queryText, itemRow) {
       const item = itemRow.raw;
+      console.log("dl charges", item)
       const textOne = item.name.toLowerCase();
       const searchText = queryText.toLowerCase();
       return textOne.indexOf(searchText) > -1;
     },
     update_delivery_charges() {
-      console.log(this.selected_delivery_charge)
+ 
       if (this.selected_delivery_charge) {
         this.delivery_charges_rate = this.selected_delivery_charge.rate;
       } else {
