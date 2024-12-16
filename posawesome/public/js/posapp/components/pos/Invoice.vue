@@ -1049,14 +1049,14 @@ export default {
     async show_payment() {
       if (!this.customer) {
         this.eventBus.emit("show_message", {
-          title: __(`There is no Customer !`),
+          title: __(`Select a customer`),
           color: "error",
         });
         return;
       }
       if (!this.items.length) {
         this.eventBus.emit("show_message", {
-          title: __(`There is no Items !`),
+          title: __(`Select items to sell`),
           color: "error",
         });
         return;
@@ -2471,7 +2471,8 @@ export default {
         },
       });
     },
-    deliveryChargesFilter(item, queryText, itemText) {
+    deliveryChargesFilter(itemText, queryText, itemRow) {
+      const item = itemRow.raw;
       const textOne = item.name.toLowerCase();
       const searchText = queryText.toLowerCase();
       return textOne.indexOf(searchText) > -1;

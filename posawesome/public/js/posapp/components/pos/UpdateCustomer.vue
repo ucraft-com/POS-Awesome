@@ -5,10 +5,10 @@
         <v-card-title>
           <span v-if="customer_id" class="text-h5 text-primary">{{
             __('Update Customer')
-            }}</span>
+          }}</span>
           <span v-else class="text-h5 text-primary">{{
             __('Create Customer')
-            }}</span>
+          }}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
@@ -75,10 +75,10 @@
           <v-spacer></v-spacer>
           <v-btn color="error" theme="dark" @click="close_dialog">{{
             __('Close')
-            }}</v-btn>
+          }}</v-btn>
           <v-btn color="success" theme="dark" @click="submit_dialog">{{
             __('Submit')
-            }}</v-btn>
+          }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -97,7 +97,7 @@ export default {
     mobile_no: '',
     email_id: '',
     referral_code: '',
-    birthday: null,
+    birthday: new Date(),
     birthday_menu: false,
     group: '',
     groups: [],
@@ -214,7 +214,7 @@ export default {
           mobile_no: this.mobile_no,
           email_id: this.email_id,
           referral_code: this.referral_code,
-          birthday: this.birthday,
+          birthday: frappe.format(this.birthday, { fieldtype: 'Date' }),
           customer_group: this.group,
           territory: this.territory,
           customer_type: this.customer_type,

@@ -148,7 +148,7 @@
                   variant="outlined" density="compact" bg-color="white" clearable color="primary" hide-details
                   v-bind="props"></v-text-field>
               </template>
-              <v-date-picker v-model="invoice_doc.posa_delivery_date" no-title scrollable color="primary"
+              <v-date-picker :v-model="new Date(invoice_doc.posa_delivery_date)" no-title scrollable color="primary"
                 :min="frappe.datetime.now_date()" @input="order_delivery_date = false">
               </v-date-picker>
             </v-menu>
@@ -226,10 +226,10 @@
               :label="frappe._('Write Off Difference Amount')"></v-switch>
           </v-col>
           <v-col cols="6" v-if="pos_profile.posa_allow_credit_sale && !invoice_doc.is_return">
-            <v-switch v-model="is_credit_sale" flat :label="frappe._('Is Credit Sale')" class="my-0 py-0"></v-switch>
+            <v-switch v-model="is_credit_sale" :label="frappe._('Credit Sale?')"></v-switch>
           </v-col>
           <v-col cols="6" v-if="invoice_doc.is_return && pos_profile.use_cashback">
-            <v-switch v-model="is_cashback" flat :label="frappe._('Is Cashback')" class="my-0 py-0"></v-switch>
+            <v-switch v-model="is_cashback" flat :label="frappe._('Cashback?')" class="my-0 py-0"></v-switch>
           </v-col>
           <v-col cols="6" v-if="is_credit_sale">
             <v-menu ref="date_menu" v-model="date_menu" :close-on-content-click="false" transition="scale-transition">
@@ -237,7 +237,7 @@
                 <v-text-field v-model="invoice_doc.due_date" :label="frappe._('Due Date')" readonly variant="outlined"
                   density="compact" hide-details v-bind="props" color="primary"></v-text-field>
               </template>
-              <v-date-picker v-model="invoice_doc.due_date" no-title scrollable color="primary"
+              <v-date-picker v-model="credit_sales_due_date" no-title scrollable color="primary"
                 :min="frappe.datetime.now_date()" @input="date_menu = false">
               </v-date-picker>
             </v-menu>
@@ -272,7 +272,7 @@
         <v-divider></v-divider>
         <v-row class="pb-0 mb-2" align="start">
           <v-col cols="12">
-            <v-autocomplete density="compact" clearable auto-select-first variant="outlined" color="primary"
+            <v-autocomplete density="compact" clearable variant="outlined" color="primary"
               :label="frappe._('Sales Person')" v-model="sales_person" :items="sales_persons"
               item-title="sales_person_name" item-value="name" bg-color="white"
               :no-data-text="__('Sales Person not found')" hide-details :customFilter="salesPersonFilter"
@@ -298,7 +298,7 @@
         <v-col cols="6">
           <v-btn block size="large" color="primary" theme="dark" @click="submit" :disabled="vaildatPayment">{{
             __("Submit")
-          }}</v-btn>
+            }}</v-btn>
         </v-col>
         <v-col cols="6" class="pl-1">
           <v-btn block size="large" color="success" theme="dark" @click="submit(undefined, false, true)"
@@ -316,7 +316,7 @@
           <v-card-title>
             <span class="text-h5 text-primary">{{
               __("Confirm Mobile Number")
-              }}</span>
+            }}</span>
           </v-card-title>
           <v-card-text class="pa-0">
             <v-container>
@@ -328,10 +328,10 @@
             <v-spacer></v-spacer>
             <v-btn color="error" theme="dark" @click="phone_dialog = false">{{
               __("Close")
-              }}</v-btn>
+            }}</v-btn>
             <v-btn color="primary" theme="dark" @click="request_payment">{{
               __("Request")
-              }}</v-btn>
+            }}</v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -349,6 +349,7 @@ export default {
     pos_profile: "",
     invoice_doc: "",
     loyalty_amount: 0,
+    credit_sales_due_date: new Date(frappe.datetime.now_date()),
     is_credit_sale: 0,
     is_write_off_change: 0,
     date_menu: false,
@@ -409,7 +410,7 @@ export default {
       }
 
       if (
-        !this.pos_profile.posa_allow_partial_payment &&
+        !this.is_credit_sale && !this.pos_profile.posa_allow_partial_payment &&
         this.total_payments <
         (this.invoice_doc.rounded_total || this.invoice_doc.grand_total)
       ) {
@@ -726,7 +727,8 @@ export default {
         },
       });
     },
-    salesPersonFilter(item, queryText, itemText) {
+    salesPersonFilter(itemText, queryText, itemRow) {
+      const item = itemRow.raw;
       const textOne = item.sales_person_name
         ? item.sales_person_name.toLowerCase()
         : "";
@@ -1075,12 +1077,16 @@ export default {
       }
     },
     is_credit_sale(value) {
-      if (value == 1) {
+      if (value) {
         this.invoice_doc.payments.forEach((payment) => {
           payment.amount = 0;
           payment.base_amount = 0;
         });
       }
+    },
+    credit_sales_due_date(value) {
+      this.invoice_doc.due_date = frappe.datetime.get_datetime_as_string(value)
+      console.log(this.invoice_doc)
     },
     is_write_off_change(value) {
       if (value == 1) {
