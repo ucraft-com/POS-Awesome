@@ -1,0 +1,389 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:title",
+ "creation": "2021-06-06 14:05:24.843820",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "applicability_section",
+  "title",
+  "description",
+  "column_break_4",
+  "disable",
+  "section_break_3",
+  "apply_on",
+  "offer",
+  "company",
+  "pos_profile",
+  "warehouse",
+  "column_break_8",
+  "item",
+  "item_group",
+  "brand",
+  "valid_from",
+  "valid_upto",
+  "coupon_based",
+  "auto",
+  "quantity_and_amount_section",
+  "min_qty",
+  "max_qty",
+  "column_break_16",
+  "min_amt",
+  "max_amt",
+  "apply_for_section",
+  "apply_type",
+  "replace_item",
+  "replace_cheapest_item",
+  "column_break_15",
+  "apply_item_code",
+  "apply_item_group",
+  "less_then",
+  "product_discount_scheme_section",
+  "given_qty",
+  "price_discount_scheme_section",
+  "discount_type",
+  "column_break_26",
+  "rate",
+  "discount_amount",
+  "discount_percentage",
+  "loyalty_point_scheme_section",
+  "loyalty_program",
+  "loyalty_points"
+ ],
+ "fields": [
+  {
+   "fieldname": "applicability_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disable",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Disable"
+  },
+  {
+   "default": "Item Code",
+   "fieldname": "apply_on",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Qualifying Transaction / Item",
+   "options": "\nItem Code\nItem Group\nBrand\nTransaction",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pos_profile",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "POS Profile",
+   "options": "POS Profile"
+  },
+  {
+   "fetch_from": "pos_profile.warehouse",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Apply Rule On Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Apply Rule On Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "label": "Apply Rule On Brand",
+   "options": "Brand"
+  },
+  {
+   "default": "0",
+   "fieldname": "min_qty",
+   "fieldtype": "Float",
+   "label": "Min Quantity"
+  },
+  {
+   "default": "0",
+   "fieldname": "max_qty",
+   "fieldtype": "Float",
+   "label": "Max Quantity"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "min_amt",
+   "fieldtype": "Float",
+   "label": "Min Amount"
+  },
+  {
+   "fieldname": "max_amt",
+   "fieldtype": "Float",
+   "label": "Max Amount"
+  },
+  {
+   "default": "Today",
+   "fieldname": "valid_from",
+   "fieldtype": "Date",
+   "label": "Valid From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "valid_upto",
+   "fieldtype": "Date",
+   "label": "Valid Upto"
+  },
+  {
+   "fieldname": "apply_for_section",
+   "fieldtype": "Section Break",
+   "label": "Apply For"
+  },
+  {
+   "fieldname": "apply_type",
+   "fieldtype": "Select",
+   "label": "Apply Type",
+   "options": "\nItem Code\nItem Group"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "apply_item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "apply_item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "price_discount_scheme_section",
+   "fieldtype": "Section Break",
+   "label": "Price Discount Scheme "
+  },
+  {
+   "fieldname": "discount_type",
+   "fieldtype": "Select",
+   "label": "Discount Type",
+   "options": "\nRate\nDiscount Percentage\nDiscount Amount"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Float",
+   "label": "Rate"
+  },
+  {
+   "fieldname": "discount_amount",
+   "fieldtype": "Float",
+   "label": "Discount Amount"
+  },
+  {
+   "fieldname": "discount_percentage",
+   "fieldtype": "Float",
+   "label": "Discount Percentage"
+  },
+  {
+   "fieldname": "product_discount_scheme_section",
+   "fieldtype": "Section Break",
+   "label": "Product Discount Scheme"
+  },
+  {
+   "fieldname": "loyalty_point_scheme_section",
+   "fieldtype": "Section Break",
+   "label": "Loyalty Point Scheme"
+  },
+  {
+   "fieldname": "loyalty_program",
+   "fieldtype": "Link",
+   "label": "Default Loyalty Program",
+   "options": "Loyalty Program"
+  },
+  {
+   "fieldname": "loyalty_points",
+   "fieldtype": "Int",
+   "label": "Loyalty Points"
+  },
+  {
+   "fieldname": "given_qty",
+   "fieldtype": "Float",
+   "label": "Given Quantity"
+  },
+  {
+   "fieldname": "quantity_and_amount_section",
+   "fieldtype": "Section Break",
+   "label": "Quantity and Amount Conditions"
+  },
+  {
+   "fieldname": "offer",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Promo Type",
+   "options": "Item Price\nGive Product\nGrand Total\nLoyalty Point",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto",
+   "fieldtype": "Check",
+   "label": "Auto Apply"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "replace_item",
+   "fieldtype": "Check",
+   "label": "Replace Same Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "replace_cheapest_item",
+   "fieldtype": "Check",
+   "label": "Replace Cheapest Item"
+  },
+  {
+   "fieldname": "less_then",
+   "fieldtype": "Float",
+   "label": "Item Rate Should Less Then"
+  },
+  {
+   "default": "0",
+   "fieldname": "coupon_based",
+   "fieldtype": "Check",
+   "label": "Coupon Code Based"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "modified": "2021-07-25 17:09:55.634113",
+ "modified_by": "Administrator",
+ "module": "POSAwesome",
+ "name": "POS Offer",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Master Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "show_preview_popup": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
