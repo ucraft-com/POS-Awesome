@@ -3,67 +3,36 @@
     <v-dialog v-model="dialog" max-width="800px" min-width="800px">
       <v-card>
         <v-card-title>
-          <span class="headline primary--text">{{ __('Select Payment') }}</span>
+          <span class="text-h5 text-primary">{{ __('Select Payment') }}</span>
         </v-card-title>
         <v-container>
           <v-row class="mb-4">
-            <v-text-field
-              color="primary"
-              :label="frappe._('Full Name')"
-              background-color="white"
-              hide-details
-              v-model="full_name"
-              dense
-              clearable
-              class="mx-4"
-            ></v-text-field>
-            <v-text-field
-              color="primary"
-              :label="frappe._('Mobile No')"
-              background-color="white"
-              hide-details
-              v-model="mobile_no"
-              dense
-              clearable
-              class="mx-4"
-            ></v-text-field>
-            <v-btn text class="ml-2" color="primary" dark @click="search">{{
+            <v-text-field color="primary" :label="frappe._('Full Name')" bg-color="white" hide-details
+              v-model="full_name" density="compact" clearable class="mx-4"></v-text-field>
+            <v-text-field color="primary" :label="frappe._('Mobile No')" bg-color="white" hide-details
+              v-model="mobile_no" density="compact" clearable class="mx-4"></v-text-field>
+            <v-btn variant="text" class="ml-2" color="primary" theme="dark" @click="search">{{
               __('Search')
-            }}</v-btn>
+              }}</v-btn>
           </v-row>
           <v-row>
             <v-col cols="12" class="pa-1" v-if="dialog_data">
-              <template>
-                <v-data-table
-                  :headers="headers"
-                  :items="dialog_data"
-                  item-key="name"
-                  class="elevation-1"
-                  :single-select="singleSelect"
-                  show-select
-                  v-model="selected"
-                >
-                  <template v-slot:item.amount="{ item }">{{
-                    formtCurrency(item.amount)
+              <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1" show-select
+                v-model="selected" return-object select-strategy="single">
+                <template v-slot:item.amount="{ item }">{{
+                  formatCurrency(item.amount)
                   }}</template>
-                  <template v-slot:item.posting_date="{ item }">{{
-                    item.posting_date.slice(0, 16)
+                <template v-slot:item.posting_date="{ item }">{{
+                  item.posting_date.slice(0, 16)
                   }}</template>
-                </v-data-table>
-              </template>
+              </v-data-table>
             </v-col>
           </v-row>
         </v-container>
         <v-card-actions class="mt-4">
           <v-spacer></v-spacer>
-          <v-btn color="error mx-2" dark @click="close_dialog">Close</v-btn>
-          <v-btn
-            v-if="selected.length"
-            color="success"
-            dark
-            @click="submit_dialog"
-            >{{ __('Submit') }}</v-btn
-          >
+          <v-btn color="error mx-2" theme="dark" @click="close_dialog">Close</v-btn>
+          <v-btn v-if="selected.length" color="success" theme="dark" @click="submit_dialog">{{ __('Submit') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -71,7 +40,7 @@
 </template>
 
 <script>
-import { evntBus } from '../../bus';
+
 export default {
   data: () => ({
     dialog: false,
@@ -85,25 +54,25 @@ export default {
     mobile_no: '',
     headers: [
       {
-        text: __('Full Name'),
+        title: __('Full Name'),
         value: 'full_name',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Mobile No'),
+        title: __('Mobile No'),
         value: 'mobile_no',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Amount'),
+        title: __('Amount'),
         value: 'amount',
         align: 'start',
         sortable: true,
       },
       {
-        text: __('Date'),
+        title: __('Date'),
         align: 'start',
         sortable: true,
         value: 'posting_date',
@@ -139,7 +108,7 @@ export default {
       });
     },
     submit_dialog() {
-      const vm = this;
+      var vm = this;
       if (this.selected.length > 0) {
         const selected_payment = this.selected[0].name;
         frappe.call({
@@ -151,20 +120,20 @@ export default {
           async: false,
           callback: function (r) {
             if (!r.exc) {
-              evntBus.$emit('set_mpesa_payment', r.message);
+              vm.eventBus.emit('set_mpesa_payment', r.message);
               vm.dialog = false;
             }
           },
         });
       }
     },
-    formtCurrency(value) {
+    formatCurrency(value) {
       value = parseFloat(value);
       return value.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
     },
   },
   created: function () {
-    evntBus.$on('open_mpesa_payments', (data) => {
+    this.eventBus.on('open_mpesa_payments', (data) => {
       this.dialog = true;
       this.full_name = '';
       this.mobile_no = '';
@@ -175,7 +144,7 @@ export default {
       this.selected = [];
     });
   },
-  beforeDestroy() {
+  beforeUnmount() {
     evntBus.$off('open_mpesa_payments');
   },
 };

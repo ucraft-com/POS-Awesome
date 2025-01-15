@@ -2,71 +2,42 @@
   <v-row justify="center">
     <v-dialog v-model="draftsDialog" max-width="900px">
       <!-- <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark v-bind="attrs" v-on="on">Open Dialog</v-btn>
+              <v-btn color="primary" theme="dark" v-bind="attrs" v-on="on">Open Dialog</v-btn>
             </template>-->
       <v-card>
         <v-card-title>
-          <span class="headline primary--text">{{
+          <span class="text-h5 text-primary">{{
             __("Select Sales Orders")
           }}</span>
         </v-card-title>
         <v-card-text class="pa-0">
           <v-container>
             <v-row class="mb-4">
-              <v-text-field
-                color="primary"
-                :label="frappe._('Order ID')"
-                background-color="white"
-                hide-details
-                v-model="order_name"
-                dense
-                clearable
-                class="mx-4"
-              ></v-text-field>
-              <v-btn
-                text
-                class="ml-2"
-                color="primary"
-                dark
-                @click="search_orders"
-                >{{ __("Search") }}</v-btn
-              >
+              <v-text-field color="primary" :label="frappe._('Order ID')" bg-color="white" hide-details
+                v-model="order_name" density="compact" clearable class="mx-4"></v-text-field>
+              <v-btn variant="text" class="ml-2" color="primary" theme="dark" @click="search_orders">{{ __("Search")
+                }}</v-btn>
             </v-row>
             <v-row no-gutters>
               <v-col cols="12" class="pa-1">
-                <template>
-                  <v-data-table
-                    :headers="headers"
-                    :items="dialog_data"
-                    item-key="name"
-                    class="elevation-1"
-                    :single-select="singleSelect"
-                    show-select
-                    v-model="selected"
-                  >
-                    <!-- <template v-slot:item.posting_time="{ item }">
+                <v-data-table :headers="headers" :items="dialog_data" item-key="name" class="elevation-1" show-select
+                  v-model="selected" return-object select-strategy="single">
+                  <!-- <template v-slot:item.posting_time="{ item }">
                           {{ item.posting_time.split(".")[0] }}
                         </template> -->
-                    <template v-slot:item.grand_total="{ item }">
-                      {{ currencySymbol(item.currency) }}
-                      {{ formtCurrency(item.grand_total) }}
-                    </template>
-                  </v-data-table>
-                </template>
+                  <template v-slot:item.grand_total="{ item }">
+                    {{ currencySymbol(item.currency) }}
+                    {{ formatCurrency(item.grand_total) }}
+                  </template>
+                </v-data-table>
               </v-col>
             </v-row>
           </v-container>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="error" dark @click="close_dialog">Close</v-btn>
-          <v-btn
-            v-if="selected.length"
-            color="success"
-            dark
-            @click="submit_dialog"
-            >Select</v-btn
-          >
+          <v-btn color="error" theme="dark" @click="close_dialog">Close</v-btn>
+          <v-btn v-if="selected.length" color="success" theme="dark" @click="submit_dialog">Select</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -74,7 +45,7 @@
 </template>
 
 <script>
-import { evntBus } from "../../bus";
+
 import format from "../../format";
 export default {
   // props: ["draftsDialog"],
@@ -88,32 +59,32 @@ export default {
     order_name: "",
     headers: [
       {
-        text: __("Customer"),
-        value: "customer_name",
+        title: __("Customer"),
+        key: "customer_name",
         align: "start",
         sortable: true,
       },
       {
-        text: __("Date"),
+        title: __("Date"),
         align: "start",
         sortable: true,
-        value: "transaction_date",
+        key: "transaction_date",
       },
       //   {
-      //     text: __("Time"),
+      //     title: __("Time"),
       //     align: "start",
       //     sortable: true,
-      //     value: "posting_time",
+      //     key: "posting_time",
       //   },
       {
-        text: __("Order"),
-        value: "name",
+        title: __("Order"),
+        key: "name",
         align: "start",
         sortable: true,
       },
       {
-        text: __("Amount"),
-        value: "grand_total",
+        title: __("Amount"),
+        key: "grand_total",
         align: "end",
         sortable: false,
       },
@@ -190,7 +161,7 @@ export default {
             }
           }
         }
-        evntBus.$emit("load_order", this.selected[0]);
+        this.eventBus.emit("load_order", this.selected[0]);
         this.draftsDialog = false;
         frappe.call({
           method: "posawesome.posawesome.api.posapp.delete_sales_invoice",
@@ -207,7 +178,7 @@ export default {
     },
   },
   created: function () {
-    evntBus.$on("open_orders", (data) => {
+    this.eventBus.on("open_orders", (data) => {
       this.clearSelected();
       this.draftsDialog = true;
       this.dialog_data = data;
@@ -215,7 +186,7 @@ export default {
     });
   },
   mounted() {
-    evntBus.$on("register_pos_profile", (data) => {
+    this.eventBus.on("register_pos_profile", (data) => {
       this.pos_profile = data.pos_profile;
     });
   },

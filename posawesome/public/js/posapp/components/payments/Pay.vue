@@ -2,10 +2,8 @@
   <div fluid>
     <v-row v-show="!dialog">
       <v-col md="8" cols="12" class="pb-2 pr-0">
-        <v-card
-          class="main mx-auto grey lighten-5 mt-3 p-3 pb-16 overflow-y-auto"
-          style="max-height: 94vh; height: 94vh"
-        >
+        <v-card class="main mx-auto bg-grey-lighten-5 mt-3 p-3 pb-16 overflow-y-auto"
+          style="max-height: 94vh; height: 94vh">
           <Customer></Customer>
           <v-divider></v-divider>
           <div>
@@ -13,11 +11,9 @@
               <v-col md="7" cols="12">
                 <p>
                   <strong>{{ __("Invoices") }}</strong>
-                  <span v-if="total_outstanding_amount" class="primary--text"
-                    >{{ __("- Total Outstanding") }} :
+                  <span v-if="total_outstanding_amount" class="text-primary">{{ __("- Total Outstanding") }} :
                     {{ currencySymbol(pos_profile.currency) }}
-                    {{ formtCurrency(total_outstanding_amount) }}</span
-                  >
+                    {{ formatCurrency(total_outstanding_amount) }}</span>
                 </p>
               </v-col>
               <v-col md="5" cols="12">
@@ -25,74 +21,48 @@
                   <span>{{ __("Total Selected :") }}</span>
                   <span>
                     {{ currencySymbol(pos_profile.currency) }}
-                    {{ formtCurrency(total_selected_invoices) }}
+                    {{ formatCurrency(total_selected_invoices) }}
                   </span>
                 </p>
               </v-col>
             </v-row>
             <v-row align="center" no-gutters class="mb-1">
               <v-col md="4" cols="12">
-                <v-select
-                  dense
-                  outlined
-                  hide-details
-                  clearable
-                  background-color="white"
-                  v-model="pos_profile_search"
-                  :items="pos_profiles_list"
-                  item-value="name"
-                  label="Select POS Profile"
-                ></v-select>
+                <v-select density="compact" variant="outlined" hide-details clearable bg-color="white"
+                  v-model="pos_profile_search" :items="pos_profiles_list" item-value="name"
+                  label="Select POS Profile"></v-select>
               </v-col>
               <v-col> </v-col>
               <v-col md="3" cols="12">
-                <v-btn
-                  block
-                  color="warning"
-                  dark
-                  @click="get_outstanding_invoices"
-                  >{{ __("Search") }}</v-btn
-                >
+                <v-btn block color="warning" theme="dark" @click="get_outstanding_invoices">{{ __("Search") }}</v-btn>
               </v-col>
             </v-row>
-            <v-data-table
-              :headers="invoices_headers"
-              :items="outstanding_invoices"
-              item-key="name"
-              class="elevation-1 mt-0"
-              show-select
-              v-model="selected_invoices"
-              :loading="invoices_loading"
-              checkbox-color="primary"
-              @item-selected="onInvoiceSelected"
-            >
+            <v-data-table :headers="invoices_headers" :items="outstanding_invoices" item-key="name"
+              class="elevation-1 mt-0" show-select v-model="selected_invoices" :loading="invoices_loading"
+              checkbox-color="primary" @item-selected="onInvoiceSelected">
               <template v-slot:item.grand_total="{ item }">
                 {{ currencySymbol(item.currency) }}
-                {{ formtCurrency(item.grand_total) }}
+                {{ formatCurrency(item.grand_total) }}
               </template>
               <template v-slot:item.outstanding_amount="{ item }">
-                <span class="primary--text"
-                  >{{ currencySymbol(item.currency) }}
-                  {{ formtCurrency(item.outstanding_amount) }}</span
-                >
+                <span class="text-primary">{{ currencySymbol(item.currency) }}
+                  {{ formatCurrency(item.outstanding_amount) }}</span>
               </template>
             </v-data-table>
             <v-divider></v-divider>
           </div>
-          <div
-            v-if="
-              pos_profile.posa_allow_reconcile_payments &&
-              unallocated_payments.length
-            "
-          >
+          <div v-if="
+            pos_profile.posa_allow_reconcile_payments &&
+            unallocated_payments.length
+          ">
             <v-row>
               <v-col md="7" cols="12">
                 <p>
                   <strong>{{ __("Payments") }}</strong>
-                  <span v-if="total_unallocated_amount" class="primary--text">
+                  <span v-if="total_unallocated_amount" class="text-primary">
                     {{ __("- Total Unallocated") }} :
                     {{ currencySymbol(pos_profile.currency) }}
-                    {{ formtCurrency(total_unallocated_amount) }}
+                    {{ formatCurrency(total_unallocated_amount) }}
                   </span>
                 </p>
               </v-col>
@@ -101,31 +71,21 @@
                   <span>{{ __("Total Selected :") }}</span>
                   <span>
                     {{ currencySymbol(pos_profile.currency) }}
-                    {{ formtCurrency(total_selected_payments) }}
+                    {{ formatCurrency(total_selected_payments) }}
                   </span>
                 </p>
               </v-col>
             </v-row>
-            <v-data-table
-              :headers="unallocated_payments_headers"
-              :items="unallocated_payments"
-              item-key="name"
-              class="elevation-1 mt-0"
-              :single-select="singleSelect"
-              show-select
-              v-model="selected_payments"
-              :loading="unallocated_payments_loading"
-              checkbox-color="primary"
-            >
+            <v-data-table :headers="unallocated_payments_headers" :items="unallocated_payments" item-key="name"
+              class="elevation-1 mt-0" :single-select="singleSelect" show-select v-model="selected_payments"
+              :loading="unallocated_payments_loading" checkbox-color="primary">
               <template v-slot:item.paid_amount="{ item }">
                 {{ currencySymbol(item.currency) }}
-                {{ formtCurrency(item.paid_amount) }}
+                {{ formatCurrency(item.paid_amount) }}
               </template>
               <template v-slot:item.unallocated_amount="{ item }">
-                <span class="primary--text"
-                  >{{ currencySymbol(item.currency) }}
-                  {{ formtCurrency(item.unallocated_amount) }}</span
-                >
+                <span class="text-primary">{{ currencySymbol(item.currency) }}
+                  {{ formatCurrency(item.unallocated_amount) }}</span>
               </template>
             </v-data-table>
             <v-divider></v-divider>
@@ -134,9 +94,7 @@
             <v-row>
               <v-col md="8" cols="12">
                 <p>
-                  <span
-                    ><strong>{{ __("Search Mpesa Payments") }}</strong></span
-                  >
+                  <span><strong>{{ __("Search Mpesa Payments") }}</strong></span>
                 </p>
               </v-col>
               <v-col md="4" cols="12" v-if="total_selected_mpesa_payments">
@@ -144,62 +102,33 @@
                   <span>{{ __("Total Selected :") }}</span>
                   <span>
                     {{ currencySymbol(pos_profile.currency) }}
-                    {{ formtCurrency(total_selected_mpesa_payments) }}
+                    {{ formatCurrency(total_selected_mpesa_payments) }}
                   </span>
                 </p>
               </v-col>
             </v-row>
             <v-row align="center" no-gutters class="mb-1">
               <v-col md="4" cols="12" class="mr-1">
-                <v-text-field
-                  dense
-                  outlined
-                  color="primary"
-                  :label="frappe._('Search by Name')"
-                  background-color="white"
-                  hide-details
-                  v-model="mpesa_search_name"
-                  clearable
-                ></v-text-field>
+                <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Search by Name')"
+                  bg-color="white" hide-details v-model="mpesa_search_name" clearable></v-text-field>
               </v-col>
               <v-col md="4" cols="12" class="mr-1">
-                <v-text-field
-                  dense
-                  outlined
-                  color="primary"
-                  :label="frappe._('Search by Mobile')"
-                  background-color="white"
-                  hide-details
-                  v-model="mpesa_search_mobile"
-                  clearable
-                ></v-text-field>
+                <v-text-field density="compact" variant="outlined" color="primary" :label="frappe._('Search by Mobile')"
+                  bg-color="white" hide-details v-model="mpesa_search_mobile" clearable></v-text-field>
               </v-col>
               <v-col> </v-col>
               <v-col md="3" cols="12">
-                <v-btn
-                  block
-                  color="warning"
-                  dark
-                  @click="get_draft_mpesa_payments_register"
-                  >{{ __("Search") }}</v-btn
-                >
+                <v-btn block color="warning" theme="dark" @click="get_draft_mpesa_payments_register">{{ __("Search")
+                  }}</v-btn>
               </v-col>
             </v-row>
-            <v-data-table
-              :headers="mpesa_payment_headers"
-              :items="mpesa_payments"
-              item-key="name"
-              class="elevation-1 mt-0"
-              :single-select="singleSelect"
-              show-select
-              v-model="selected_mpesa_payments"
-              :loading="mpesa_payments_loading"
-              checkbox-color="primary"
-            >
+            <v-data-table :headers="mpesa_payment_headers" :items="mpesa_payments" item-key="name"
+              class="elevation-1 mt-0" :single-select="singleSelect" show-select v-model="selected_mpesa_payments"
+              :loading="mpesa_payments_loading" checkbox-color="primary">
               <template v-slot:item.amount="{ item }">
-                <span class="primary--text">
+                <span class="text-primary">
                   {{ currencySymbol(item.currency) }}
-                  {{ formtCurrency(item.amount) }}
+                  {{ formatCurrency(item.amount) }}
                 </span>
               </template>
             </v-data-table>
@@ -207,128 +136,65 @@
         </v-card>
       </v-col>
       <v-col md="4" cols="12" class="pb-3">
-        <v-card
-          class="invoices mx-auto grey lighten-5 mt-3 p-3"
-          style="max-height: 94vh; height: 94vh"
-        >
+        <v-card class="invoices mx-auto bg-grey-lighten-5 mt-3 p-3" style="max-height: 94vh; height: 94vh">
           <strong>
-            <h4 class="primary--text">Totals</h4>
+            <h4 class="text-primary">Totals</h4>
             <v-row>
               <v-col md="7" class="mt-1">
                 <span>{{ __("Total Invoices:") }}</span>
               </v-col>
               <v-col md="5">
-                <v-text-field
-                  class="p-0 m-0"
-                  dense
-                  color="primary"
-                  background-color="white"
-                  hide-details
-                  :value="formtCurrency(total_selected_invoices)"
-                  total_selected_invoices
-                  readonly
-                  flat
-                  :prefix="currencySymbol(pos_profile.currency)"
-                ></v-text-field>
+                <v-text-field class="p-0 m-0" density="compact" color="primary" bg-color="white" hide-details
+                  :model-value="formatCurrency(total_selected_invoices)" total_selected_invoices readonly flat
+                  :prefix="currencySymbol(pos_profile.currency)"></v-text-field>
               </v-col>
             </v-row>
 
             <v-row v-if="total_selected_payments">
-              <v-col md="7" class="mt-1"
-                ><span>{{ __("Total Payments:") }}</span></v-col
-              >
+              <v-col md="7" class="mt-1"><span>{{ __("Total Payments:") }}</span></v-col>
               <v-col md="5">
-                <v-text-field
-                  class="p-0 m-0"
-                  dense
-                  color="primary"
-                  background-color="white"
-                  hide-details
-                  :value="formtCurrency(total_selected_payments)"
-                  total_selected_payments
-                  readonly
-                  flat
-                  :prefix="currencySymbol(pos_profile.currency)"
-                ></v-text-field>
+                <v-text-field class="p-0 m-0" density="compact" color="primary" bg-color="white" hide-details
+                  :model-value="formatCurrency(total_selected_payments)" total_selected_payments readonly flat
+                  :prefix="currencySymbol(pos_profile.currency)"></v-text-field>
               </v-col>
             </v-row>
 
             <v-row v-if="total_selected_mpesa_payments">
-              <v-col md="7" class="mt-1"
-                ><span>{{ __("Total Mpesa:") }}</span></v-col
-              >
+              <v-col md="7" class="mt-1"><span>{{ __("Total Mpesa:") }}</span></v-col>
               <v-col md="5">
-                <v-text-field
-                  class="p-0 m-0"
-                  dense
-                  color="primary"
-                  background-color="white"
-                  hide-details
-                  :value="formtCurrency(total_selected_mpesa_payments)"
-                  total_selected_mpesa_payments
-                  readonly
-                  flat
-                  :prefix="currencySymbol(pos_profile.currency)"
-                ></v-text-field>
+                <v-text-field class="p-0 m-0" density="compact" color="primary" bg-color="white" hide-details
+                  :model-value="formatCurrency(total_selected_mpesa_payments)" total_selected_mpesa_payments readonly
+                  flat :prefix="currencySymbol(pos_profile.currency)"></v-text-field>
               </v-col>
             </v-row>
 
             <v-divider v-if="payment_methods.length"></v-divider>
             <div v-if="pos_profile.posa_allow_make_new_payments">
-              <h4 class="primary--text">Make New Payment</h4>
-              <v-row
-                v-if="payment_methods.length"
-                v-for="method in payment_methods"
-                :key="method.row_id"
-              >
-                <v-col md="7"
-                  ><span class="mt-1">{{ __(method.mode_of_payment) }}:</span>
+              <h4 class="text-primary">Make New Payment</h4>
+              <v-row v-if="payment_methods.length" v-for="method in payment_methods" :key="method.row_id">
+                <v-col md="7"><span class="mt-1">{{ __(method.mode_of_payment) }}:</span>
                 </v-col>
-                <v-col md="5"
-                  ><v-text-field
-                    class="p-0 m-0"
-                    dense
-                    color="primary"
-                    background-color="white"
-                    hide-details
-                    :value="formtCurrency(method.amount)"
-                    @change="
+                <v-col md="5"><v-text-field class="p-0 m-0" density="compact" color="primary" bg-color="white"
+                    hide-details :model-value="formatCurrency(method.amount)" @change="
                       setFormatedCurrency(method, 'amount', null, true, $event)
-                    "
-                    payments_methods
-                    flat
-                    :prefix="currencySymbol(pos_profile.currency)"
-                  ></v-text-field
-                ></v-col>
+                      " payments_methods flat :prefix="currencySymbol(pos_profile.currency)"></v-text-field></v-col>
               </v-row>
             </div>
 
             <v-divider></v-divider>
             <v-row>
               <v-col md="7">
-                <h4 class="primary--text mt-1">{{ __("Difference:") }}</h4>
+                <h4 class="text-primary mt-1">{{ __("Difference:") }}</h4>
               </v-col>
               <v-col md="5">
-                <v-text-field
-                  class="p-0 m-0"
-                  dense
-                  color="primary"
-                  background-color="white"
-                  hide-details
-                  :value="formtCurrency(total_of_diff)"
-                  total_of_diff
-                  flat
-                  readonly
-                  :prefix="currencySymbol(pos_profile.currency)"
-                ></v-text-field>
+                <v-text-field class="p-0 m-0" density="compact" color="primary" bg-color="white" hide-details
+                  :model-value="formatCurrency(total_of_diff)" total_of_diff flat readonly
+                  :prefix="currencySymbol(pos_profile.currency)"></v-text-field>
               </v-col>
             </v-row>
           </strong>
-          <div
-            class="pb-6 pr-6"
-            style="position: absolute; bottom: 0; width: 100%"
-          >
-            <v-btn block color="primary" dark @click="submit">
+          <div class="pb-6 pr-6" style="position: absolute; bottom: 0; width: 100%">
+            <v-btn block color="primary" theme="dark" @click="submit">
               {{ __("Submit") }}
             </v-btn>
           </div>
@@ -339,7 +205,7 @@
 </template>
 
 <script>
-import { evntBus } from "../../bus";
+
 import format from "../../format";
 import Customer from "../pos/Customer.vue";
 import UpdateCustomer from "../pos/UpdateCustomer.vue";
@@ -372,110 +238,110 @@ export default {
       mpesa_search_mobile: "",
       invoices_headers: [
         {
-          text: __("Invoice"),
+          title: __("Invoice"),
           align: "start",
           sortable: true,
-          value: "name",
+          key: "name",
         },
         {
-          text: __("Customer"),
+          title: __("Customer"),
           align: "start",
           sortable: true,
-          value: "customer_name",
+          key: "customer_name",
         },
         {
-          text: __("Date"),
+          title: __("Date"),
           align: "start",
           sortable: true,
-          value: "posting_date",
+          key: "posting_date",
         },
         {
-          text: __("Due Date"),
+          title: __("Due Date"),
           align: "start",
           sortable: true,
-          value: "due_date",
+          key: "due_date",
         },
         {
-          text: __("Total"),
+          title: __("Total"),
           align: "end",
           sortable: true,
-          value: "grand_total",
+          key: "grand_total",
         },
         {
-          text: __("Outstanding"),
+          title: __("Outstanding"),
           align: "end",
           sortable: true,
-          value: "outstanding_amount",
+          key: "outstanding_amount",
         },
       ],
       unallocated_payments_headers: [
         {
-          text: __("Payment ID"),
+          title: __("Payment ID"),
           align: "start",
           sortable: true,
-          value: "name",
+          key: "name",
         },
         {
-          text: __("Customer"),
+          title: __("Customer"),
           align: "start",
           sortable: true,
-          value: "customer_name",
+          key: "customer_name",
         },
         {
-          text: __("Date"),
+          title: __("Date"),
           align: "start",
           sortable: true,
-          value: "posting_date",
+          key: "posting_date",
         },
         {
-          text: __("Mode"),
+          title: __("Mode"),
           align: "start",
           sortable: true,
-          value: "mode_of_payment",
+          key: "mode_of_payment",
         },
         {
-          text: __("Paid"),
+          title: __("Paid"),
           align: "end",
           sortable: true,
-          value: "paid_amount",
+          key: "paid_amount",
         },
         {
-          text: __("Unallocated"),
+          title: __("Unallocated"),
           align: "end",
           sortable: true,
-          value: "unallocated_amount",
+          key: "unallocated_amount",
         },
       ],
       mpesa_payment_headers: [
         {
-          text: __("Payment ID"),
+          title: __("Payment ID"),
           align: "start",
           sortable: true,
-          value: "transid",
+          key: "transid",
         },
         {
-          text: __("Full Name"),
+          title: __("Full Name"),
           align: "start",
           sortable: true,
-          value: "full_name",
+          key: "full_name",
         },
         {
-          text: __("Nobile Number"),
+          title: __("Nobile Number"),
           align: "start",
           sortable: true,
-          value: "mobile_no",
+          key: "mobile_no",
         },
         {
-          text: __("Date"),
+          title: __("Date"),
           align: "start",
           sortable: true,
-          value: "posting_date",
+          key: "posting_date",
         },
         {
-          text: __("Amount"),
+          title: __("Amount"),
           align: "end",
           sortable: true,
-          value: "amount",
+          key: "amount",
         },
       ],
     };
@@ -488,6 +354,7 @@ export default {
 
   methods: {
     check_opening_entry() {
+      var vm = this;
       return frappe
         .call("posawesome.posawesome.api.posapp.check_opening_shift", {
           user: frappe.session.user,
@@ -497,8 +364,8 @@ export default {
             this.pos_profile = r.message.pos_profile;
             this.pos_opening_shift = r.message.pos_opening_shift;
             this.company = r.message.company.name;
-            evntBus.$emit("payments_register_pos_profile", r.message);
-            evntBus.$emit("set_company", r.message.company);
+            vm.eventBus.emit("payments_register_pos_profile", r.message);
+            vm.eventBus.emit("set_company", r.message.company);
             this.set_payment_methods();
             this.pos_profile_search = r.message.pos_profile.name;
             this.pos_profiles_list.push(this.pos_profile_search);
@@ -534,7 +401,7 @@ export default {
       this.dialog = true;
     },
     fetch_customer_details() {
-      const vm = this;
+      var vm = this;
       if (this.customer_name) {
         frappe.call({
           method: "posawesome.posawesome.api.posapp.get_customer_info",
@@ -549,14 +416,14 @@ export default {
                 ...message,
               };
               vm.set_mpesa_search_params();
-              evntBus.$emit("set_customer_info_to_edit", vm.customer_info);
+              vm.eventBus.emit("set_customer_info_to_edit", vm.customer_info);
             }
           },
         });
       }
     },
     onInvoiceSelected(event) {
-      evntBus.$emit("set_customer", event.item.customer);
+      this.eventBus.emit("set_customer", event.item.customer);
     },
     get_outstanding_invoices() {
       this.invoices_loading = true;
@@ -766,9 +633,9 @@ export default {
     total_of_diff() {
       return flt(
         this.total_selected_invoices -
-          this.total_selected_payments -
-          this.total_selected_mpesa_payments -
-          this.total_payment_methods
+        this.total_selected_payments -
+        this.total_selected_mpesa_payments -
+        this.total_payment_methods
       );
     },
   },
@@ -776,7 +643,7 @@ export default {
   mounted: function () {
     this.$nextTick(function () {
       this.check_opening_entry();
-      evntBus.$on("update_customer", (customer_name) => {
+      this.eventBus.on("update_customer", (customer_name) => {
         this.clear_all(true);
         this.customer_name = customer_name;
         this.fetch_customer_details();
@@ -784,12 +651,12 @@ export default {
         this.get_unallocated_payments();
         this.get_draft_mpesa_payments_register();
       });
-      evntBus.$on("fetch_customer_details", () => {
+      this.eventBus.on("fetch_customer_details", () => {
         this.fetch_customer_details();
       });
     });
   },
-  beforeDestroy() {
+  beforeUnmount() {
     evntBus.$off("update_customer");
     evntBus.$off("fetch_customer_details");
   },
@@ -800,15 +667,19 @@ export default {
 input[total_of_diff] {
   text-align: right;
 }
+
 input[payments_methods] {
   text-align: right;
 }
+
 input[total_selected_payments] {
   text-align: right;
 }
+
 input[total_selected_invoices] {
   text-align: right;
 }
+
 input[total_selected_mpesa_payments] {
   text-align: right;
 }

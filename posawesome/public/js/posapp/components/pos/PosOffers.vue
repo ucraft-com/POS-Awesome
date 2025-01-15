@@ -1,88 +1,47 @@
 <template>
   <div>
-    <v-card
-      class="selection mx-auto grey lighten-5"
-      style="max-height: 80vh; height: 80vh"
-    >
+    <v-card class="selection mx-auto bg-grey-lighten-5" style="max-height: 80vh; height: 80vh">
       <v-card-title>
-        <span class="text-h6 primary--text">{{ __('Offers') }}</span>
+        <span class="text-h6 text-primary">{{ __('Offers') }}</span>
       </v-card-title>
-      <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh">
-        <template @mouseover="style = 'cursor: pointer'">
-          <v-data-table
-            :headers="items_headers"
-            :items="pos_offers"
-            :single-expand="singleExpand"
-            :expanded.sync="expanded"
-            show-expand
-            item-key="row_id"
-            class="elevation-1"
-            :items-per-page="itemsPerPage"
-            hide-default-footer
-          >
-            <template v-slot:item.offer_applied="{ item }">
-              <v-simple-checkbox
-                @click="forceUpdateItem"
-                v-model="item.offer_applied"
-                :disabled="
-                  (item.offer == 'Give Product' &&
-                    !item.give_item &&
-                    (!offer.replace_cheapest_item || !offer.replace_item)) ||
-                  (item.offer == 'Grand Total' &&
-                    discount_percentage_offer_name &&
-                    discount_percentage_offer_name != item.name)
-                "
-              ></v-simple-checkbox>
-            </template>
-            <template v-slot:expanded-item="{ headers, item }">
-              <td :colspan="headers.length">
-                <v-row class="mt-2">
-                  <v-col v-if="item.description">
-                    <div
-                      class="primary--text"
-                      v-html="handleNewLine(item.description)"
-                    ></div>
-                  </v-col>
-                  <v-col v-if="item.offer == 'Give Product'">
-                    <v-autocomplete
-                      v-model="item.give_item"
-                      :items="get_give_items(item)"
-                      item-text="item_code"
-                      outlined
-                      dense
-                      color="primary"
-                      :label="frappe._('Give Item')"
-                      :disabled="
-                        item.apply_type != 'Item Group' ||
-                        item.replace_item ||
-                        item.replace_cheapest_item
-                      "
-                    ></v-autocomplete>
-                  </v-col>
-                </v-row>
-              </td>
-            </template>
-          </v-data-table>
-        </template>
+      <div class="my-0 py-0 overflow-y-auto" style="max-height: 75vh" @mouseover="style = 'cursor: pointer'">
+        <v-data-table :headers="items_headers" :items="pos_offers" :single-expand="singleExpand"
+          v-model:expanded="expanded" show-expand item-key="row_id" class="elevation-1" :items-per-page="itemsPerPage"
+          hide-default-footer>
+          <template v-slot:item.offer_applied="{ item }">
+            <v-checkbox-btn @click="forceUpdateItem" :v-model="item.offer_applied" :disabled="(item.offer == 'Give Product' &&
+              !item.give_item &&
+              (!offer.replace_cheapest_item || !offer.replace_item)) ||
+              (item.offer == 'Grand Total' &&
+                discount_percentage_offer_name &&
+                discount_percentage_offer_name != item.name)
+              "></v-checkbox-btn>
+          </template>
+          <template v-slot:expanded-item="{ headers, item }">
+            <td :colspan="headers.length">
+              <v-row class="mt-2">
+                <v-col v-if="item.description">
+                  <div class="text-primary" v-html="handleNewLine(item.description)"></div>
+                </v-col>
+                <v-col v-if="item.offer == 'Give Product'">
+                  <v-autocomplete v-model="item.give_item" :items="get_give_items(item)" item-title="item_code"
+                    variant="outlined" density="compact" color="primary" :label="frappe._('Give Item')" :disabled="item.apply_type != 'Item Group' ||
+                      item.replace_item ||
+                      item.replace_cheapest_item
+                      "></v-autocomplete>
+                </v-col>
+              </v-row>
+            </td>
+          </template>
+        </v-data-table>
       </div>
     </v-card>
 
-    <v-card
-      flat
-      style="max-height: 11vh; height: 11vh"
-      class="cards mb-0 mt-3 py-0"
-    >
+    <v-card flat style="max-height: 11vh; height: 11vh" class="cards mb-0 mt-3 py-0">
       <v-row align="start" no-gutters>
         <v-col cols="12">
-          <v-btn
-            block
-            class="pa-1"
-            large
-            color="warning"
-            dark
-            @click="back_to_invoice"
-            >{{ __('Back') }}</v-btn
-          >
+          <v-btn block class="pa-1" size="large" color="warning" theme="dark" @click="back_to_invoice">{{ __('Back')
+            }}</v-btn>
         </v-col>
       </v-row>
     </v-card>
@@ -90,7 +49,7 @@
 </template>
 
 <script>
-import { evntBus } from '../../bus';
+
 import format from '../../format';
 export default {
   mixins: [format],
@@ -104,10 +63,10 @@ export default {
     expanded: [],
     singleExpand: true,
     items_headers: [
-      { text: __('Name'), value: 'name', align: 'start' },
-      { text: __('Apply On'), value: 'apply_on', align: 'start' },
-      { text: __('Offer'), value: 'offer', align: 'start' },
-      { text: __('Applied'), value: 'offer_applied', align: 'start' },
+      { title: __('Name'), value: 'name', align: 'start' },
+      { title: __('Apply On'), value: 'apply_on', align: 'start' },
+      { title: __('Offer'), value: 'offer', align: 'start' },
+      { title: __('Applied'), value: 'offer_applied', align: 'start' },
     ],
   }),
 
@@ -122,7 +81,7 @@ export default {
 
   methods: {
     back_to_invoice() {
-      evntBus.$emit('show_offers', 'false');
+      this.eventBus.emit('show_offers', 'false');
     },
     forceUpdateItem() {
       let list_offers = [];
@@ -200,8 +159,8 @@ export default {
             newOffer.give_item = this.get_give_items(newOffer)[0].item_code;
           }
           this.pos_offers.push(newOffer);
-          evntBus.$emit('show_mesage', {
-            text: __('New Offer Available'),
+          this.eventBus.emit('show_message', {
+            title: __('New Offer Available'),
             color: 'warning',
           });
         }
@@ -216,7 +175,7 @@ export default {
       const applyedOffers = this.pos_offers.filter(
         (offer) => offer.offer_applied
       );
-      evntBus.$emit('update_invoice_offers', applyedOffers);
+      this.eventBus.emit('update_invoice_offers', applyedOffers);
     },
     handleNewLine(str) {
       if (str) {
@@ -247,7 +206,7 @@ export default {
       }
     },
     updateCounters() {
-      evntBus.$emit('update_offers_counters', {
+      this.eventBus.emit('update_offers_counters', {
         offersCount: this.offersCount,
         appliedOffersCount: this.appliedOffersCount,
       });
@@ -256,7 +215,7 @@ export default {
       const applyedOffers = this.pos_offers.filter(
         (offer) => offer.offer_applied && offer.coupon_based
       );
-      evntBus.$emit('update_pos_coupons', applyedOffers);
+      this.eventBus.emit('update_pos_coupons', applyedOffers);
     },
   },
 
@@ -273,22 +232,22 @@ export default {
 
   created: function () {
     this.$nextTick(function () {
-      evntBus.$on('register_pos_profile', (data) => {
+      this.eventBus.on('register_pos_profile', (data) => {
         this.pos_profile = data.pos_profile;
       });
     });
-    evntBus.$on('update_customer', (customer) => {
+    this.eventBus.on('update_customer', (customer) => {
       if (this.customer != customer) {
         this.offers = [];
       }
     });
-    evntBus.$on('update_pos_offers', (data) => {
+    this.eventBus.on('update_pos_offers', (data) => {
       this.updatePosOffers(data);
     });
-    evntBus.$on('update_discount_percentage_offer_name', (data) => {
+    this.eventBus.on('update_discount_percentage_offer_name', (data) => {
       this.discount_percentage_offer_name = data.value;
     });
-    evntBus.$on('set_all_items', (data) => {
+    this.eventBus.on('set_all_items', (data) => {
       this.allItems = data;
     });
   },
