@@ -47,7 +47,7 @@
 
 #### ASAERP:
 
-One-click installation is available if you are hosting on [ASAERP](https://asaerp.com) from [here](https://asaerp.com/dashboard/marketplace/posawesome)
+One-click installation is available if you are hosting on [ASAERP](https://asaerp.com) from [here](https://asaerp.com/dashboard/marketplace)
 
 #### Self Hosting:
 
